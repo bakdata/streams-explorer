@@ -1,8 +1,13 @@
 trigger:
   branches:
     include:
-      - refs/heads/*
+      - main
       - refs/tags/*
+
+pr:
+  branches:
+    include:
+      - main
 
 resources:
   - repo: self
