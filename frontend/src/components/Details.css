@@ -1,0 +1,21 @@
+.Info {
+  padding-left: 14px;
+}
+
+.descItem {
+  vertical-align: top;
+}
+
+.details {
+  width: 100%;
+  text-align: start;
+}
+
+.loadingSpinnerContainer {
+  width: 100%;
+  text-align: center;
+}
+
+.jsonDetail {
+  font-size: 11px;
+}

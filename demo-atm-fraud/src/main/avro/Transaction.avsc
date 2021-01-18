@@ -1,0 +1,48 @@
+{
+  "name": "Transaction",
+  "namespace": "com.bakdata.kafka",
+  "type": "record",
+  "fields": [
+    {
+      "name": "transaction_id",
+      "type": "string"
+    },
+    {
+      "name": "account_id",
+      "type": "string"
+    },
+    {
+      "name": "amount",
+      "type": "int"
+    },
+    {
+      "name": "atm",
+      "type": "string",
+      "default": ""
+    },
+    {
+      "name": "timestamp",
+      "type": {
+        "type": "long",
+        "logicalType": "timestamp-millis"
+      }
+    },
+    {
+      "name": "location",
+      "type": {
+        "name": "Location",
+        "type": "record",
+        "fields": [
+          {
+            "name": "latitude",
+            "type": "double"
+          },
+          {
+            "name": "longitude",
+            "type": "double"
+          }
+        ]
+      }
+    }
+  ]
+}

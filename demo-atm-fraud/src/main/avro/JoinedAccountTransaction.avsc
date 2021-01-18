@@ -1,0 +1,51 @@
+{
+  "name": "JoinedAccountTransaction",
+  "namespace": "com.bakdata.kafka",
+  "type": "record",
+  "fields": [
+    {
+      "name": "account_id",
+      "type": "string"
+    },
+    {
+      "name": "transaction1",
+      "type": "Transaction"
+    },
+    {
+      "name": "transaction2",
+      "type": "Transaction"
+    },
+    {
+      "name": "distance_between_txn_km",
+      "type": "double"
+    },
+    {
+      "name": "minutes_difference",
+      "type": "long"
+    },
+    {
+      "name": "kmh_required",
+      "type": "double"
+    },
+    {
+      "name": "customer_name",
+      "type": "string"
+    },
+    {
+      "name": "customer_email",
+      "type": "string"
+    },
+    {
+      "name": "customer_phone",
+      "type": "string"
+    },
+    {
+      "name": "customer_address",
+      "type": "string"
+    },
+    {
+      "name": "customer_country",
+      "type": "string"
+    }
+  ]
+}

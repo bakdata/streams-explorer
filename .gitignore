@@ -1,0 +1,14 @@
+# Ignore dynaconf secret files
+.secrets.*
+
+backend/static/
+backend/docs/
+demo-atm-fraud/build/
+.gradle
+
+# Generic
+.DS_Store
+
+# IDE
+.idea
+.vscode

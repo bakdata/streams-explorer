@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "streams-explorer.fullname" . }}
+  labels:
+    app: {{ template "streams-explorer.name" . }}
+    chart: {{ template "streams-explorer.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - name: http
+      port: {{ .Values.serviceHttpPort }}
+  selector:
+    app: {{ template "streams-explorer.name" . }}
+    release: {{ .Release.Name }}

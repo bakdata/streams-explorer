@@ -1,0 +1,15 @@
+{{- if .Values.serviceAccount.create -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  labels:
+    app: {{ template "streams-explorer.name" . }}
+    chart: {{ template "streams-explorer.chart" . }}
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+  name: {{ template "streams-explorer.fullname" . }}
+rules:
+  - apiGroups: ["apps", "batch"]
+    resources: ["deployments", "cronjobs"]
+    verbs: ["get", "list", "watch"]
+{{- end -}}

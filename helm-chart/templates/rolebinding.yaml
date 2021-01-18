@@ -1,0 +1,20 @@
+
+{{- if .Values.serviceAccount.create -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  labels:
+    app: {{ template "streams-explorer.name" . }}
+    chart: {{ template "streams-explorer.chart" . }}
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+  name: {{ template "streams-explorer.fullname" . }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ template "streams-explorer.fullname" . }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ template "streams-explorer.serviceAccountName" . }}
+    namespace: {{ .Release.Namespace }}
+{{- end -}}

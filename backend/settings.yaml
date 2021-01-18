@@ -1,0 +1,50 @@
+kafkaconnect:
+  url: "http://localhost:8083"
+  displayed_information:
+    - name: "Transformer"
+      key: "transforms.changeTopic.regex"
+
+k8s:
+  deployment:
+    cluster: false
+    # not needed if in cluster
+    context: "kubernetes-cluster"
+    namespaces:
+      - "kubernetes-namespace"
+  containers:
+    ignore:
+      - name: "prometheus-jmx-exporter"
+  displayed_information:
+    - name: "Labels"
+      key: "metadata.labels"
+  labels:
+    # used to set attributes of nodes in the graph (used to extract pipeline names)
+    - name: "pipeline"
+  independent_graph:
+    # refers to the attribute of nodes the pipeline name should be extracted from
+    label: "pipeline"
+
+schemaregistry:
+  url: "http://localhost:8081"
+
+controlcenter:
+  url: "http://localhost:9021"
+  clusterid: ""
+
+grafana:
+  url: "http://localhost:3000"
+  dashboard: "path/to/dashboard"
+
+kibanalogs:
+  url: "http://localhost:5601"
+
+esindex:
+  url: "http://localhost:5601/app/kibana#/dev_tools/console"
+
+prometheus:
+  url: "http://localhost:9090"
+
+plugins:
+  path: "./plugins"
+  extractors:
+    default: true

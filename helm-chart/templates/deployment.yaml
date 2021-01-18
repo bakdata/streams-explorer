@@ -1,0 +1,77 @@
+{{- if .Capabilities.APIVersions.Has "apps/v1" }}
+apiVersion: apps/v1
+{{- else }}
+apiVersion: apps/v1beta2
+{{- end }}
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  {{- if .Values.labels }}
+  labels:
+    {{- range $key, $value := .Values.labels }}
+    {{ $key }}: {{ $value }}
+    {{- end }}
+  {{- end }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "streams-explorer.name" . }}
+      chart: {{ include "streams-explorer.chart" . }}
+      release: {{ .Release.Name }}
+      heritage: {{ .Release.Service }}
+      {{- range $key, $value := .Values.labels }}
+      {{ $key }}: {{ $value }}
+      {{- end }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "streams-explorer.name" . }}
+        chart: {{ include "streams-explorer.chart" . }}
+        release: {{ .Release.Name }}
+        heritage: {{ .Release.Service }}
+        {{- range $key, $value := .Values.labels }}
+        {{ $key }}: {{ $value }}
+        {{- end }}
+      {{- if or .Values.awsRole  .Values.annotations }}
+      annotations:
+      {{- if .Values.awsRole }}
+        iam.amazonaws.com/role: {{ .Values.awsRole }}
+      {{- end }}
+      {{- range $key, $value := .Values.annotations }}
+        {{ $key | quote }}: {{ $value | quote }}
+      {{- end }}
+      {{- end }}
+    spec:
+      {{ if .Values.serviceAccount.create }}
+      serviceAccountName:  {{ template "streams-explorer.serviceAccountName" . }}
+      {{ end }}
+      {{ if and (eq .Values.serviceAccount.create false) (.Values.serviceAccount.name)}}
+      serviceAccountName:  {{ .Values.serviceAccount.name }}
+      {{ end }}
+      {{- if .Values.tolerations }}
+      tolerations:
+{{ toYaml .Values.tolerations | indent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image }}:{{ .Values.imageTag }}"
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.serviceHttpPort}}
+              protocol: TCP
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+          env:
+          {{- range $key, $value := .Values.secrets }}
+            - name: "{{ $key }}"
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "streams-explorer.fullname" $ }}
+                  key: "{{ $key }}"
+          {{- end }}
+          {{- range $key, $value := .Values.env }}
+            - name: {{ $key | quote }}
+              value: {{ $value | quote }}
+          {{- end }}

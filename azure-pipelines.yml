@@ -1,0 +1,57 @@
+jobs:
+  - job: "Backend"
+    pool:
+      vmImage: "ubuntu-20.04"
+    strategy:
+      matrix:
+        Python38:
+          python.version: "3.8"
+
+    steps:
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: "$(python.version)"
+
+      - script: |
+          cd backend
+          sudo apt-get -y install python3-dev graphviz libgraphviz-dev pkg-config python3-wheel
+          python -m pip install -r requirements.txt
+        displayName: "Install dependencies"
+
+      - script: |
+          cd backend
+          python -m flake8 --config .flake8 .
+        displayName: "Lint"
+
+      - script: |
+          cd backend
+          python -m pytest tests
+        displayName: "Run Tests"
+
+  - job: "Frontend"
+    pool:
+      vmImage: "ubuntu-20.04"
+    strategy:
+      matrix:
+        node_14_x:
+          node.version: "14.x"
+
+    steps:
+      - task: NodeTool@0
+        inputs:
+          versionSpec: $(node.version)
+
+      - script: |
+          cd frontend
+          npm install
+        displayName: "Install dependencies"
+
+      - script: |
+          cd frontend
+          npm run lint
+        displayName: "Lint"
+
+      - script: |
+          cd frontend
+          CI=true npm test
+        displayName: "Run Tests"

@@ -1,0 +1,22 @@
+nameOverride: atm-fraud-transactionavroproducer
+
+replicaCount: 1
+
+image: url-to-container-registry.com/streams-explorer-demo-transactionavroproducer
+imageTag: latest
+
+streams:
+  brokers: "kafka://my-confluent-cp-kafka-headless:9092"
+  schemaRegistryUrl: "http://my-confluent-cp-schema-registry:8081"
+  inputTopics: atm-fraud-raw-input-topic
+  outputTopic: atm-fraud-incoming-transactions-topic
+  errorTopic: atm-fraud-transactionavroproducer-error-topic
+
+annotations:
+  consumer_group: "streams-explorer-transactionavroproducer-atm-fraud-incoming-transactions-topic"
+
+prometheus:
+  jmx:
+    enabled: false
+
+debug: true

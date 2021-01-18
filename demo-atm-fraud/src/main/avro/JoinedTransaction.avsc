@@ -1,0 +1,15 @@
+{
+  "name": "JoinedTransaction",
+  "namespace": "com.bakdata.kafka",
+  "type": "record",
+  "fields": [
+    {
+      "name": "transaction1",
+      "type": "Transaction"
+    },
+    {
+      "name": "transaction2",
+      "type": "Transaction"
+    }
+  ]
+}
