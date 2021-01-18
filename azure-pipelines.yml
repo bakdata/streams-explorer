@@ -9,8 +9,15 @@ pr:
     include:
       - main
 
+resources:
+  - repo: self
+
 variables:
   vmImage: "ubuntu-latest"
+  imageRepository: "$(Build.repository.name)"
+  dockerfilePath: "$(Build.SourcesDirectory)/Dockerfile"
+  dockerRegistryServiceConnection: "docker_hub"
+  tag: "$(Build.BuildId)"
 
 stages:
   - stage: Testing
@@ -72,9 +79,6 @@ stages:
 
   - stage: Publish
     condition: succeeded()
-    variables:
-      imageRepo: "$(Build.repository.name)"
-      dockerHub: "Docker hub"
     jobs:
       - job: "Docker"
         pool:
@@ -83,10 +87,10 @@ stages:
           - task: Docker@2
             displayName: Build & Push image
             inputs:
-              repository: $(imageRepo)
               command: buildAndPush
-              Dockerfile: Dockerfile
-              containerRegistry: $(dockerHub)
+              repository: $(imageRepository)
+              Dockerfile: $(dockerfilePath)
+              containerRegistry: $(dockerRegistryServiceConnection)
               tags: |
-                $(Build.BuildId)
+                $(tag)
                 latest
