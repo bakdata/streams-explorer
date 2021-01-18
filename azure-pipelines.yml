@@ -74,6 +74,7 @@ stages:
     condition: succeeded()
     variables:
       imageRepo: "$(Build.repository.name)"
+      dockerHub: "Docker hub"
     jobs:
       - job: "Docker"
         pool:
