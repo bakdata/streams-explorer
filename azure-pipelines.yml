@@ -4,11 +4,6 @@ trigger:
       - refs/heads/*
       - refs/tags/*
 
-pr:
-  branches:
-    include:
-      - main
-
 resources:
   - repo: self
 
