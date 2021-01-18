@@ -1,57 +1,91 @@
-jobs:
-  - job: "Backend"
-    pool:
-      vmImage: "ubuntu-20.04"
-    strategy:
-      matrix:
-        Python38:
-          python.version: "3.8"
+trigger:
+  branches:
+    include:
+      - refs/heads/*
+      - refs/tags/*
 
-    steps:
-      - task: UsePythonVersion@0
-        inputs:
-          versionSpec: "$(python.version)"
+pr:
+  branches:
+    include:
+      - main
 
-      - script: |
-          cd backend
-          sudo apt-get -y install python3-dev graphviz libgraphviz-dev pkg-config python3-wheel
-          python -m pip install -r requirements.txt
-        displayName: "Install dependencies"
+variables:
+  vmImage: "ubuntu-latest"
 
-      - script: |
-          cd backend
-          python -m flake8 --config .flake8 .
-        displayName: "Lint"
+stages:
+  - stage: Testing
+    jobs:
+      - job: "Backend"
+        pool:
+          vmImage: $(vmImage)
+        strategy:
+          matrix:
+            Python38:
+              python.version: "3.8"
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: "$(python.version)"
 
-      - script: |
-          cd backend
-          python -m pytest tests
-        displayName: "Run Tests"
+          - script: |
+              cd backend
+              sudo apt-get -y install python3-dev graphviz libgraphviz-dev pkg-config python3-wheel
+              python -m pip install -r requirements.txt
+            displayName: "Install dependencies"
 
-  - job: "Frontend"
-    pool:
-      vmImage: "ubuntu-20.04"
-    strategy:
-      matrix:
-        node_14_x:
-          node.version: "14.x"
+          - script: |
+              cd backend
+              python -m flake8 --config .flake8 .
+            displayName: "Lint"
 
-    steps:
-      - task: NodeTool@0
-        inputs:
-          versionSpec: $(node.version)
+          - script: |
+              cd backend
+              python -m pytest tests
+            displayName: "Run Tests"
 
-      - script: |
-          cd frontend
-          npm install
-        displayName: "Install dependencies"
+      - job: "Frontend"
+        pool:
+          vmImage: $(vmImage)
+        strategy:
+          matrix:
+            node_14_x:
+              node.version: "14.x"
+        steps:
+          - task: NodeTool@0
+            inputs:
+              versionSpec: $(node.version)
 
-      - script: |
-          cd frontend
-          npm run lint
-        displayName: "Lint"
+          - script: |
+              cd frontend
+              npm install
+            displayName: "Install dependencies"
 
-      - script: |
-          cd frontend
-          CI=true npm test
-        displayName: "Run Tests"
+          - script: |
+              cd frontend
+              npm run lint
+            displayName: "Lint"
+
+          - script: |
+              cd frontend
+              CI=true npm test
+            displayName: "Run Tests"
+
+  - stage: Publish
+    condition: succeeded()
+    variables:
+      imageRepo: "$(Build.repository.name)"
+    jobs:
+      - job: "Docker"
+        pool:
+          vmImage: $(vmImage)
+        steps:
+          - task: Docker@2
+            displayName: Build & Push image
+            inputs:
+              repository: $(imageRepo)
+              command: buildAndPush
+              Dockerfile: Dockerfile
+              containerRegistry: $(dockerHub)
+              tags: |
+                $(Build.BuildId)
+                latest
