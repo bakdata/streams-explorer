@@ -23,7 +23,7 @@ variables:
 stages:
   - stage: Testing
     jobs:
-      - job: "Backend"
+      - job: Backend
         pool:
           vmImage: $(vmImage)
         strategy:
@@ -51,7 +51,7 @@ stages:
               python -m pytest tests
             displayName: "Run Tests"
 
-      - job: "Frontend"
+      - job: Frontend
         pool:
           vmImage: $(vmImage)
         strategy:
@@ -83,7 +83,7 @@ stages:
     pool:
       vmImage: $(vmImage)
     jobs:
-      - job: "Version"
+      - job: Version
         condition: eq(variables.isMain, true)
         steps:
           - checkout: self
@@ -114,7 +114,8 @@ stages:
           - script: git push --follow-tags origin $(Build.SourceBranchName)
             displayName: "Push Tag to GitHub"
 
-      - job: "Docker"
+      - job: Build
+        dependsOn: Version
         steps:
           - task: Docker@2
             displayName: Build & Push image
