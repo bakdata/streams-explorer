@@ -2,7 +2,9 @@ trigger:
   branches:
     include:
       - main
-      - refs/tags/*
+  tags:
+    include:
+      - "*"
 
 pr:
   branches:
@@ -17,8 +19,9 @@ variables:
   imageRepository: "$(Build.repository.name)"
   dockerfilePath: "$(Build.SourcesDirectory)/Dockerfile"
   dockerRegistryServiceConnection: "docker_hub"
-  tag: "$(Build.BuildId)"
   isMain: $[eq(variables['Build.SourceBranchName'], 'main')]
+  isTag: $[startsWith(variables['Build.SourceBranch'], 'refs/tags/')]
+  tag: "$(Build.BuildId)"
 
 stages:
   - stage: Testing
@@ -117,8 +120,8 @@ stages:
           - script: git push --follow-tags origin $(Build.SourceBranchName)
             displayName: "Push Tag to GitHub"
 
-      - job: Build
-        dependsOn: Version
+      - job: Docker
+        condition: eq(variables.isTag, true)
         steps:
           - task: Docker@2
             displayName: Build & Push image
