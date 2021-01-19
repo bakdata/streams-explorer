@@ -93,6 +93,10 @@ stages:
               command: build
               repository: $(imageRepository)
               Dockerfile: $(dockerfilePath)
+              tags: |
+                $(dockerDefaultImageTag)
+                $(release.version)
+                latest
           - task: Docker@2
             condition: ne(variables['release.version'], '')
             displayName: "Push image release"
