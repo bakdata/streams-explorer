@@ -19,9 +19,8 @@ variables:
   imageRepository: "$(Build.repository.name)"
   dockerfilePath: "$(Build.SourcesDirectory)/Dockerfile"
   dockerRegistryServiceConnection: "docker_hub"
+  dockerDefaultImageTag: "$(Build.BuildId)-$(Build.SourceVersion)"
   isMain: $[eq(variables['Build.SourceBranchName'], 'main')]
-  isTag: $[startsWith(variables['Build.SourceBranch'], 'refs/tags/')]
-  tag: "$(Build.BuildId)"
 
 stages:
   - stage: Testing
@@ -86,8 +85,37 @@ stages:
     pool:
       vmImage: $(vmImage)
     jobs:
-      - job: Version
-        condition: eq(variables.isMain, true)
+      - job: Docker
+        steps:
+          - task: Docker@2
+            displayName: "Build image"
+            inputs:
+              command: build
+              repository: $(imageRepository)
+              Dockerfile: $(dockerfilePath)
+          - task: Docker@2
+            condition: ne(variables['release.version'], '')
+            displayName: "Push image release"
+            inputs:
+              command: push
+              repository: $(imageRepository)
+              containerRegistry: $(dockerRegistryServiceConnection)
+              tags: |
+                $(release.version)
+                latest
+          - task: Docker@2
+            condition: eq(variables['release.version'], '')
+            displayName: "Push image commit"
+            inputs:
+              command: push
+              repository: $(imageRepository)
+              containerRegistry: $(dockerRegistryServiceConnection)
+              tags: |
+                $(dockerDefaultImageTag)
+
+      - job: Release
+        dependsOn: Docker
+        condition: and(succeeded(Docker), eq(variables.isMain, true), ne(variables['release.version'], ''))
         steps:
           - checkout: self
             persistCredentials: true
@@ -110,26 +138,7 @@ stages:
             displayName: "Configure Git"
 
           - script: bump2version $(release.version)
-            condition: ne(variables['release.version'], '')
             displayName: "Bump version release"
-
-          - script: bump2version patch
-            condition: eq(variables['release.version'], '')
-            displayName: "Bump version patch"
 
           - script: git push --follow-tags origin $(Build.SourceBranchName)
             displayName: "Push Tag to GitHub"
-
-      - job: Docker
-        condition: eq(variables.isTag, true)
-        steps:
-          - task: Docker@2
-            displayName: Build & Push image
-            inputs:
-              command: buildAndPush
-              repository: $(imageRepository)
-              Dockerfile: $(dockerfilePath)
-              containerRegistry: $(dockerRegistryServiceConnection)
-              tags: |
-                $(tag)
-                latest
