@@ -96,6 +96,9 @@ stages:
           - script: pip install -U pip
             displayName: "Upgrade pip"
 
+          - script: pip install -U bump2version
+            displayName: "Install bump2version"
+
           - script: |
               git config user.email "31185348+bakdata-bot@users.noreply.github.com"
               git config user.name "bakdata-bot"
