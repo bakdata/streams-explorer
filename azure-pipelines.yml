@@ -88,15 +88,24 @@ stages:
       - job: Docker
         steps:
           - task: Docker@2
-            displayName: "Build image"
+            condition: ne(variables['release.version'], '')
+            displayName: "Build image release"
+            inputs:
+              command: build
+              repository: $(imageRepository)
+              Dockerfile: $(dockerfilePath)
+              tags: |
+                $(release.version)
+                latest
+          - task: Docker@2
+            condition: eq(variables['release.version'], '')
+            displayName: "Build image commit"
             inputs:
               command: build
               repository: $(imageRepository)
               Dockerfile: $(dockerfilePath)
               tags: |
                 $(dockerDefaultImageTag)
-                $(release.version)
-                latest
           - task: Docker@2
             condition: ne(variables['release.version'], '')
             displayName: "Push image release"
