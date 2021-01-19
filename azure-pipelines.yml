@@ -115,7 +115,7 @@ stages:
 
       - job: Release
         dependsOn: Docker
-        condition: and(succeeded(Docker), eq(variables.isMain, true), ne(variables['release.version'], ''))
+        condition: and(succeeded(), eq(variables.isMain, true), ne(variables['release.version'], ''))
         steps:
           - checkout: self
             persistCredentials: true
