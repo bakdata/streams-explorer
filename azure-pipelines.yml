@@ -13,7 +13,7 @@ resources:
   - repo: self
 
 variables:
-  vmImage: "ubuntu-latest"
+  vmImage: "ubuntu-20.04"
   imageRepository: "$(Build.repository.name)"
   dockerfilePath: "$(Build.SourcesDirectory)/Dockerfile"
   dockerRegistryServiceConnection: "docker_hub"
