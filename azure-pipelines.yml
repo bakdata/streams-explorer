@@ -21,6 +21,7 @@ variables:
   dockerRegistryServiceConnection: "docker_hub"
   dockerDefaultImageTag: "$(Build.BuildId)-$(Build.SourceVersion)"
   isMain: $[eq(variables['Build.SourceBranchName'], 'main')]
+  isTag: $[startsWith(variables['Build.SourceBranch'], 'refs/tags/')]
 
 stages:
   - stage: Testing
@@ -85,49 +86,33 @@ stages:
     pool:
       vmImage: $(vmImage)
     jobs:
-      - job: Docker
+      - job: Build
         steps:
           - task: Docker@2
-            condition: ne(variables['release.version'], '')
-            displayName: "Build image release"
+            condition: and(eq(variables['release.version'], ''), eq(variables.isTag, false))
+            displayName: "Build & Push image commit"
             inputs:
-              command: build
+              command: buildAndPush
               repository: $(imageRepository)
               Dockerfile: $(dockerfilePath)
-              tags: |
-                $(release.version)
-                latest
-          - task: Docker@2
-            condition: eq(variables['release.version'], '')
-            displayName: "Build image commit"
-            inputs:
-              command: build
-              repository: $(imageRepository)
-              Dockerfile: $(dockerfilePath)
-              tags: |
-                $(dockerDefaultImageTag)
-          - task: Docker@2
-            condition: ne(variables['release.version'], '')
-            displayName: "Push image release"
-            inputs:
-              command: push
-              repository: $(imageRepository)
-              containerRegistry: $(dockerRegistryServiceConnection)
-              tags: |
-                $(release.version)
-                latest
-          - task: Docker@2
-            condition: eq(variables['release.version'], '')
-            displayName: "Push image commit"
-            inputs:
-              command: push
-              repository: $(imageRepository)
               containerRegistry: $(dockerRegistryServiceConnection)
               tags: |
                 $(dockerDefaultImageTag)
 
+          - task: Docker@2
+            condition: eq(variables.isTag, true)
+            displayName: "Build & Push image release"
+            inputs:
+              command: buildAndPush
+              repository: $(imageRepository)
+              Dockerfile: $(dockerfilePath)
+              containerRegistry: $(dockerRegistryServiceConnection)
+              tags: |
+                $(Build.SourceBranchName)  # name of git release tag
+                latest
+
       - job: Release
-        dependsOn: Docker
+        dependsOn: Build
         condition: and(succeeded(), eq(variables.isMain, true), ne(variables['release.version'], ''))
         steps:
           - checkout: self
