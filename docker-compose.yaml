@@ -1,0 +1,20 @@
+version: "3.9"
+
+services:
+  streams-explorer:
+    image: bakdata/streams-explorer
+    ports:
+      - "3000:80"
+      - "8081:8081"
+      - "8083:8083"
+      - "9090:9090"
+    volumes:
+      - ~/.kube/config:/app/kubeconfig
+    env_file:
+      - ./backend/.env
+    environment:
+      - KUBECONFIG=/app/kubeconfig
+      - SE_K8S__deployment__cluster=false
+      - SE_SCHEMAREGISTRY__url=http://host.docker.internal:8081
+      - SE_KAFKACONNECT__url=http://host.docker.internal:8083
+      - SE_PROMETHEUS__url=http://host.docker.internal:9090
