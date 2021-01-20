@@ -9,7 +9,7 @@ from server.plugins import load_plugin
 
 def load_linker() -> Type[LinkingService]:
     linker = load_plugin(LinkingService)
-    if linker == [] or not issubclass(linker, LinkingService):
+    if not linker or not issubclass(linker, LinkingService):
         logger.info("Using default LinkingService")
         return DefaultLinker
     logger.info(f"Using custom LinkingService: {linker.__name__}")
