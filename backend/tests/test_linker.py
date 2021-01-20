@@ -4,7 +4,6 @@ from server.core.config import settings
 from server.core.services.linking_services import LinkingService
 from server.defaultlinker import DefaultLinker
 from server.linker import load_linker
-from server.plugins import load_plugin
 
 fake_linker = """
 from typing import Optional
@@ -22,7 +21,7 @@ class FakeLinker(LinkingService):
 
 
 def test_load_default_linker():
-    linking_service: LinkingService = load_linker()
+    linking_service = load_linker()
 
     assert isinstance(linking_service(), DefaultLinker)
 
@@ -35,7 +34,7 @@ def test_load_plugin_linker():
         with open(fake_linker_path, "w") as f:
             f.write(fake_linker)
 
-        linking_service = load_plugin(LinkingService)()
+        linking_service = load_linker()()
 
         assert isinstance(linking_service, LinkingService)
         assert not isinstance(linking_service, DefaultLinker)
