@@ -6,6 +6,7 @@ API_PREFIX = "/api"
 settings = Dynaconf(
     envvar_prefix="se",
     settings_files=["settings.yaml"],
+    load_dotenv=True,
     validators=[
         Validator("kafkaconnect.url", must_exist=True),
         Validator(
