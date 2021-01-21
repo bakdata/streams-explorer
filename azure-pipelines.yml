@@ -148,7 +148,7 @@ stages:
           - script: git push --follow-tags origin $(Build.SourceBranchName)
             displayName: "Push Tag to GitHub"
 
-      - job: PyPi
+      - job: PyPI
         condition: eq(variables.isTag, true)
         steps:
           - checkout: self
@@ -183,7 +183,7 @@ stages:
             workingDirectory: $(backendPath)
 
           - script: flit publish
-            displayName: "Publish to PyPi"
+            displayName: "Publish to PyPI"
             workingDirectory: $(backendPath)
             env:
               FLIT_INDEX_URL: $(pypi.url)
