@@ -15,7 +15,7 @@ resources:
   - repo: self
 
 variables:
-  - group: testpypi
+  - group: pypi
   - name: vmImage
     value: ubuntu-20.04
   - name: imageRepository
@@ -148,7 +148,7 @@ stages:
           - script: git push --follow-tags origin $(Build.SourceBranchName)
             displayName: "Push Tag to GitHub"
 
-      - job: TestPyPi
+      - job: PyPi
         condition: eq(variables.isTag, true)
         steps:
           - checkout: self
@@ -183,10 +183,10 @@ stages:
             workingDirectory: $(backendPath)
 
           - script: flit publish
-            displayName: "Publish to TestPyPi"
+            displayName: "Publish to PyPi"
             workingDirectory: $(backendPath)
             env:
-              FLIT_INDEX_URL: "https://test.pypi.org/legacy/"
-              FLIT_USERNAME: $(testpypi.username)
-              FLIT_PASSWORD: $(testpypi.password)
+              FLIT_INDEX_URL: $(pypi.url)
+              FLIT_USERNAME: $(pypi.username)
+              FLIT_PASSWORD: $(pypi.password)
               FLIT_ROOT_INSTALL: 1
