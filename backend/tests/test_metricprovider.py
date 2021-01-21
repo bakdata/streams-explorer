@@ -1,8 +1,8 @@
 import pytest
 from prometheus_api_client import PrometheusConnect
 
-from server.core.services.metric_providers import PrometheusMetricProvider
-from server.models.graph import Metric
+from streams_explorer.core.services.metric_providers import PrometheusMetricProvider
+from streams_explorer.models.graph import Metric
 from tests.test_metricprovider_data import nodes, prometheus_data
 
 

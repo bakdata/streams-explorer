@@ -2,7 +2,7 @@ import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
 
-from server.application import get_application
+from streams_explorer.application import get_application
 
 
 class TestApplication:

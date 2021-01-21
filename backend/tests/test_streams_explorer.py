@@ -3,18 +3,18 @@ from typing import List
 import pytest
 from kubernetes.client import V1beta1CronJob, V1ObjectMeta
 
-from server.core.config import settings
-from server.core.extractor.extractor import Extractor
-from server.core.services.dataflow_graph import NodeTypesEnum
-from server.defaultlinker import DefaultLinker
-from server.extractors import extractor_container
-from server.models.node_information import (
+from streams_explorer.core.config import settings
+from streams_explorer.core.extractor.extractor import Extractor
+from streams_explorer.core.services.dataflow_graph import NodeTypesEnum
+from streams_explorer.defaultlinker import DefaultLinker
+from streams_explorer.extractors import extractor_container
+from streams_explorer.models.node_information import (
     NodeInfoListItem,
     NodeInformation,
     NodeInfoType,
 )
-from server.models.source import Source
-from server.streams_explorer import StreamsExplorer
+from streams_explorer.models.source import Source
+from streams_explorer.streams_explorer import StreamsExplorer
 from tests.utils import get_streaming_app_deployment
 
 
@@ -70,7 +70,7 @@ class TestStreamsExplorer:
             pass
 
         mocker.patch(
-            "server.defaultlinker.DefaultLinker.__init__",
+            "streams_explorer.defaultlinker.DefaultLinker.__init__",
             fake_linker_init,
         )
         return DefaultLinker()
@@ -96,20 +96,20 @@ class TestStreamsExplorer:
             return ["output-topic3"], {"test": "test_value"}
 
         mocker.patch(
-            "server.core.services.kafkaconnect.KafkaConnect.get_connectors",
+            "streams_explorer.core.services.kafkaconnect.KafkaConnect.get_connectors",
             get_connectors,
         )
         mocker.patch(
-            "server.core.services.kafkaconnect.KafkaConnect.get_connector_info",
+            "streams_explorer.core.services.kafkaconnect.KafkaConnect.get_connector_info",
             get_connector_info,
         )
 
         mocker.patch(
-            "server.core.services.schemaregistry.SchemaRegistry.get_topic_value_schema_versions",
+            "streams_explorer.core.services.schemaregistry.SchemaRegistry.get_topic_value_schema_versions",
             lambda topic: [1, 2],
         )
         mocker.patch(
-            "server.core.services.schemaregistry.SchemaRegistry.get_topic_value_schema",
+            "streams_explorer.core.services.schemaregistry.SchemaRegistry.get_topic_value_schema",
             self.get_topic_value_schema,
         )
 

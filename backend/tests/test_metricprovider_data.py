@@ -1,4 +1,4 @@
-from server.models.node_types import NodeTypesEnum
+from streams_explorer.models.node_types import NodeTypesEnum
 
 nodes = [
     (

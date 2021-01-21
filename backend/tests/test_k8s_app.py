@@ -1,4 +1,4 @@
-from server.core.k8s_app import K8sApp
+from streams_explorer.core.k8s_app import K8sApp
 from tests.utils import get_streaming_app_deployment
 
 
