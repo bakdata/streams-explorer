@@ -99,7 +99,7 @@ class K8sApp:
 
     @staticmethod
     def get_labels() -> Set:
-        return set([label.get("name") for label in settings.k8s.labels])
+        return set(settings.k8s.labels)
 
     @staticmethod
     def parse_input_topics(input_topics: str) -> List[str]:
