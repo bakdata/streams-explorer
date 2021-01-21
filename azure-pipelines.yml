@@ -22,6 +22,8 @@ variables:
     value: $(Build.repository.name)
   - name: dockerfilePath
     value: $(Build.SourcesDirectory)/Dockerfile
+  - name: backendPath
+    value: $(Build.SourcesDirectory)/backend
   - name: dockerRegistryServiceConnection
     value: docker_hub
   - name: dockerDefaultImageTag
@@ -159,8 +161,7 @@ stages:
               versionSpec: "3.8"
 
           - script: |
-              cp README.md backend/
-              cd backend
+              cp README.md $(backendPath)/
             displayName: "Copy Readme"
 
           - script: pip install -U pip
@@ -171,12 +172,15 @@ stages:
 
           - script: flit install
             displayName: "Install library"
+            workingDirectory: $(backendPath)
 
           - script: flit build
             displayName: "Build library"
+            workingDirectory: $(backendPath)
 
           - script: flit publish
             displayName: "Publish to TestPyPi"
+            workingDirectory: $(backendPath)
             env:
               FLIT_INDEX_URL: "https://test.pypi.org/legacy/"
               FLIT_USERNAME: $(testpypi.username)
