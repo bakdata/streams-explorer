@@ -96,7 +96,7 @@ stages:
     pool:
       vmImage: $(vmImage)
     jobs:
-      - job: Build
+      - job: Docker
         steps:
           - task: Docker@2
             condition: and(eq(variables['release.version'], ''), eq(variables.isTag, false))
@@ -122,7 +122,7 @@ stages:
                 latest
 
       - job: Release
-        dependsOn: Build
+        dependsOn: Docker
         condition: and(succeeded(), eq(variables.isMain, true), ne(variables['release.version'], ''))
         steps:
           - checkout: self
@@ -151,7 +151,7 @@ stages:
           - script: git push --follow-tags origin $(Build.SourceBranchName)
             displayName: "Push Tag to GitHub"
 
-      - job: PublishTestPyPi
+      - job: TestPyPi
         steps:
           - checkout: self
             persistCredentials: true
