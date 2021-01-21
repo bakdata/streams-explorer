@@ -15,13 +15,21 @@ resources:
   - repo: self
 
 variables:
-  vmImage: "ubuntu-20.04"
-  imageRepository: "$(Build.repository.name)"
-  dockerfilePath: "$(Build.SourcesDirectory)/Dockerfile"
-  dockerRegistryServiceConnection: "docker_hub"
-  dockerDefaultImageTag: "$(Build.BuildId)-$(Build.SourceVersion)"
-  isMain: $[eq(variables['Build.SourceBranchName'], 'main')]
-  isTag: $[startsWith(variables['Build.SourceBranch'], 'refs/tags/')]
+  - group: testpypi
+  - name: vmImage
+    value: ubuntu-20.04
+  - name: imageRepository
+    value: $(Build.repository.name)
+  - name: dockerfilePath
+    value: $(Build.SourcesDirectory)/Dockerfile
+  - name: dockerRegistryServiceConnection
+    value: docker_hub
+  - name: dockerDefaultImageTag
+    value: $(Build.BuildId)-$(Build.SourceVersion)
+  - name: isMain
+    value: $[eq(variables['Build.SourceBranchName'], 'main')]
+  - name: isTag
+    value: $[startsWith(variables['Build.SourceBranch'], 'refs/tags/')]
 
 stages:
   - stage: Testing
@@ -140,3 +148,37 @@ stages:
 
           - script: git push --follow-tags origin $(Build.SourceBranchName)
             displayName: "Push Tag to GitHub"
+
+      - job: PublishTestPyPi
+        steps:
+          - checkout: self
+            persistCredentials: true
+
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: "3.8"
+
+          - script: |
+              cp README.md backend/
+              cd backend
+            displayName: "Copy Readme"
+
+          - script: pip install -U pip
+            displayName: "Upgrade pip"
+
+          - script: pip install flit
+            displayName: "Install flit"
+
+          - script: flit install
+            displayName: "Install library"
+
+          - script: flit build
+            displayName: "Build library"
+
+          - script: flit publish
+            displayName: "Publish to TestPyPi"
+            env:
+              FLIT_INDEX_URL: "https://test.pypi.org/legacy/"
+              FLIT_USERNAME: $(testpypi.username)
+              FLIT_PASSWORD: $(testpypi.password)
+              FLIT_ROOT_INSTALL: 1
