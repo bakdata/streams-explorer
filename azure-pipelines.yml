@@ -96,60 +96,60 @@ stages:
     pool:
       vmImage: $(vmImage)
     jobs:
-      - job: Docker
-        steps:
-          - task: Docker@2
-            condition: and(eq(variables['release.version'], ''), eq(variables.isTag, false))
-            displayName: "Build & Push image commit"
-            inputs:
-              command: buildAndPush
-              repository: $(imageRepository)
-              Dockerfile: $(dockerfilePath)
-              containerRegistry: $(dockerRegistryServiceConnection)
-              tags: |
-                $(dockerDefaultImageTag)
+      # - job: Docker
+      #   steps:
+      #     - task: Docker@2
+      #       condition: and(eq(variables['release.version'], ''), eq(variables.isTag, false))
+      #       displayName: "Build & Push image commit"
+      #       inputs:
+      #         command: buildAndPush
+      #         repository: $(imageRepository)
+      #         Dockerfile: $(dockerfilePath)
+      #         containerRegistry: $(dockerRegistryServiceConnection)
+      #         tags: |
+      #           $(dockerDefaultImageTag)
 
-          - task: Docker@2
-            condition: eq(variables.isTag, true)
-            displayName: "Build & Push image release"
-            inputs:
-              command: buildAndPush
-              repository: $(imageRepository)
-              Dockerfile: $(dockerfilePath)
-              containerRegistry: $(dockerRegistryServiceConnection)
-              tags: |
-                $(Build.SourceBranchName)  # name of git release tag
-                latest
+      #     - task: Docker@2
+      #       condition: eq(variables.isTag, true)
+      #       displayName: "Build & Push image release"
+      #       inputs:
+      #         command: buildAndPush
+      #         repository: $(imageRepository)
+      #         Dockerfile: $(dockerfilePath)
+      #         containerRegistry: $(dockerRegistryServiceConnection)
+      #         tags: |
+      #           $(Build.SourceBranchName)  # name of git release tag
+      #           latest
 
-      - job: Release
-        dependsOn: Docker
-        condition: and(succeeded(), eq(variables.isMain, true), ne(variables['release.version'], ''))
-        steps:
-          - checkout: self
-            persistCredentials: true
+      # - job: Release
+      #   dependsOn: Docker
+      #   condition: and(succeeded(), eq(variables.isMain, true), ne(variables['release.version'], ''))
+      #   steps:
+      #     - checkout: self
+      #       persistCredentials: true
 
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: "3.8"
+      #     - task: UsePythonVersion@0
+      #       inputs:
+      #         versionSpec: "3.8"
 
-          - script: pip install -U pip
-            displayName: "Upgrade pip"
+      #     - script: pip install -U pip
+      #       displayName: "Upgrade pip"
 
-          - script: pip install -U bump2version
-            displayName: "Install bump2version"
+      #     - script: pip install -U bump2version
+      #       displayName: "Install bump2version"
 
-          - script: |
-              git config user.email "31185348+bakdata-bot@users.noreply.github.com"
-              git config user.name "bakdata-bot"
-              git fetch
-              git checkout main
-            displayName: "Configure Git"
+      #     - script: |
+      #         git config user.email "31185348+bakdata-bot@users.noreply.github.com"
+      #         git config user.name "bakdata-bot"
+      #         git fetch
+      #         git checkout main
+      #       displayName: "Configure Git"
 
-          - script: bump2version $(release.version)
-            displayName: "Bump version release"
+      #     - script: bump2version $(release.version)
+      #       displayName: "Bump version release"
 
-          - script: git push --follow-tags origin $(Build.SourceBranchName)
-            displayName: "Push Tag to GitHub"
+      #     - script: git push --follow-tags origin $(Build.SourceBranchName)
+      #       displayName: "Push Tag to GitHub"
 
       - job: TestPyPi
         steps:
@@ -162,6 +162,7 @@ stages:
 
           - script: |
               cp README.md $(backendPath)/
+              git add $(backendPath)/README.md
             displayName: "Copy Readme"
 
           - script: |
