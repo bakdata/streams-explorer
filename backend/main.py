@@ -1,7 +1,7 @@
 import uvicorn as uvicorn
 
-from server.application import get_application
-from server.default import setup_default
+from streams_explorer.application import get_application
+from streams_explorer.default import setup_default
 
 app = get_application()
 app.add_event_handler("startup", setup_default(app))

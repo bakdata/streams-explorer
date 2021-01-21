@@ -1,14 +1,14 @@
 import os
 
-from server.core.config import settings
-from server.core.services.linking_services import LinkingService
-from server.defaultlinker import DefaultLinker
-from server.linker import load_linker
+from streams_explorer.core.config import settings
+from streams_explorer.core.services.linking_services import LinkingService
+from streams_explorer.defaultlinker import DefaultLinker
+from streams_explorer.linker import load_linker
 
 fake_linker = """
 from typing import Optional
 
-from server.core.services.linking_services import LinkingService
+from streams_explorer.core.services.linking_services import LinkingService
 
 
 class FakeLinker(LinkingService):
