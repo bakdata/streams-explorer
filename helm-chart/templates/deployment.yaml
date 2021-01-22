@@ -1,3 +1,4 @@
+{{- $fullName := include "streams-explorer.fullname" . -}}
 {{- if .Capabilities.APIVersions.Has "apps/v1" }}
 apiVersion: apps/v1
 {{- else }}
@@ -75,3 +76,28 @@ spec:
             - name: {{ $key | quote }}
               value: {{ $value | quote }}
           {{- end }}
+          volumeMounts:
+          {{- if .Values.plugins }}
+            - name: {{ $fullName }}-plugin-volume
+              mountPath: /app/plugins
+          {{ end }}
+          {{- if .Values.icons }}
+          {{- range $key, $value := .Values.icons }}
+            - name: {{ $fullName }}-icons-volume
+              mountPath: /app/static/{{ $key }}.svg
+              subPath: {{ $key }}.svg
+          {{ end }}
+          {{ end }}
+          {{- if .Values.volumeMounts }}{{ toYaml .Values.volumeMounts | trim | nindent 12 }}{{ end }}
+      volumes:
+      {{- if .Values.plugins }}
+        - name: {{ $fullName }}-plugin-volume
+          configMap:
+            name: {{ $fullName }}-plugins
+      {{ end }}
+      {{- if .Values.icons }}
+        - name: {{ $fullName }}-icons-volume
+          configMap:
+            name: {{ $fullName }}-icons
+      {{ end }}
+      {{- if .Values.volumes }}{{ toYaml .Values.volumes | trim | nindent 8 }}{{ end }}
