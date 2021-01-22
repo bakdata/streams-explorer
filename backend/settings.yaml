@@ -27,9 +27,9 @@ k8s:
 schemaregistry:
   url: "http://localhost:8081"
 
-controlcenter:
-  url: "http://localhost:9021"
-  clusterid: ""
+akhq:
+  url: "http://localhost:8080"
+  cluster: "cluster-name"
 
 grafana:
   url: "http://localhost:3000"

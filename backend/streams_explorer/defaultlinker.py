@@ -14,11 +14,19 @@ class DefaultLinker(LinkingService):
             NodeInfoListItem(
                 name="Topic Monitoring", value="grafana", type=NodeInfoType.LINK
             ),
-            NodeInfoListItem(name="Message Viewer", value="c3", type=NodeInfoType.LINK),
+            NodeInfoListItem(
+                name="Message Viewer", value="akhq", type=NodeInfoType.LINK
+            ),
         ]
         self.streaming_app_info = [
             NodeInfoListItem(name="Kibana Logs", value="", type=NodeInfoType.LINK)
         ]
+
+        self.sink_source_info = {
+            "elasticsearch-index": [
+                NodeInfoListItem(name="Kibana", value="", type=NodeInfoType.LINK)
+            ]
+        }
 
     def get_redirect_connector(
         self, config: dict, link_type: Optional[str]
@@ -28,11 +36,8 @@ class DefaultLinker(LinkingService):
     def get_redirect_topic(
         self, topic_name: str, link_type: Optional[str]
     ) -> Optional[str]:
-        if link_type == "c3":
-            return (
-                f"{settings.controlcenter.url}/clusters/"
-                f"{settings.controlcenter.clusterid}/management/topics/{topic_name}/message-viewer"
-            )
+        if link_type == "akhq":
+            return f"{settings.akhq.url}/ui/{settings.akhq.cluster}/topic/{topic_name}"
         if link_type == "grafana":
             return f"{settings.grafana.url}/d/{settings.grafana.dashboard}?var-topics={topic_name}"
         return None
