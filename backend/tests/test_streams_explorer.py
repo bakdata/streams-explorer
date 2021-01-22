@@ -187,5 +187,5 @@ class TestStreamsExplorer:
     def test_get_link(self, streams_explorer):
         streams_explorer.update()
         assert type(streams_explorer.get_link("input-topic1", "grafana")) == str
-        assert type(streams_explorer.get_link("input-topic1", "c3")) == str
+        assert type(streams_explorer.get_link("input-topic1", "akhq")) == str
         assert type(streams_explorer.get_link("streaming-app2", None)) == str
