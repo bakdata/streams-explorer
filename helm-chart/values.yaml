@@ -20,6 +20,24 @@ secrets: {}
 
 annotations: {}
 
+# Configure custom volumeMounts
+volumeMounts: []
+
+# Configure custom volumes
+volumes: []
+
+# Add plugins
+plugins: {}
+# example_linking_service: |
+#   def class Linking(LinkingService):
+#     ...
+
+# Add icons for sources or sinks added with custom extractor plugins
+icons: {}
+# example_icon: |
+#   <svg></svg>
+
+
 labels: {}
 
 service:
@@ -47,3 +65,4 @@ resources:
   limits:
     memory: 2G
     cpu: 500m
+
