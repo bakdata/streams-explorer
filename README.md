@@ -36,7 +36,7 @@
 docker-compose up
 ```
 
-Once the container is started visit <http://localhost:3000>
+Once the container is started visit <http://localhost:8000>
 
 ### Deploying to Kubernetes cluster
 
@@ -84,7 +84,7 @@ npm install
 npm start
 ```
 
-Visit <http://localhost:3000>
+Visit <http://localhost:8000>
 
 ## Configuration
 
@@ -101,7 +101,7 @@ The following configuration options are available:
 #### Kafka Connect
 
 - `kafkaconnect.url` URL to Kafka Connect server (string, **required**, default: `http://localhost:8083`)
-- `kafkaconnect.displayed_information` (list of dict, **required**, default: `[{'name': 'Transformer', 'key': 'transforms.changeTopic.regex'}]`)
+- `kafkaconnect.displayed_information` Configuration options of Kafka connectors displayed in the frontend (list of dict, **required**, default: `[{'name': 'Transformer', 'key': 'transforms.changeTopic.regex'}]`)
 
 #### Kubernetes
 
@@ -141,8 +141,8 @@ The following configuration options are available:
 
 #### Plugins
 
-- `plugins.path` path to folder containing plugins relative to backend (string, **required**, default: `./plugins`)
-- `plugins.extractors.default` whether to load default extractors (bool, **required**, default: `true`)
+- `plugins.path` Path to folder containing plugins relative to backend (string, **required**, default: `./plugins`)
+- `plugins.extractors.default` Whether to load default extractors (bool, **required**, default: `true`)
 
 ## Demo pipeline
 
@@ -150,4 +150,4 @@ The following configuration options are available:
 
 ## Plugin customization
 
-It is possible to create your own linkers and extractors in Python by implementing the `LinkingService` or `Extractor` classes. This way you can customize it to your specific setup and services. As an example we provide the [DefaultLinker](https://github.com/bakdata/streams-explorer/blob/main/backend/streams_explorer/defaultlinker.py) and [ElasticsearchSink](https://github.com/bakdata/streams-explorer/blob/main/backend/streams_explorer/core/extractor/default/elasticsearch_sink.py) classes which are used by default.
+It is possible to create your own linker and extractors in Python by implementing the `LinkingService` or `Extractor` classes. This way you can customize it to your specific setup and services. As an example we provide the [DefaultLinker](https://github.com/bakdata/streams-explorer/blob/main/backend/streams_explorer/defaultlinker.py) and [ElasticsearchSink](https://github.com/bakdata/streams-explorer/blob/main/backend/streams_explorer/core/extractor/default/elasticsearch_sink.py) classes which are used by default.
