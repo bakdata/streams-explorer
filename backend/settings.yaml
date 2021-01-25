@@ -27,6 +27,9 @@ k8s:
 schemaregistry:
   url: "http://localhost:8081"
 
+prometheus:
+  url: "http://localhost:9090"
+
 akhq:
   url: "http://localhost:8080"
   cluster: "cluster-name"
@@ -40,9 +43,6 @@ kibanalogs:
 
 esindex:
   url: "http://localhost:5601/app/kibana#/dev_tools/console"
-
-prometheus:
-  url: "http://localhost:9090"
 
 plugins:
   path: "./plugins"

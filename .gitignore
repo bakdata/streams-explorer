@@ -1,6 +1,8 @@
 # Ignore dynaconf secret files
 .secrets.*
+*_private*
 
+backend/.env
 backend/static/
 backend/docs/
 demo-atm-fraud/build/

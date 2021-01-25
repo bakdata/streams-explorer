@@ -1,6 +1,6 @@
-# Demo: ATM Fraud detection with Common Kafka Streams
+# Demo: ATM Fraud detection with streams-bootstrap
 
-> This is an adaption of the example pipeline for ATM fraud detection using [common-kafka-streams](https://github.com/bakdata/common-kafka-streams). The original by Confluent is written in KSQL and can be found in the [ksql-atm-fraud-detection](https://github.com/confluentinc/demo-scene/tree/master/ksql-atm-fraud-detection) repo. Details can be found in their [blogpost](https://www.confluent.io/blog/atm-fraud-detection-apache-kafka-ksql/)
+> This is an adaption of the example pipeline for ATM fraud detection using [streams-bootstrap](https://github.com/bakdata/streams-bootstrap). The original by Confluent is written in KSQL and can be found in the [ksql-atm-fraud-detection](https://github.com/confluentinc/demo-scene/tree/master/ksql-atm-fraud-detection) repo. Details can be found in their [blogpost](https://www.confluent.io/blog/atm-fraud-detection-apache-kafka-ksql/)
 
 ## Usage
 
@@ -18,7 +18,7 @@ gradle jib -Djib.to.image=url-to-container-registry.com/streams-explorer-demo-ac
 ### Deploy in Kubernetes
 
 ```
-helm repo add bakdata-common https://raw.githubusercontent.com/bakdata/common-kafka-streams/master/charts/
+helm repo add bakdata-common https://raw.githubusercontent.com/bakdata/streams-bootstrap/master/charts/
 helm repo update
 helm upgrade --debug --install --force --values values-transactionavroproducer.yaml demo-transactionavroproducer bakdata-common/streams-app
 helm upgrade --debug --install --force --values values-transactionjoiner.yaml demo-transactionjoiner bakdata-common/streams-app
