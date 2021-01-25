@@ -1,9 +1,9 @@
-from server.core.config import settings
-from server.core.k8s_app import K8sApp
-from server.core.services.dataflow_graph import DataFlowGraph
-from server.core.services.kafkaconnect import KafkaConnector
-from server.models.sink import Sink
-from server.models.source import Source
+from streams_explorer.core.config import settings
+from streams_explorer.core.k8s_app import K8sApp
+from streams_explorer.core.services.dataflow_graph import DataFlowGraph
+from streams_explorer.core.services.kafkaconnect import KafkaConnector
+from streams_explorer.models.sink import Sink
+from streams_explorer.models.source import Source
 from tests.utils import get_streaming_app_deployment
 
 

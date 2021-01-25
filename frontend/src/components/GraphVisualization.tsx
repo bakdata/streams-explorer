@@ -11,6 +11,7 @@ import {
 import INode from "@antv/g6/lib/interface/item";
 import Graph from "@antv/g6/lib/graph/graph";
 import "./MetricCustomNode";
+import { millify } from "millify";
 
 interface GraphVisualizationProps {
   id: string;
@@ -34,25 +35,31 @@ class Icon implements IIcon {
   }
 }
 
+function formatNumber(num: number): string {
+  return num < 1e6 ? num.toLocaleString("en") : millify(num);
+}
+
 function updateNodeMetrics(graph: Graph, metrics: Metric[]) {
   metrics.forEach((metric) => {
     let metricsString: string = [
       `${
-        typeof metric.topic_size === "number" ? `SIZE ${metric.topic_size}` : ""
+        typeof metric.topic_size === "number"
+          ? `SIZE ${formatNumber(metric.topic_size)}`
+          : ""
       }`,
       `${
         typeof metric.messages_in === "number"
-          ? `IN ${metric.messages_in}/s`
+          ? `IN ${formatNumber(metric.messages_in)}/s`
           : ""
       }`,
       `${
         typeof metric.messages_out === "number"
-          ? `OUT ${metric.messages_out}/s`
+          ? `OUT ${formatNumber(metric.messages_out)}/s`
           : ""
       }`,
       `${
         typeof metric.consumer_lag === "number"
-          ? `LAG ${metric.consumer_lag}`
+          ? `LAG ${formatNumber(metric.consumer_lag)}`
           : ""
       }`,
     ]

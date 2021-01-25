@@ -19,7 +19,7 @@ k8s:
       key: "metadata.labels"
   labels:
     # used to set attributes of nodes in the graph (used to extract pipeline names)
-    - name: "pipeline"
+    - "pipeline"
   independent_graph:
     # refers to the attribute of nodes the pipeline name should be extracted from
     label: "pipeline"
@@ -30,9 +30,9 @@ schemaregistry:
 prometheus:
   url: "http://localhost:9090"
 
-controlcenter:
-  url: "http://localhost:9021"
-  clusterid: ""
+akhq:
+  url: "http://localhost:8080"
+  cluster: "cluster-name"
 
 grafana:
   url: "http://localhost:3000"

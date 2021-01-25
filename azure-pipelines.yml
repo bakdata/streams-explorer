@@ -15,13 +15,25 @@ resources:
   - repo: self
 
 variables:
-  vmImage: "ubuntu-20.04"
-  imageRepository: "$(Build.repository.name)"
-  dockerfilePath: "$(Build.SourcesDirectory)/Dockerfile"
-  dockerRegistryServiceConnection: "docker_hub"
-  dockerDefaultImageTag: "$(Build.BuildId)-$(Build.SourceVersion)"
-  isMain: $[eq(variables['Build.SourceBranchName'], 'main')]
-  isTag: $[startsWith(variables['Build.SourceBranch'], 'refs/tags/')]
+  - group: pypi
+  - name: vmImage
+    value: ubuntu-20.04
+  - name: imageRepository
+    value: $(Build.repository.name)
+  - name: dockerfilePath
+    value: $(Build.SourcesDirectory)/Dockerfile
+  - name: backendPath
+    value: $(Build.SourcesDirectory)/backend
+  - name: frontendPath
+    value: $(Build.SourcesDirectory)/frontend
+  - name: dockerRegistryServiceConnection
+    value: docker_hub
+  - name: dockerDefaultImageTag
+    value: $(Build.BuildId)-$(Build.SourceVersion)
+  - name: isMain
+    value: $[eq(variables['Build.SourceBranchName'], 'main')]
+  - name: isTag
+    value: $[startsWith(variables['Build.SourceBranch'], 'refs/tags/')]
 
 stages:
   - stage: Testing
@@ -39,20 +51,18 @@ stages:
               versionSpec: "$(python.version)"
 
           - script: |
-              cd backend
               sudo apt-get -y install python3-dev graphviz libgraphviz-dev pkg-config python3-wheel
               python -m pip install -r requirements.txt
             displayName: "Install dependencies"
+            workingDirectory: $(backendPath)
 
-          - script: |
-              cd backend
-              python -m flake8 --config .flake8 .
+          - script: python -m flake8 --config .flake8 .
             displayName: "Lint"
+            workingDirectory: $(backendPath)
 
-          - script: |
-              cd backend
-              python -m pytest tests
+          - script: python -m pytest tests
             displayName: "Run Tests"
+            workingDirectory: $(backendPath)
 
       - job: Frontend
         pool:
@@ -66,27 +76,24 @@ stages:
             inputs:
               versionSpec: $(node.version)
 
-          - script: |
-              cd frontend
-              npm install
+          - script: npm install
             displayName: "Install dependencies"
+            workingDirectory: $(frontendPath)
 
-          - script: |
-              cd frontend
-              npm run lint
+          - script: npm run lint
             displayName: "Lint"
+            workingDirectory: $(frontendPath)
 
-          - script: |
-              cd frontend
-              CI=true npm test
+          - script: CI=true npm test
             displayName: "Run Tests"
+            workingDirectory: $(frontendPath)
 
   - stage: Publish
     condition: succeeded()
     pool:
       vmImage: $(vmImage)
     jobs:
-      - job: Build
+      - job: Docker
         steps:
           - task: Docker@2
             condition: and(eq(variables['release.version'], ''), eq(variables.isTag, false))
@@ -112,7 +119,7 @@ stages:
                 latest
 
       - job: Release
-        dependsOn: Build
+        dependsOn: Docker
         condition: and(succeeded(), eq(variables.isMain, true), ne(variables['release.version'], ''))
         steps:
           - checkout: self
@@ -140,3 +147,46 @@ stages:
 
           - script: git push --follow-tags origin $(Build.SourceBranchName)
             displayName: "Push Tag to GitHub"
+
+      - job: PyPI
+        condition: eq(variables.isTag, true)
+        steps:
+          - checkout: self
+            persistCredentials: true
+
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: "3.8"
+
+          - script: |
+              cp README.md $(backendPath)/
+              git add $(backendPath)/README.md
+            displayName: "Copy Readme"
+
+          - script: |
+              sudo apt-get -y install python3-dev graphviz libgraphviz-dev pkg-config python3-wheel
+            displayName: "Install dependencies"
+            workingDirectory: $(backendPath)
+
+          - script: pip install -U pip
+            displayName: "Upgrade pip"
+
+          - script: pip install flit
+            displayName: "Install flit"
+
+          - script: flit install
+            displayName: "Install library"
+            workingDirectory: $(backendPath)
+
+          - script: flit build
+            displayName: "Build library"
+            workingDirectory: $(backendPath)
+
+          - script: flit publish
+            displayName: "Publish to PyPI"
+            workingDirectory: $(backendPath)
+            env:
+              FLIT_INDEX_URL: $(pypi.url)
+              FLIT_USERNAME: $(pypi.username)
+              FLIT_PASSWORD: $(pypi.password)
+              FLIT_ROOT_INSTALL: 1

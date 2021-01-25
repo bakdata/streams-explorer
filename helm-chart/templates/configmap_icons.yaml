@@ -1,0 +1,17 @@
+{{- if .Values.icons }}
+{{- $fullName := include "streams-explorer.fullname" . -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $fullName }}-icons
+  labels:
+    app.kubernetes.io/name: {{ include "streams-explorer.name" . }}
+    helm.sh/chart: {{ include "streams-explorer.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+data:
+  {{- range $key, $value := .Values.icons }}
+  {{ $key }}.svg: |
+{{ $value | indent 4 }}
+  {{- end }}
+{{ end }}

@@ -1,0 +1,46 @@
+[build-system]
+requires = ["flit_core >=2,<4"]
+build-backend = "flit_core.buildapi"
+
+[tool.flit.metadata]
+module = "streams_explorer"
+dist-name = "streams-explorer"
+author = "bakdata"
+home-page = "https://github.com/bakdata/streams-explorer"
+description-file="README.md"
+requires-python = ">=3.6"
+requires = [
+    "aiofiles==0.6.0",
+    "dynaconf==3.1.2",
+    "fastapi==0.63.0",
+    "kubernetes==12.0.1",
+    "loguru==0.5.3",
+    "matplotlib==3.3.3",
+    "networkx==2.5",
+    "numpy==1.19.5",
+    "pandas==1.2.0",
+    "prometheus-api-client==0.4.2",
+    "pygraphviz==1.6",
+    "uvicorn==0.13.3",
+]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development",
+    "Intended Audience :: Developers",
+    "Typing :: Typed",
+]
+
+[tool.flit.metadata.requires-extra]
+test = [
+    "pytest",
+    "pytest-cov",
+    "pytest-mock",
+]

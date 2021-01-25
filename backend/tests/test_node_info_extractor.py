@@ -1,11 +1,11 @@
-from server.core.config import settings
-from server.core.k8s_app import K8sApp
-from server.core.node_info_extractor import (
+from streams_explorer.core.config import settings
+from streams_explorer.core.k8s_app import K8sApp
+from streams_explorer.core.node_info_extractor import (
     get_displayed_information_connector,
     get_displayed_information_deployment,
 )
-from server.models.kafka_connector import KafkaConnector
-from server.models.node_information import NodeInfoListItem, NodeInfoType
+from streams_explorer.models.kafka_connector import KafkaConnector
+from streams_explorer.models.node_information import NodeInfoListItem, NodeInfoType
 from tests.utils import get_streaming_app_deployment
 
 

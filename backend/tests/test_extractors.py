@@ -1,12 +1,12 @@
 import os
 
-from server.core.config import settings
-from server.core.extractor.extractor_container import ExtractorContainer
-from server.extractors import extractor_container, load_extractors
+from streams_explorer.core.config import settings
+from streams_explorer.core.extractor.extractor_container import ExtractorContainer
+from streams_explorer.extractors import extractor_container, load_extractors
 
 extractor_file_1 = """from typing import List
-from server.core.extractor.extractor import Extractor
-from server.models.sink import Sink
+from streams_explorer.core.extractor.extractor import Extractor
+from streams_explorer.models.sink import Sink
 
 
 class TestSinkOne(Extractor):
@@ -24,8 +24,8 @@ class TestSinkOne(Extractor):
             """
 
 extractor_file_2 = """from typing import List
-from server.core.extractor.extractor import Extractor
-from server.models.sink import Sink
+from streams_explorer.core.extractor.extractor import Extractor
+from streams_explorer.models.sink import Sink
 
 
 class TestSinkTwo(Extractor):
