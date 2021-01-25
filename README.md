@@ -20,9 +20,9 @@
 - Visualization of streaming applications and topics
 - Monitor all or individual pipelines from multiple namespaces
 - Inspection of Avro schema from schema registry
-- Integration with [streams-bootstrap](https://github.com/bakdata/streams-bootstrap) for deploying Kafka streams applications
+- Integration with [streams-bootstrap](https://github.com/bakdata/streams-bootstrap) and [faust-bootstrap](https://github.com/bakdata/faust-bootstrap) for deploying Kafka Streams applications
 - Real-time metrics from Prometheus (consumer lag, topic size, messages in/out per second)
-- Linking to external services for logging and analysis like Kibana, Grafana, AKHQ, Elasticsearch
+- Linking to external services for logging and analysis, such as Kibana, Grafana, AKHQ, Elasticsearch
 - Customizable through Python plugins
 
 ## Installation
@@ -36,7 +36,7 @@
 docker-compose up
 ```
 
-Once the container is started visit <http://localhost:8000>
+Once the container is started visit <http://localhost:3000>
 
 ### Deploying to Kubernetes cluster
 
@@ -84,7 +84,7 @@ npm install
 npm start
 ```
 
-Visit <http://localhost:8000>
+Visit <http://localhost:3000>
 
 ## Configuration
 
@@ -100,44 +100,45 @@ The following configuration options are available:
 
 #### Kafka Connect
 
-- `kafkaconnect.url` URL to Kafka Connect server (string, **required**, default: `http://localhost:8083`)
+- `kafkaconnect.url` URL of Kafka Connect server (string, **required**, default: `http://localhost:8083`)
 - `kafkaconnect.displayed_information` Configuration options of Kafka connectors displayed in the frontend (list of dict, **required**, default: `[{'name': 'Transformer', 'key': 'transforms.changeTopic.regex'}]`)
 
 #### Kubernetes
 
-- `k8s.deployment.cluster` Whether it is deployed to Kubernetes cluster (bool, **required**, default: `false`)
-- `k8s.deployment.context` Name of Cluster (string, optional if running in cluster, default: `kubernetes-cluster`)
+- `k8s.deployment.cluster` Whether streams-explorer is deployed to Kubernetes cluster (bool, **required**, default: `false`)
+- `k8s.deployment.context` Name of cluster (string, optional if running in cluster, default: `kubernetes-cluster`)
 - `k8s.deployment.namespaces` Kubernetes namespaces (list of string, **required**, default: `['kubernetes-namespace']`)
 - `k8s.containers.ignore` Name of containers that should be ignored/hidden (list of string, default: `['prometheus-jmx-exporter']`)
-- `k8s.displayed_information` Details of Pod that should be displayed (list of dict, default: `[{'name': 'Labels', 'key': 'metadata.labels'}]`)
+- `k8s.displayed_information` Details of pod that should be displayed (list of dict, default: `[{'name': 'Labels', 'key': 'metadata.labels'}]`)
 - `k8s.labels` Labels used to set attributes of nodes (list of string, **required**, default: `['pipeline']`)
 - `k8s.independent_graph.label` Attribute of nodes the pipeline name should be extracted from (string, **required**, default: `pipeline`)
 
 #### Schema Registry
 
-- `schemaregistry.url` URL to Schema Registry (string, **required**, default: `http://localhost:8081`)
+- `schemaregistry.url` URL of Schema Registry (string, **required**, default: `http://localhost:8081`)
+
+#### Prometheus
+
+- `prometheus.url` URL of Prometheus (string, **required**, default: `http://localhost:9090`)
 
 #### AKHQ
 
-- `akhq.url` URL to AKHQ (string, default: `http://localhost:8080`)
+- `akhq.url` URL of AKHQ (string, default: `http://localhost:8080`)
 - `akhq.cluster` Name of cluster (string, default: `kubernetes-cluster`)
 
 #### Grafana
 
-- `granfa.url` URL to Grafana (string, default: `http://localhost:3000`)
+- `granfa.url` URL of Grafana (string, default: `http://localhost:3000`)
 - `grafana.dashboard` path to Dashboard (string)
 
 #### Kibana
 
-- `kibanalogs.url` URL to Kibana logs (string, default: `http://localhost:5601`)
+- `kibanalogs.url` URL of Kibana logs (string, default: `http://localhost:5601`)
 
 #### Elasticsearch
 
-- `esindex.url` URL to Elasticsearch index (string, default: `http://localhost:5601/app/kibana#/dev_tools/console`)
-
-#### Prometheus
-
-- `prometheus.url` URL to Prometheus (string, **required**, default: `http://localhost:9090`)
+for Kafka Connect Elasticsearch connector
+- `esindex.url` URL of Elasticsearch index (string, default: `http://localhost:5601/app/kibana#/dev_tools/console`)
 
 #### Plugins
 

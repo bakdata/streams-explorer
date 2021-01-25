@@ -4,7 +4,7 @@ services:
   streams-explorer:
     image: bakdata/streams-explorer
     ports:
-      - "8000:80"
+      - "3000:80"
       - "8081:8081"
       - "8083:8083"
       - "9090:9090"

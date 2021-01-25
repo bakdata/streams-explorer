@@ -29,8 +29,8 @@
     "typescript": "^3.7.5"
   },
   "scripts": {
-    "start": "PORT=8000 react-scripts start",
-    "build": "PORT=8000 react-scripts build",
+    "start": "react-scripts start",
+    "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "generate-fetcher": "restful-react import --file ../backend/docs/openapi.json --output ./src/api/fetchers.tsx",
