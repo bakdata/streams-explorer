@@ -115,7 +115,7 @@ stages:
               Dockerfile: $(dockerfilePath)
               containerRegistry: $(dockerRegistryServiceConnection)
               tags: |
-                $(Build.SourceBranchName)  # name of git release tag
+                $(Build.SourceBranchName)
                 latest
 
       - job: Release
