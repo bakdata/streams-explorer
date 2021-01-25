@@ -128,8 +128,8 @@ The following configuration options are available:
 
 #### Grafana
 
-- `granfa.url` URL of Grafana (string, default: `http://localhost:3000`)
-- `grafana.dashboard` path to Dashboard (string)
+- `grafana.url` URL of Grafana (string, default: `http://localhost:3000`)
+- `grafana.dashboard` Path to dashboard (string)
 
 #### Kibana
 
