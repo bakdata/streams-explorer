@@ -13,15 +13,16 @@
   - [Standalone](#standalone)
 - [Configuration](#configuration)
 - [Demo pipeline](#demo-pipeline)
+- [Plugin customization](#plugin-customization)
 
 ## Features
 
 - Visualization of streaming applications and topics
-- Monitor all or individual pipelines from namespace
+- Monitor all or individual pipelines from multiple namespaces
 - Inspection of Avro schema from schema registry
 - Integration with [streams-bootstrap](https://github.com/bakdata/streams-bootstrap) for deploying Kafka streams applications
 - Real-time metrics from Prometheus (consumer lag, topic size, messages in/out per second)
-- Integration with external services for logging and analysis like Kibana, Grafana, AKHQ, Elasticsearch
+- Linking to external services for logging and analysis like Kibana, Grafana, AKHQ, Elasticsearch
 - Customizable through Python plugins
 
 ## Installation
@@ -93,11 +94,13 @@ Depending on your type of installation set the configuration for the backend ser
 - **Kubernetes**: [helm-chart/values.yaml](helm-chart/values.yaml)
 - **standalone**: [backend/settings.yaml](backend/settings.yaml)
 
+All configuration options can be written as environment variables using underscore notation and the prefix `SE`, e.g. `SE_K8S__deployment__cluster=false`.
+
 The following configuration options are available:
 
 #### Kafka Connect
 
-- `kafkaconnect.url` url to Kafka Connect server (string, **required**, default: `http://localhost:8083`)
+- `kafkaconnect.url` URL to Kafka Connect server (string, **required**, default: `http://localhost:8083`)
 - `kafkaconnect.displayed_information` (list of dict, **required**, default: `[{'name': 'Transformer', 'key': 'transforms.changeTopic.regex'}]`)
 
 #### Kubernetes
@@ -112,29 +115,29 @@ The following configuration options are available:
 
 #### Schema Registry
 
-- `schemaregistry.url` url to Schema Registry (string, **required**, default: `http://localhost:8081`)
+- `schemaregistry.url` URL to Schema Registry (string, **required**, default: `http://localhost:8081`)
 
 #### AKHQ
 
-- `akhq.url` url to AKHQ (string, default: `http://localhost:8080`)
+- `akhq.url` URL to AKHQ (string, default: `http://localhost:8080`)
 - `akhq.cluster` Name of cluster (string, default: `kubernetes-cluster`)
 
 #### Grafana
 
-- `granfa.url` url to Grafana (string, default: `http://localhost:3000`)
+- `granfa.url` URL to Grafana (string, default: `http://localhost:3000`)
 - `grafana.dashboard` path to Dashboard (string)
 
 #### Kibana
 
-- `kibanalogs.url` url to Kibana logs (string, default: `http://localhost:5601`)
+- `kibanalogs.url` URL to Kibana logs (string, default: `http://localhost:5601`)
 
 #### Elasticsearch
 
-- `esindex.url` url to Elasticsearch index (string, default: `http://localhost:5601/app/kibana#/dev_tools/console`)
+- `esindex.url` URL to Elasticsearch index (string, default: `http://localhost:5601/app/kibana#/dev_tools/console`)
 
 #### Prometheus
 
-- `prometheus.url` url to Prometheus (string, **required**, default: `http://localhost:9090`)
+- `prometheus.url` URL to Prometheus (string, **required**, default: `http://localhost:9090`)
 
 #### Plugins
 
@@ -144,3 +147,7 @@ The following configuration options are available:
 ## Demo pipeline
 
 [ATM Fraud detection with streams-bootstrap](https://github.com/bakdata/streams-explorer/blob/main/demo-atm-fraud/README.md)
+
+## Plugin customization
+
+It is possible to create your own linkers and extractors in Python by implementing the `LinkingService` or `Extractor` classes. This way you can customize it to your specific setup and services. As an example we provide the [DefaultLinker](https://github.com/bakdata/streams-explorer/blob/main/backend/streams_explorer/defaultlinker.py) and [ElasticsearchSink](https://github.com/bakdata/streams-explorer/blob/main/backend/streams_explorer/core/extractor/default/elasticsearch_sink.py) classes which are used by default.
