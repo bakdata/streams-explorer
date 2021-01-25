@@ -105,7 +105,7 @@ The following configuration options are available:
 
 #### Kubernetes
 
-- `k8s.deployment.cluster` whether it is deployed to Kubernetes cluster (bool, **required**, default: `false`)
+- `k8s.deployment.cluster` Whether it is deployed to Kubernetes cluster (bool, **required**, default: `false`)
 - `k8s.deployment.context` Name of Cluster (string, optional if running in cluster, default: `kubernetes-cluster`)
 - `k8s.deployment.namespaces` Kubernetes namespaces (list of string, **required**, default: `['kubernetes-namespace']`)
 - `k8s.containers.ignore` Name of containers that should be ignored/hidden (list of string, default: `['prometheus-jmx-exporter']`)
