@@ -4,6 +4,16 @@
 
 ![streams-explorer](screens/streams-explorer.png)
 
+## Contents
+
+- [Features](#features)
+- [Installation](#installation)
+  - [Docker Compose](#docker-compose)
+  - [Deploying to Kubernetes cluster](#deploying-to-kubernetes-cluster)
+  - [Standalone](#standalone)
+- [Configuration](#configuration)
+- [Demo pipeline](#demo-pipeline)
+
 ## Features
 
 - Visualization of streaming applications and topics
