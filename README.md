@@ -138,6 +138,7 @@ The following configuration options are available:
 #### Elasticsearch
 
 for Kafka Connect Elasticsearch connector
+
 - `esindex.url` URL of Elasticsearch index (string, default: `http://localhost:5601/app/kibana#/dev_tools/console`)
 
 #### Plugins
