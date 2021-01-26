@@ -1,6 +1,5 @@
 package com.bakdata.kafka;
 
-import com.bakdata.common_kafka_streams.KafkaStreamsApplication;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
