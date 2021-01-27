@@ -28,7 +28,7 @@ dependencies {
     implementation(group = "com.bakdata.seq2", name = "seq2", version = "1.0.0")
     val confluentVersion: String by project
     implementation(group = "io.confluent", name = "kafka-streams-avro-serde", version = confluentVersion)
-    implementation(group = "com.bakdata.common-kafka-streams", name = "common-kafka-streams", version = "1.5.3")
+    implementation(group = "com.bakdata.kafka", name = "streams-bootstrap", version = "1.6.0")
     implementation(group = "com.bakdata.kafka", name = "error-handling", version = "1.0.0")
     implementation(group = "org.elasticsearch", name = "elasticsearch", version = "7.10.0")
     implementation(group = "org.slf4j", name = "slf4j-log4j12", version = "1.7.26")

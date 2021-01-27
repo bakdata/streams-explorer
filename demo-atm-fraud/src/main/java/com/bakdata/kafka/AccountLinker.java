@@ -1,6 +1,5 @@
 package com.bakdata.kafka;
 
-import com.bakdata.common_kafka_streams.KafkaStreamsApplication;
 import java.time.Duration;
 import java.util.Properties;
 import org.apache.kafka.common.serialization.Serdes;
