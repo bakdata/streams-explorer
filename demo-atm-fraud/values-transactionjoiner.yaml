@@ -14,7 +14,7 @@ streams:
   errorTopic: atm-fraud-transactionjoiner-error-topic
 
 annotations:
-  consumer_group: "streams-explorer-transactionjoiner-atm-fraud-joinedtransactions-topic"
+  consumerGroup: "streams-explorer-transactionjoiner-atm-fraud-joinedtransactions-topic"
 
 prometheus:
   jmx:

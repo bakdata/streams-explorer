@@ -14,7 +14,7 @@ streams:
   errorTopic: atm-fraud-frauddetector-error-topic
 
 annotations:
-  consumer_group: "streams-explorer-frauddetector-atm-fraud-possiblefraudtransactions-topic"
+  consumerGroup: "streams-explorer-frauddetector-atm-fraud-possiblefraudtransactions-topic"
 
 prometheus:
   jmx:

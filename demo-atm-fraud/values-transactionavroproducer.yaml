@@ -13,7 +13,7 @@ streams:
   errorTopic: atm-fraud-transactionavroproducer-error-topic
 
 annotations:
-  consumer_group: "streams-explorer-transactionavroproducer-atm-fraud-incoming-transactions-topic"
+  consumerGroup: "streams-explorer-transactionavroproducer-atm-fraud-incoming-transactions-topic"
 
 prometheus:
   jmx:
