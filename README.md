@@ -6,14 +6,27 @@
 
 ## Contents
 
-- [Features](#features)
-- [Installation](#installation)
-  - [Docker Compose](#docker-compose)
-  - [Deploying to Kubernetes cluster](#deploying-to-kubernetes-cluster)
-  - [Standalone](#standalone)
-- [Configuration](#configuration)
-- [Demo pipeline](#demo-pipeline)
-- [Plugin customization](#plugin-customization)
+- [Streams Explorer](#streams-explorer)
+  - [Contents](#contents)
+  - [Features](#features)
+  - [Installation](#installation)
+    - [Docker Compose](#docker-compose)
+    - [Deploying to Kubernetes cluster](#deploying-to-kubernetes-cluster)
+    - [Standalone](#standalone)
+      - [Backend](#backend)
+      - [Frontend](#frontend)
+  - [Configuration](#configuration)
+    - [Kafka Connect](#kafka-connect)
+    - [Kubernetes](#kubernetes)
+    - [Schema Registry](#schema-registry)
+    - [Prometheus](#prometheus)
+    - [AKHQ](#akhq)
+    - [Grafana](#grafana)
+    - [Kibana](#kibana)
+    - [Elasticsearch](#elasticsearch)
+    - [Plugins](#plugins)
+  - [Demo pipeline](#demo-pipeline)
+  - [Plugin customization](#plugin-customization)
 
 ## Features
 
@@ -112,6 +125,7 @@ The following configuration options are available:
 - `k8s.displayed_information` Details of pod that should be displayed (list of dict, default: `[{'name': 'Labels', 'key': 'metadata.labels'}]`)
 - `k8s.labels` Labels used to set attributes of nodes (list of string, **required**, default: `['pipeline']`)
 - `k8s.independent_graph.label` Attribute of nodes the pipeline name should be extracted from (string, **required**, default: `pipeline`)
+- `k8s.consumer_group_annotation` Annotation the consumer group name should be extracted from (string, **required**, default: `consumerGroup`)
 
 #### Schema Registry
 
