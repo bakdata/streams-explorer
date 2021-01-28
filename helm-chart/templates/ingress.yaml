@@ -1,6 +1,7 @@
 {{- if .Values.ingress.enabled -}}
 {{- $fullName := include "streams-explorer.fullname" . -}}
 {{- $ingressPath := .Values.ingress.path -}}
+{{- $sslRedirect := .Values.ingress.sslRedirect -}}
 {{- if .Capabilities.APIVersions.Has "networking.k8s.io/v1beta1" }}
 apiVersion: networking.k8s.io/v1beta1
 {{- else }}
@@ -34,6 +35,12 @@ spec:
     - host: {{ . | quote }}
       http:
         paths:
+        {{- if $sslRedirect }}
+          - path: /*
+            backend:
+              serviceName: ssl-redirect
+              servicePort: use-annotation
+        {{- end }}
           - path: {{ $ingressPath }}
             backend:
               serviceName: {{ $fullName }}
