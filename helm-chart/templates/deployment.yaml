@@ -9,30 +9,29 @@ metadata:
   name: {{ .Release.Name }}
   {{- if .Values.labels }}
   labels:
-    {{- range $key, $value := .Values.labels }}
-    {{ $key }}: {{ $value }}
+    app.kubernetes.io/name: {{ include "streams-explorer.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "streams-explorer.chart" . }}
+    {{- range $key, $value := .Values.deploymentLabels }}
+    {{ $key }}: {{ $value | quote }}
     {{- end }}
   {{- end }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: {{ include "streams-explorer.name" . }}
-      chart: {{ include "streams-explorer.chart" . }}
-      release: {{ .Release.Name }}
-      heritage: {{ .Release.Service }}
-      {{- range $key, $value := .Values.labels }}
-      {{ $key }}: {{ $value }}
-      {{- end }}
+      app.kubernetes.io/name: {{ include "streams-explorer.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        app: {{ include "streams-explorer.name" . }}
-        chart: {{ include "streams-explorer.chart" . }}
-        release: {{ .Release.Name }}
-        heritage: {{ .Release.Service }}
-        {{- range $key, $value := .Values.labels }}
-        {{ $key }}: {{ $value }}
+        app.kubernetes.io/name: {{ include "streams-explorer.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
+        helm.sh/chart: {{ include "streams-explorer.chart" . }}
+        {{- range $key, $value := .Values.podLabels }}
+        {{ $key }}: {{ $value | quote }}
         {{- end }}
       {{- if or .Values.awsRole  .Values.annotations }}
       annotations:

@@ -3,10 +3,10 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   labels:
-    app: {{ template "streams-explorer.name" . }}
-    chart: {{ template "streams-explorer.chart" . }}
-    heritage: {{ .Release.Service }}
-    release: {{ .Release.Name }}
+    app.kubernetes.io/name: {{ include "streams-explorer.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "streams-explorer.chart" . }}
   name: {{ template "streams-explorer.fullname" . }}
 rules:
   - apiGroups: ["apps", "batch"]
