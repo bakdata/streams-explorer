@@ -25,6 +25,7 @@ class Metric(BaseModel):
     messages_in: Optional[float] = None
     messages_out: Optional[float] = None
     consumer_lag: Optional[int] = None
+    consumer_read_rate: Optional[float] = None
     topic_size: Optional[int] = None
     replicas: Optional[int] = None
 

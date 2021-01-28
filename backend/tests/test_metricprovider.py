@@ -41,7 +41,10 @@ class TestPrometheusMetricProvider:
         result = metrics_provider.get()
         assert result == [
             Metric(
-                node_id="atm-fraud-transactionavroproducer", consumer_lag=78, replicas=1
+                node_id="atm-fraud-transactionavroproducer",
+                consumer_lag=78,
+                replicas=1,
+                consumer_read_rate=64.977769,
             ),
             Metric(
                 node_id="atm-fraud-incoming-transactions-topic",

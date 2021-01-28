@@ -5,7 +5,7 @@ nodes = [
         "atm-fraud-transactionavroproducer",
         {
             "node_type": NodeTypesEnum.STREAMING_APP,
-            "consumer_group": "streams-explorer-transactionavroproducer-atm-fraud-incoming-transactions-topic",
+            "consumerGroup": "streams-explorer-transactionavroproducer-atm-fraud-incoming-transactions-topic",
         },
     ),
     (
@@ -56,24 +56,6 @@ prometheus_data = {
             },
             "value": [1608115880.752, "78"],
         },
-        {
-            "metric": {
-                "group": "streams-explorer-transactionjoiner-atm-fraud-joinedtransactions-topic"
-            },
-            "value": [1608115880.752, "131"],
-        },
-        {
-            "metric": {
-                "group": "streams-explorer-accountlinker-atm-fraud-output-topic"
-            },
-            "value": [1608115880.752, "0"],
-        },
-        {
-            "metric": {
-                "group": "streams-explorer-frauddetector-atm-fraud-possiblefraudtransactions-topic"
-            },
-            "value": [1608115880.752, "1"],
-        },
     ],
     "topic_size": [
         {
@@ -89,6 +71,14 @@ prometheus_data = {
         {
             "metric": {"deployment": "atm-fraud-transactionavroproducer"},
             "value": [1611674899.53, "1"],
+        },
+    ],
+    "consumer_read_rate": [
+        {
+            "metric": {
+                "group": "streams-explorer-transactionavroproducer-atm-fraud-incoming-transactions-topic"
+            },
+            "value": [1608115880.752, "64.977769"],
         },
     ],
 }
