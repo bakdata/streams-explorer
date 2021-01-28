@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from loguru import logger
 from prometheus_api_client import PrometheusApiClientException, PrometheusConnect
@@ -48,18 +48,23 @@ class MetricProvider:
     def refresh_data(self):
         pass
 
+    @staticmethod
+    def get_consumer_group(node_id: str, node: dict) -> Optional[str]:
+        node_type: NodeTypesEnum = node["node_type"]
+        if node_type == NodeTypesEnum.CONNECTOR:
+            return f"connect-{node_id}"
+        return node.get(settings.k8s.consumer_group_annotation)
+
     def update(self):
         self.refresh_data()
         self.metrics = [
             Metric(
                 node_id=node_id,
-                consumer_lag=self._data["consumer_lag"].get(f"connect-{node_id}")
-                if node.get("node_type") == NodeTypesEnum.CONNECTOR
-                else self._data["consumer_lag"].get(
-                    node.get(settings.k8s.consumer_group_annotation)
+                consumer_lag=self._data["consumer_lag"].get(
+                    self.get_consumer_group(node_id, node)
                 ),
                 consumer_read_rate=self._data["consumer_read_rate"].get(
-                    node.get(settings.k8s.consumer_group_annotation)
+                    self.get_consumer_group(node_id, node)
                 ),
                 consumer_read_rate=self._data["consumer_read_rate"].get(
                     node.get(settings.k8s.consumer_group_annotation)
