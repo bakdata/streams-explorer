@@ -29,6 +29,9 @@ class TestPrometheusMetricProvider:
             Metric(
                 node_id="atm-fraud-raw-input-topic",
             ),
+            Metric(
+                node_id="demo-sink",
+            ),
         ]
 
     def test_update(self, mocker, monkeypatch, metrics_provider):
@@ -39,6 +42,9 @@ class TestPrometheusMetricProvider:
         monkeypatch.setattr(PrometheusMetricProvider, "get_metric", mock_get_metric)
 
         result = metrics_provider.get()
+        from pprint import pprint
+
+        pprint(result)
         assert result == [
             Metric(
                 node_id="atm-fraud-transactionavroproducer",
@@ -57,5 +63,9 @@ class TestPrometheusMetricProvider:
                 messages_in=0,
                 messages_out=5.13,
                 topic_size=75921,
+            ),
+            Metric(
+                node_id="demo-sink",
+                consumer_lag=1,
             ),
         ]

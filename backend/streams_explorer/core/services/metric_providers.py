@@ -1,11 +1,11 @@
 from enum import Enum
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 from loguru import logger
 from prometheus_api_client import PrometheusApiClientException, PrometheusConnect
-
 from streams_explorer.core.config import settings
 from streams_explorer.models.graph import Metric, Node
+from streams_explorer.models.node_types import NodeTypesEnum
 
 
 class PrometheusMetric(Enum):
@@ -40,8 +40,8 @@ class PrometheusMetric(Enum):
 
 
 class MetricProvider:
-    def __init__(self, nodes: List[Node]):
-        self._nodes: List[Node] = nodes
+    def __init__(self, nodes: List[Tuple[str, dict]]):
+        self._nodes: List[Tuple[str, dict]] = nodes
         self.metrics: List[Metric] = []
         self._data: Dict[str, List] = {}
 
@@ -53,7 +53,11 @@ class MetricProvider:
         self.metrics = [
             Metric(
                 node_id=node_id,
-                consumer_lag=self._data["consumer_lag"].get(node.get(settings.k8s.consumer_group_annotation)),
+                consumer_lag=self._data["consumer_lag"].get(f"connect-{node_id}")
+                if node.get("node_type") == NodeTypesEnum.CONNECTOR
+                else self._data["consumer_lag"].get(
+                    node.get(settings.k8s.consumer_group_annotation)
+                ),
                 consumer_read_rate=self._data["consumer_read_rate"].get(
                     node.get(settings.k8s.consumer_group_annotation)
                 ),
