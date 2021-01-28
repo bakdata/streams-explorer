@@ -49,7 +49,9 @@ class MetricProvider:
         self.metrics = [
             Metric(
                 node_id=node_id,
-                consumer_lag=self._data["consumer_lag"].get(node.get("consumer_group")),
+                consumer_lag=self._data["consumer_lag"].get(
+                    node.get(settings.k8s.consumerGroupAnnotation)
+                ),
                 messages_in=self._data["messages_in"].get(node_id),
                 messages_out=self._data["messages_out"].get(node_id),
                 topic_size=self._data["topic_size"].get(node_id),

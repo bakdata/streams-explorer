@@ -11,6 +11,8 @@ k8s:
     context: "kubernetes-cluster"
     namespaces:
       - "kubernetes-namespace"
+  # used to extract the consumer group for metrics (e.g. consumer lag)
+  consumerGroupAnnotation: "consumerGroup"
   containers:
     ignore:
       - name: "prometheus-jmx-exporter"
