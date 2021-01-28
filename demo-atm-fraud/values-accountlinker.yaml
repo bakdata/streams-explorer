@@ -15,7 +15,7 @@ streams:
   errorTopic: atm-fraud-accountlinker-error-topic
 
 annotations:
-  consumer_group: "streams-explorer-accountlinker-atm-fraud-output-topic"
+  consumerGroup: "streams-explorer-accountlinker-atm-fraud-output-topic"
 
 prometheus:
   jmx:
