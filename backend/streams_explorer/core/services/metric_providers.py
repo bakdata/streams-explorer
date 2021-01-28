@@ -53,7 +53,8 @@ class MetricProvider:
         self.metrics = [
             Metric(
                 node_id=node_id,
-                consumer_lag=self._data["consumer_lag"].get(
+                consumer_lag=self._data["consumer_lag"].get(node.get(settings.k8s.consumer_group_annotation)),
+                consumer_read_rate=self._data["consumer_read_rate"].get(
                     node.get(settings.k8s.consumer_group_annotation)
                 ),
                 consumer_read_rate=self._data["consumer_read_rate"].get(
