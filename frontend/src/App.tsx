@@ -16,6 +16,7 @@ import {
   message,
   Alert,
 } from "antd";
+import { DownOutlined } from "@ant-design/icons";
 import { graphConfig } from "./graphConfiguration";
 import DetailsCard from "./components/DetailsCard";
 import GraphVisualization from "./components/GraphVisualization";
@@ -31,7 +32,7 @@ const App: React.FC = () => {
   const { width, height } = useDimensions({ ref });
   const defaultRefreshInterval = 30;
   const refreshIntervals = [0, 10, 30, 60];
-  const [currentRefreshInterval, setCurrentRefreshInterval] = useState(
+  const [refreshInterval, setRefreshInterval] = useState(
     defaultRefreshInterval
   );
 
@@ -62,14 +63,11 @@ const App: React.FC = () => {
   );
 
   useEffect(() => {
-    if (currentRefreshInterval && currentRefreshInterval > 0) {
-      const interval = setInterval(
-        refetchMetrics,
-        currentRefreshInterval * 1000
-      );
+    if (refreshInterval && refreshInterval > 0) {
+      const interval = setInterval(refetchMetrics, refreshInterval * 1000);
       return () => clearInterval(interval);
     }
-  }, [refetchMetrics, currentRefreshInterval]);
+  }, [refetchMetrics, refreshInterval]);
 
   if (graphError) {
     message.error(graphError.message);
@@ -103,7 +101,7 @@ const App: React.FC = () => {
   const menuRefresh = (
     <Menu
       onClick={(e) => {
-        setCurrentRefreshInterval(Number(e.key));
+        setRefreshInterval(Number(e.key));
       }}
     >
       {refreshIntervals.map((interval: number) => (
@@ -135,10 +133,12 @@ const App: React.FC = () => {
                   Update Graphs
                 </Button>
               </Menu.Item>
-              <Menu.Item>
-                Refresh:&nbsp;
-                <Dropdown overlay={menuRefresh} placement="bottomRight" arrow>
-                  <Button>{currentRefreshInterval}s</Button>
+              <Menu.Item style={{ float: "right" }}>
+                Metrics refresh:&nbsp;
+                <Dropdown overlay={menuRefresh}>
+                  <a>
+                    {refreshInterval}s <DownOutlined />
+                  </a>
                 </Dropdown>
               </Menu.Item>
             </Menu>
