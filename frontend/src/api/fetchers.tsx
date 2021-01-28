@@ -44,6 +44,7 @@ export interface Metric {
   messages_out?: number;
   consumer_lag?: number;
   topic_size?: number;
+  replicas?: number;
 }
 
 export interface Node {

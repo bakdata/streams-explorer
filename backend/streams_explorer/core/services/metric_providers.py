@@ -29,6 +29,10 @@ class PrometheusMetric(Enum):
         "topic_size",
         "sum by(topic) (kafka_topic_partition_current_offset - kafka_topic_partition_oldest_offset)",
     )
+    REPLICAS = (
+        "replicas",
+        "sum(kube_deployment_status_replicas) by (deployment)",
+    )
 
 
 class MetricProvider:
@@ -49,6 +53,7 @@ class MetricProvider:
                 messages_in=self._data["messages_in"].get(node_id),
                 messages_out=self._data["messages_out"].get(node_id),
                 topic_size=self._data["topic_size"].get(node_id),
+                replicas=self._data["replicas"].get(node_id),
             )
             for node_id, node in self._nodes
             if node_id
@@ -80,6 +85,7 @@ class PrometheusMetricProvider(MetricProvider):
         self._data["messages_out"] = self.__get_messages_out()
         self._data["consumer_lag"] = self.__get_consumer_lag()
         self._data["topic_size"] = self.__get_topic_size()
+        self._data["replicas"] = self.__get_replicas()
 
     def __get_messages_in(self) -> Dict[str, float]:
         prom_messages_in = self.get_metric(metric=PrometheusMetric.MESSAGES_IN)
@@ -102,3 +108,7 @@ class PrometheusMetricProvider(MetricProvider):
     def __get_topic_size(self) -> Dict[str, int]:
         prom_topic_size = self.get_metric(metric=PrometheusMetric.TOPIC_SIZE)
         return {d["metric"]["topic"]: int(d["value"][-1]) for d in prom_topic_size}
+
+    def __get_replicas(self) -> Dict[str, int]:
+        prom_replicas = self.get_metric(metric=PrometheusMetric.REPLICAS)
+        return {d["metric"]["deployment"]: int(d["value"][-1]) for d in prom_replicas}

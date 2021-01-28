@@ -26,6 +26,7 @@ class Metric(BaseModel):
     messages_out: Optional[float] = None
     consumer_lag: Optional[int] = None
     topic_size: Optional[int] = None
+    replicas: Optional[int] = None
 
 
 class Edge(BaseModel):
