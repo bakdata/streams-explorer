@@ -41,7 +41,6 @@ icons: {}
 deploymentLabels: {}
 
 podLabels: {}
-
 service:
   type: ClusterIP
 
