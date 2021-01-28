@@ -29,7 +29,11 @@ const App: React.FC = () => {
   const [selectedNodeID, setSelectedNodeID] = useState<string | null>(null);
   const ref = useRef<HTMLDivElement>(null!);
   const { width, height } = useDimensions({ ref });
-  const refreshInterval = 30000; // 30s
+  const defaultRefreshInterval = 30;
+  const refreshIntervals = [0, 10, 30, 60];
+  const [currentRefreshInterval, setCurrentRefreshInterval] = useState(
+    defaultRefreshInterval
+  );
 
   const { mutate: update, loading: isUpdating } = useMutate({
     verb: "POST",
@@ -58,11 +62,14 @@ const App: React.FC = () => {
   );
 
   useEffect(() => {
-    if (refreshInterval && refreshInterval > 0) {
-      const interval = setInterval(refetchMetrics, refreshInterval);
+    if (currentRefreshInterval && currentRefreshInterval > 0) {
+      const interval = setInterval(
+        refetchMetrics,
+        currentRefreshInterval * 1000
+      );
       return () => clearInterval(interval);
     }
-  }, [refetchMetrics, refreshInterval]);
+  }, [refetchMetrics, currentRefreshInterval]);
 
   if (graphError) {
     message.error(graphError.message);
@@ -78,7 +85,7 @@ const App: React.FC = () => {
       : height * 0.66 - 64;
   graphConfig.width = width;
 
-  const menu = (
+  const menuPipeline = (
     <Menu
       onClick={(e) => {
         setCurrentPipeline(e.key.toString());
@@ -93,6 +100,18 @@ const App: React.FC = () => {
     </Menu>
   );
 
+  const menuRefresh = (
+    <Menu
+      onClick={(e) => {
+        setCurrentRefreshInterval(Number(e.key));
+      }}
+    >
+      {refreshIntervals.map((interval: number) => (
+        <Menu.Item key={interval}>{interval}s</Menu.Item>
+      ))}
+    </Menu>
+  );
+
   if (!isLoadingGraph && !isLoadingPipelines && !isUpdating) {
     return (
       <div ref={ref} className="application">
@@ -101,7 +120,7 @@ const App: React.FC = () => {
             <Menu theme="dark" mode="horizontal" selectable={false}>
               <Menu.Item key="1">
                 Pipeline:&nbsp;
-                <Dropdown overlay={menu} placement="bottomLeft" arrow>
+                <Dropdown overlay={menuPipeline} placement="bottomLeft" arrow>
                   <Button>{currentPipeline}</Button>
                 </Dropdown>
               </Menu.Item>
@@ -115,6 +134,12 @@ const App: React.FC = () => {
                 <Button type="dashed" ghost={true}>
                   Update Graphs
                 </Button>
+              </Menu.Item>
+              <Menu.Item>
+                Refresh:&nbsp;
+                <Dropdown overlay={menuRefresh} placement="bottomRight" arrow>
+                  <Button>{currentRefreshInterval}s</Button>
+                </Dropdown>
               </Menu.Item>
             </Menu>
           </Header>
