@@ -42,9 +42,6 @@ class TestPrometheusMetricProvider:
         monkeypatch.setattr(PrometheusMetricProvider, "get_metric", mock_get_metric)
 
         result = metrics_provider.get()
-        from pprint import pprint
-
-        pprint(result)
         assert result == [
             Metric(
                 node_id="atm-fraud-transactionavroproducer",
