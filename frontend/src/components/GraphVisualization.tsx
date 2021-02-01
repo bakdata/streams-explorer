@@ -58,9 +58,7 @@ function updateNodeMetrics(graph: Graph, metrics: Metric[]) {
           : ""
       }`,
       `${
-        typeof metric.consumer_lag === "number"
-          ? `REPLICAS ${metric.replicas}`
-          : ""
+        typeof metric.replicas === "number" ? `REPLICAS ${metric.replicas}` : ""
       }`,
       `${
         typeof metric.consumer_lag === "number"
