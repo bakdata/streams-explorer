@@ -41,8 +41,8 @@ class PrometheusMetric(Enum):
 
 
 class MetricProvider:
-    def __init__(self, nodes: List[Tuple[str, Dict[str, dict]]]):
-        self._nodes: List[Tuple[str, Dict[str, dict]]] = nodes
+    def __init__(self, nodes: List[Tuple[str, dict]]):
+        self._nodes: List[Tuple[str, dict]] = nodes
         self.metrics: List[Metric] = []
         self._data: Dict[str, List] = {}
 
@@ -82,7 +82,7 @@ class MetricProvider:
 
 
 class PrometheusMetricProvider(MetricProvider):
-    def __init__(self, nodes: List[Tuple[str, Dict[str, dict]]]):
+    def __init__(self, nodes: List[Tuple[str, dict]]):
         super().__init__(nodes)
         self._prom = PrometheusConnect(url=settings.prometheus.url)
 
