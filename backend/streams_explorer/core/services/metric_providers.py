@@ -3,8 +3,9 @@ from typing import Dict, List, Optional, Tuple
 
 from loguru import logger
 from prometheus_api_client import PrometheusApiClientException, PrometheusConnect
+
 from streams_explorer.core.config import settings
-from streams_explorer.models.graph import Metric, Node
+from streams_explorer.models.graph import Metric
 from streams_explorer.models.node_types import NodeTypesEnum
 
 
@@ -40,8 +41,8 @@ class PrometheusMetric(Enum):
 
 
 class MetricProvider:
-    def __init__(self, nodes: List[Tuple[str, dict]]):
-        self._nodes: List[Tuple[str, dict]] = nodes
+    def __init__(self, nodes: List[Tuple[str, Dict[str, dict]]]):
+        self._nodes: List[Tuple[str, Dict[str, dict]]] = nodes
         self.metrics: List[Metric] = []
         self._data: Dict[str, List] = {}
 
@@ -66,9 +67,6 @@ class MetricProvider:
                 consumer_read_rate=self._data["consumer_read_rate"].get(
                     self.get_consumer_group(node_id, node)
                 ),
-                consumer_read_rate=self._data["consumer_read_rate"].get(
-                    node.get(settings.k8s.consumer_group_annotation)
-                ),
                 messages_in=self._data["messages_in"].get(node_id),
                 messages_out=self._data["messages_out"].get(node_id),
                 topic_size=self._data["topic_size"].get(node_id),
@@ -84,7 +82,7 @@ class MetricProvider:
 
 
 class PrometheusMetricProvider(MetricProvider):
-    def __init__(self, nodes: List[Node]):
+    def __init__(self, nodes: List[Tuple[str, Dict[str, dict]]]):
         super().__init__(nodes)
         self._prom = PrometheusConnect(url=settings.prometheus.url)
 
