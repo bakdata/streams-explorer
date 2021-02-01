@@ -31,12 +31,12 @@ const App: React.FC = () => {
   const ref = useRef<HTMLDivElement>(null!);
   const { width, height } = useDimensions({ ref });
   const defaultRefreshInterval = 30;
-  const refreshIntervals = [
-    ["off", 0],
-    ["60s", 60],
-    ["30s", 30],
-    ["10s", 10],
-  ];
+  const refreshIntervals: Record<number, string> = {
+    0: "off",
+    60: "60s",
+    30: "30s",
+    10: "10s",
+  };
   const [refreshInterval, setRefreshInterval] = useState(
     defaultRefreshInterval
   );
@@ -109,8 +109,8 @@ const App: React.FC = () => {
         setRefreshInterval(Number(e.key));
       }}
     >
-      {refreshIntervals.map((entry) => (
-        <Menu.Item key={entry[1]}>{entry[0]}</Menu.Item>
+      {Object.keys(refreshIntervals).map((key: any) => (
+        <Menu.Item key={key}>{refreshIntervals[key]}</Menu.Item>
       ))}
     </Menu>
   );
@@ -142,8 +142,7 @@ const App: React.FC = () => {
                 Metrics refresh:&nbsp;
                 <Dropdown overlay={menuRefresh}>
                   <a>
-                    {refreshInterval > 0 ? `${refreshInterval}s` : "off"}{" "}
-                    <DownOutlined />
+                    {refreshIntervals[refreshInterval]} <DownOutlined />
                   </a>
                 </Dropdown>
               </Menu.Item>
