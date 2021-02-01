@@ -16,6 +16,7 @@ import {
   message,
   Alert,
 } from "antd";
+import { DownOutlined } from "@ant-design/icons";
 import { graphConfig } from "./graphConfiguration";
 import DetailsCard from "./components/DetailsCard";
 import GraphVisualization from "./components/GraphVisualization";
@@ -29,7 +30,16 @@ const App: React.FC = () => {
   const [selectedNodeID, setSelectedNodeID] = useState<string | null>(null);
   const ref = useRef<HTMLDivElement>(null!);
   const { width, height } = useDimensions({ ref });
-  const refreshInterval = 30000; // 30s
+  const defaultRefreshInterval = 30;
+  const refreshIntervals: Record<number, string> = {
+    0: "off",
+    60: "60s",
+    30: "30s",
+    10: "10s",
+  };
+  const [refreshInterval, setRefreshInterval] = useState(
+    defaultRefreshInterval
+  );
 
   const { mutate: update, loading: isUpdating } = useMutate({
     verb: "POST",
@@ -59,7 +69,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (refreshInterval && refreshInterval > 0) {
-      const interval = setInterval(refetchMetrics, refreshInterval);
+      const interval = setInterval(refetchMetrics, refreshInterval * 1000);
       return () => clearInterval(interval);
     }
   }, [refetchMetrics, refreshInterval]);
@@ -78,7 +88,7 @@ const App: React.FC = () => {
       : height * 0.66 - 64;
   graphConfig.width = width;
 
-  const menu = (
+  const menuPipeline = (
     <Menu
       onClick={(e) => {
         setCurrentPipeline(e.key.toString());
@@ -87,8 +97,20 @@ const App: React.FC = () => {
       <Menu.Item key={ALL_PIPELINES}>
         <i>{ALL_PIPELINES}</i>
       </Menu.Item>
-      {pipelines?.pipelines.map((name: any) => (
+      {pipelines?.pipelines.map((name: string) => (
         <Menu.Item key={name}>{name}</Menu.Item>
+      ))}
+    </Menu>
+  );
+
+  const menuRefresh = (
+    <Menu
+      onClick={(e) => {
+        setRefreshInterval(Number(e.key));
+      }}
+    >
+      {Object.keys(refreshIntervals).map((key: any) => (
+        <Menu.Item key={key}>{refreshIntervals[key]}</Menu.Item>
       ))}
     </Menu>
   );
@@ -101,7 +123,7 @@ const App: React.FC = () => {
             <Menu theme="dark" mode="horizontal" selectable={false}>
               <Menu.Item key="1">
                 Pipeline:&nbsp;
-                <Dropdown overlay={menu} placement="bottomLeft" arrow>
+                <Dropdown overlay={menuPipeline} placement="bottomLeft" arrow>
                   <Button>{currentPipeline}</Button>
                 </Dropdown>
               </Menu.Item>
@@ -115,6 +137,14 @@ const App: React.FC = () => {
                 <Button type="dashed" ghost={true}>
                   Update Graphs
                 </Button>
+              </Menu.Item>
+              <Menu.Item style={{ float: "right" }}>
+                Metrics refresh:&nbsp;
+                <Dropdown overlay={menuRefresh}>
+                  <a>
+                    {refreshIntervals[refreshInterval]} <DownOutlined />
+                  </a>
+                </Dropdown>
               </Menu.Item>
             </Menu>
           </Header>
