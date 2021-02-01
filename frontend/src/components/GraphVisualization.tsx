@@ -67,6 +67,11 @@ function updateNodeMetrics(graph: Graph, metrics: Metric[]) {
           ? `LAG ${formatNumber(metric.consumer_lag)}`
           : ""
       }`,
+      `${
+        typeof metric.consumer_read_rate === "number"
+          ? `READ ${formatNumber(metric.consumer_read_rate)}/s`
+          : ""
+      }`,
     ]
       .filter(Boolean)
       .join("  ");

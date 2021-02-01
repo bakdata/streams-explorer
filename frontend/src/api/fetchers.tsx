@@ -43,6 +43,7 @@ export interface Metric {
   messages_in?: number;
   messages_out?: number;
   consumer_lag?: number;
+  consumer_read_rate?: number;
   topic_size?: number;
   replicas?: number;
 }

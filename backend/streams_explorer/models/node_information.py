@@ -20,5 +20,4 @@ class NodeInfoListItem(BaseModel):
 class NodeInformation(BaseModel):
     node_id: str
     node_type: NodeTypesEnum
-    # Todo define types
     info: List[NodeInfoListItem]

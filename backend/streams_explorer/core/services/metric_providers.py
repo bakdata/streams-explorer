@@ -23,7 +23,11 @@ class PrometheusMetric(Enum):
     )
     CONSUMER_LAG = (
         "consumer_lag",
-        'sum(kafka_consumergroup_group_topic_sum_lag{group=~".+"}) by (group)',
+        'sum by(group) (kafka_consumergroup_group_topic_sum_lag{group=~".+"})',
+    )
+    CONSUMER_READ_RATE = (
+        "consumer_read_rate",
+        'sum by(group) (rate(kafka_consumergroup_group_offset{group=~".+"}[5m]) >= 0)',
     )
     TOPIC_SIZE = (
         "topic_size",
@@ -31,7 +35,7 @@ class PrometheusMetric(Enum):
     )
     REPLICAS = (
         "replicas",
-        "sum(kube_deployment_status_replicas) by (deployment)",
+        "sum by(deployment) (kube_deployment_status_replicas)",
     )
 
 
@@ -50,6 +54,9 @@ class MetricProvider:
             Metric(
                 node_id=node_id,
                 consumer_lag=self._data["consumer_lag"].get(
+                    node.get(settings.k8s.consumer_group_annotation)
+                ),
+                consumer_read_rate=self._data["consumer_read_rate"].get(
                     node.get(settings.k8s.consumer_group_annotation)
                 ),
                 messages_in=self._data["messages_in"].get(node_id),
@@ -86,6 +93,7 @@ class PrometheusMetricProvider(MetricProvider):
         self._data["messages_in"] = self.__get_messages_in()
         self._data["messages_out"] = self.__get_messages_out()
         self._data["consumer_lag"] = self.__get_consumer_lag()
+        self._data["consumer_read_rate"] = self.__get_consumer_read_rate()
         self._data["topic_size"] = self.__get_topic_size()
         self._data["replicas"] = self.__get_replicas()
 
@@ -106,6 +114,14 @@ class PrometheusMetricProvider(MetricProvider):
     def __get_consumer_lag(self) -> Dict[str, int]:
         prom_consumer_lag = self.get_metric(metric=PrometheusMetric.CONSUMER_LAG)
         return {d["metric"]["group"]: int(d["value"][-1]) for d in prom_consumer_lag}
+
+    def __get_consumer_read_rate(self) -> Dict[str, float]:
+        prom_consumer_read_rate = self.get_metric(
+            metric=PrometheusMetric.CONSUMER_READ_RATE
+        )
+        return {
+            d["metric"]["group"]: float(d["value"][-1]) for d in prom_consumer_read_rate
+        }
 
     def __get_topic_size(self) -> Dict[str, int]:
         prom_topic_size = self.get_metric(metric=PrometheusMetric.TOPIC_SIZE)
