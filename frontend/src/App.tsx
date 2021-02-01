@@ -31,7 +31,12 @@ const App: React.FC = () => {
   const ref = useRef<HTMLDivElement>(null!);
   const { width, height } = useDimensions({ ref });
   const defaultRefreshInterval = 30;
-  const refreshIntervals = [0, 10, 30, 60];
+  const refreshIntervals = [
+    ["off", 0],
+    ["60s", 60],
+    ["30s", 30],
+    ["10s", 10],
+  ];
   const [refreshInterval, setRefreshInterval] = useState(
     defaultRefreshInterval
   );
@@ -92,7 +97,7 @@ const App: React.FC = () => {
       <Menu.Item key={ALL_PIPELINES}>
         <i>{ALL_PIPELINES}</i>
       </Menu.Item>
-      {pipelines?.pipelines.map((name: any) => (
+      {pipelines?.pipelines.map((name: string) => (
         <Menu.Item key={name}>{name}</Menu.Item>
       ))}
     </Menu>
@@ -104,8 +109,8 @@ const App: React.FC = () => {
         setRefreshInterval(Number(e.key));
       }}
     >
-      {refreshIntervals.map((interval: number) => (
-        <Menu.Item key={interval}>{interval}s</Menu.Item>
+      {refreshIntervals.map((entry) => (
+        <Menu.Item key={entry[1]}>{entry[0]}</Menu.Item>
       ))}
     </Menu>
   );
@@ -137,7 +142,8 @@ const App: React.FC = () => {
                 Metrics refresh:&nbsp;
                 <Dropdown overlay={menuRefresh}>
                   <a>
-                    {refreshInterval}s <DownOutlined />
+                    {refreshInterval > 0 ? `${refreshInterval}s` : "off"}{" "}
+                    <DownOutlined />
                   </a>
                 </Dropdown>
               </Menu.Item>
