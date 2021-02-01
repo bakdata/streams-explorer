@@ -26,6 +26,12 @@ nodes = [
             "node_type": NodeTypesEnum.TOPIC,
         },
     ),
+    (
+        "demo-sink",
+        {
+            "node_type": NodeTypesEnum.CONNECTOR,
+        },
+    ),
 ]
 
 prometheus_data = {
@@ -55,6 +61,10 @@ prometheus_data = {
                 "group": "streams-explorer-transactionavroproducer-atm-fraud-incoming-transactions-topic"
             },
             "value": [1608115880.752, "78"],
+        },
+        {
+            "metric": {"group": "connect-demo-sink"},
+            "value": [1608115880.752, "1"],
         },
     ],
     "topic_size": [
