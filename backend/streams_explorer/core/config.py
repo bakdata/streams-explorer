@@ -23,5 +23,6 @@ settings = Dynaconf(
         Validator("plugins.path", must_exist=True, is_type_of=str),
         Validator("plugins.extractors.default", must_exist=True, is_type_of=bool),
         Validator("k8s.consumer_group_annotation", must_exist=True, is_type_of=str),
+        Validator("graph_update_every", must_exist=True, is_type_of=int),
     ],
 )

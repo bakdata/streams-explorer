@@ -88,3 +88,7 @@ wcwidth==0.2.5
 websocket-client==0.57.0
 websockets==8.1
 zipp==3.4.0
+fastapi-utils==0.2.1
+
+
+
