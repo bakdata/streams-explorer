@@ -111,6 +111,10 @@ All configuration options can be written as environment variables using undersco
 
 The following configuration options are available:
 
+#### General
+
+- `graph_update_every` Update the graph every X seconds (integer, **required**, default: 300)
+
 #### Kafka Connect
 
 - `kafkaconnect.url` URL of Kafka Connect server (string, **required**, default: `http://localhost:8083`)
