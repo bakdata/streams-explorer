@@ -12,7 +12,7 @@ app.add_event_handler("startup", setup_default(app))
 
 @app.on_event("startup")
 @repeat_every(seconds=settings.graph_update_every)
-def update():
+async def update():
     logger.info("Update graph")
     app.state.streams_explorer.update()
     logger.info("Update graph completed")
