@@ -38,7 +38,7 @@ class TestApplication:
         import nest_asyncio
 
         nest_asyncio.apply()
-        settings.graph_update_every = 10
+        settings.graph_update_every = 2
 
         def mock_get_deployments(*args, **kwargs):
             return [
@@ -75,7 +75,9 @@ class TestApplication:
         def get_connector_info(connector):
             if connector == "connector1":
                 return ["output-topic1", "output-topic2"], {"test": "test_value"}
-            return ["output-topic3"], {"test": "test_value"}
+            return ["output-topic3"], {
+                "transforms.changeTopic.replacement": "test-index"
+            }
 
         mocker.patch(
             "streams_explorer.core.services.kafkaconnect.KafkaConnect.get_connector_info",
@@ -85,10 +87,10 @@ class TestApplication:
         from main import app
 
         with TestClient(app) as client:
-            asyncio.sleep(0.1)
+            await asyncio.sleep(0.1)
             response = client.get(f"{API_PREFIX}/graph")
 
-            assert len(response.json().get("nodes")) == 14
+            assert len(response.json().get("nodes")) == 15
 
             def mock_get_deployments(*args, **kwargs):
                 return [
@@ -109,7 +111,18 @@ class TestApplication:
             monkeypatch.setattr(
                 StreamsExplorer, "get_deployments", mock_get_deployments
             )
-            await asyncio.sleep(10)
+            await asyncio.sleep(2)
             response = client.get(f"{API_PREFIX}/graph")
 
-            assert len(response.json().get("nodes")) == 11
+            assert len(response.json().get("nodes")) == 12
+
+            def get_connectors():
+                return ["connector1"]
+
+            mocker.patch(
+                "streams_explorer.core.services.kafkaconnect.KafkaConnect.get_connectors",
+                get_connectors,
+            )
+            await asyncio.sleep(2)
+            response = client.get(f"{API_PREFIX}/graph")
+            assert len(response.json().get("nodes")) == 9

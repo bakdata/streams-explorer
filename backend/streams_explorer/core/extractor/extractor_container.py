@@ -16,6 +16,11 @@ class ExtractorContainer:
         self.extractors.append(extractor)
         logger.info(f"Added extractor {extractor.__class__.__name__}")
 
+    def reset(self):
+        for extractor in self.extractors:
+            extractor.sinks = []
+            extractor.sources = []
+
     def on_streaming_app_env_parsing(self, env, streaming_app_name: str):
         for extractor in self.extractors:
             extractor.on_streaming_app_env_parsing(env, streaming_app_name)
