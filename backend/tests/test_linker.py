@@ -1,5 +1,4 @@
 from pathlib import Path
-from time import sleep
 
 from streams_explorer.core.config import settings
 from streams_explorer.core.services.linking_services import LinkingService
@@ -33,7 +32,6 @@ def test_load_plugin_linker():
     try:
         with open(fake_linker_path, "w") as f:
             f.write(fake_linker)
-            sleep(1)
 
         linking_service = load_linker()()
 
