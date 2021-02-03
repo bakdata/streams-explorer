@@ -22,6 +22,7 @@ requires = [
     "prometheus-api-client==0.4.2",
     "pygraphviz==1.6",
     "uvicorn==0.13.3",
+    "fastapi-utils==0.2.1"
 ]
 classifiers = [
     "License :: OSI Approved :: MIT License",
