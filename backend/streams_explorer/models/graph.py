@@ -15,7 +15,6 @@ class Node(BaseModel):
     label: str
     node_type: str
     icon: Optional[Icon]
-    labelPosition: str
     x: Optional[int]
     y: Optional[int]
 

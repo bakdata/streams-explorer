@@ -31,7 +31,6 @@ class DataFlowGraph:
             app.name,
             label=app.name,
             node_type=NodeTypesEnum.STREAMING_APP,
-            labelPosition="bottom",
             **app.attributes,
         )
         self._add_topic(app.output_topic)
@@ -58,7 +57,6 @@ class DataFlowGraph:
             connector.name,
             label=connector.name,
             node_type=NodeTypesEnum.CONNECTOR,
-            labelPosition="bottom",
         )
         for topic in connector.topics:
             self._add_topic(topic)
@@ -69,7 +67,6 @@ class DataFlowGraph:
             source.name,
             label=source.name,
             node_type=source.node_type,
-            labelPosition="bottom",
         )
         self.graph.add_edge(source.name, source.target)
 
@@ -78,7 +75,6 @@ class DataFlowGraph:
             sink.name,
             label=sink.name,
             node_type=sink.node_type,
-            labelPosition="bottom",
         )
         self.graph.add_edge(sink.source, sink.name)
 
@@ -112,7 +108,6 @@ class DataFlowGraph:
             name,
             label=name,
             node_type=NodeTypesEnum.TOPIC,
-            labelPosition="bottom",
         )
 
     def _add_input_topic(self, streaming_app, topic_name):
@@ -127,7 +122,6 @@ class DataFlowGraph:
             topic_name,
             label=topic_name,
             node_type=NodeTypesEnum.ERROR_TOPIC,
-            labelPosition="bottom",
         )
         self.graph.add_edge(streaming_app, topic_name)
 
