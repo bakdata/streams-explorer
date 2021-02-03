@@ -137,7 +137,7 @@ class TestStreamsExplorer:
         monkeypatch.setattr(
             settings.k8s,
             "displayed_information",
-            [{"name": "Source Type", "key": "metadata.labels.source_type"}],
+            [{"name": "Test Label", "key": "metadata.labels.test_label"}],
         )
 
         assert streams_explorer.get_node_information("connector1") == NodeInformation(
@@ -188,4 +188,5 @@ class TestStreamsExplorer:
         streams_explorer.update()
         assert type(streams_explorer.get_link("input-topic1", "grafana")) == str
         assert type(streams_explorer.get_link("input-topic1", "akhq")) == str
-        assert type(streams_explorer.get_link("streaming-app2", None)) == str
+        assert type(streams_explorer.get_link("streaming-app2", "grafana")) == str
+        assert type(streams_explorer.get_link("streaming-app2", "kibanalogs")) == str
