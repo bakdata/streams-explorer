@@ -20,6 +20,9 @@ interface GraphVisualizationProps {
   metrics: Metric[] | null;
   refetchMetrics: Function;
   onClickNode: Function;
+  window: Window;
+  width: number;
+  height: number;
 }
 
 class Icon implements IIcon {
@@ -89,6 +92,9 @@ const GraphVisualization = ({
   metrics,
   refetchMetrics,
   onClickNode,
+  width,
+  height,
+  window,
 }: GraphVisualizationProps) => {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -136,6 +142,11 @@ const GraphVisualization = ({
     [onClickNode]
   );
 
+  window.onresize = () => {
+    if (!graph || graph.get("destroyed")) return;
+    graph.changeSize(width, height - 64);
+  };
+
   useEffect(() => {
     config.container = ReactDOM.findDOMNode(ref.current) as HTMLElement;
     let currentGraph: Graph | null = graph;
@@ -144,6 +155,7 @@ const GraphVisualization = ({
     }
     let nodes = data["nodes"];
     const defaultIconConfig = config?.defaultNode?.icon as NodeConfig["icon"];
+    currentGraph?.changeSize(width, height);
 
     nodes?.forEach((node: any) => {
       if (!node.icon) {

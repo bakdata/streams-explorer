@@ -82,13 +82,6 @@ const App: React.FC = () => {
     message.error(pipelineError?.message);
   }
 
-  // graphConfig.height =
-  //   height > window.screen.height
-  //     ? window.screen.height * 0.66 - 64
-  //     : height * 0.66 - 64;
-  graphConfig.height = height - 64;
-  graphConfig.width = width;
-
   const menuPipeline = (
     <Menu
       onClick={(e) => {
@@ -165,6 +158,9 @@ const App: React.FC = () => {
                   metrics={metrics}
                   refetchMetrics={() => refetchMetrics()}
                   onClickNode={(nodeId: string) => setSelectedNodeID(nodeId)}
+                  width={width}
+                  height={height}
+                  window={window}
                 />
               ) : (
                 <Alert
@@ -180,7 +176,7 @@ const App: React.FC = () => {
                 padding: "0 50px",
                 width: width,
                 zIndex: 1,
-                top: "85%",
+                top: height - 150,
                 position: "absolute",
                 background: "#F0F2F5",
               }}
