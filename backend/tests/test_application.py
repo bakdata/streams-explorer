@@ -76,7 +76,8 @@ class TestApplication:
             if connector == "connector1":
                 return ["output-topic1", "output-topic2"], {"test": "test_value"}
             return ["output-topic3"], {
-                "transforms.changeTopic.replacement": "test-index"
+                "connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
+                "transforms.changeTopic.replacement": "test-index",
             }
 
         mocker.patch(
