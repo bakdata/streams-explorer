@@ -29,7 +29,6 @@ def test_load_default_linker():
 def test_load_plugin_linker():
     settings.plugins.path = os.path.join(os.getcwd(), "plugins")
     fake_linker_path = os.path.join(settings.plugins.path, "fake_linker.py")
-    print(fake_linker_path)
     try:
         with open(fake_linker_path, "w") as f:
             f.write(fake_linker)

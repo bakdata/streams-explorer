@@ -28,7 +28,13 @@ class DefaultLinker(LinkingService):
                 name="Kibana Logs", value="kibanalogs", type=NodeInfoType.LINK
             ),
         ]
-
+        self.connector_info = [
+            NodeInfoListItem(
+                name="Consumer Group Monitoring",
+                value="grafana",
+                type=NodeInfoType.LINK,
+            ),
+        ]
         self.sink_source_info = {
             "elasticsearch-index": [
                 NodeInfoListItem(name="Kibana", value="", type=NodeInfoType.LINK)
@@ -38,7 +44,11 @@ class DefaultLinker(LinkingService):
     def get_redirect_connector(
         self, config: dict, link_type: Optional[str]
     ) -> Optional[str]:
-        pass
+        if link_type == "grafana":
+            connector_name = config.get("name")
+            if connector_name is not None:
+                return f"{settings.grafana.url}/d/{settings.grafana.dashboards.consumergroups}?var-consumergroups=connect-{connector_name}"
+        return None
 
     def get_redirect_topic(
         self, topic_name: str, link_type: Optional[str]
@@ -58,7 +68,8 @@ class DefaultLinker(LinkingService):
             consumer_group = k8s_application.attributes.get(
                 settings.k8s.consumer_group_annotation
             )
-            return f"{settings.grafana.url}/d/{settings.grafana.dashboards.consumergroups}?var-consumergroups={consumer_group}"
+            if consumer_group is not None:
+                return f"{settings.grafana.url}/d/{settings.grafana.dashboards.consumergroups}?var-consumergroups={consumer_group}"
         return None
 
     def get_sink_source_redirects(self, node_type: str, sink_source_name: str):
