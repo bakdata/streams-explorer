@@ -144,18 +144,19 @@ const GraphVisualization = ({
 
   window.onresize = () => {
     if (!graph || graph.get("destroyed")) return;
-    graph.changeSize(width, height - 64);
+    graph.changeSize(width, height);
   };
 
   useEffect(() => {
     config.container = ReactDOM.findDOMNode(ref.current) as HTMLElement;
     let currentGraph: Graph | null = graph;
     if (!currentGraph && ref) {
+      config.width = width;
+      config.height = height;
       currentGraph = new G6.Graph(config);
     }
     let nodes = data["nodes"];
     const defaultIconConfig = config?.defaultNode?.icon as NodeConfig["icon"];
-    currentGraph?.changeSize(width, height);
 
     nodes?.forEach((node: any) => {
       if (!node.icon) {

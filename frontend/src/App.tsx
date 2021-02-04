@@ -159,7 +159,7 @@ const App: React.FC = () => {
                   refetchMetrics={() => refetchMetrics()}
                   onClickNode={(nodeId: string) => setSelectedNodeID(nodeId)}
                   width={width}
-                  height={height}
+                  height={height - 64}
                   window={window}
                 />
               ) : (
