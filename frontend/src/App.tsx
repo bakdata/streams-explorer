@@ -153,8 +153,7 @@ const App: React.FC = () => {
             style={{
               minHeight: "100vh",
               paddingTop: "64px",
-              // overflow: "auto",
-              // position: "fixed",
+              position: "relative",
             }}
           >
             <Row>
@@ -175,23 +174,17 @@ const App: React.FC = () => {
                   showIcon
                 />
               )}
-            </Row>
-            <Row
-              style={{
-                position: "fixed",
-                top: "66%",
-                padding: "0 50px",
-                // top: 0,
-                // bottom: 0,
-                // left: 0,
-                // right: 0,
-                width: width,
-                zIndex: 999,
-                maxHeight: "100%",
-                overflowY: "auto",
-              }}
-            >
-              <DetailsCard nodeID={selectedNodeID} />
+              <Row
+                style={{
+                  padding: "0 50px",
+                  width: width,
+                  zIndex: 999,
+                  top: "66%",
+                  position: "absolute",
+                }}
+              >
+                <DetailsCard nodeID={selectedNodeID} />
+              </Row>
             </Row>
           </Content>
         </Layout>
