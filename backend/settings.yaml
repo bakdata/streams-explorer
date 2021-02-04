@@ -4,6 +4,9 @@ kafkaconnect:
     - name: "Transformer"
       key: "transforms.changeTopic.regex"
 
+# update graph (fetch deployments and connectors) every X seconds
+graph_update_every: 300
+
 k8s:
   deployment:
     cluster: false

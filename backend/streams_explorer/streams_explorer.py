@@ -43,6 +43,7 @@ class StreamsExplorer:
     def update(self):
         self.applications = {}
         self.kafka_connectors = []
+        extractor_container.reset()
         self.data_flow.reset()
         self.__retrieve_deployments()
         self.__retrieve_cron_jobs()
