@@ -10,6 +10,9 @@ class DefaultLinker(LinkingService):
     sink_source_redirects = {"elasticsearch-index"}
 
     def __init__(self):
+        grafana_consumer_link = NodeInfoListItem(
+            name="Consumer Group Monitoring", value="grafana", type=NodeInfoType.LINK
+        )
         self.topic_info = [
             NodeInfoListItem(
                 name="Topic Monitoring", value="grafana", type=NodeInfoType.LINK
@@ -19,22 +22,12 @@ class DefaultLinker(LinkingService):
             ),
         ]
         self.streaming_app_info = [
-            NodeInfoListItem(
-                name="Consumer Group Monitoring",
-                value="grafana",
-                type=NodeInfoType.LINK,
-            ),
+            grafana_consumer_link,
             NodeInfoListItem(
                 name="Kibana Logs", value="kibanalogs", type=NodeInfoType.LINK
             ),
         ]
-        self.connector_info = [
-            NodeInfoListItem(
-                name="Consumer Group Monitoring",
-                value="grafana",
-                type=NodeInfoType.LINK,
-            ),
-        ]
+        self.connector_info = [grafana_consumer_link]
         self.sink_source_info = {
             "elasticsearch-index": [
                 NodeInfoListItem(name="Kibana", value="", type=NodeInfoType.LINK)
