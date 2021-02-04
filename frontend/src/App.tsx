@@ -82,10 +82,11 @@ const App: React.FC = () => {
     message.error(pipelineError?.message);
   }
 
-  graphConfig.height =
-    height > window.screen.height
-      ? window.screen.height * 0.66 - 64
-      : height * 0.66 - 64;
+  // graphConfig.height =
+  //   height > window.screen.height
+  //     ? window.screen.height * 0.66 - 64
+  //     : height * 0.66 - 64;
+  graphConfig.height = height - 64;
   graphConfig.width = width;
 
   const menuPipeline = (
@@ -148,7 +149,13 @@ const App: React.FC = () => {
               </Menu.Item>
             </Menu>
           </Header>
-          <Content style={{ minHeight: "100vh", paddingTop: "64px" }}>
+          <Content
+            style={{
+              minHeight: "100vh",
+              paddingTop: "64px",
+              overflow: "hidden",
+            }}
+          >
             <Row>
               {graph ? (
                 <GraphVisualization
@@ -168,7 +175,18 @@ const App: React.FC = () => {
                 />
               )}
             </Row>
-            <Row style={{ padding: "0 50px", width: width }}>
+            <Row
+              style={{
+                position: "fixed",
+                overflow: "scroll",
+                top: "66%",
+                padding: "0 50px",
+                width: width,
+                minHeight: "200px",
+                // height: "33%",
+                zIndex: 999,
+              }}
+            >
               <DetailsCard nodeID={selectedNodeID} />
             </Row>
           </Content>
