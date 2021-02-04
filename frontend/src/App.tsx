@@ -120,7 +120,7 @@ const App: React.FC = () => {
     return (
       <div ref={ref} className="application">
         <Layout className="layout">
-          <Header className="header">
+          <Header className="header" style={{ zIndex: 2 }}>
             <Menu theme="dark" mode="horizontal" selectable={false}>
               <Menu.Item key="1">
                 Pipeline:&nbsp;
@@ -156,7 +156,7 @@ const App: React.FC = () => {
               position: "relative",
             }}
           >
-            <Row>
+            <Row style={{ position: "fixed" }}>
               {graph ? (
                 <GraphVisualization
                   id="topology-graph"
@@ -174,17 +174,18 @@ const App: React.FC = () => {
                   showIcon
                 />
               )}
-              <Row
-                style={{
-                  padding: "0 50px",
-                  width: width,
-                  zIndex: 999,
-                  top: "66%",
-                  position: "absolute",
-                }}
-              >
-                <DetailsCard nodeID={selectedNodeID} />
-              </Row>
+            </Row>
+            <Row
+              style={{
+                padding: "0 50px",
+                width: width,
+                zIndex: 1,
+                top: "85%",
+                position: "absolute",
+                background: "#F0F2F5",
+              }}
+            >
+              <DetailsCard nodeID={selectedNodeID} />
             </Row>
           </Content>
         </Layout>
