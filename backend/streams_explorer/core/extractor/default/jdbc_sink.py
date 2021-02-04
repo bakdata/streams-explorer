@@ -9,11 +9,14 @@ class JdbcSink(Extractor):
         self.sinks: List[Sink] = []
 
     def on_connector_config_parsing(self, config, connector_name):
-        if "JdbcSinkConnector" in config.get("connector.class"):
-            self.sinks.append(
-                Sink(
-                    name=config.get("name"),
-                    node_type="jdbc-sink",
-                    source=connector_name,
+        connector_class = config.get("connector.class")
+        if connector_class and "JdbcSinkConnector" in connector_class:
+            name = config.get("name")
+            if name:
+                self.sinks.append(
+                    Sink(
+                        name=name,
+                        node_type="jdbc-sink",
+                        source=connector_name,
+                    )
                 )
-            )

@@ -80,3 +80,63 @@ def test_load_extractors_without_defaults():
     load_extractors()
 
     assert len(extractor_container.extractors) == 0
+
+
+def test_elasticsearch_sink():
+    from streams_explorer.core.extractor.default.elasticsearch_sink import (
+        ElasticsearchSink,
+    )
+
+    extractor = ElasticsearchSink()
+    extractor.on_connector_config_parsing({}, "")
+    assert len(extractor.sinks) == 0
+    extractor.on_connector_config_parsing(
+        {
+            "connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector"
+        },
+        "elasticsearch-test-sink",
+    )
+    assert len(extractor.sinks) == 0
+    extractor.on_connector_config_parsing(
+        {
+            "connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
+            "transforms.changeTopic.replacement": "es-test-index",
+        },
+        "elasticsearch-sink-connector",
+    )
+    assert len(extractor.sinks) == 1
+    assert extractor.sinks[0].name == "es-test-index"
+
+
+def test_s3_sink():
+    from streams_explorer.core.extractor.default.s3_sink import S3Sink
+
+    extractor = S3Sink()
+    extractor.on_connector_config_parsing({}, "")
+    assert len(extractor.sinks) == 0
+    extractor.on_connector_config_parsing(
+        {
+            "connector.class": "io.confluent.connect.s3.S3SinkConnector",
+            "s3.bucket.name": "s3-test-bucket",
+        },
+        "s3-sink-connector",
+    )
+    assert len(extractor.sinks) == 1
+    assert extractor.sinks[0].name == "s3-test-bucket"
+
+
+def test_jdbc_sink():
+    from streams_explorer.core.extractor.default.jdbc_sink import JdbcSink
+
+    extractor = JdbcSink()
+    extractor.on_connector_config_parsing({}, "")
+    assert len(extractor.sinks) == 0
+    extractor.on_connector_config_parsing(
+        {
+            "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
+            "name": "jdbc-test-sink",
+        },
+        "jdbc-sink-connector",
+    )
+    assert len(extractor.sinks) == 1
+    assert extractor.sinks[0].name == "jdbc-test-sink"
