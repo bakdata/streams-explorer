@@ -147,7 +147,8 @@ The following configuration options are available:
 #### Grafana
 
 - `grafana.url` URL of Grafana (string, default: `http://localhost:3000`)
-- `grafana.dashboard` Path to dashboard (string)
+- `grafana.dashboards.topics` Path to topics dashboard (string)
+- `grafana.dashboards.consumergroups` Path to consumer groups dashboard (string)
 
 #### Kibana
 

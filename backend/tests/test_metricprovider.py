@@ -1,7 +1,10 @@
 import pytest
 from prometheus_api_client import PrometheusConnect
 
-from streams_explorer.core.services.metric_providers import PrometheusMetricProvider
+from streams_explorer.core.services.metric_providers import (
+    MetricProvider,
+    PrometheusMetricProvider,
+)
 from streams_explorer.models.graph import Metric
 from tests.test_metricprovider_data import nodes, prometheus_data
 
@@ -11,6 +14,15 @@ class TestPrometheusMetricProvider:
     def metrics_provider(self, mocker, monkeypatch):
         metrics_provider = PrometheusMetricProvider(nodes)
         return metrics_provider
+
+    def test_get_consumer_group(self, metrics_provider):
+        node_id, node = nodes[0]  # streaming-app
+        assert (
+            MetricProvider.get_consumer_group(node_id, node)
+            == "streams-explorer-transactionavroproducer-atm-fraud-incoming-transactions-topic"
+        )
+        node_id, node = nodes[4]  # connector
+        assert MetricProvider.get_consumer_group(node_id, node) == "connect-demo-sink"
 
     def test_empty_query(self, monkeypatch, metrics_provider):
         def mock_query(*args, **kwargs):

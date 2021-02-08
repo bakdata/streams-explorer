@@ -106,7 +106,7 @@ const LinkInfo = ({ infoListItem, nodeID }: NodeInfoDetailProps) => {
       </Space>
     );
   }
-  return <>"Could not get link to service"</>;
+  return <>Could not get link to service</>;
 };
 
 export default Details;

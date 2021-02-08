@@ -47,7 +47,11 @@ class TestStreamsExplorer:
                 "streaming-app1", "input-topic1", "output-topic1", "error-topic1"
             ),
             get_streaming_app_deployment(
-                "streaming-app2", "input-topic2", "output-topic2", "error-topic2"
+                "streaming-app2",
+                "input-topic2",
+                "output-topic2",
+                "error-topic2",
+                consumer_group="consumer-group2",
             ),
             get_streaming_app_deployment(
                 "streaming-app3",
@@ -81,6 +85,7 @@ class TestStreamsExplorer:
     ):
         explorer = StreamsExplorer(linking_service=fake_linker)
         extractor_container.extractors = []
+        monkeypatch.setattr(settings.k8s, "consumer_group_annotation", "consumerGroup")
         mocker.patch.object(
             explorer, attribute="get_deployments", return_value=deployments
         )
@@ -93,7 +98,8 @@ class TestStreamsExplorer:
         def get_connector_info(connector):
             if connector == "connector1":
                 return ["output-topic1", "output-topic2"], {"test": "test_value"}
-            return ["output-topic3"], {"test": "test_value"}
+            if connector == "connector2":
+                return ["output-topic3"], {"name": "test-sink"}
 
         mocker.patch(
             "streams_explorer.core.services.kafkaconnect.KafkaConnect.get_connectors",
@@ -127,7 +133,7 @@ class TestStreamsExplorer:
             "pipeline2",
         ]
 
-    def test_get_node_information(self, streams_explorer, deployments, monkeypatch):
+    def test_get_node_information(self, streams_explorer, monkeypatch):
         streams_explorer.update()
         monkeypatch.setattr(
             settings.kafkaconnect,
@@ -137,7 +143,7 @@ class TestStreamsExplorer:
         monkeypatch.setattr(
             settings.k8s,
             "displayed_information",
-            [{"name": "Source Type", "key": "metadata.labels.source_type"}],
+            [{"name": "Test Label", "key": "metadata.labels.test_label"}],
         )
 
         assert streams_explorer.get_node_information("connector1") == NodeInformation(
@@ -184,8 +190,14 @@ class TestStreamsExplorer:
         assert extractor.cron_job.metadata.name == "test"
         extractor_container.extractors = []
 
-    def test_get_link(self, streams_explorer):
+    def test_get_link(self, monkeypatch, streams_explorer):
         streams_explorer.update()
         assert type(streams_explorer.get_link("input-topic1", "grafana")) == str
         assert type(streams_explorer.get_link("input-topic1", "akhq")) == str
-        assert type(streams_explorer.get_link("streaming-app2", None)) == str
+        assert "consumergroups=consumer-group2" in streams_explorer.get_link(
+            "streaming-app2", "grafana"
+        )
+        assert type(streams_explorer.get_link("streaming-app2", "kibanalogs")) == str
+        assert "consumergroups=connect-test-sink" in streams_explorer.get_link(
+            "connector2", "grafana"
+        )

@@ -1,4 +1,4 @@
-import os
+from pathlib import Path
 
 from streams_explorer.core.config import settings
 from streams_explorer.core.extractor.extractor_container import ExtractorContainer
@@ -45,15 +45,15 @@ class TestSinkTwo(Extractor):
 
 def test_load_extractors():
     settings.plugins.extractors.default = True
-    settings.plugins.path = os.getcwd()
+    settings.plugins.path = Path.cwd() / "plugins"
     assert len(extractor_container.extractors) == 3
-    file_path_1 = os.path.join(settings.plugins.path, "test_extractor1.py")
-    file_path_2 = os.path.join(settings.plugins.path, "test_extractor2.py")
+    extractor_1_path = settings.plugins.path / "fake_extractor_1.py"
+    extractor_2_path = settings.plugins.path / "fake_extractor_2.py"
     try:
-        with open(file_path_1, "w") as f:
+        with open(extractor_1_path, "w") as f:
             f.write(extractor_file_1)
 
-        with open(file_path_2, "w") as f:
+        with open(extractor_2_path, "w") as f:
             f.write(extractor_file_2)
 
         load_extractors()
@@ -69,13 +69,13 @@ def test_load_extractors():
         assert "S3Sink" in extractor_classes
         assert "JdbcSink" in extractor_classes
     finally:
-        os.remove(file_path_1)
-        os.remove(file_path_2)
+        extractor_1_path.unlink()
+        extractor_2_path.unlink()
 
 
 def test_load_extractors_without_defaults():
     settings.plugins.extractors.default = False
-    settings.plugins.path = os.getcwd()
+    settings.plugins.path = Path.cwd() / "plugins"
     extractor_container = ExtractorContainer()  # noqa: F811
     load_extractors()
 

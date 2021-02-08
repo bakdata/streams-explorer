@@ -53,7 +53,6 @@ export interface Node {
   label: string;
   node_type: string;
   icon?: Icon;
-  labelPosition: string;
   x?: number;
   y?: number;
 }

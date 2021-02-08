@@ -1,12 +1,11 @@
-import os
+from pathlib import Path
 
 from streams_explorer.core.config import settings
 from streams_explorer.core.services.linking_services import LinkingService
 from streams_explorer.defaultlinker import DefaultLinker
 from streams_explorer.linker import load_linker
 
-fake_linker = """
-from typing import Optional
+fake_linker = """from typing import Optional
 
 from streams_explorer.core.services.linking_services import LinkingService
 
@@ -17,6 +16,7 @@ class FakeLinker(LinkingService):
     ) -> Optional[str]:
         if link_type == "test":
             return f"{topic_name}-link"
+        return None
 """
 
 
@@ -27,9 +27,8 @@ def test_load_default_linker():
 
 
 def test_load_plugin_linker():
-    settings.plugins.path = os.path.join(os.getcwd(), "plugins")
-    fake_linker_path = os.path.join(settings.plugins.path, "fake_linker.py")
-    print(fake_linker_path)
+    settings.plugins.path = Path.cwd() / "plugins"
+    fake_linker_path = settings.plugins.path / "fake_linker.py"
     try:
         with open(fake_linker_path, "w") as f:
             f.write(fake_linker)
@@ -44,4 +43,4 @@ def test_load_plugin_linker():
             == "test-link"
         )
     finally:
-        os.remove(fake_linker_path)
+        fake_linker_path.unlink()
