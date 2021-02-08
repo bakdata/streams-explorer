@@ -1,4 +1,3 @@
-from abc import abstractmethod
 from typing import Dict, List, Optional
 
 from streams_explorer.core.k8s_app import K8sApp
@@ -12,25 +11,21 @@ class LinkingService:
     topic_info: List[NodeInfoListItem] = []
     sink_source_info: Dict[str, List[NodeInfoListItem]] = {}
 
-    @abstractmethod
     def get_redirect_connector(
         self, config: dict, link_type: Optional[str]
     ) -> Optional[str]:
         pass
 
-    @abstractmethod
     def get_redirect_topic(
         self, topic_name: str, link_type: Optional[str]
     ) -> Optional[str]:
         pass
 
-    @abstractmethod
     def get_redirect_streaming_app(
         self, k8s_application: K8sApp, link_type: Optional[str]
     ) -> Optional[str]:
         pass
 
-    @abstractmethod
     def get_sink_source_redirects(self, node_type: str, sink_source_name: str):
         pass
 

@@ -1,7 +1,7 @@
 import importlib
-import os
 import sys
 from inspect import isclass
+from pathlib import Path
 from types import ModuleType
 from typing import List, Optional, Union
 
@@ -13,15 +13,12 @@ from streams_explorer.core.config import settings
 def load_plugin(base_class: type, all: bool = False) -> Union[type, List[type], None]:
     if not settings.plugins.path:
         return None
-    path = settings.plugins.path
-    sys.path.append(path)
+    path = Path(settings.plugins.path)
+    sys.path.append(str(path))
     logger.info(f"Loading {base_class} from {path}")
     modules = []
-    for file in os.listdir(path):
-        if not file.endswith(".py"):
-            continue
-
-        module = importlib.import_module(file.replace(".py", ""))
+    for file in path.glob("*.py"):
+        module = importlib.import_module(file.stem)
         plugin_class: Optional[type] = get_class(module, base_class)
         if plugin_class is None:
             continue
