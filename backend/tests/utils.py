@@ -18,9 +18,12 @@ def get_streaming_app_deployment(
     multiple_outputs=None,
     env_prefix="APP_",
     pipeline=None,
+    consumer_group=None,
 ) -> V1Deployment:
     metadata = V1ObjectMeta(
-        annotations={"deployment.kubernetes.io/revision": "1"},
+        annotations={
+            "deployment.kubernetes.io/revision": "1",
+        },
         labels={
             "app": name,
             "app_name": "test-app-name",
@@ -49,7 +52,12 @@ def get_streaming_app_deployment(
 
     container = V1Container(name="test-container", env=envs)
     pod_spec = V1PodSpec(containers=[container])
-    pod_template_spec = V1PodTemplateSpec(spec=pod_spec)
+    spec_metadata = None
+    if consumer_group is not None:
+        spec_metadata = V1ObjectMeta(
+            annotations={"consumerGroup": consumer_group},
+        )
+    pod_template_spec = V1PodTemplateSpec(spec=pod_spec, metadata=spec_metadata)
     deployment_spec = V1DeploymentSpec(
         template=pod_template_spec, selector="app=test-app,release=test-release"
     )

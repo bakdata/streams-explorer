@@ -41,7 +41,9 @@ akhq:
 
 grafana:
   url: "http://localhost:3000"
-  dashboard: "path/to/dashboard"
+  dashboards:
+    topics: "path/to/dashboard"
+    consumergroups: "path/to/dashboard"
 
 kibanalogs:
   url: "http://localhost:5601"
