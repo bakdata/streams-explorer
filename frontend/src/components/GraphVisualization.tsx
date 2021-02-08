@@ -40,7 +40,9 @@ function formatNumber(num: number): string {
   return num < 1e6 ? num.toLocaleString("en") : millify(num);
 }
 
-function updateNodeMetrics(graph: Graph, metrics: Metric[]) {
+export function updateNodeMetrics(graph: Graph, metrics: Metric[]) {
+  let readingNodes = new Set();
+  let outgoingEdges: IEdge[] = [];
   metrics.forEach((metric) => {
     let metricsString: string = [
       `${
@@ -84,17 +86,33 @@ function updateNodeMetrics(graph: Graph, metrics: Metric[]) {
       // update edge animation
       const nodeType = node.getModel().node_type;
       if (nodeType === "topic" || nodeType === "error-topic") {
-        node.getInEdges().forEach((edge: IEdge, index: number) => {
+        node.getInEdges().forEach((edge: IEdge) => {
           graph.updateItem(edge, {
             type: metric.messages_in ? "line-dash" : "cubic-horizontal",
           });
         });
-        node.getOutEdges().forEach((edge: IEdge, index: number) => {
+        node.getOutEdges().forEach((edge: IEdge) => {
           graph.updateItem(edge, {
             type: metric.messages_out ? "line-dash" : "cubic-horizontal",
           });
+
+          if (metric.messages_out) {
+            outgoingEdges.push(edge);
+          }
         });
       }
+
+      if (metric.consumer_read_rate) {
+        readingNodes.add(node.getID());
+      }
+    }
+  });
+
+  outgoingEdges.forEach((edge: IEdge) => {
+    if (!readingNodes.has(edge.getTarget().getID())) {
+      graph.updateItem(edge, {
+        type: "cubic-horizontal",
+      });
     }
   });
 }
