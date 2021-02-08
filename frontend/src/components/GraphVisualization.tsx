@@ -8,9 +8,10 @@ import {
   NodeConfig,
   IG6GraphEvent,
 } from "@antv/g6/lib/types";
-import INode from "@antv/g6/lib/interface/item";
+import { IEdge, INode } from "@antv/g6/lib/interface/item";
 import Graph from "@antv/g6/lib/graph/graph";
 import "./MetricCustomNode";
+import "./DashedEdge";
 import { millify } from "millify";
 
 interface GraphVisualizationProps {
@@ -39,7 +40,9 @@ function formatNumber(num: number): string {
   return num < 1e6 ? num.toLocaleString("en") : millify(num);
 }
 
-function updateNodeMetrics(graph: Graph, metrics: Metric[]) {
+export function updateNodeMetrics(graph: Graph, metrics: Metric[]) {
+  let readingNodes = new Set();
+  let outgoingEdges: IEdge[] = [];
   metrics.forEach((metric) => {
     let metricsString: string = [
       `${
@@ -73,10 +76,42 @@ function updateNodeMetrics(graph: Graph, metrics: Metric[]) {
     ]
       .filter(Boolean)
       .join("  ");
-    let node = graph.findById(metric.node_id);
+
+    let node = graph.findById(metric.node_id) as INode;
     if (node) {
       graph.updateItem(node, {
         metric: metricsString,
+      });
+
+      // update edge animation
+      const nodeType = node.getModel().node_type;
+      if (nodeType === "topic" || nodeType === "error-topic") {
+        node.getInEdges().forEach((edge: IEdge) => {
+          graph.updateItem(edge, {
+            type: metric.messages_in ? "line-dash" : "cubic-horizontal",
+          });
+        });
+        node.getOutEdges().forEach((edge: IEdge) => {
+          graph.updateItem(edge, {
+            type: metric.messages_out ? "line-dash" : "cubic-horizontal",
+          });
+
+          if (metric.messages_out) {
+            outgoingEdges.push(edge);
+          }
+        });
+      }
+
+      if (metric.consumer_read_rate) {
+        readingNodes.add(node.getID());
+      }
+    }
+  });
+
+  outgoingEdges.forEach((edge: IEdge) => {
+    if (!readingNodes.has(edge.getTarget().getID())) {
+      graph.updateItem(edge, {
+        type: "cubic-horizontal",
       });
     }
   });
@@ -100,7 +135,7 @@ const GraphVisualization = ({
 
   const mouseEnterCallback = useCallback(
     (e: IG6GraphEvent) => {
-      const node = e.item as INode.INode;
+      const node = e.item as INode;
       graph?.setItemState(node, "hover", true);
     },
     [graph]
@@ -108,7 +143,7 @@ const GraphVisualization = ({
 
   const mouseLeaveCallback = useCallback(
     (e: IG6GraphEvent) => {
-      const node = e.item as INode.INode;
+      const node = e.item as INode;
       graph?.setItemState(node, "hover", false);
     },
     [graph]
@@ -120,7 +155,7 @@ const GraphVisualization = ({
       clickNodes?.forEach((cn) => {
         graph?.setItemState(cn, "click", false);
       });
-      const node = e.item as INode.INode;
+      const node = e.item as INode;
       graph?.setItemState(node, "click", true);
     },
     [graph]
@@ -155,6 +190,7 @@ const GraphVisualization = ({
         node.icon = icon;
       }
     });
+
     currentGraph?.data(data as GraphData);
     currentGraph?.render();
 

@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "@ant-design/icons": "^4.2.2",
-    "@antv/g6": "^3.8.1",
+    "@antv/g6": "3.8.1",
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.5.0",
     "@testing-library/user-event": "^7.2.1",
@@ -52,9 +52,8 @@
     ]
   },
   "devDependencies": {
-    "react-test-renderer": "^17.0.1",
-    "nock": "^13.0.5",
     "@babel/plugin-transform-typescript": "^7.11.0",
+    "canvas": "^2.6.1",
     "eslint": "^6.8.0",
     "eslint-config-airbnb-typescript-prettier": "^3.1.0",
     "eslint-config-prettier": "^6.12.0",
@@ -62,8 +61,11 @@
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-jsx-a11y": "^6.3.1",
     "eslint-plugin-react": "^7.21.4",
+    "jest-canvas-mock": "^2.3.1",
+    "nock": "^13.0.5",
     "openapi-typescript-codegen": "^0.4.10",
-    "prettier": "^2.1.2"
+    "prettier": "^2.1.2",
+    "react-test-renderer": "^17.0.1"
   },
   "homepage": "http://localhost/static"
 }
