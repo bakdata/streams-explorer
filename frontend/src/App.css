@@ -1,6 +1,9 @@
+body {
+  background: #f0f2f5;
+}
+
 .application {
   text-align: center;
-  background: #f0f2f5;
   border-radius: 4px;
 }
 

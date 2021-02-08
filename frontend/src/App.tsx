@@ -178,7 +178,6 @@ const App: React.FC = () => {
                 zIndex: 1,
                 top: height - 150,
                 position: "absolute",
-                background: "#F0F2F5",
               }}
             >
               <DetailsCard nodeID={selectedNodeID} />
