@@ -21,6 +21,8 @@ interface GraphVisualizationProps {
   metrics: Metric[] | null;
   refetchMetrics: Function;
   onClickNode: Function;
+  width: number | undefined;
+  height: number | undefined;
 }
 
 class Icon implements IIcon {
@@ -124,10 +126,15 @@ const GraphVisualization = ({
   metrics,
   refetchMetrics,
   onClickNode,
+  width,
+  height,
 }: GraphVisualizationProps) => {
   const ref = useRef<HTMLDivElement>(null);
 
   const [graph, setGraph] = useState<Graph | null>(null);
+  if (graph && width && height) {
+    graph.changeSize(width, height);
+  }
 
   if (graph && metrics) {
     updateNodeMetrics(graph, metrics);

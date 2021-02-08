@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import "./App.css";
-import useDimensions from "react-cool-dimensions";
+import { useResizeDetector } from "react-resize-detector";
 import {
   usePipelinesApiPipelinesGet,
   useGraphPositionedApiGraphGet,
@@ -29,7 +29,13 @@ const App: React.FC = () => {
   const [currentPipeline, setCurrentPipeline] = useState(ALL_PIPELINES);
   const [selectedNodeID, setSelectedNodeID] = useState<string | null>(null);
   const ref = useRef<HTMLDivElement>(null!);
-  const { width, height } = useDimensions({ ref });
+  const onResize = useCallback(() => {}, []);
+  const { width, height } = useResizeDetector({
+    targetRef: ref,
+    refreshMode: "debounce",
+    refreshRate: 100,
+    onResize,
+  });
   const defaultRefreshInterval = 30;
   const refreshIntervals: Record<number, string> = {
     0: "off",
@@ -82,12 +88,6 @@ const App: React.FC = () => {
     message.error(pipelineError?.message);
   }
 
-  graphConfig.height =
-    height > window.screen.height
-      ? window.screen.height * 0.66 - 64
-      : height * 0.66 - 64;
-  graphConfig.width = width;
-
   const menuPipeline = (
     <Menu
       onClick={(e) => {
@@ -119,7 +119,7 @@ const App: React.FC = () => {
     return (
       <div ref={ref} className="application">
         <Layout className="layout">
-          <Header className="header">
+          <Header className="header" style={{ zIndex: 2 }}>
             <Menu theme="dark" mode="horizontal" selectable={false}>
               <Menu.Item key="1">
                 Pipeline:&nbsp;
@@ -148,8 +148,14 @@ const App: React.FC = () => {
               </Menu.Item>
             </Menu>
           </Header>
-          <Content style={{ minHeight: "100vh", paddingTop: "64px" }}>
-            <Row>
+          <Content
+            style={{
+              minHeight: "100vh",
+              paddingTop: "64px",
+              position: "relative",
+            }}
+          >
+            <Row style={{ position: "fixed" }}>
               {graph ? (
                 <GraphVisualization
                   id="topology-graph"
@@ -158,6 +164,8 @@ const App: React.FC = () => {
                   metrics={metrics}
                   refetchMetrics={() => refetchMetrics()}
                   onClickNode={(nodeId: string) => setSelectedNodeID(nodeId)}
+                  width={width}
+                  height={height! - 64}
                 />
               ) : (
                 <Alert
@@ -168,7 +176,15 @@ const App: React.FC = () => {
                 />
               )}
             </Row>
-            <Row style={{ padding: "0 50px", width: width }}>
+            <Row
+              style={{
+                padding: "0 50px",
+                width: width,
+                zIndex: 1,
+                top: height! - 147,
+                position: "absolute",
+              }}
+            >
               <DetailsCard nodeID={selectedNodeID} />
             </Row>
           </Content>

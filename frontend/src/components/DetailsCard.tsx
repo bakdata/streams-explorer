@@ -1,6 +1,6 @@
 import React, { useRef } from "react";
 import { Card } from "antd";
-import useDimensions from "react-cool-dimensions";
+import { useResizeDetector } from "react-resize-detector";
 import Details from "./Details";
 import "./Details.css";
 
@@ -10,7 +10,7 @@ interface DetailsCardProps {
 
 const DetailsCard = ({ nodeID }: DetailsCardProps) => {
   const ref = useRef<HTMLDivElement>(null!);
-  const { width } = useDimensions({ ref });
+  const { width } = useResizeDetector({ targetRef: ref, handleHeight: false });
   return (
     <div ref={ref} className="details">
       <Card
