@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import "./App.css";
-import useDimensions from "react-cool-dimensions";
+import { useResizeDetector } from "react-resize-detector";
 import {
   usePipelinesApiPipelinesGet,
   useGraphPositionedApiGraphGet,
@@ -29,7 +29,13 @@ const App: React.FC = () => {
   const [currentPipeline, setCurrentPipeline] = useState(ALL_PIPELINES);
   const [selectedNodeID, setSelectedNodeID] = useState<string | null>(null);
   const ref = useRef<HTMLDivElement>(null!);
-  const { width, height } = useDimensions({ ref });
+  const onResize = useCallback(() => {}, []);
+  const { width, height } = useResizeDetector({
+    targetRef: ref,
+    refreshMode: "debounce",
+    refreshRate: 100,
+    onResize,
+  });
   const defaultRefreshInterval = 30;
   const refreshIntervals: Record<number, string> = {
     0: "off",
@@ -159,8 +165,7 @@ const App: React.FC = () => {
                   refetchMetrics={() => refetchMetrics()}
                   onClickNode={(nodeId: string) => setSelectedNodeID(nodeId)}
                   width={width}
-                  height={height - 64}
-                  window={window}
+                  height={height! - 64}
                 />
               ) : (
                 <Alert
@@ -176,7 +181,7 @@ const App: React.FC = () => {
                 padding: "0 50px",
                 width: width,
                 zIndex: 1,
-                top: height - 147,
+                top: height! - 147,
                 position: "absolute",
               }}
             >

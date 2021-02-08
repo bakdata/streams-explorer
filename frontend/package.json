@@ -20,9 +20,9 @@
     "http-proxy-middleware": "^1.0.5",
     "millify": "^3.5.0",
     "react": "^16.13.1",
-    "react-cool-dimensions": "^1.1.3",
     "react-dom": "^16.13.1",
     "react-json-view": "^1.19.1",
+    "react-resize-detector": "^6.5.0",
     "react-scripts": "^3.4.3",
     "restful-react": "^14.4.0",
     "typescript": "^3.7.5"
