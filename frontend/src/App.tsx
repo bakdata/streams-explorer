@@ -176,7 +176,7 @@ const App: React.FC = () => {
                 padding: "0 50px",
                 width: width,
                 zIndex: 1,
-                top: height - 150,
+                top: height - 147,
                 position: "absolute",
               }}
             >
