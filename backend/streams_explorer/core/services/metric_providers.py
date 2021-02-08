@@ -51,7 +51,7 @@ class MetricProvider:
 
     @staticmethod
     def get_consumer_group(node_id: str, node: dict) -> Optional[str]:
-        node_type: Optional[NodeTypesEnum] = node.get("node_type")
+        node_type: NodeTypesEnum = node["node_type"]
         if node_type == NodeTypesEnum.CONNECTOR:
             return f"connect-{node_id}"
         return node.get(settings.k8s.consumer_group_annotation)

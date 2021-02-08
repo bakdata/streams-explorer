@@ -23,7 +23,6 @@ class TestPrometheusMetricProvider:
         )
         node_id, node = nodes[4]  # connector
         assert MetricProvider.get_consumer_group(node_id, node) == "connect-demo-sink"
-        assert MetricProvider.get_consumer_group("", {}) is None
 
     def test_empty_query(self, monkeypatch, metrics_provider):
         def mock_query(*args, **kwargs):
