@@ -134,9 +134,9 @@ def test_jdbc_sink():
     extractor.on_connector_config_parsing(
         {
             "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
-            "name": "jdbc-test-sink",
+            "table.name.format": "jdbc-table",
         },
         "jdbc-sink-connector",
     )
     assert len(extractor.sinks) == 1
-    assert extractor.sinks[0].name == "jdbc-test-sink"
+    assert extractor.sinks[0].name == "jdbc-table"
