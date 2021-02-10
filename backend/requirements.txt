@@ -37,6 +37,7 @@ Markdown==3.3.3
 MarkupSafe==1.1.1
 matplotlib==3.3.3
 mccabe==0.6.1
+mock==4.0.3
 mypy==0.790
 mypy-extensions==0.4.3
 networkx==2.5

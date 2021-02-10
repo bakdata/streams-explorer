@@ -1,7 +1,10 @@
 from pathlib import Path
 
+import mock
+
 from streams_explorer.core.config import settings
 from streams_explorer.core.extractor.extractor_container import ExtractorContainer
+from streams_explorer.core.services.kafkaconnect import KafkaConnect
 from streams_explorer.extractors import extractor_container, load_extractors
 
 extractor_file_1 = """from typing import List
@@ -80,6 +83,26 @@ def test_load_extractors_without_defaults():
     load_extractors()
 
     assert len(extractor_container.extractors) == 0
+
+
+def test_extractors_topics_none(mocker):
+    def get_connector_info(connector):
+        return None, {}
+
+    mocker.patch(
+        "streams_explorer.core.services.kafkaconnect.KafkaConnect.get_connector_info",
+        get_connector_info,
+    )
+    mocker.patch(
+        "streams_explorer.core.services.kafkaconnect.KafkaConnect.get_connectors",
+        lambda: ["connector"],
+    )
+
+    with mock.patch(
+        "streams_explorer.extractors.extractor_container.on_connector_config_parsing"
+    ) as on_connector_config_parsing:
+        KafkaConnect.connectors()
+        on_connector_config_parsing.assert_called()
 
 
 def test_elasticsearch_sink():
