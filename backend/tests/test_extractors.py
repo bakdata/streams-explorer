@@ -1,7 +1,5 @@
 from pathlib import Path
 
-import mock
-
 from streams_explorer.core.config import settings
 from streams_explorer.core.extractor.extractor_container import ExtractorContainer
 from streams_explorer.core.services.kafkaconnect import KafkaConnect
@@ -98,11 +96,13 @@ def test_extractors_topics_none(mocker):
         lambda: ["connector"],
     )
 
-    with mock.patch(
-        "streams_explorer.extractors.extractor_container.on_connector_config_parsing"
-    ) as on_connector_config_parsing:
-        KafkaConnect.connectors()
-        on_connector_config_parsing.assert_called()
+    from streams_explorer.extractors import extractor_container
+
+    on_connector_config_parsing = mocker.spy(
+        extractor_container, "on_connector_config_parsing"
+    )
+    KafkaConnect.connectors()
+    on_connector_config_parsing.assert_called_once()
 
 
 def test_elasticsearch_sink():
