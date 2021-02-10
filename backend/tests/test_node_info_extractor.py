@@ -28,6 +28,7 @@ class TestNodeInfoExtractor:
                 "test": "testValue",
                 "foo": {"bar": {"testDict": "test"}, "test": ["test", "test"]},
             },
+            type="sink",
         )
 
         output = get_displayed_information_connector(connector.config)

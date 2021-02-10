@@ -74,11 +74,19 @@ class TestApplication:
 
         def get_connector_info(connector):
             if connector == "connector1":
-                return ["output-topic1", "output-topic2"], {"test": "test_value"}
-            return ["output-topic3"], {
-                "connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
-                "transforms.changeTopic.replacement": "test-index",
-            }
+                return (
+                    ["output-topic1", "output-topic2"],
+                    {"test": "test_value"},
+                    "sink",
+                )
+            return (
+                ["output-topic3"],
+                {
+                    "connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
+                    "transforms.changeTopic.replacement": "test-index",
+                },
+                "sink",
+            )
 
         mocker.patch(
             "streams_explorer.core.services.kafkaconnect.KafkaConnect.get_connector_info",

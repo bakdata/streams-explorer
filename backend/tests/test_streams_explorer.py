@@ -97,9 +97,13 @@ class TestStreamsExplorer:
 
         def get_connector_info(connector):
             if connector == "connector1":
-                return ["output-topic1", "output-topic2"], {"test": "test_value"}
+                return (
+                    ["output-topic1", "output-topic2"],
+                    {"test": "test_value"},
+                    "sink",
+                )
             if connector == "connector2":
-                return ["output-topic3"], {"name": "test-sink"}
+                return ["output-topic3"], {"name": "test-sink"}, "sink"
 
         mocker.patch(
             "streams_explorer.core.services.kafkaconnect.KafkaConnect.get_connectors",

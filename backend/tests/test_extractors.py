@@ -86,7 +86,7 @@ def test_load_extractors_without_defaults():
 def test_extractors_topics_none(mocker):
     mocker.patch(
         "streams_explorer.core.services.kafkaconnect.KafkaConnect.get_connector_info",
-        lambda connector: (None, {}),
+        lambda connector: (None, {}, "sink"),
     )
     mocker.patch(
         "streams_explorer.core.services.kafkaconnect.KafkaConnect.get_connectors",

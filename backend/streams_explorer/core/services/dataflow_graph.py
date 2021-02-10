@@ -60,7 +60,10 @@ class DataFlowGraph:
         )
         for topic in connector.topics:
             self._add_topic(topic)
-            self.graph.add_edge(topic, connector.name)
+            if connector.type == "sink":
+                self.graph.add_edge(topic, connector.name)
+            if connector.type == "source":
+                self.graph.add_edge(connector.name, topic)
 
     def add_source(self, source: Source):
         self.graph.add_node(
