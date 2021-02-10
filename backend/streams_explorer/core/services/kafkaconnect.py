@@ -34,7 +34,7 @@ class KafkaConnect:
             topics, config = KafkaConnect.get_connector_info(connector)
             if topics is not None:
                 out.append(KafkaConnector(name=connector, topics=topics, config=config))
-                extractor_container.on_connector_config_parsing(config, connector)
+            extractor_container.on_connector_config_parsing(config, connector)
         return out
 
     @staticmethod
