@@ -64,20 +64,28 @@ class TestApplication:
         monkeypatch.setattr(StreamsExplorer, "get_cron_jobs", mock_get_cron_jobs)
         monkeypatch.setattr(StreamsExplorer, "setup", lambda _: None)
 
-        def get_connectors():
-            return ["connector1", "connector2"]
-
         mocker.patch(
             "streams_explorer.core.services.kafkaconnect.KafkaConnect.get_connectors",
-            get_connectors,
+            lambda: ["connector1", "connector2"],
         )
 
-        def get_connector_info(connector):
-            if connector == "connector1":
-                return ["output-topic1", "output-topic2"], {"test": "test_value"}
-            return ["output-topic3"], {
-                "connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
-                "transforms.changeTopic.replacement": "test-index",
+        def get_connector_info(connector_name: str):
+            if connector_name == "connector1":
+                return {
+                    "config": {
+                        "connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
+                        "topics": "output-topic1,output-topic2",
+                        "test": "test_value",
+                    },
+                    "type": "sink",
+                }
+            return {
+                "config": {
+                    "connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
+                    "topics": "output-topic3",
+                    "transforms.changeTopic.replacement": "test-index",
+                },
+                "type": "sink",
             }
 
         mocker.patch(
@@ -117,12 +125,9 @@ class TestApplication:
 
             assert len(response.json().get("nodes")) == 12
 
-            def get_connectors():
-                return ["connector1"]
-
             mocker.patch(
                 "streams_explorer.core.services.kafkaconnect.KafkaConnect.get_connectors",
-                get_connectors,
+                lambda: ["connector1"],
             )
             await asyncio.sleep(2)
             response = client.get(f"{API_PREFIX}/graph")

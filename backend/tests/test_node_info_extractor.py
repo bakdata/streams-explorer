@@ -4,7 +4,10 @@ from streams_explorer.core.node_info_extractor import (
     get_displayed_information_connector,
     get_displayed_information_deployment,
 )
-from streams_explorer.models.kafka_connector import KafkaConnector
+from streams_explorer.models.kafka_connector import (
+    KafkaConnector,
+    KafkaConnectorTypesEnum,
+)
 from streams_explorer.models.node_information import NodeInfoListItem, NodeInfoType
 from tests.utils import get_streaming_app_deployment
 
@@ -23,6 +26,7 @@ class TestNodeInfoExtractor:
 
         connector = KafkaConnector(
             name="test-connector",
+            type=KafkaConnectorTypesEnum.SINK,
             topics=["topic1"],
             config={
                 "test": "testValue",

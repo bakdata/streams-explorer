@@ -10,9 +10,9 @@ from streams_explorer.models.node_types import NodeTypesEnum
 
 
 class PrometheusMetric(Enum):
-    def __init__(self, metric, query):
-        self.metric = metric
-        self.query = query
+    def __init__(self, metric: str, query: str):
+        self.metric: str = metric
+        self.query: str = query
 
     MESSAGES_IN = (
         "messages_in",

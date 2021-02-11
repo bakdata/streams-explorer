@@ -4,10 +4,12 @@ import pytest
 from kubernetes.client import V1beta1CronJob, V1ObjectMeta
 
 from streams_explorer.core.config import settings
+from streams_explorer.core.extractor.default.elasticsearch_sink import ElasticsearchSink
 from streams_explorer.core.extractor.extractor import Extractor
 from streams_explorer.core.services.dataflow_graph import NodeTypesEnum
 from streams_explorer.defaultlinker import DefaultLinker
 from streams_explorer.extractors import extractor_container
+from streams_explorer.models.kafka_connector import KafkaConnectorTypesEnum
 from streams_explorer.models.node_information import (
     NodeInfoListItem,
     NodeInformation,
@@ -84,7 +86,7 @@ class TestStreamsExplorer:
         self, mocker, deployments, cron_jobs, monkeypatch, fake_linker
     ):
         explorer = StreamsExplorer(linking_service=fake_linker)
-        extractor_container.extractors = []
+        extractor_container.extractors = [ElasticsearchSink()]
         monkeypatch.setattr(settings.k8s, "consumer_group_annotation", "consumerGroup")
         mocker.patch.object(
             explorer, attribute="get_deployments", return_value=deployments
@@ -97,9 +99,23 @@ class TestStreamsExplorer:
 
         def get_connector_info(connector):
             if connector == "connector1":
-                return ["output-topic1", "output-topic2"], {"test": "test_value"}
+                return {
+                    "config": {
+                        "connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
+                        "test": "test_value",
+                        "topics": "output-topic1,output-topic2",
+                    },
+                    "type": KafkaConnectorTypesEnum.SINK,
+                }
             if connector == "connector2":
-                return ["output-topic3"], {"name": "test-sink"}
+                return {
+                    "config": {
+                        "connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
+                        "name": "test-sink",
+                        "topics": "output-topic3",
+                    },
+                    "type": KafkaConnectorTypesEnum.SINK,
+                }
 
         mocker.patch(
             "streams_explorer.core.services.kafkaconnect.KafkaConnect.get_connectors",
@@ -190,7 +206,7 @@ class TestStreamsExplorer:
         assert extractor.cron_job.metadata.name == "test"
         extractor_container.extractors = []
 
-    def test_get_link(self, monkeypatch, streams_explorer):
+    def test_get_link(self, streams_explorer):
         streams_explorer.update()
         assert type(streams_explorer.get_link("input-topic1", "grafana")) == str
         assert type(streams_explorer.get_link("input-topic1", "akhq")) == str

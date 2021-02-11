@@ -25,9 +25,16 @@ class ExtractorContainer:
         for extractor in self.extractors:
             extractor.on_streaming_app_env_parsing(env, streaming_app_name)
 
-    def on_connector_config_parsing(self, config, connector_name: str):
+    def on_connector_config_parsing(
+        self, config: dict, connector_name: str
+    ) -> List[str]:
         for extractor in self.extractors:
-            extractor.on_connector_config_parsing(config, connector_name)
+            topics: List[str] = extractor.on_connector_config_parsing(
+                config, connector_name
+            )
+            if topics:
+                return topics
+        return []
 
     def on_cron_job(self, cron_job: V1beta1CronJob):
         for extractor in self.extractors:

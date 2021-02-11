@@ -2,6 +2,7 @@ from pathlib import Path
 
 from streams_explorer.core.config import settings
 from streams_explorer.core.extractor.extractor_container import ExtractorContainer
+from streams_explorer.core.services.kafkaconnect import KafkaConnect
 from streams_explorer.extractors import extractor_container, load_extractors
 
 extractor_file_1 = """from typing import List
@@ -82,6 +83,25 @@ def test_load_extractors_without_defaults():
     assert len(extractor_container.extractors) == 0
 
 
+def test_extractors_topics_none(mocker):
+    mocker.patch(
+        "streams_explorer.core.services.kafkaconnect.KafkaConnect.get_connector_info",
+        lambda connector: {"config": {}, "type": ""},
+    )
+    mocker.patch(
+        "streams_explorer.core.services.kafkaconnect.KafkaConnect.get_connectors",
+        lambda: ["connector"],
+    )
+
+    from streams_explorer.extractors import extractor_container
+
+    on_connector_config_parsing = mocker.spy(
+        extractor_container, "on_connector_config_parsing"
+    )
+    KafkaConnect.connectors()
+    on_connector_config_parsing.assert_called_once()
+
+
 def test_elasticsearch_sink():
     from streams_explorer.core.extractor.default.elasticsearch_sink import (
         ElasticsearchSink,
@@ -97,15 +117,17 @@ def test_elasticsearch_sink():
         "elasticsearch-test-sink",
     )
     assert len(extractor.sinks) == 0
-    extractor.on_connector_config_parsing(
+    topics = extractor.on_connector_config_parsing(
         {
             "connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
             "transforms.changeTopic.replacement": "es-test-index",
+            "topics": "my-topic-1, my-topic-2",
         },
         "elasticsearch-sink-connector",
     )
     assert len(extractor.sinks) == 1
     assert extractor.sinks[0].name == "es-test-index"
+    assert topics == ["my-topic-1", "my-topic-2"]
 
 
 def test_s3_sink():

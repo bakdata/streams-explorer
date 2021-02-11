@@ -8,7 +8,9 @@ class ElasticsearchSink(Extractor):
     def __init__(self):
         self.sinks: List[Sink] = []
 
-    def on_connector_config_parsing(self, config, connector_name):
+    def on_connector_config_parsing(
+        self, config: dict, connector_name: str
+    ) -> List[str]:
         connector_class = config.get("connector.class")
         if connector_class and "ElasticsearchSinkConnector" in connector_class:
             index = config.get("transforms.changeTopic.replacement")
@@ -20,3 +22,5 @@ class ElasticsearchSink(Extractor):
                         source=connector_name,
                     )
                 )
+            return Extractor.split_topics(config.get("topics"))
+        return []

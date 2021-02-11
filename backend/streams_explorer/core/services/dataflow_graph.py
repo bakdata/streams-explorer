@@ -10,7 +10,10 @@ from streams_explorer.core.config import settings
 from streams_explorer.core.k8s_app import K8sApp
 from streams_explorer.core.services.metric_providers import PrometheusMetricProvider
 from streams_explorer.models.graph import Metric
-from streams_explorer.models.kafka_connector import KafkaConnector
+from streams_explorer.models.kafka_connector import (
+    KafkaConnector,
+    KafkaConnectorTypesEnum,
+)
 from streams_explorer.models.node_types import NodeTypesEnum
 from streams_explorer.models.sink import Sink
 from streams_explorer.models.source import Source
@@ -60,7 +63,10 @@ class DataFlowGraph:
         )
         for topic in connector.topics:
             self._add_topic(topic)
-            self.graph.add_edge(topic, connector.name)
+            if connector.type == KafkaConnectorTypesEnum.SINK:
+                self.graph.add_edge(topic, connector.name)
+            if connector.type == KafkaConnectorTypesEnum.SOURCE:
+                self.graph.add_edge(connector.name, topic)
 
     def add_source(self, source: Source):
         self.graph.add_node(
