@@ -67,6 +67,13 @@ class TestStreamsExplorer:
         return [V1beta1CronJob(metadata=V1ObjectMeta(name="test"))]
 
     @pytest.fixture()
+    def get_connector_topics(self):
+        return {
+            "connector1": ["output-topic1", "output-topic2"],
+            "connector2": ["output-topic3"],
+        }
+
+    @pytest.fixture()
     def fake_linker(self, mocker):
         """Creates LinkingService without default NodeInfoListItems."""
 
@@ -81,7 +88,13 @@ class TestStreamsExplorer:
 
     @pytest.fixture()
     def streams_explorer(
-        self, mocker, deployments, cron_jobs, monkeypatch, fake_linker
+        self,
+        mocker,
+        deployments,
+        cron_jobs,
+        get_connector_topics,
+        monkeypatch,
+        fake_linker,
     ):
         explorer = StreamsExplorer(linking_service=fake_linker)
         extractor_container.extractors = []
@@ -97,13 +110,9 @@ class TestStreamsExplorer:
 
         def get_connector_info(connector):
             if connector == "connector1":
-                return (
-                    ["output-topic1", "output-topic2"],
-                    {"test": "test_value"},
-                    "sink",
-                )
+                return {"config": {"test": "test_value"}, "type": "sink"}
             if connector == "connector2":
-                return ["output-topic3"], {"name": "test-sink"}, "sink"
+                return {"config": {"name": "test-sink"}, "type": "sink"}
 
         mocker.patch(
             "streams_explorer.core.services.kafkaconnect.KafkaConnect.get_connectors",
@@ -112,6 +121,11 @@ class TestStreamsExplorer:
         mocker.patch(
             "streams_explorer.core.services.kafkaconnect.KafkaConnect.get_connector_info",
             get_connector_info,
+        )
+        mocker.patch.object(
+            extractor_container,
+            attribute="get_connector_topics",
+            return_value=get_connector_topics,
         )
 
         mocker.patch(
@@ -184,6 +198,7 @@ class TestStreamsExplorer:
             def __init__(self):
                 self.sources: List[Source] = []
                 self.cron_job = None
+                self.topics = None
 
             def on_cron_job_parsing(self, cron_job: V1beta1CronJob):
                 self.cron_job = cron_job
@@ -194,7 +209,7 @@ class TestStreamsExplorer:
         assert extractor.cron_job.metadata.name == "test"
         extractor_container.extractors = []
 
-    def test_get_link(self, monkeypatch, streams_explorer):
+    def test_get_link(self, streams_explorer):
         streams_explorer.update()
         assert type(streams_explorer.get_link("input-topic1", "grafana")) == str
         assert type(streams_explorer.get_link("input-topic1", "akhq")) == str

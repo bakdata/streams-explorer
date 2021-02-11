@@ -1,7 +1,10 @@
 from streams_explorer.core.config import settings
 from streams_explorer.core.k8s_app import K8sApp
 from streams_explorer.core.services.dataflow_graph import DataFlowGraph
-from streams_explorer.core.services.kafkaconnect import KafkaConnector
+from streams_explorer.models.kafka_connector import (
+    KafkaConnector,
+    KafkaConnectorTypesEnum,
+)
 from streams_explorer.models.sink import Sink
 from streams_explorer.models.source import Source
 from tests.utils import get_streaming_app_deployment
@@ -41,11 +44,11 @@ class TestDataFlowGraph:
 
     def test_add_connector(self):
         connector = KafkaConnector(
-            name="test-connector", topics=["output-topic"], config={}, type="sink"
+            name="test-connector", config={}, type=KafkaConnectorTypesEnum.SINK
         )
         df = DataFlowGraph()
         df.add_streaming_app(self.get_k8s_app())
-        df.add_connector(connector)
+        df.add_connector(connector, ["output-topic"])
         assert len(df.graph.nodes) == 5
         assert df.graph.has_edge("output-topic", "test-connector")
 

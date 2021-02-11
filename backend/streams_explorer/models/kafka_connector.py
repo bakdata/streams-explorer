@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import List
+from typing import Optional
 
 
 class KafkaConnectorTypesEnum(str, Enum):
@@ -11,6 +11,5 @@ class KafkaConnectorTypesEnum(str, Enum):
 @dataclass
 class KafkaConnector:
     name: str
-    type: KafkaConnectorTypesEnum
-    topics: List[str]
     config: dict
+    type: Optional[KafkaConnectorTypesEnum] = None

@@ -65,7 +65,7 @@ class StreamsExplorer:
     def get_node_information(self, node_id: str):
         node_type = self.data_flow.get_node_type(node_id)
         if node_type == NodeTypesEnum.CONNECTOR:
-            _, config, _ = KafkaConnect.get_connector_info(node_id)
+            config = KafkaConnect.get_connector_info(node_id)["config"]
             return NodeInformation(
                 node_id=node_id,
                 node_type=node_type,
@@ -103,7 +103,7 @@ class StreamsExplorer:
     def get_link(self, node_id: str, link_type: Optional[str]):
         node_type = self.data_flow.get_node_type(node_id)
         if node_type == NodeTypesEnum.CONNECTOR:
-            _, config, _ = KafkaConnect.get_connector_info(node_id)
+            config = KafkaConnect.get_connector_info(node_id)["config"]
             return self.linking_service.get_redirect_connector(config, link_type)
         if node_type == NodeTypesEnum.TOPIC or node_type == NodeTypesEnum.ERROR_TOPIC:
             return self.linking_service.get_redirect_topic(node_id, link_type)
@@ -173,8 +173,9 @@ class StreamsExplorer:
         for _, app in self.applications.items():
             self.data_flow.add_streaming_app(app)
 
+        connector_topics = extractor_container.get_connector_topics()
         for connector in self.kafka_connectors:
-            self.data_flow.add_connector(connector)
+            self.data_flow.add_connector(connector, connector_topics[connector.name])
 
         sources, sinks = extractor_container.get_sources_sinks()
         for source in sources:

@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import Dict, List, Tuple
 
 from kubernetes.client import V1beta1CronJob
 from loguru import logger
@@ -44,3 +44,9 @@ class ExtractorContainer:
                 for sink in extractor.sinks:
                     sinks.append(sink)
         return sources, sinks
+
+    def get_connector_topics(self) -> Dict[str, List[str]]:
+        connector_topics: Dict[str, List[str]] = dict()
+        for extractor in self.extractors:
+            connector_topics[extractor.connector.name] = extractor.topics
+        return connector_topics
