@@ -2,12 +2,13 @@ from typing import List
 
 from kubernetes.client import V1beta1CronJob
 
+from streams_explorer.models.sink import Sink
+from streams_explorer.models.source import Source
+
 
 class Extractor:
-    sources = None
-    sinks = None
-    # topics: List[str]
-    # connector_name: str
+    sources: List[Source] = []
+    sinks: List[Sink] = []
 
     def on_streaming_app_env_parsing(self, env, streaming_app_name: str):
         pass

@@ -82,12 +82,7 @@ class TestStreamsExplorer:
 
     @pytest.fixture()
     def streams_explorer(
-        self,
-        mocker,
-        deployments,
-        cron_jobs,
-        monkeypatch,
-        fake_linker,
+        self, mocker, deployments, cron_jobs, monkeypatch, fake_linker
     ):
         explorer = StreamsExplorer(linking_service=fake_linker)
         extractor_container.extractors = [ElasticsearchSink()]
@@ -200,7 +195,6 @@ class TestStreamsExplorer:
             def __init__(self):
                 self.sources: List[Source] = []
                 self.cron_job = None
-                self.topics = None
 
             def on_cron_job_parsing(self, cron_job: V1beta1CronJob):
                 self.cron_job = cron_job

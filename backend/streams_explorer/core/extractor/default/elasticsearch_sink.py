@@ -13,7 +13,6 @@ class ElasticsearchSink(Extractor):
     ) -> List[str]:
         connector_class = config.get("connector.class")
         if connector_class and "ElasticsearchSinkConnector" in connector_class:
-            self.connector_name = connector_name
             index = config.get("transforms.changeTopic.replacement")
             if index:
                 self.sinks.append(
@@ -28,6 +27,6 @@ class ElasticsearchSink(Extractor):
 
     @staticmethod
     def split_topics(topics: Optional[str]) -> List[str]:
-        if topics is not None:
+        if topics:
             return topics.replace(" ", "").split(",")
         return []

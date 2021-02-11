@@ -26,12 +26,12 @@ class TestNodeInfoExtractor:
 
         connector = KafkaConnector(
             name="test-connector",
+            type=KafkaConnectorTypesEnum.SINK,
             topics=["topic1"],
             config={
                 "test": "testValue",
                 "foo": {"bar": {"testDict": "test"}, "test": ["test", "test"]},
             },
-            type=KafkaConnectorTypesEnum.SINK,
         )
 
         output = get_displayed_information_connector(connector.config)

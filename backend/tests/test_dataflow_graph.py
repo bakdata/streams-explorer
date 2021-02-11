@@ -45,9 +45,9 @@ class TestDataFlowGraph:
     def test_add_connector(self):
         connector = KafkaConnector(
             name="test-connector",
+            type=KafkaConnectorTypesEnum.SINK,
             topics=["output-topic"],
             config={},
-            type=KafkaConnectorTypesEnum.SINK,
         )
         df = DataFlowGraph()
         df.add_streaming_app(self.get_k8s_app())
