@@ -173,9 +173,8 @@ class StreamsExplorer:
         for _, app in self.applications.items():
             self.data_flow.add_streaming_app(app)
 
-        connector_topics = extractor_container.get_connector_topics()
         for connector in self.kafka_connectors:
-            self.data_flow.add_connector(connector, connector_topics[connector.name])
+            self.data_flow.add_connector(connector)
 
         sources, sinks = extractor_container.get_sources_sinks()
         for source in sources:

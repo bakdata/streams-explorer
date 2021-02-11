@@ -26,6 +26,7 @@ class TestNodeInfoExtractor:
 
         connector = KafkaConnector(
             name="test-connector",
+            topics=["topic1"],
             config={
                 "test": "testValue",
                 "foo": {"bar": {"testDict": "test"}, "test": ["test", "test"]},

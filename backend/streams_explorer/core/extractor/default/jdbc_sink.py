@@ -8,7 +8,7 @@ class JdbcSink(Extractor):
     def __init__(self):
         self.sinks: List[Sink] = []
 
-    def on_connector_config_parsing(self, config, connector_name):
+    def on_connector_config_parsing(self, config, connector_name) -> List[str]:
         connector_class = config.get("connector.class")
         if connector_class and "JdbcSinkConnector" in connector_class:
             name = config.get("table.name.format")
@@ -20,3 +20,5 @@ class JdbcSink(Extractor):
                         source=connector_name,
                     )
                 )
+            return config.get("topics", [])
+        return []

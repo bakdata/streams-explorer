@@ -17,20 +17,11 @@ class KafkaConnect:
         return response.json()
 
     @staticmethod
-    def get_connector_info(
-        connector_name: str,
-    ) -> dict:
-        logger.info(f"Get connector information for connector {connector_name}")
+    def get_connector_info(connector_name: str) -> dict:
+        logger.info(f"Get connector information for {connector_name}")
         response = requests.get(f"{url}/connectors/{connector_name}")
         info: dict = response.json()
         return info
-
-    # @staticmethod
-    # def get_connector_type(connector_info: dict) -> Optional[KafkaConnectorTypesEnum]:
-    #     try:
-    #         return KafkaConnectorTypesEnum[connector_info["type"]]
-    #     except KeyError:
-    #         return None
 
     @staticmethod
     def connectors() -> List[KafkaConnector]:
@@ -38,12 +29,11 @@ class KafkaConnect:
         out = []
         for name in connectors:
             info = KafkaConnect.get_connector_info(name)
-            # type = KafkaConnect.get_connector_type(info)
+            topics: List[str] = extractor_container.on_connector_config_parsing(
+                info["config"], name
+            )
             connector = KafkaConnector(
-                name=name,
-                config=info["config"],
-                type=info["type"],
+                name=name, config=info["config"], type=info["type"], topics=topics
             )
             out.append(connector)
-            extractor_container.on_connector_config_parsing(info["config"], name)
         return out

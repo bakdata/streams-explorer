@@ -44,11 +44,14 @@ class TestDataFlowGraph:
 
     def test_add_connector(self):
         connector = KafkaConnector(
-            name="test-connector", config={}, type=KafkaConnectorTypesEnum.SINK
+            name="test-connector",
+            topics=["output-topic"],
+            config={},
+            type=KafkaConnectorTypesEnum.SINK,
         )
         df = DataFlowGraph()
         df.add_streaming_app(self.get_k8s_app())
-        df.add_connector(connector, ["output-topic"])
+        df.add_connector(connector)
         assert len(df.graph.nodes) == 5
         assert df.graph.has_edge("output-topic", "test-connector")
 

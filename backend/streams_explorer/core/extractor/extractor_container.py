@@ -1,4 +1,4 @@
-from typing import Dict, List, Tuple
+from typing import List, Tuple
 
 from kubernetes.client import V1beta1CronJob
 from loguru import logger
@@ -25,9 +25,16 @@ class ExtractorContainer:
         for extractor in self.extractors:
             extractor.on_streaming_app_env_parsing(env, streaming_app_name)
 
-    def on_connector_config_parsing(self, config, connector_name: str):
+    def on_connector_config_parsing(
+        self, config: dict, connector_name: str
+    ) -> List[str]:
         for extractor in self.extractors:
-            extractor.on_connector_config_parsing(config, connector_name)
+            topics: List[str] = extractor.on_connector_config_parsing(
+                config, connector_name
+            )
+            if topics:
+                return topics
+        return []
 
     def on_cron_job(self, cron_job: V1beta1CronJob):
         for extractor in self.extractors:
@@ -44,9 +51,3 @@ class ExtractorContainer:
                 for sink in extractor.sinks:
                     sinks.append(sink)
         return sources, sinks
-
-    def get_connector_topics(self) -> Dict[str, List[str]]:
-        connector_topics: Dict[str, List[str]] = dict()
-        for extractor in self.extractors:
-            connector_topics[extractor.connector.name] = extractor.topics
-        return connector_topics

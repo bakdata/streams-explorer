@@ -8,7 +8,7 @@ class S3Sink(Extractor):
     def __init__(self):
         self.sinks: List[Sink] = []
 
-    def on_connector_config_parsing(self, config, connector_name):
+    def on_connector_config_parsing(self, config, connector_name) -> List[str]:
         connector_class = config.get("connector.class")
         if connector_class and "S3SinkConnector" in connector_class:
             name = config.get("s3.bucket.name")
@@ -20,3 +20,5 @@ class S3Sink(Extractor):
                         source=connector_name,
                     )
                 )
+            return config.get("topics", [])
+        return []
