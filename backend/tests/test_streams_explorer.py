@@ -9,6 +9,7 @@ from streams_explorer.core.extractor.extractor import Extractor
 from streams_explorer.core.services.dataflow_graph import NodeTypesEnum
 from streams_explorer.defaultlinker import DefaultLinker
 from streams_explorer.extractors import extractor_container
+from streams_explorer.models.kafka_connector import KafkaConnectorTypesEnum
 from streams_explorer.models.node_information import (
     NodeInfoListItem,
     NodeInformation,
@@ -104,7 +105,7 @@ class TestStreamsExplorer:
                         "test": "test_value",
                         "topics": "output-topic1,output-topic2",
                     },
-                    "type": "sink",
+                    "type": KafkaConnectorTypesEnum.SINK,
                 }
             if connector == "connector2":
                 return {
@@ -113,7 +114,7 @@ class TestStreamsExplorer:
                         "name": "test-sink",
                         "topics": "output-topic3",
                     },
-                    "type": "sink",
+                    "type": KafkaConnectorTypesEnum.SINK,
                 }
 
         mocker.patch(
