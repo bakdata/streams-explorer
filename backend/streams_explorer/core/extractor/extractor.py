@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from kubernetes.client import V1beta1CronJob
 
@@ -18,3 +18,9 @@ class Extractor:
 
     def on_cron_job_parsing(self, cron_job: V1beta1CronJob):
         pass
+
+    @staticmethod
+    def split_topics(topics: Optional[str]) -> List[str]:
+        if topics:
+            return topics.replace(" ", "").split(",")
+        return []

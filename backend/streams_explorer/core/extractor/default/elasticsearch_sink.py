@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List
 
 from streams_explorer.core.extractor.extractor import Extractor
 from streams_explorer.models.sink import Sink
@@ -22,11 +22,5 @@ class ElasticsearchSink(Extractor):
                         source=connector_name,
                     )
                 )
-            return self.split_topics(config.get("topics"))
-        return []
-
-    @staticmethod
-    def split_topics(topics: Optional[str]) -> List[str]:
-        if topics:
-            return topics.replace(" ", "").split(",")
+            return Extractor.split_topics(config.get("topics"))
         return []
