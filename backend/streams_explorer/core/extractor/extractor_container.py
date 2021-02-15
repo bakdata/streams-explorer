@@ -4,6 +4,7 @@ from kubernetes.client import V1beta1CronJob
 from loguru import logger
 
 from streams_explorer.core.extractor.extractor import Extractor
+from streams_explorer.models.kafka_connector import KafkaConnector
 from streams_explorer.models.sink import Sink
 from streams_explorer.models.source import Source
 
@@ -27,14 +28,19 @@ class ExtractorContainer:
 
     def on_connector_config_parsing(
         self, config: dict, connector_name: str
-    ) -> Tuple[List[str], Optional[str]]:
+    ) -> Optional[KafkaConnector]:
         for extractor in self.extractors:
-            topics, error_topic = extractor.on_connector_config_parsing(
+            # topics, error_topic = extractor.on_connector_config_parsing(
+            #     config, connector_name
+            # )
+            # if topics:
+            #     return topics, error_topic
+            connector: Optional[KafkaConnector] = extractor.on_connector_config_parsing(
                 config, connector_name
             )
-            if topics:
-                return topics, error_topic
-        return [], None
+            if connector:
+                return connector
+        return None
 
     def on_cron_job(self, cron_job: V1beta1CronJob):
         for extractor in self.extractors:

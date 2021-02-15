@@ -1,6 +1,10 @@
-from typing import List, Optional, Tuple
+from typing import List, Optional
 
 from streams_explorer.core.extractor.extractor import Extractor
+from streams_explorer.models.kafka_connector import (
+    KafkaConnector,
+    KafkaConnectorTypesEnum,
+)
 from streams_explorer.models.sink import Sink
 
 
@@ -10,7 +14,7 @@ class ElasticsearchSink(Extractor):
 
     def on_connector_config_parsing(
         self, config: dict, connector_name: str
-    ) -> Tuple[List[str], Optional[str]]:
+    ) -> Optional[KafkaConnector]:
         connector_class = config.get("connector.class")
         if connector_class and "ElasticsearchSinkConnector" in connector_class:
             index = config.get("transforms.changeTopic.replacement")
@@ -22,8 +26,11 @@ class ElasticsearchSink(Extractor):
                         source=connector_name,
                     )
                 )
-            topics = Extractor.split_topics(config.get("topics"))
-            error_topic = config.get("errors.deadletterqueue.topic.name")
-            return topics, error_topic
-            # return {"topics": topics, "error_topic": error_topic}
-        return [], None
+            return KafkaConnector(
+                name=connector_name,
+                config=config,
+                type=KafkaConnectorTypesEnum.SINK,
+                topics=Extractor.split_topics(config.get("topics")),
+                error_topic=config.get("errors.deadletterqueue.topic.name"),
+            )
+        return None

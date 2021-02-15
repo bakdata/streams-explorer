@@ -117,17 +117,19 @@ def test_elasticsearch_sink():
         "elasticsearch-test-sink",
     )
     assert len(extractor.sinks) == 0
-    topics = extractor.on_connector_config_parsing(
+    connector = extractor.on_connector_config_parsing(
         {
             "connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
             "transforms.changeTopic.replacement": "es-test-index",
             "topics": "my-topic-1, my-topic-2",
+            "errors.deadletterqueue.topic.name": "dead-letter-topic",
         },
         "elasticsearch-sink-connector",
     )
     assert len(extractor.sinks) == 1
     assert extractor.sinks[0].name == "es-test-index"
-    assert topics == ["my-topic-1", "my-topic-2"]
+    assert connector.topics == ["my-topic-1", "my-topic-2"]
+    assert connector.error_topic == "dead-letter-topic"
 
 
 def test_s3_sink():

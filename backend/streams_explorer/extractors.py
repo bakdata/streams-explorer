@@ -11,8 +11,8 @@ extractor_container = ExtractorContainer()
 # add defaults
 if settings.plugins.extractors.default:
     extractor_container.add(ElasticsearchSink())
-    # extractor_container.add(S3Sink())
-    # extractor_container.add(JdbcSink())
+    extractor_container.add(S3Sink())
+    extractor_container.add(JdbcSink())
 
 
 def load_extractors():

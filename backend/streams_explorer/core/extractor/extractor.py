@@ -1,7 +1,8 @@
-from typing import List, Optional, Tuple
+from typing import List, Optional
 
 from kubernetes.client import V1beta1CronJob
 
+from streams_explorer.models.kafka_connector import KafkaConnector
 from streams_explorer.models.sink import Sink
 from streams_explorer.models.source import Source
 
@@ -15,7 +16,7 @@ class Extractor:
 
     def on_connector_config_parsing(
         self, config, connector_name: str
-    ) -> Tuple[List[str], Optional[str]]:
+    ) -> Optional[KafkaConnector]:
         pass
 
     def on_cron_job_parsing(self, cron_job: V1beta1CronJob):

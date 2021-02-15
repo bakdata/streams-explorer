@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 import requests
 from loguru import logger
@@ -29,15 +29,16 @@ class KafkaConnect:
         out = []
         for name in connectors:
             info = KafkaConnect.get_connector_info(name)
-            topics, error_topic = extractor_container.on_connector_config_parsing(
-                info["config"], name
-            )
-            connector = KafkaConnector(
-                name=name,
-                config=info["config"],
-                type=info["type"],
-                topics=topics,
-                error_topic=error_topic,
-            )
+            connector: Optional[
+                KafkaConnector
+            ] = extractor_container.on_connector_config_parsing(info["config"], name)
+            # if no specific connector is returned create generic one
+            if not connector:
+                connector = KafkaConnector(
+                    name=name,
+                    config=info["config"],
+                    type=info["type"],
+                    topics=[],
+                )
             out.append(connector)
         return out

@@ -1,6 +1,10 @@
-from typing import List
+from typing import List, Optional
 
 from streams_explorer.core.extractor.extractor import Extractor
+from streams_explorer.models.kafka_connector import (
+    KafkaConnector,
+    KafkaConnectorTypesEnum,
+)
 from streams_explorer.models.sink import Sink
 
 
@@ -10,7 +14,7 @@ class JdbcSink(Extractor):
 
     def on_connector_config_parsing(
         self, config: dict, connector_name: str
-    ) -> List[str]:
+    ) -> Optional[KafkaConnector]:
         connector_class = config.get("connector.class")
         if connector_class and "JdbcSinkConnector" in connector_class:
             name = config.get("table.name.format")
@@ -22,5 +26,11 @@ class JdbcSink(Extractor):
                         source=connector_name,
                     )
                 )
-            return Extractor.split_topics(config.get("topics"))
-        return []
+            return KafkaConnector(
+                name=connector_name,
+                config=config,
+                type=KafkaConnectorTypesEnum.SINK,
+                topics=Extractor.split_topics(config.get("topics")),
+                error_topic=config.get("errors.deadletterqueue.topic.name"),
+            )
+        return None
