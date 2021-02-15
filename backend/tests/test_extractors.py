@@ -43,7 +43,7 @@ class TestSinkTwo(Extractor):
         )
             """
 
-empty_connector_info = {"config": {}, "type": ""}
+EMPTY_CONNECTOR_INFO = {"config": {}, "type": ""}
 
 
 def test_load_extractors():
@@ -88,7 +88,7 @@ def test_load_extractors_without_defaults():
 def test_extractors_topics_none(mocker):
     mocker.patch(
         "streams_explorer.core.services.kafkaconnect.KafkaConnect.get_connector_info",
-        lambda connector: empty_connector_info,
+        lambda connector: EMPTY_CONNECTOR_INFO,
     )
     mocker.patch(
         "streams_explorer.core.services.kafkaconnect.KafkaConnect.get_connectors",
@@ -110,7 +110,7 @@ def test_elasticsearch_sink():
     )
 
     extractor = ElasticsearchSink()
-    extractor.on_connector_info_parsing(empty_connector_info, "")
+    extractor.on_connector_info_parsing(EMPTY_CONNECTOR_INFO, "")
     assert len(extractor.sinks) == 0
     extractor.on_connector_info_parsing(
         {
@@ -142,7 +142,7 @@ def test_s3_sink():
     from streams_explorer.core.extractor.default.s3_sink import S3Sink
 
     extractor = S3Sink()
-    extractor.on_connector_info_parsing(empty_connector_info, "")
+    extractor.on_connector_info_parsing(EMPTY_CONNECTOR_INFO, "")
     assert len(extractor.sinks) == 0
     extractor.on_connector_info_parsing(
         {
@@ -161,7 +161,7 @@ def test_jdbc_sink():
     from streams_explorer.core.extractor.default.jdbc_sink import JdbcSink
 
     extractor = JdbcSink()
-    extractor.on_connector_info_parsing(empty_connector_info, "")
+    extractor.on_connector_info_parsing(EMPTY_CONNECTOR_INFO, "")
     assert len(extractor.sinks) == 0
     extractor.on_connector_info_parsing(
         {
