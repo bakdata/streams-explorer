@@ -12,9 +12,10 @@ class S3Sink(Extractor):
     def __init__(self):
         self.sinks: List[Sink] = []
 
-    def on_connector_config_parsing(
-        self, config: dict, connector_name: str
+    def on_connector_info_parsing(
+        self, info: dict, connector_name: str
     ) -> Optional[KafkaConnector]:
+        config = info["config"]
         connector_class = config.get("connector.class")
         if connector_class and "S3SinkConnector" in connector_class:
             name = config.get("s3.bucket.name")

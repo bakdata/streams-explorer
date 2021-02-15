@@ -14,8 +14,8 @@ class Extractor:
     def on_streaming_app_env_parsing(self, env, streaming_app_name: str):
         pass
 
-    def on_connector_config_parsing(
-        self, config: dict, connector_name: str
+    def on_connector_info_parsing(
+        self, info: dict, connector_name: str
     ) -> Optional[KafkaConnector]:
         pass
 

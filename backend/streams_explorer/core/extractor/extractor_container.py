@@ -3,6 +3,7 @@ from typing import List, Optional, Tuple
 from kubernetes.client import V1beta1CronJob
 from loguru import logger
 
+from streams_explorer.core.extractor.default.generic import GenericSink, GenericSource
 from streams_explorer.core.extractor.extractor import Extractor
 from streams_explorer.models.kafka_connector import KafkaConnector
 from streams_explorer.models.sink import Sink
@@ -17,6 +18,10 @@ class ExtractorContainer:
         self.extractors.append(extractor)
         logger.info(f"Added extractor {extractor.__class__.__name__}")
 
+    def add_generic(self):
+        self.add(GenericSink())
+        self.add(GenericSource())
+
     def reset(self):
         for extractor in self.extractors:
             extractor.sinks = []
@@ -26,12 +31,12 @@ class ExtractorContainer:
         for extractor in self.extractors:
             extractor.on_streaming_app_env_parsing(env, streaming_app_name)
 
-    def on_connector_config_parsing(
-        self, config: dict, connector_name: str
+    def on_connector_info_parsing(
+        self, info: dict, connector_name: str
     ) -> Optional[KafkaConnector]:
         for extractor in self.extractors:
-            connector: Optional[KafkaConnector] = extractor.on_connector_config_parsing(
-                config, connector_name
+            connector: Optional[KafkaConnector] = extractor.on_connector_info_parsing(
+                info, connector_name
             )
             if connector:
                 return connector

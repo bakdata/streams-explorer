@@ -31,14 +31,9 @@ class KafkaConnect:
             info = KafkaConnect.get_connector_info(name)
             connector: Optional[
                 KafkaConnector
-            ] = extractor_container.on_connector_config_parsing(info["config"], name)
-            # if no specific connector is returned create generic one
-            if not connector:
-                connector = KafkaConnector(
-                    name=name,
-                    config=info["config"],
-                    type=info["type"],
-                    topics=[],
-                )
-            out.append(connector)
+            ] = extractor_container.on_connector_info_parsing(info, name)
+            if connector:
+                out.append(connector)
+            else:
+                logger.warning(f"Failed to parse connector {name}")
         return out
