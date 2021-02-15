@@ -29,11 +29,15 @@ class KafkaConnect:
         out = []
         for name in connectors:
             info = KafkaConnect.get_connector_info(name)
-            topics: List[str] = extractor_container.on_connector_config_parsing(
+            topics, error_topic = extractor_container.on_connector_config_parsing(
                 info["config"], name
             )
             connector = KafkaConnector(
-                name=name, config=info["config"], type=info["type"], topics=topics
+                name=name,
+                config=info["config"],
+                type=info["type"],
+                topics=topics,
+                error_topic=error_topic,
             )
             out.append(connector)
         return out

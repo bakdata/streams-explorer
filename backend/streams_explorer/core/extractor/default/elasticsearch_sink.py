@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional, Tuple
 
 from streams_explorer.core.extractor.extractor import Extractor
 from streams_explorer.models.sink import Sink
@@ -10,7 +10,7 @@ class ElasticsearchSink(Extractor):
 
     def on_connector_config_parsing(
         self, config: dict, connector_name: str
-    ) -> List[str]:
+    ) -> Tuple[List[str], Optional[str]]:
         connector_class = config.get("connector.class")
         if connector_class and "ElasticsearchSinkConnector" in connector_class:
             index = config.get("transforms.changeTopic.replacement")
@@ -22,5 +22,8 @@ class ElasticsearchSink(Extractor):
                         source=connector_name,
                     )
                 )
-            return Extractor.split_topics(config.get("topics"))
-        return []
+            topics = Extractor.split_topics(config.get("topics"))
+            error_topic = config.get("errors.deadletterqueue.topic.name")
+            return topics, error_topic
+            # return {"topics": topics, "error_topic": error_topic}
+        return [], None

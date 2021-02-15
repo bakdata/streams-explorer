@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 from kubernetes.client import V1beta1CronJob
 
@@ -13,7 +13,9 @@ class Extractor:
     def on_streaming_app_env_parsing(self, env, streaming_app_name: str):
         pass
 
-    def on_connector_config_parsing(self, config, connector_name: str) -> List[str]:
+    def on_connector_config_parsing(
+        self, config, connector_name: str
+    ) -> Tuple[List[str], Optional[str]]:
         pass
 
     def on_cron_job_parsing(self, cron_job: V1beta1CronJob):

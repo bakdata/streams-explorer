@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 from kubernetes.client import V1beta1CronJob
 from loguru import logger
@@ -27,14 +27,14 @@ class ExtractorContainer:
 
     def on_connector_config_parsing(
         self, config: dict, connector_name: str
-    ) -> List[str]:
+    ) -> Tuple[List[str], Optional[str]]:
         for extractor in self.extractors:
-            topics: List[str] = extractor.on_connector_config_parsing(
+            topics, error_topic = extractor.on_connector_config_parsing(
                 config, connector_name
             )
             if topics:
-                return topics
-        return []
+                return topics, error_topic
+        return [], None
 
     def on_cron_job(self, cron_job: V1beta1CronJob):
         for extractor in self.extractors:
