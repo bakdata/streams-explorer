@@ -15,7 +15,7 @@ class Extractor:
         pass
 
     def on_connector_config_parsing(
-        self, config, connector_name: str
+        self, config: dict, connector_name: str
     ) -> Optional[KafkaConnector]:
         pass
 

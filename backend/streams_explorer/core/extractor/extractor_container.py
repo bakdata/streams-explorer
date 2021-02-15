@@ -30,11 +30,6 @@ class ExtractorContainer:
         self, config: dict, connector_name: str
     ) -> Optional[KafkaConnector]:
         for extractor in self.extractors:
-            # topics, error_topic = extractor.on_connector_config_parsing(
-            #     config, connector_name
-            # )
-            # if topics:
-            #     return topics, error_topic
             connector: Optional[KafkaConnector] = extractor.on_connector_config_parsing(
                 config, connector_name
             )
