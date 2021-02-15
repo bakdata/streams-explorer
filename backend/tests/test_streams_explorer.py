@@ -5,6 +5,7 @@ from kubernetes.client import V1beta1CronJob, V1ObjectMeta
 
 from streams_explorer.core.config import settings
 from streams_explorer.core.extractor.default.elasticsearch_sink import ElasticsearchSink
+from streams_explorer.core.extractor.default.generic import GenericSink, GenericSource
 from streams_explorer.core.extractor.extractor import Extractor
 from streams_explorer.core.services.dataflow_graph import NodeTypesEnum
 from streams_explorer.defaultlinker import DefaultLinker
@@ -86,7 +87,11 @@ class TestStreamsExplorer:
         self, mocker, deployments, cron_jobs, monkeypatch, fake_linker
     ):
         explorer = StreamsExplorer(linking_service=fake_linker)
-        extractor_container.extractors = [ElasticsearchSink()]
+        extractor_container.extractors = [
+            ElasticsearchSink(),
+            GenericSink(),
+            GenericSource(),
+        ]
         monkeypatch.setattr(settings.k8s, "consumer_group_annotation", "consumerGroup")
         mocker.patch.object(
             explorer, attribute="get_deployments", return_value=deployments

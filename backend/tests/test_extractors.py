@@ -14,7 +14,7 @@ class TestSinkOne(Extractor):
     def __init__(self):
         self.sinks: List[Sink] = []
 
-    def on_connector_config_parsing(self, config, connector_name):
+    def on_connector_info_parsing(self, config: dict, connector_name: str):
         self.sinks.append(
             Sink(
                 name="test",
@@ -33,7 +33,7 @@ class TestSinkTwo(Extractor):
     def __init__(self):
         self.sinks: List[Sink] = []
 
-    def on_connector_config_parsing(self, config, connector_name):
+    def on_connector_info_parsing(self, info: dict, connector_name: str):
         self.sinks.append(
             Sink(
                 name="test",
@@ -43,11 +43,13 @@ class TestSinkTwo(Extractor):
         )
             """
 
+empty_connector_info = {"config": {}, "type": ""}
+
 
 def test_load_extractors():
     settings.plugins.extractors.default = True
     settings.plugins.path = Path.cwd() / "plugins"
-    assert len(extractor_container.extractors) == 3
+    assert len(extractor_container.extractors) == 5
     extractor_1_path = settings.plugins.path / "fake_extractor_1.py"
     extractor_2_path = settings.plugins.path / "fake_extractor_2.py"
     try:
@@ -59,7 +61,7 @@ def test_load_extractors():
 
         load_extractors()
 
-        assert len(extractor_container.extractors) == 5
+        assert len(extractor_container.extractors) == 7
 
         extractor_classes = [
             extractor.__class__.__name__ for extractor in extractor_container.extractors
@@ -86,7 +88,7 @@ def test_load_extractors_without_defaults():
 def test_extractors_topics_none(mocker):
     mocker.patch(
         "streams_explorer.core.services.kafkaconnect.KafkaConnect.get_connector_info",
-        lambda connector: {"config": {}, "type": ""},
+        lambda connector: empty_connector_info,
     )
     mocker.patch(
         "streams_explorer.core.services.kafkaconnect.KafkaConnect.get_connectors",
@@ -95,11 +97,11 @@ def test_extractors_topics_none(mocker):
 
     from streams_explorer.extractors import extractor_container
 
-    on_connector_config_parsing = mocker.spy(
-        extractor_container, "on_connector_config_parsing"
+    on_connector_info_parsing = mocker.spy(
+        extractor_container, "on_connector_info_parsing"
     )
     KafkaConnect.connectors()
-    on_connector_config_parsing.assert_called_once()
+    on_connector_info_parsing.assert_called_once()
 
 
 def test_elasticsearch_sink():
@@ -108,21 +110,25 @@ def test_elasticsearch_sink():
     )
 
     extractor = ElasticsearchSink()
-    extractor.on_connector_config_parsing({}, "")
+    extractor.on_connector_info_parsing(empty_connector_info, "")
     assert len(extractor.sinks) == 0
-    extractor.on_connector_config_parsing(
+    extractor.on_connector_info_parsing(
         {
-            "connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector"
+            "config": {
+                "connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector"
+            }
         },
         "elasticsearch-test-sink",
     )
     assert len(extractor.sinks) == 0
-    connector = extractor.on_connector_config_parsing(
+    connector = extractor.on_connector_info_parsing(
         {
-            "connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
-            "transforms.changeTopic.replacement": "es-test-index",
-            "topics": "my-topic-1, my-topic-2",
-            "errors.deadletterqueue.topic.name": "dead-letter-topic",
+            "config": {
+                "connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
+                "transforms.changeTopic.replacement": "es-test-index",
+                "topics": "my-topic-1, my-topic-2",
+                "errors.deadletterqueue.topic.name": "dead-letter-topic",
+            }
         },
         "elasticsearch-sink-connector",
     )
@@ -136,12 +142,14 @@ def test_s3_sink():
     from streams_explorer.core.extractor.default.s3_sink import S3Sink
 
     extractor = S3Sink()
-    extractor.on_connector_config_parsing({}, "")
+    extractor.on_connector_info_parsing(empty_connector_info, "")
     assert len(extractor.sinks) == 0
-    extractor.on_connector_config_parsing(
+    extractor.on_connector_info_parsing(
         {
-            "connector.class": "io.confluent.connect.s3.S3SinkConnector",
-            "s3.bucket.name": "s3-test-bucket",
+            "config": {
+                "connector.class": "io.confluent.connect.s3.S3SinkConnector",
+                "s3.bucket.name": "s3-test-bucket",
+            }
         },
         "s3-sink-connector",
     )
@@ -153,12 +161,14 @@ def test_jdbc_sink():
     from streams_explorer.core.extractor.default.jdbc_sink import JdbcSink
 
     extractor = JdbcSink()
-    extractor.on_connector_config_parsing({}, "")
+    extractor.on_connector_info_parsing(empty_connector_info, "")
     assert len(extractor.sinks) == 0
-    extractor.on_connector_config_parsing(
+    extractor.on_connector_info_parsing(
         {
-            "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
-            "table.name.format": "jdbc-table",
+            "config": {
+                "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
+                "table.name.format": "jdbc-table",
+            }
         },
         "jdbc-sink-connector",
     )
