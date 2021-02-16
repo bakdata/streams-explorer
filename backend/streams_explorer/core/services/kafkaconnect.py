@@ -73,6 +73,7 @@ class KafkaConnect:
 
     @staticmethod
     def connectors() -> List[KafkaConnector]:
+        protected_keys.clear()
         connectors = KafkaConnect.get_connectors()
         out = []
         for name in connectors:
