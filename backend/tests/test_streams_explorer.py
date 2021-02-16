@@ -5,6 +5,7 @@ from kubernetes.client import V1beta1CronJob, V1ObjectMeta
 
 from streams_explorer.core.config import settings
 from streams_explorer.core.extractor.default.elasticsearch_sink import ElasticsearchSink
+from streams_explorer.core.extractor.default.generic import GenericSink, GenericSource
 from streams_explorer.core.extractor.extractor import Extractor
 from streams_explorer.core.services.dataflow_graph import NodeTypesEnum
 from streams_explorer.defaultlinker import DefaultLinker
@@ -86,7 +87,11 @@ class TestStreamsExplorer:
         self, mocker, deployments, cron_jobs, monkeypatch, fake_linker
     ):
         explorer = StreamsExplorer(linking_service=fake_linker)
-        extractor_container.extractors = [ElasticsearchSink()]
+        extractor_container.extractors = [
+            ElasticsearchSink(),
+            GenericSink(),
+            GenericSource(),
+        ]
         monkeypatch.setattr(settings.k8s, "consumer_group_annotation", "consumerGroup")
         mocker.patch.object(
             explorer, attribute="get_deployments", return_value=deployments
@@ -95,10 +100,10 @@ class TestStreamsExplorer:
         mocker.patch.object(explorer, attribute="get_cron_jobs", return_value=cron_jobs)
 
         def get_connectors():
-            return ["connector1", "connector2"]
+            return ["es-sink-connector", "generic-source-connector"]
 
         def get_connector_info(connector):
-            if connector == "connector1":
+            if connector == "es-sink-connector":
                 return {
                     "config": {
                         "connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
@@ -107,14 +112,13 @@ class TestStreamsExplorer:
                     },
                     "type": KafkaConnectorTypesEnum.SINK,
                 }
-            if connector == "connector2":
+            if connector == "generic-source-connector":
                 return {
                     "config": {
-                        "connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
-                        "name": "test-sink",
-                        "topics": "output-topic3",
+                        "connector.class": "GenericSourceConnector",
+                        "name": "generic-source",
                     },
-                    "type": KafkaConnectorTypesEnum.SINK,
+                    "type": KafkaConnectorTypesEnum.SOURCE,
                 }
 
         mocker.patch(
@@ -151,6 +155,7 @@ class TestStreamsExplorer:
         assert streams_explorer.get_pipeline_names() == [
             "streaming-app1",
             "pipeline2",
+            "generic-source-connector",
         ]
 
     def test_get_node_information(self, streams_explorer, monkeypatch):
@@ -166,8 +171,10 @@ class TestStreamsExplorer:
             [{"name": "Test Label", "key": "metadata.labels.test_label"}],
         )
 
-        assert streams_explorer.get_node_information("connector1") == NodeInformation(
-            node_id="connector1",
+        assert streams_explorer.get_node_information(
+            "es-sink-connector"
+        ) == NodeInformation(
+            node_id="es-sink-connector",
             node_type=NodeTypesEnum.CONNECTOR,
             info=[
                 NodeInfoListItem(
@@ -218,6 +225,6 @@ class TestStreamsExplorer:
             "streaming-app2", "grafana"
         )
         assert type(streams_explorer.get_link("streaming-app2", "kibanalogs")) == str
-        assert "consumergroups=connect-test-sink" in streams_explorer.get_link(
-            "connector2", "grafana"
+        assert "consumergroups=connect-generic-source" in streams_explorer.get_link(
+            "generic-source-connector", "grafana"
         )
