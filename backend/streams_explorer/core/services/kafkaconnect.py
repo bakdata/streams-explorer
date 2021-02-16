@@ -1,4 +1,4 @@
-from typing import Dict, List, Set
+from typing import Dict, List, Optional, Set
 
 import requests
 from loguru import logger
@@ -78,11 +78,11 @@ class KafkaConnect:
         out = []
         for name in connectors:
             info = KafkaConnect.get_connector_info(name)
-            topics: List[str] = extractor_container.on_connector_config_parsing(
-                info["config"], name
-            )
-            connector = KafkaConnector(
-                name=name, config=info["config"], type=info["type"], topics=topics
-            )
-            out.append(connector)
+            connector: Optional[
+                KafkaConnector
+            ] = extractor_container.on_connector_info_parsing(info, name)
+            if connector:
+                out.append(connector)
+            else:
+                logger.warning("Failed to parse connector {}", name)
         return out

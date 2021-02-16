@@ -48,6 +48,7 @@ class TestDataFlowGraph:
             type=KafkaConnectorTypesEnum.SINK,
             topics=["output-topic"],
             config={},
+            error_topic="dead-letter-topic",
         )
         source_connector = KafkaConnector(
             name="test-source-connector",
@@ -59,8 +60,9 @@ class TestDataFlowGraph:
         df.add_streaming_app(self.get_k8s_app())
         df.add_connector(sink_connector)
         df.add_connector(source_connector)
-        assert len(df.graph.nodes) == 7
+        assert len(df.graph.nodes) == 8
         assert df.graph.has_edge("output-topic", "test-sink-connector")
+        assert df.graph.has_edge("test-sink-connector", "dead-letter-topic")
         assert df.graph.has_edge("test-source-connector", "input-topic")
         assert df.graph.has_edge("test-source-connector", "input-topic2")
 
