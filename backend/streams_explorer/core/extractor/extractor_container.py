@@ -16,7 +16,7 @@ class ExtractorContainer:
 
     def add(self, extractor: Extractor):
         self.extractors.append(extractor)
-        logger.info(f"Added extractor {extractor.__class__.__name__}")
+        logger.info("Added extractor {}", extractor.__class__.__name__)
 
     def add_generic(self):
         self.add(GenericSink())

@@ -84,5 +84,5 @@ class KafkaConnect:
             if connector:
                 out.append(connector)
             else:
-                logger.warning(f"Failed to parse connector {name}")
+                logger.warning("Failed to parse connector {}", name)
         return out
