@@ -18,7 +18,7 @@ class KafkaConnect:
 
     @staticmethod
     def get_connector_info(connector_name: str) -> dict:
-        logger.info(f"Get connector information for {connector_name}")
+        logger.info("Get connector information for {}", connector_name)
         response = requests.get(f"{url}/connectors/{connector_name}")
         info: dict = response.json()
         return info
@@ -29,13 +29,23 @@ class KafkaConnect:
         return KafkaConnect.sanitize_connector_config(info["config"])
 
     @staticmethod
+    def extract_connector_class_basename(connector_class: str) -> str:
+        if "." in connector_class:
+            return connector_class.rsplit(".", 1)[-1]
+        return connector_class
+
+    @staticmethod
+    @logger.catch
     def sanitize_connector_config(config: dict) -> dict:
-        connector_plugin = config["connector.class"].rsplit(".", 1)[-1]
+        connector_class = KafkaConnect.extract_connector_class_basename(
+            config["connector.class"]
+        )
         response = requests.put(
-            f"{url}/connector-plugins/{connector_plugin}/config/validate",
-            headers={"Content-type": "application/json"},
+            f"{url}/connector-plugins/{connector_class}/config/validate",
             json=config,
         )
+        if not response.ok:
+            return config
         data = response.json()
         protected_keys = [
             config["value"]["name"]
@@ -44,7 +54,7 @@ class KafkaConnect:
         ]
         for key in protected_keys:
             config[key] = "[hidden]"
-            logger.debug(f"Sanitized connector config {key}")
+            logger.debug('Sanitized connector config "{}"', key)
         return config
 
     @staticmethod
