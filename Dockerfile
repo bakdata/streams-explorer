@@ -3,6 +3,7 @@ RUN apt-get -y update && \
     apt-get --no-install-recommends -y install gcc curl && \
     curl -sL https://deb.nodesource.com/setup_14.x | bash - && \
     apt-get --no-install-recommends -y install nodejs python3-dev graphviz libgraphviz-dev pkg-config && \
+    apt-get -y purge --auto-remove python2-minimal && \
     rm -rf /var/lib/apt/lists/*
 
 COPY ./backend /app
