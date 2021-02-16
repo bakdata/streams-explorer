@@ -1,4 +1,4 @@
-from typing import List
+from typing import Dict, List
 
 import requests
 from loguru import logger
@@ -8,6 +8,7 @@ from streams_explorer.extractors import extractor_container
 from streams_explorer.models.kafka_connector import KafkaConnector
 
 url = settings.kafkaconnect.url
+protected_keys: Dict[str, List[str]] = {}
 
 
 class KafkaConnect:
@@ -35,24 +36,24 @@ class KafkaConnect:
         return connector_class
 
     @staticmethod
-    @logger.catch
     def sanitize_connector_config(config: dict) -> dict:
         connector_class = KafkaConnect.extract_connector_class_basename(
             config["connector.class"]
         )
-        response = requests.put(
-            f"{url}/connector-plugins/{connector_class}/config/validate",
-            json=config,
-        )
-        if not response.ok:
-            return config
-        data = response.json()
-        protected_keys = [
-            config["value"]["name"]
-            for config in data["configs"]
-            if config["value"]["value"] == "[hidden]"
-        ]
-        for key in protected_keys:
+        if connector_class not in protected_keys:
+            response = requests.put(
+                f"{url}/connector-plugins/{connector_class}/config/validate",
+                json=config,
+            )
+            if not response.ok:
+                return config
+            data = response.json()
+            protected_keys[connector_class] = [
+                config["value"]["name"]
+                for config in data["configs"]
+                if config["definition"]["type"] == "PASSWORD"
+            ]
+        for key in set(protected_keys[connector_class]).intersection(config):
             config[key] = "[hidden]"
             logger.debug('Sanitized connector config "{}"', key)
         return config
