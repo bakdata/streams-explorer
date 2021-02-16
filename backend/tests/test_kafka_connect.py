@@ -18,6 +18,18 @@ connector_data = {
 
 
 class TestKafkaConnect:
+    def test_extract_connector_class_basename(self):
+        assert (
+            KafkaConnect.extract_connector_class_basename(
+                "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector"
+            )
+            == "ElasticsearchSinkConnector"
+        )
+        assert (
+            KafkaConnect.extract_connector_class_basename("ElasticsearchSinkConnector")
+            == "ElasticsearchSinkConnector"
+        )
+
     def test_sanitize_connector_config(self, requests_mock):
         connector_config = {
             "connector.class": "ConnectorClass",
