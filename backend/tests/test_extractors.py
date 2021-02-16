@@ -1,7 +1,6 @@
 from pathlib import Path
 
 from streams_explorer.core.config import settings
-from streams_explorer.core.extractor.extractor_container import ExtractorContainer
 from streams_explorer.core.services.kafkaconnect import KafkaConnect
 from streams_explorer.extractors import extractor_container, load_extractors
 from streams_explorer.models.kafka_connector import KafkaConnectorTypesEnum
@@ -60,7 +59,7 @@ EMPTY_CONNECTOR_INFO = {"config": {}, "type": ""}
 def test_load_extractors():
     settings.plugins.extractors.default = True
     settings.plugins.path = Path.cwd() / "plugins"
-    assert len(extractor_container.extractors) == 5
+    assert len(extractor_container.extractors) == 3
     extractor_1_path = settings.plugins.path / "fake_extractor_1.py"
     extractor_2_path = settings.plugins.path / "fake_extractor_2.py"
     try:
@@ -90,10 +89,10 @@ def test_load_extractors():
 def test_load_extractors_without_defaults():
     settings.plugins.extractors.default = False
     settings.plugins.path = Path.cwd() / "plugins"
-    extractor_container = ExtractorContainer()  # noqa: F811
+    extractor_container.extractors.clear()
     load_extractors()
 
-    assert len(extractor_container.extractors) == 0
+    assert len(extractor_container.extractors) == 2
 
 
 def test_generic_extractors_fallback(mocker):

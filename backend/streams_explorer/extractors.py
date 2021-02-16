@@ -13,10 +13,10 @@ if settings.plugins.extractors.default:
     extractor_container.add(ElasticsearchSink())
     extractor_container.add(S3Sink())
     extractor_container.add(JdbcSink())
-    extractor_container.add_generic()
 
 
 def load_extractors():
     extractors = load_plugin(Extractor, all=True)
     for extractor in extractors:
         extractor_container.add(extractor())
+    extractor_container.add_generic()
