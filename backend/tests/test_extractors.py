@@ -4,6 +4,7 @@ from streams_explorer.core.config import settings
 from streams_explorer.core.extractor.extractor_container import ExtractorContainer
 from streams_explorer.core.services.kafkaconnect import KafkaConnect
 from streams_explorer.extractors import extractor_container, load_extractors
+from streams_explorer.models.kafka_connector import KafkaConnectorTypesEnum
 
 extractor_file_1 = """from typing import List
 from streams_explorer.core.extractor.extractor import Extractor
@@ -85,6 +86,48 @@ def test_load_extractors_without_defaults():
     assert len(extractor_container.extractors) == 0
 
 
+def test_generic_extractors_fallback(mocker):
+    settings.plugins.extractors.default = True
+
+    mocker.patch(
+        "streams_explorer.core.services.kafkaconnect.KafkaConnect.get_connectors",
+        lambda: ["custom-sink", "custom-source"],
+    )
+
+    def get_connector_info(connector_name: str) -> dict:
+        if connector_name == "custom-sink":
+            return {
+                "type": "sink",
+                "config": {
+                    "connector.class": "CustomSinkConnector",
+                    "topics": "my-topic-1, my-topic-2",
+                    "errors.deadletterqueue.topic.name": "dead-letter-topic",
+                },
+            }
+        if connector_name == "custom-source":
+            return {
+                "type": "source",
+                "config": {
+                    "connector.class": "CustomSourceConnector",
+                },
+            }
+        return {}
+
+    mocker.patch(
+        "streams_explorer.core.services.kafkaconnect.KafkaConnect.get_connector_info",
+        get_connector_info,
+    )
+
+    connectors = KafkaConnect.connectors()
+    assert len(connectors) == 2
+    assert connectors[0].type == KafkaConnectorTypesEnum.SINK
+    assert connectors[0].topics == ["my-topic-1", "my-topic-2"]
+    assert connectors[0].error_topic == "dead-letter-topic"
+    assert connectors[1].type == KafkaConnectorTypesEnum.SOURCE
+    assert connectors[1].topics == []
+    assert connectors[1].error_topic is None
+
+
 def test_extractors_topics_none(mocker):
     mocker.patch(
         "streams_explorer.core.services.kafkaconnect.KafkaConnect.get_connector_info",
@@ -94,8 +137,6 @@ def test_extractors_topics_none(mocker):
         "streams_explorer.core.services.kafkaconnect.KafkaConnect.get_connectors",
         lambda: ["connector"],
     )
-
-    from streams_explorer.extractors import extractor_container
 
     on_connector_info_parsing = mocker.spy(
         extractor_container, "on_connector_info_parsing"
