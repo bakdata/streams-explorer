@@ -129,6 +129,10 @@ class TestStreamsExplorer:
             "streams_explorer.core.services.kafkaconnect.KafkaConnect.get_connector_info",
             get_connector_info,
         )
+        mocker.patch(
+            "streams_explorer.core.services.kafkaconnect.KafkaConnect.sanitize_connector_config",
+            lambda config: config,
+        )
 
         mocker.patch(
             "streams_explorer.core.services.schemaregistry.SchemaRegistry.get_topic_value_schema_versions",
