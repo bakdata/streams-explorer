@@ -81,6 +81,10 @@ def test_load_extractors():
         assert "ElasticsearchSink" in extractor_classes
         assert "S3Sink" in extractor_classes
         assert "JdbcSink" in extractor_classes
+        # Verify Generic extractors are last in list as fallback
+        fallback_extractor_classes = extractor_classes[-2:]
+        assert "GenericSink" in fallback_extractor_classes
+        assert "GenericSource" in fallback_extractor_classes
     finally:
         extractor_1_path.unlink()
         extractor_2_path.unlink()
@@ -93,6 +97,12 @@ def test_load_extractors_without_defaults():
     load_extractors()
 
     assert len(extractor_container.extractors) == 2
+
+    extractor_classes = [
+        extractor.__class__.__name__ for extractor in extractor_container.extractors
+    ]
+    assert "GenericSink" in extractor_classes
+    assert "GenericSource" in extractor_classes
 
 
 def test_generic_extractors_fallback(mocker):
