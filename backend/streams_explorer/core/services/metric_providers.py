@@ -40,7 +40,7 @@ class PrometheusMetric(Enum):
     )
     CONNECTOR_TASKS = (
         "connector_tasks",
-        "sum by(connector) (kafka_connect_connector_tasks_state == 1)",
+        "sum by(connector) (kafka_connect_connector_tasks_state == 1) or clamp_max(sum by(connector) (kafka_connect_connector_tasks_state), 0)",
     )
 
 
