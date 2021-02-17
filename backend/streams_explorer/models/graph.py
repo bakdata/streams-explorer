@@ -27,6 +27,7 @@ class Metric(BaseModel):
     consumer_read_rate: Optional[float] = None
     topic_size: Optional[int] = None
     replicas: Optional[int] = None
+    connector_tasks: Optional[int] = None
 
 
 class Edge(BaseModel):

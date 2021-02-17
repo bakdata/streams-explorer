@@ -91,4 +91,10 @@ prometheus_data = {
             "value": [1608115880.752, "64.977769"],
         },
     ],
+    "connector_tasks": [
+        {
+            "metric": {"connector": "demo-sink"},
+            "value": [1613560970.102, "3"],
+        },
+    ],
 }
