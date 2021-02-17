@@ -92,6 +92,10 @@ class TestApplication:
             "streams_explorer.core.services.kafkaconnect.KafkaConnect.get_connector_info",
             get_connector_info,
         )
+        mocker.patch(
+            "streams_explorer.extractors.load_extractors",
+            lambda: None,
+        )
 
         from main import app
 
