@@ -88,6 +88,18 @@ spec:
           {{ end }}
           {{ end }}
           {{- if .Values.volumeMounts }}{{ toYaml .Values.volumeMounts | trim | nindent 12 }}{{ end }}
+          livenessProbe:
+            httpGet:
+              path: /healthz/live
+              port: 8080  # TODO
+            initialDelaySeconds: 5
+            timeoutSeconds: 1
+          readinessProbe:
+            httpGet:
+              path: /healthz/ready
+              port: 8080  # TODO
+            initialDelaySeconds: 5
+            timeoutSeconds: 1
       volumes:
       {{- if .Values.plugins }}
         - name: {{ $fullName }}-plugin-volume
