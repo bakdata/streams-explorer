@@ -66,6 +66,11 @@ export function updateNodeMetrics(graph: Graph, metrics: Metric[]) {
         typeof metric.replicas === "number" ? `REPLICAS ${metric.replicas}` : ""
       }`,
       `${
+        typeof metric.connector_tasks === "number"
+          ? `TASKS ${metric.connector_tasks}`
+          : ""
+      }`,
+      `${
         typeof metric.consumer_lag === "number"
           ? `LAG ${formatNumber(metric.consumer_lag)}`
           : ""

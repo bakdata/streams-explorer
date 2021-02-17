@@ -46,6 +46,7 @@ export interface Metric {
   consumer_read_rate?: number;
   topic_size?: number;
   replicas?: number;
+  connector_tasks?: number;
 }
 
 export interface Node {
