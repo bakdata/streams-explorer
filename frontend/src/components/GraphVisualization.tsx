@@ -112,6 +112,16 @@ export function updateNodeMetrics(graph: Graph, metrics: Metric[]) {
       if (metric.consumer_read_rate) {
         readingNodes.add(node.getID());
       }
+
+      if (nodeType === "connector") {
+        if (metric.consumer_read_rate) {
+          node.getOutEdges().forEach((edge: IEdge) => {
+            graph.updateItem(edge, {
+              type: "line-dash",
+            });
+          });
+        }
+      }
     }
   });
 
