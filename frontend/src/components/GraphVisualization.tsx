@@ -113,10 +113,10 @@ export function updateNodeMetrics(graph: Graph, metrics: Metric[]) {
         readingNodes.add(node.getID());
       }
 
-      // animate outgoing edges on connector nodes with read rate > 0
+      // animate incoming & outgoing edges on connector nodes with read rate > 0
       if (nodeType === "connector") {
         if (metric.consumer_read_rate) {
-          node.getOutEdges().forEach((edge: IEdge) => {
+          node.getEdges().forEach((edge: IEdge) => {
             graph.updateItem(edge, {
               type: "line-dash",
             });
