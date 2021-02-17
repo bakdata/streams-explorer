@@ -76,5 +76,6 @@ class TestPrometheusMetricProvider:
             Metric(
                 node_id="demo-sink",
                 consumer_lag=1,
+                connector_tasks=3,
             ),
         ]
