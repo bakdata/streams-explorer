@@ -109,9 +109,7 @@ export function updateNodeMetrics(graph: Graph, metrics: Metric[]) {
         node.getOutEdges().forEach((edge: IEdge) => {
           setEdgeActivity(graph, edge, !!metric.messages_out);
         });
-      }
-
-      if (metric.replicas === 0) {
+      } else if (metric.replicas === 0) {
         unavailableStreamingApps.push(node);
       } else if (
         nodeType === "streaming-app" &&
