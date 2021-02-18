@@ -19,20 +19,21 @@ describe("visualize node metrics", () => {
         { id: "topic-out3", node_type: "topic" },
         { id: "sink-connector2", node_type: "connector" },
         { id: "sink-connector3", node_type: "connector" },
+        { id: "sink2", node_type: "sink/source" },
       ],
       edges: [
         {
-          id: "in-edge",
+          id: "in-edge1",
           source: "topic-in",
           target: "streaming-app1",
         },
         {
-          id: "out-edge",
+          id: "out-edge1",
           source: "streaming-app1",
           target: "topic-out1",
         },
         {
-          id: "in-edge1",
+          id: "in-edge2",
           source: "topic-out1",
           target: "streaming-app2",
         },
@@ -47,7 +48,7 @@ describe("visualize node metrics", () => {
           target: "sink-connector2",
         },
         {
-          id: "in-edge2",
+          id: "in-edge3",
           source: "topic-out1",
           target: "streaming-app3",
         },
@@ -159,12 +160,12 @@ describe("visualize node metrics", () => {
       },
     ]);
 
-    expect(graph.findById("in-edge").getModel().type).toEqual("line-dash");
-    expect(graph.findById("out-edge").getModel().type).toEqual("line-dash");
-    expect(graph.findById("in-edge1").getModel().type).toEqual(
+    expect(graph.findById("in-edge1").getModel().type).toEqual("line-dash");
+    expect(graph.findById("out-edge1").getModel().type).toEqual("line-dash");
+    expect(graph.findById("in-edge2").getModel().type).toEqual(
       "cubic-horizontal"
     );
-    expect(graph.findById("in-edge2").getModel().type).toEqual("line-dash");
+    expect(graph.findById("in-edge3").getModel().type).toEqual("line-dash");
     expect(graph.findById("out-edge3").getModel().type).toEqual("line-dash");
     expect(graph.findById("in-edge-sink-connector2").getModel().type).toEqual(
       "cubic-horizontal"
