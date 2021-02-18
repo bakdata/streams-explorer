@@ -403,31 +403,3 @@ export type UseMetricsApiMetricsGetProps = Omit<
  */
 export const useMetricsApiMetricsGet = (props: UseMetricsApiMetricsGetProps) =>
   useGet<Metric[], unknown, void, void>(`/api/metrics`, props);
-
-export interface ReadyApiHealthGetResponse {}
-
-export type ReadyApiHealthGetProps = Omit<
-  GetProps<ReadyApiHealthGetResponse, unknown, void, void>,
-  "path"
->;
-
-/**
- * Ready
- */
-export const ReadyApiHealthGet = (props: ReadyApiHealthGetProps) => (
-  <Get<ReadyApiHealthGetResponse, unknown, void, void>
-    path={`/api/health`}
-    {...props}
-  />
-);
-
-export type UseReadyApiHealthGetProps = Omit<
-  UseGetProps<ReadyApiHealthGetResponse, unknown, void, void>,
-  "path"
->;
-
-/**
- * Ready
- */
-export const useReadyApiHealthGet = (props: UseReadyApiHealthGetProps) =>
-  useGet<ReadyApiHealthGetResponse, unknown, void, void>(`/api/health`, props);
