@@ -1,4 +1,7 @@
 FROM tiangolo/uvicorn-gunicorn-fastapi:python3.8-slim
+
+ENV PIP_NO_CACHE_DIR=1
+
 RUN apt-get -y update && \
     apt-get --no-install-recommends -y install gcc curl && \
     curl -sL https://deb.nodesource.com/setup_14.x | bash - && \
@@ -7,7 +10,8 @@ RUN apt-get -y update && \
 
 COPY ./backend /app
 RUN pip install -U pip && \
-    pip install --no-cache-dir -r requirements.txt
+    sed -E -i.bak '/^(fastapi|uvicorn|click|h11)=/d' requirements.txt && \
+    pip install -r requirements.txt
 
 COPY ./frontend /frontend
 RUN mkdir -p /app/static && \
