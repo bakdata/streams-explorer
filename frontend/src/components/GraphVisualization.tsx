@@ -56,7 +56,6 @@ function setEdgeActivity(
 }
 
 export function updateNodeMetrics(graph: Graph, metrics: Metric[]) {
-  let readingNodes = new Set();
   let outgoingEdges: IEdge[] = [];
   metrics.forEach((metric) => {
     let metricsString: string = [
@@ -113,8 +112,6 @@ export function updateNodeMetrics(graph: Graph, metrics: Metric[]) {
             outgoingEdges.push(edge);
           }
         });
-      } else if (metric.consumer_read_rate) {
-        readingNodes.add(node.getID());
       }
 
       if (metric.replicas === 0) {
@@ -133,12 +130,6 @@ export function updateNodeMetrics(graph: Graph, metrics: Metric[]) {
         );
         setEdgeActivity(graph, node.getEdges(), active);
       }
-    }
-  });
-
-  outgoingEdges.forEach((edge: IEdge) => {
-    if (!readingNodes.has(edge.getTarget().getID())) {
-      setEdgeActivity(graph, edge, false);
     }
   });
 }

@@ -195,9 +195,7 @@ describe("visualize node metrics", () => {
     ).toEqual("line-dash");
     expect(graph.findById("in-edge1").getModel().type).toEqual("line-dash");
     expect(graph.findById("out-edge1").getModel().type).toEqual("line-dash");
-    expect(graph.findById("in-edge2").getModel().type).toEqual(
-      "cubic-horizontal"
-    );
+    expect(graph.findById("in-edge2").getModel().type).toEqual("line-dash");
     expect(graph.findById("out-edge2").getModel().type).toEqual(
       "cubic-horizontal"
     );
