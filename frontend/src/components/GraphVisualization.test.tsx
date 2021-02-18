@@ -48,6 +48,11 @@ describe("visualize node metrics", () => {
           target: "sink-connector2",
         },
         {
+          id: "in-edge-sink2",
+          source: "sink-connector2",
+          target: "sink2",
+        },
+        {
           id: "in-edge3",
           source: "topic-out1",
           target: "streaming-app3",
@@ -168,6 +173,9 @@ describe("visualize node metrics", () => {
     expect(graph.findById("in-edge3").getModel().type).toEqual("line-dash");
     expect(graph.findById("out-edge3").getModel().type).toEqual("line-dash");
     expect(graph.findById("in-edge-sink-connector2").getModel().type).toEqual(
+      "cubic-horizontal"
+    );
+    expect(graph.findById("in-edge-sink2").getModel().type).toEqual(
       "cubic-horizontal"
     );
     expect(graph.findById("in-edge-sink-connector3").getModel().type).toEqual(
