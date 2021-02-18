@@ -150,7 +150,7 @@ describe("visualize node metrics", () => {
         messages_in: undefined,
         messages_out: undefined,
         consumer_lag: 1,
-        consumer_read_rate: 1,
+        consumer_read_rate: 0,
         topic_size: undefined,
         replicas: undefined,
         connector_tasks: undefined,
@@ -198,7 +198,12 @@ describe("visualize node metrics", () => {
     expect(graph.findById("in-edge2").getModel().type).toEqual(
       "cubic-horizontal"
     );
-    expect(graph.findById("in-edge3").getModel().type).toEqual("line-dash");
+    expect(graph.findById("out-edge2").getModel().type).toEqual(
+      "cubic-horizontal"
+    );
+    expect(graph.findById("in-edge3").getModel().type).toEqual(
+      "cubic-horizontal"
+    );
     expect(graph.findById("out-edge3").getModel().type).toEqual("line-dash");
     expect(graph.findById("in-edge-sink-connector2").getModel().type).toEqual(
       "cubic-horizontal"

@@ -118,8 +118,14 @@ export function updateNodeMetrics(graph: Graph, metrics: Metric[]) {
       }
 
       if (metric.replicas === 0) {
-        // do not animate edges on streaming apps with 0 replicas or read rate of 0
+        // do not animate edges on streaming apps with 0 replicas
         setEdgeActivity(graph, node.getEdges(), false);
+      } else if (
+        nodeType === "streaming-app" &&
+        metric.consumer_read_rate === 0
+      ) {
+        // do not animate incoming edges on streaming apps with read rate 0
+        setEdgeActivity(graph, node.getInEdges(), false);
       } else if (nodeType === "connector") {
         // animate edges on connector nodes if read rate and running tasks is not 0
         const active: boolean = !(
