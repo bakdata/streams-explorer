@@ -404,70 +404,30 @@ export type UseMetricsApiMetricsGetProps = Omit<
 export const useMetricsApiMetricsGet = (props: UseMetricsApiMetricsGetProps) =>
   useGet<Metric[], unknown, void, void>(`/api/metrics`, props);
 
-export interface LiveApiHealthzLiveGetResponse {}
+export interface ReadyApiHealthGetResponse {}
 
-export type LiveApiHealthzLiveGetProps = Omit<
-  GetProps<LiveApiHealthzLiveGetResponse, unknown, void, void>,
-  "path"
->;
-
-/**
- * Live
- */
-export const LiveApiHealthzLiveGet = (props: LiveApiHealthzLiveGetProps) => (
-  <Get<LiveApiHealthzLiveGetResponse, unknown, void, void>
-    path={`/api/healthz/live`}
-    {...props}
-  />
-);
-
-export type UseLiveApiHealthzLiveGetProps = Omit<
-  UseGetProps<LiveApiHealthzLiveGetResponse, unknown, void, void>,
-  "path"
->;
-
-/**
- * Live
- */
-export const useLiveApiHealthzLiveGet = (
-  props: UseLiveApiHealthzLiveGetProps
-) =>
-  useGet<LiveApiHealthzLiveGetResponse, unknown, void, void>(
-    `/api/healthz/live`,
-    props
-  );
-
-export interface ReadyApiHealthzReadyGetResponse {}
-
-export type ReadyApiHealthzReadyGetProps = Omit<
-  GetProps<ReadyApiHealthzReadyGetResponse, unknown, void, void>,
+export type ReadyApiHealthGetProps = Omit<
+  GetProps<ReadyApiHealthGetResponse, unknown, void, void>,
   "path"
 >;
 
 /**
  * Ready
  */
-export const ReadyApiHealthzReadyGet = (
-  props: ReadyApiHealthzReadyGetProps
-) => (
-  <Get<ReadyApiHealthzReadyGetResponse, unknown, void, void>
-    path={`/api/healthz/ready`}
+export const ReadyApiHealthGet = (props: ReadyApiHealthGetProps) => (
+  <Get<ReadyApiHealthGetResponse, unknown, void, void>
+    path={`/api/health`}
     {...props}
   />
 );
 
-export type UseReadyApiHealthzReadyGetProps = Omit<
-  UseGetProps<ReadyApiHealthzReadyGetResponse, unknown, void, void>,
+export type UseReadyApiHealthGetProps = Omit<
+  UseGetProps<ReadyApiHealthGetResponse, unknown, void, void>,
   "path"
 >;
 
 /**
  * Ready
  */
-export const useReadyApiHealthzReadyGet = (
-  props: UseReadyApiHealthzReadyGetProps
-) =>
-  useGet<ReadyApiHealthzReadyGetResponse, unknown, void, void>(
-    `/api/healthz/ready`,
-    props
-  );
+export const useReadyApiHealthGet = (props: UseReadyApiHealthGetProps) =>
+  useGet<ReadyApiHealthGetResponse, unknown, void, void>(`/api/health`, props);

@@ -61,6 +61,23 @@ spec:
             - name: http
               containerPort: {{ .Values.serviceHttpPort}}
               protocol: TCP
+          livenessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: {{ .Values.livenessProbeInitialDelay }}
+            periodSeconds: {{ .Values.livenessProbePeriodSeconds }}
+            timeoutSeconds: {{ .Values.livenessProbeTimeout }}
+            failureThreshold: {{ .Values.livenessProbeFailureThreshold }}
+            successThreshold: {{ .Values.livenessProbeSuccessThreshold }}
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: {{ .Values.readinessProbeInitialDelay }}
+            periodSeconds: {{ .Values.readinessProbePeriodSeconds }}
+            timeoutSeconds: {{ .Values.readinessProbeTimeout }}
+            failureThreshold: {{ .Values.readinessProbeFailureThreshold }}
+            successThreshold: {{ .Values.readinessProbeSuccessThreshold }}
           resources:
 {{ toYaml .Values.resources | indent 12 }}
           env:
@@ -88,18 +105,6 @@ spec:
           {{ end }}
           {{ end }}
           {{- if .Values.volumeMounts }}{{ toYaml .Values.volumeMounts | trim | nindent 12 }}{{ end }}
-          livenessProbe:
-            httpGet:
-              path: /healthz/live
-              port: 8080  # TODO
-            initialDelaySeconds: 5
-            timeoutSeconds: 1
-          readinessProbe:
-            httpGet:
-              path: /healthz/ready
-              port: 8080  # TODO
-            initialDelaySeconds: 5
-            timeoutSeconds: 1
       volumes:
       {{- if .Values.plugins }}
         - name: {{ $fullName }}-plugin-volume

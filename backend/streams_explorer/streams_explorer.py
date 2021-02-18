@@ -30,6 +30,7 @@ class StreamsExplorer:
     v1_client: Optional[ApiClient] = None
     context = settings.k8s.deployment.context
     namespaces = settings.k8s.deployment.namespaces
+    ready: bool = False
 
     def __init__(self, linking_service: LinkingService):
         self.applications: Dict[str, K8sApp] = {}
@@ -41,6 +42,7 @@ class StreamsExplorer:
         self.__setup_k8s_environment()
 
     def update(self):
+        self.ready = False
         self.applications = {}
         self.kafka_connectors = []
         extractor_container.reset()
@@ -49,6 +51,7 @@ class StreamsExplorer:
         self.__retrieve_cron_jobs()
         self.__get_connectors()
         self.__create_graph()
+        self.ready = True
 
     def get_positioned_json_graph(self) -> dict:
         return self.data_flow.get_positioned_graph()

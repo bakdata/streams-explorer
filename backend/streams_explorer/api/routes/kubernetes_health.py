@@ -1,13 +1,15 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+
+from streams_explorer.api.dependencies.streams_explorer import (
+    get_streams_explorer_from_request,
+)
+from streams_explorer.streams_explorer import StreamsExplorer
 
 router = APIRouter()
 
 
-@router.get("/live", status_code=200)
-async def live():
-    return {"status": "UP"}
-
-
-@router.get("/ready", status_code=200)
-async def ready():
-    return {"ready": True}
+@router.get("", status_code=200)
+async def ready(
+    streams_explorer: StreamsExplorer = Depends(get_streams_explorer_from_request),
+):
+    return {"ready": streams_explorer.ready}
