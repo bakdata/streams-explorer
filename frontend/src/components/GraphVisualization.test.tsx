@@ -17,11 +17,23 @@ describe("visualize node metrics", () => {
         { id: "topic-out1", node_type: "topic" },
         { id: "topic-out2", node_type: "topic" },
         { id: "topic-out3", node_type: "topic" },
+        { id: "source-connector1", node_type: "connector" },
         { id: "sink-connector2", node_type: "connector" },
         { id: "sink-connector3", node_type: "connector" },
+        { id: "source1", node_type: "sink/source" },
         { id: "sink2", node_type: "sink/source" },
       ],
       edges: [
+        {
+          id: "out-edge-source1",
+          source: "source1",
+          target: "source-connector1",
+        },
+        {
+          id: "out-edge-source-connector1",
+          source: "source-connector1",
+          target: "topic-in",
+        },
         {
           id: "in-edge1",
           source: "topic-in",
@@ -74,21 +86,31 @@ describe("visualize node metrics", () => {
 
     updateNodeMetrics(graph, [
       {
-        node_id: "streaming-app1",
+        node_id: "source-connector1",
         messages_in: undefined,
         messages_out: undefined,
         consumer_lag: 1,
         consumer_read_rate: 1,
         topic_size: undefined,
         replicas: undefined,
-        connector_tasks: undefined,
+        connector_tasks: 1,
       },
       {
         node_id: "topic-in",
-        messages_in: undefined,
+        messages_in: 1,
         messages_out: 1,
         consumer_lag: undefined,
         consumer_read_rate: undefined,
+        topic_size: undefined,
+        replicas: undefined,
+        connector_tasks: undefined,
+      },
+      {
+        node_id: "streaming-app1",
+        messages_in: undefined,
+        messages_out: undefined,
+        consumer_lag: 1,
+        consumer_read_rate: 1,
         topic_size: undefined,
         replicas: undefined,
         connector_tasks: undefined,
@@ -165,6 +187,12 @@ describe("visualize node metrics", () => {
       },
     ]);
 
+    expect(graph.findById("out-edge-source1").getModel().type).toEqual(
+      "line-dash"
+    );
+    expect(
+      graph.findById("out-edge-source-connector1").getModel().type
+    ).toEqual("line-dash");
     expect(graph.findById("in-edge1").getModel().type).toEqual("line-dash");
     expect(graph.findById("out-edge1").getModel().type).toEqual("line-dash");
     expect(graph.findById("in-edge2").getModel().type).toEqual(
