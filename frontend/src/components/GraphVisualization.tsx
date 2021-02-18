@@ -56,7 +56,7 @@ function setEdgeActivity(
 }
 
 export function updateNodeMetrics(graph: Graph, metrics: Metric[]) {
-  let outgoingEdges: IEdge[] = [];
+  let unavailableStreamingApps: INode[] = [];
   metrics.forEach((metric) => {
     let metricsString: string = [
       `${
@@ -108,15 +108,11 @@ export function updateNodeMetrics(graph: Graph, metrics: Metric[]) {
         setEdgeActivity(graph, node.getInEdges(), !!metric.messages_in);
         node.getOutEdges().forEach((edge: IEdge) => {
           setEdgeActivity(graph, edge, !!metric.messages_out);
-          if (metric.messages_out) {
-            outgoingEdges.push(edge);
-          }
         });
       }
 
       if (metric.replicas === 0) {
-        // do not animate edges on streaming apps with 0 replicas
-        setEdgeActivity(graph, node.getEdges(), false);
+        unavailableStreamingApps.push(node);
       } else if (
         nodeType === "streaming-app" &&
         metric.consumer_read_rate === 0
@@ -131,6 +127,11 @@ export function updateNodeMetrics(graph: Graph, metrics: Metric[]) {
         setEdgeActivity(graph, node.getEdges(), active);
       }
     }
+  });
+
+  // do not animate edges on streaming apps with 0 replicas
+  unavailableStreamingApps.forEach((node: INode) => {
+    setEdgeActivity(graph, node.getEdges(), false);
   });
 }
 

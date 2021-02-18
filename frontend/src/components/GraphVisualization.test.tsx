@@ -110,9 +110,19 @@ describe("visualize node metrics", () => {
         messages_in: undefined,
         messages_out: undefined,
         consumer_lag: 1,
-        consumer_read_rate: 1,
+        consumer_read_rate: undefined,
         topic_size: undefined,
         replicas: undefined,
+        connector_tasks: undefined,
+      },
+      {
+        node_id: "streaming-app2",
+        messages_in: undefined,
+        messages_out: undefined,
+        consumer_lag: 1,
+        consumer_read_rate: 1,
+        topic_size: undefined,
+        replicas: 0,
         connector_tasks: undefined,
       },
       {
@@ -122,16 +132,6 @@ describe("visualize node metrics", () => {
         consumer_lag: undefined,
         consumer_read_rate: undefined,
         topic_size: 1,
-        replicas: undefined,
-        connector_tasks: undefined,
-      },
-      {
-        node_id: "streaming-app2",
-        messages_in: undefined,
-        messages_out: undefined,
-        consumer_lag: 1,
-        consumer_read_rate: undefined,
-        topic_size: undefined,
         replicas: undefined,
         connector_tasks: undefined,
       },
@@ -195,7 +195,9 @@ describe("visualize node metrics", () => {
     ).toEqual("line-dash");
     expect(graph.findById("in-edge1").getModel().type).toEqual("line-dash");
     expect(graph.findById("out-edge1").getModel().type).toEqual("line-dash");
-    expect(graph.findById("in-edge2").getModel().type).toEqual("line-dash");
+    expect(graph.findById("in-edge2").getModel().type).toEqual(
+      "cubic-horizontal"
+    );
     expect(graph.findById("out-edge2").getModel().type).toEqual(
       "cubic-horizontal"
     );
