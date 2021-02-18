@@ -61,6 +61,23 @@ spec:
             - name: http
               containerPort: {{ .Values.serviceHttpPort}}
               protocol: TCP
+          livenessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: {{ .Values.health.livenessProbeInitialDelay }}
+            periodSeconds: {{ .Values.health.livenessProbePeriodSeconds }}
+            timeoutSeconds: {{ .Values.health.livenessProbeTimeout }}
+            failureThreshold: {{ .Values.health.livenessProbeFailureThreshold }}
+            successThreshold: {{ .Values.health.livenessProbeSuccessThreshold }}
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: {{ .Values.health.readinessProbeInitialDelay }}
+            periodSeconds: {{ .Values.health.readinessProbePeriodSeconds }}
+            timeoutSeconds: {{ .Values.health.readinessProbeTimeout }}
+            failureThreshold: {{ .Values.health.readinessProbeFailureThreshold }}
+            successThreshold: {{ .Values.health.readinessProbeSuccessThreshold }}
           resources:
 {{ toYaml .Values.resources | indent 12 }}
           env:
