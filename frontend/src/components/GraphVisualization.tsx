@@ -42,9 +42,21 @@ function formatNumber(num: number): string {
   return num < 1e6 ? num.toLocaleString("en") : millify(num);
 }
 
+function setEdgeActivity(
+  graph: Graph,
+  edges: IEdge | IEdge[],
+  active: boolean
+): void {
+  edges = edges instanceof Array ? edges : [edges];
+  edges.forEach((edge: IEdge) => {
+    graph.updateItem(edge, {
+      type: active ? "line-dash" : "cubic-horizontal",
+    });
+  });
+}
+
 export function updateNodeMetrics(graph: Graph, metrics: Metric[]) {
-  let readingNodes = new Set();
-  let outgoingEdges: IEdge[] = [];
+  let unavailableStreamingApps: INode[] = [];
   metrics.forEach((metric) => {
     let metricsString: string = [
       `${
@@ -93,34 +105,31 @@ export function updateNodeMetrics(graph: Graph, metrics: Metric[]) {
       // update edge animation
       const nodeType = node.getModel().node_type;
       if (nodeType === "topic" || nodeType === "error-topic") {
-        node.getInEdges().forEach((edge: IEdge) => {
-          graph.updateItem(edge, {
-            type: metric.messages_in ? "line-dash" : "cubic-horizontal",
-          });
-        });
+        setEdgeActivity(graph, node.getInEdges(), !!metric.messages_in);
         node.getOutEdges().forEach((edge: IEdge) => {
-          graph.updateItem(edge, {
-            type: metric.messages_out ? "line-dash" : "cubic-horizontal",
-          });
-
-          if (metric.messages_out) {
-            outgoingEdges.push(edge);
-          }
+          setEdgeActivity(graph, edge, !!metric.messages_out);
         });
-      }
-
-      if (metric.consumer_read_rate) {
-        readingNodes.add(node.getID());
+      } else if (metric.replicas === 0) {
+        unavailableStreamingApps.push(node);
+      } else if (
+        nodeType === "streaming-app" &&
+        metric.consumer_read_rate === 0
+      ) {
+        // do not animate incoming edges on streaming apps with read rate 0
+        setEdgeActivity(graph, node.getInEdges(), false);
+      } else if (nodeType === "connector") {
+        // animate edges on connector nodes if read rate and running tasks is not 0
+        const active: boolean = !(
+          metric.consumer_read_rate === 0 || metric.connector_tasks === 0
+        );
+        setEdgeActivity(graph, node.getEdges(), active);
       }
     }
   });
 
-  outgoingEdges.forEach((edge: IEdge) => {
-    if (!readingNodes.has(edge.getTarget().getID())) {
-      graph.updateItem(edge, {
-        type: "cubic-horizontal",
-      });
-    }
+  // do not animate edges on streaming apps with 0 replicas
+  unavailableStreamingApps.forEach((node: INode) => {
+    setEdgeActivity(graph, node.getEdges(), false);
   });
 }
 
