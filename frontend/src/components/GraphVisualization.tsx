@@ -122,9 +122,12 @@ export function updateNodeMetrics(graph: Graph, metrics: Metric[]) {
         setEdgeActivity(graph, node.getEdges(), false);
       }
 
-      // animate incoming & outgoing edges on connector nodes with read rate > 0
-      else if (nodeType === "connector" && metric.consumer_read_rate) {
-        setEdgeActivity(graph, node.getEdges(), true);
+      // animate edges on connector nodes if read rate or running tasks is not 0
+      else if (nodeType === "connector") {
+        const active: boolean = !(
+          metric.consumer_read_rate === 0 && metric.connector_tasks === 0
+        );
+        setEdgeActivity(graph, node.getEdges(), active);
       }
     }
   });
