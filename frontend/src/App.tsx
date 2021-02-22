@@ -21,6 +21,8 @@ import { graphConfig } from "./graphConfiguration";
 import DetailsCard from "./components/DetailsCard";
 import GraphVisualization from "./components/GraphVisualization";
 import { useMutate } from "restful-react";
+import { AutoComplete } from "antd";
+const { Option } = AutoComplete;
 
 const { Header, Content } = Layout;
 
@@ -152,9 +154,23 @@ const App: React.FC = () => {
                 </Button>
               </Menu.Item>
               <Menu.Item>
-                <Dropdown overlay={menuNode} placement="bottomLeft" arrow>
-                  <Button>Node selection</Button>
-                </Dropdown>
+                <AutoComplete
+                  style={{
+                    width: 200,
+                  }}
+                  placeholder="Search Node"
+                  filterOption={(inputValue, option) =>
+                    option?.value
+                      .toUpperCase()
+                      .indexOf(inputValue.toUpperCase()) !== -1
+                  }
+                >
+                  {graph?.nodes.map((node) => (
+                    <Option key={"id"} value={node.id}>
+                      {node.id}
+                    </Option>
+                  ))}
+                </AutoComplete>
               </Menu.Item>
               <Menu.Item style={{ float: "right" }}>
                 Metrics refresh:&nbsp;
