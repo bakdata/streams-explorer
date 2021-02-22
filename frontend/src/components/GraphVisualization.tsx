@@ -154,13 +154,15 @@ const GraphVisualization = ({
 
   useEffect(() => {
     if (graph && nodeSelection) {
-      console.log(`focusing node ${nodeSelection}`);
+      if (graph.getZoom() < 1) {
+        graph.zoomTo(1);
+      }
       graph.focusItem(nodeSelection, true, {
         easing: "easeCubic",
-        duration: 500,
+        duration: 1500,
       });
     }
-  }, [graph, nodeSelection]);
+  }, [graph, nodeSelection, onClickNode]);
 
   if (graph && metrics) {
     updateNodeMetrics(graph, metrics);

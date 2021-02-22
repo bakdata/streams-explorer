@@ -144,20 +144,24 @@ const App: React.FC = () => {
               <Menu.Item>
                 <AutoComplete
                   style={{
-                    width: 200,
+                    minWidth: 400,
                   }}
                   placeholder="Search Node"
+                  allowClear={true}
+                  listHeight={512}
+                  dropdownStyle={{ minWidth: 500 }}
                   filterOption={(inputValue, option) =>
                     option?.value
                       .toUpperCase()
                       .indexOf(inputValue.toUpperCase()) !== -1
                   }
-                  onSelect={(nodeId) => {
+                  onSelect={(nodeId: string) => {
                     setNodeSelection(nodeId);
+                    setSelectedNodeID(nodeId);
                   }}
                 >
                   {graph?.nodes.map((node) => (
-                    <Option key={"id"} value={node.id}>
+                    <Option key={node.id} value={node.id}>
                       {node.id}
                     </Option>
                   ))}
