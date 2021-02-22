@@ -28,11 +28,12 @@ interface GraphVisualizationProps {
 
 class Icon implements IIcon {
   img: string;
-  show: boolean = true;
+  show: boolean;
   width: number;
   height: number;
 
   constructor(img: string, width: number, height: number) {
+    this.show = true;
     this.img = img;
     this.width = width;
     this.height = height;
