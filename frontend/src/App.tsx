@@ -1,11 +1,13 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
 import "./App.css";
-import { useResizeDetector } from "react-resize-detector";
 import {
   usePipelinesApiPipelinesGet,
   useGraphPositionedApiGraphGet,
   useMetricsApiMetricsGet,
 } from "./api/fetchers";
+import DetailsCard from "./components/DetailsCard";
+import GraphVisualization from "./components/GraphVisualization";
+import { graphConfig } from "./graphConfiguration";
+import { DownOutlined } from "@ant-design/icons";
 import {
   Layout,
   Menu,
@@ -16,12 +18,11 @@ import {
   message,
   Alert,
 } from "antd";
-import { DownOutlined } from "@ant-design/icons";
-import { graphConfig } from "./graphConfiguration";
-import DetailsCard from "./components/DetailsCard";
-import GraphVisualization from "./components/GraphVisualization";
-import { useMutate } from "restful-react";
 import { AutoComplete } from "antd";
+import React, { useState, useRef, useEffect, useCallback } from "react";
+import { useResizeDetector } from "react-resize-detector";
+import { useMutate } from "restful-react";
+
 const { Option } = AutoComplete;
 
 const { Header, Content } = Layout;
