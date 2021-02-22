@@ -23,6 +23,7 @@ interface GraphVisualizationProps {
   onClickNode: Function;
   width: number | undefined;
   height: number | undefined;
+  nodeSelection: string | null;
 }
 
 class Icon implements IIcon {
@@ -142,6 +143,7 @@ const GraphVisualization = ({
   onClickNode,
   width,
   height,
+  nodeSelection,
 }: GraphVisualizationProps) => {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -149,6 +151,16 @@ const GraphVisualization = ({
   if (graph && width && height) {
     graph.changeSize(width, height);
   }
+
+  useEffect(() => {
+    if (graph && nodeSelection) {
+      console.log(`focusing node ${nodeSelection}`);
+      graph.focusItem(nodeSelection, true, {
+        easing: "easeCubic",
+        duration: 500,
+      });
+    }
+  }, [graph, nodeSelection]);
 
   if (graph && metrics) {
     updateNodeMetrics(graph, metrics);

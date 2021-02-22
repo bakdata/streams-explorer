@@ -28,6 +28,7 @@ const App: React.FC = () => {
   const ALL_PIPELINES = "all pipelines";
   const [currentPipeline, setCurrentPipeline] = useState(ALL_PIPELINES);
   const [selectedNodeID, setSelectedNodeID] = useState<string | null>(null);
+  const [nodeSelection, setNodeSelection] = useState<string | null>(null);
   const ref = useRef<HTMLDivElement>(null!);
   const onResize = useCallback(() => {}, []);
   const { width, height } = useResizeDetector({
@@ -103,6 +104,18 @@ const App: React.FC = () => {
     </Menu>
   );
 
+  const menuNode = (
+    <Menu
+      onClick={(e) => {
+        setNodeSelection(e.key.toString());
+      }}
+    >
+      {graph?.nodes.map((node: any) => (
+        <Menu.Item key={node.id}>{node.id}</Menu.Item>
+      ))}
+    </Menu>
+  );
+
   const menuRefresh = (
     <Menu
       onClick={(e) => {
@@ -138,6 +151,11 @@ const App: React.FC = () => {
                   Update Graphs
                 </Button>
               </Menu.Item>
+              <Menu.Item>
+                <Dropdown overlay={menuNode} placement="bottomLeft" arrow>
+                  <Button>Node selection</Button>
+                </Dropdown>
+              </Menu.Item>
               <Menu.Item style={{ float: "right" }}>
                 Metrics refresh:&nbsp;
                 <Dropdown overlay={menuRefresh}>
@@ -166,6 +184,7 @@ const App: React.FC = () => {
                   onClickNode={(nodeId: string) => setSelectedNodeID(nodeId)}
                   width={width}
                   height={height! - 64}
+                  nodeSelection={nodeSelection}
                 />
               ) : (
                 <Alert
