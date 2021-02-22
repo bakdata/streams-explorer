@@ -106,18 +106,6 @@ const App: React.FC = () => {
     </Menu>
   );
 
-  const menuNode = (
-    <Menu
-      onClick={(e) => {
-        setNodeSelection(e.key.toString());
-      }}
-    >
-      {graph?.nodes.map((node: any) => (
-        <Menu.Item key={node.id}>{node.id}</Menu.Item>
-      ))}
-    </Menu>
-  );
-
   const menuRefresh = (
     <Menu
       onClick={(e) => {
@@ -164,6 +152,9 @@ const App: React.FC = () => {
                       .toUpperCase()
                       .indexOf(inputValue.toUpperCase()) !== -1
                   }
+                  onSelect={(nodeId) => {
+                    setNodeSelection(nodeId);
+                  }}
                 >
                   {graph?.nodes.map((node) => (
                     <Option key={"id"} value={node.id}>
