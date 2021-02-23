@@ -143,6 +143,12 @@ The following configuration options are available:
 
 - `prometheus.url` URL of Prometheus (string, **required**, default: `http://localhost:9090`)
 
+The following exporters are required to collect Kafka metrics for Prometheus:
+
+- [Kafka Exporter](https://github.com/danielqsj/kafka_exporter)
+- [Kafka Lag Exporter](https://github.com/lightbend/kafka-lag-exporter)
+- [Kafka Connect Exporter](https://github.com/wakeful/kafka_connect_exporter)
+
 #### AKHQ
 
 - `akhq.url` URL of AKHQ (string, default: `http://localhost:8080`)
@@ -177,4 +183,9 @@ for Kafka Connect Elasticsearch connector
 
 ## Plugin customization
 
-It is possible to create your own linker and extractors in Python by implementing the `LinkingService` or `Extractor` classes. This way you can customize it to your specific setup and services. As an example we provide the [DefaultLinker](https://github.com/bakdata/streams-explorer/blob/main/backend/streams_explorer/defaultlinker.py) as `LinkingService` and [ElasticsearchSink](https://github.com/bakdata/streams-explorer/blob/main/backend/streams_explorer/core/extractor/default/elasticsearch_sink.py), [JdbcSink](https://github.com/bakdata/streams-explorer/blob/main/backend/streams_explorer/core/extractor/default/jdbc_sink.py), [S3Sink](https://github.com/bakdata/streams-explorer/blob/main/backend/streams_explorer/core/extractor/default/s3_sink.py) `Extractor` classes which are used by default.
+It is possible to create your own linker and extractors in Python by implementing the `LinkingService` or `Extractor` classes. This way you can customize it to your specific setup and services. As an example we provide the [`DefaultLinker`](https://github.com/bakdata/streams-explorer/blob/main/backend/streams_explorer/defaultlinker.py) as `LinkingService`. Furthermore the following default `Extractor` plugins are included:
+
+- [`ElasticsearchSink`](https://github.com/bakdata/streams-explorer/blob/main/backend/streams_explorer/core/extractor/default/elasticsearch_sink.py)
+- [`JdbcSink`](https://github.com/bakdata/streams-explorer/blob/main/backend/streams_explorer/core/extractor/default/jdbc_sink.py)
+- [`S3Sink`](https://github.com/bakdata/streams-explorer/blob/main/backend/streams_explorer/core/extractor/default/s3_sink.py)
+- [`GenericSink`/`GenericSource`](https://github.com/bakdata/streams-explorer/blob/main/backend/streams_explorer/core/extractor/default/generic.py)
