@@ -23,7 +23,7 @@ interface GraphVisualizationProps {
   onClickNode: Function;
   width: number | undefined;
   height: number | undefined;
-  nodeSelection: string | null;
+  focusedNode: string | null;
 }
 
 class Icon implements IIcon {
@@ -144,7 +144,7 @@ const GraphVisualization = ({
   onClickNode,
   width,
   height,
-  nodeSelection,
+  focusedNode,
 }: GraphVisualizationProps) => {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -154,16 +154,16 @@ const GraphVisualization = ({
   }
 
   useEffect(() => {
-    if (graph && nodeSelection) {
+    if (graph && focusedNode) {
       if (graph.getZoom() < 1) {
         graph.zoomTo(1);
       }
-      graph.focusItem(nodeSelection, true, {
+      graph.focusItem(focusedNode, true, {
         easing: "easeCubic",
         duration: 1500,
       });
     }
-  }, [graph, nodeSelection, onClickNode]);
+  }, [graph, focusedNode, onClickNode]);
 
   if (graph && metrics) {
     updateNodeMetrics(graph, metrics);

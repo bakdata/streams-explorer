@@ -30,8 +30,8 @@ const { Header, Content } = Layout;
 const App: React.FC = () => {
   const ALL_PIPELINES = "all pipelines";
   const [currentPipeline, setCurrentPipeline] = useState(ALL_PIPELINES);
-  const [selectedNodeID, setSelectedNodeID] = useState<string | null>(null);
-  const [nodeSelection, setNodeSelection] = useState<string | null>(null);
+  const [detailNode, setDetailNode] = useState<string | null>(null);
+  const [focusedNode, setFocusedNode] = useState<string | null>(null);
   const ref = useRef<HTMLDivElement>(null!);
   const onResize = useCallback(() => {}, []);
   const { width, height } = useResizeDetector({
@@ -157,8 +157,8 @@ const App: React.FC = () => {
                       .indexOf(inputValue.toUpperCase()) !== -1
                   }
                   onSelect={(nodeId: string) => {
-                    setNodeSelection(nodeId);
-                    setSelectedNodeID(nodeId);
+                    setFocusedNode(nodeId);
+                    setDetailNode(nodeId);
                   }}
                 >
                   {graph?.nodes.map((node) => (
@@ -193,10 +193,10 @@ const App: React.FC = () => {
                   config={graphConfig}
                   metrics={metrics}
                   refetchMetrics={() => refetchMetrics()}
-                  onClickNode={(nodeId: string) => setSelectedNodeID(nodeId)}
+                  onClickNode={(nodeId: string) => setDetailNode(nodeId)}
                   width={width}
                   height={height! - 64}
-                  nodeSelection={nodeSelection}
+                  focusedNode={focusedNode}
                 />
               ) : (
                 <Alert
@@ -216,7 +216,7 @@ const App: React.FC = () => {
                 position: "absolute",
               }}
             >
-              <DetailsCard nodeID={selectedNodeID} />
+              <DetailsCard nodeID={detailNode} />
             </Row>
           </Content>
         </Layout>
