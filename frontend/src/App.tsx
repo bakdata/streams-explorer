@@ -160,6 +160,7 @@ const App: React.FC = () => {
                   }}
                   placeholder="Search Node"
                   allowClear={true}
+                  defaultActiveFirstOption={true}
                   listHeight={512}
                   dropdownStyle={{
                     minWidth: searchWidth,
