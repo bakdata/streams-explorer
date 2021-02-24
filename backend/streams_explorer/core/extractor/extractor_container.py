@@ -1,6 +1,6 @@
 from typing import List, Optional, Tuple
 
-from kubernetes.client import V1beta1CronJob
+from kubernetes.client import V1beta1CronJob, V1Deployment
 from loguru import logger
 
 from streams_explorer.core.extractor.default.generic import GenericSink, GenericSource
@@ -42,9 +42,12 @@ class ExtractorContainer:
                 return connector
         return None
 
-    def on_cron_job(self, cron_job: V1beta1CronJob):
+    def on_cron_job(self, cron_job: V1beta1CronJob) -> Optional[V1Deployment]:
         for extractor in self.extractors:
-            extractor.on_cron_job_parsing(cron_job)
+            deployment: Optional[V1Deployment] = extractor.on_cron_job_parsing(cron_job)
+            if deployment:
+                return deployment
+        return None
 
     def get_sources_sinks(self) -> Tuple[List[Source], List[Sink]]:
         sources: List[Source] = []

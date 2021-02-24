@@ -1,17 +1,10 @@
 from typing import Dict, List, Optional
 
 import kubernetes
-from kubernetes.client import (
-    V1beta1CronJob,
-    V1Container,
-    V1Deployment,
-    V1DeploymentSpec,
-    V1ObjectMeta,
-    V1PodSpec,
-    V1PodTemplateSpec,
-)
+from kubernetes.client import V1beta1CronJob, V1Deployment
 from kubernetes.client.api_client import ApiClient
 from loguru import logger
+
 from streams_explorer.core.config import settings
 from streams_explorer.core.k8s_app import K8sApp
 from streams_explorer.core.node_info_extractor import (
@@ -160,17 +153,12 @@ class StreamsExplorer:
         logger.info("Retrieve cronjob descriptions")
         cron_jobs = self.get_cron_jobs()
         for cron_job in cron_jobs:
-            extractor_container.on_cron_job(cron_job)
-        cron_job = cron_jobs[0]
-        breakpoint()
-        pod_template_spec = cron_job.spec.job_template.spec.template
-        deployment_spec = V1DeploymentSpec(
-            template=pod_template_spec,
-            selector="app=test-app,release=test-release",  # TODO selector
-        )
-        item = V1Deployment(metadata=cron_job.metadata, spec=deployment_spec)
-        app = K8sApp(item)
-        self.applications[app.name] = app
+            deployment: Optional[V1Deployment] = extractor_container.on_cron_job(
+                cron_job
+            )
+            if deployment:
+                app = K8sApp(deployment)
+                self.applications[app.name] = app
 
     def get_cron_jobs(self) -> List[V1beta1CronJob]:
         cron_jobs: List[V1beta1CronJob] = []
