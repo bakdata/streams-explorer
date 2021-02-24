@@ -167,8 +167,7 @@ const GraphVisualization = ({
     if (graph && focusedNode) {
       setFocusedNode(graph, focusedNode);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [focusedNode]);
+  }, [focusedNode]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (graph && metrics) {
     updateNodeMetrics(graph, metrics);

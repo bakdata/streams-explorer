@@ -32,6 +32,7 @@ const App: React.FC = () => {
   const [currentPipeline, setCurrentPipeline] = useState(ALL_PIPELINES);
   const [detailNode, setDetailNode] = useState<string | null>(null);
   const [focusedNode, setFocusedNode] = useState<string | null>(null);
+  const [searchWidth, setSearchWidth] = useState<number>(300);
   const ref = useRef<HTMLDivElement>(null!);
   const onResize = useCallback(() => {}, []);
   const { width, height } = useResizeDetector({
@@ -83,6 +84,16 @@ const App: React.FC = () => {
       return () => clearInterval(interval);
     }
   }, [refetchMetrics, refreshInterval]);
+
+  // find longest node name and multiply string length by char width 8
+  // doesn't cause long delays as builtin function
+  useEffect(() => {
+    if (graph) {
+      setSearchWidth(
+        Math.max(...graph.nodes.map((node) => node.label.length)) * 8
+      );
+    }
+  }, [graph]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (graphError) {
     message.error(graphError.message);
@@ -145,12 +156,14 @@ const App: React.FC = () => {
               <Menu.Item>
                 <AutoComplete
                   style={{
-                    minWidth: 400,
+                    minWidth: searchWidth,
                   }}
                   placeholder="Search Node"
                   allowClear={true}
                   listHeight={512}
-                  dropdownStyle={{ minWidth: 500 }}
+                  dropdownStyle={{
+                    minWidth: searchWidth,
+                  }}
                   filterOption={(inputValue, option) =>
                     option?.value
                       .toUpperCase()
