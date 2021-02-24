@@ -135,6 +135,16 @@ export function updateNodeMetrics(graph: Graph, metrics: Metric[]) {
   });
 }
 
+function setFocusedNode(graph: Graph, focusedNode: string) {
+  if (graph.getZoom() < 1) {
+    graph.zoomTo(1);
+  }
+  graph.focusItem(focusedNode, true, {
+    easing: "easeCubic",
+    duration: 1500,
+  });
+}
+
 const GraphVisualization = ({
   id,
   data,
@@ -155,15 +165,10 @@ const GraphVisualization = ({
 
   useEffect(() => {
     if (graph && focusedNode) {
-      if (graph.getZoom() < 1) {
-        graph.zoomTo(1);
-      }
-      graph.focusItem(focusedNode, true, {
-        easing: "easeCubic",
-        duration: 1500,
-      });
+      setFocusedNode(graph, focusedNode);
     }
-  }, [graph, focusedNode, onClickNode]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [focusedNode]);
 
   if (graph && metrics) {
     updateNodeMetrics(graph, metrics);

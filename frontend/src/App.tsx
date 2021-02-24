@@ -162,9 +162,7 @@ const App: React.FC = () => {
                   }}
                 >
                   {graph?.nodes.map((node) => (
-                    <Option key={node.id} value={node.id}>
-                      {node.id}
-                    </Option>
+                    <Option value={node.id}>{node.id}</Option>
                   ))}
                 </AutoComplete>
               </Menu.Item>
