@@ -145,7 +145,8 @@ const App: React.FC = () => {
               <Menu.Item>
                 <AutoComplete
                   style={{
-                    minWidth: searchWidth,
+                    width: searchWidth,
+                    maxWidth: 480,
                   }}
                   placeholder="Search Node"
                   allowClear={true}
