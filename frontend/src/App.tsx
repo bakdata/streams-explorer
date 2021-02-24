@@ -142,17 +142,6 @@ const App: React.FC = () => {
                   <Button>{currentPipeline}</Button>
                 </Dropdown>
               </Menu.Item>
-              <Menu.Item
-                onClick={() => {
-                  update({})
-                    .then(() => window.location.reload())
-                    .catch(() => message.error("Failed to update!"));
-                }}
-              >
-                <Button type="dashed" ghost={true}>
-                  Update Graphs
-                </Button>
-              </Menu.Item>
               <Menu.Item>
                 <AutoComplete
                   style={{
@@ -187,6 +176,18 @@ const App: React.FC = () => {
                     {refreshIntervals[refreshInterval]} <DownOutlined />
                   </a>
                 </Dropdown>
+              </Menu.Item>
+              <Menu.Item
+                style={{ float: "right" }}
+                onClick={() => {
+                  update({})
+                    .then(() => window.location.reload())
+                    .catch(() => message.error("Failed to update!"));
+                }}
+              >
+                <Button type="dashed" ghost={true}>
+                  Update Graphs
+                </Button>
               </Menu.Item>
             </Menu>
           </Header>
