@@ -4,6 +4,8 @@ export const graphConfig: GraphOptions = {
   container: "",
   width: 0,
   height: 0,
+  minZoom: 0.2,
+  maxZoom: 3,
   modes: {
     default: ["drag-canvas", "zoom-canvas", "click-select"],
   },

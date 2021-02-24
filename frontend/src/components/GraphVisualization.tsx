@@ -1,18 +1,18 @@
-import React, { useRef, useEffect, useCallback, useState } from "react";
-import ReactDOM from "react-dom";
-import G6 from "@antv/g6";
 import { Graph as Data, Icon as IIcon, Metric } from "../api/fetchers";
+import "./DashedEdge";
+import "./MetricCustomNode";
+import G6 from "@antv/g6";
+import Graph from "@antv/g6/lib/graph/graph";
+import { IEdge, INode } from "@antv/g6/lib/interface/item";
 import {
   GraphOptions,
   GraphData,
   NodeConfig,
   IG6GraphEvent,
 } from "@antv/g6/lib/types";
-import { IEdge, INode } from "@antv/g6/lib/interface/item";
-import Graph from "@antv/g6/lib/graph/graph";
-import "./MetricCustomNode";
-import "./DashedEdge";
 import { millify } from "millify";
+import React, { useRef, useEffect, useCallback, useState } from "react";
+import ReactDOM from "react-dom";
 
 interface GraphVisualizationProps {
   id: string;
@@ -23,15 +23,17 @@ interface GraphVisualizationProps {
   onClickNode: Function;
   width: number | undefined;
   height: number | undefined;
+  focusedNode: string | null;
 }
 
 class Icon implements IIcon {
   img: string;
-  show: boolean = true;
+  show: boolean;
   width: number;
   height: number;
 
   constructor(img: string, width: number, height: number) {
+    this.show = true;
     this.img = img;
     this.width = width;
     this.height = height;
@@ -133,6 +135,16 @@ export function updateNodeMetrics(graph: Graph, metrics: Metric[]) {
   });
 }
 
+function setFocusedNode(graph: Graph, focusedNode: string) {
+  if (graph.getZoom() < 1) {
+    graph.zoomTo(1);
+  }
+  graph.focusItem(focusedNode, true, {
+    easing: "easeCubic",
+    duration: 1500,
+  });
+}
+
 const GraphVisualization = ({
   id,
   data,
@@ -142,6 +154,7 @@ const GraphVisualization = ({
   onClickNode,
   width,
   height,
+  focusedNode,
 }: GraphVisualizationProps) => {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -149,6 +162,12 @@ const GraphVisualization = ({
   if (graph && width && height) {
     graph.changeSize(width, height);
   }
+
+  useEffect(() => {
+    if (graph && focusedNode) {
+      setFocusedNode(graph, focusedNode);
+    }
+  }, [focusedNode]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (graph && metrics) {
     updateNodeMetrics(graph, metrics);

@@ -1,11 +1,13 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
 import "./App.css";
-import { useResizeDetector } from "react-resize-detector";
 import {
   usePipelinesApiPipelinesGet,
   useGraphPositionedApiGraphGet,
   useMetricsApiMetricsGet,
 } from "./api/fetchers";
+import DetailsCard from "./components/DetailsCard";
+import GraphVisualization from "./components/GraphVisualization";
+import { graphConfig } from "./graphConfiguration";
+import { DownOutlined } from "@ant-design/icons";
 import {
   Layout,
   Menu,
@@ -16,18 +18,21 @@ import {
   message,
   Alert,
 } from "antd";
-import { DownOutlined } from "@ant-design/icons";
-import { graphConfig } from "./graphConfiguration";
-import DetailsCard from "./components/DetailsCard";
-import GraphVisualization from "./components/GraphVisualization";
+import { AutoComplete } from "antd";
+import React, { useState, useRef, useEffect, useCallback } from "react";
+import { useResizeDetector } from "react-resize-detector";
 import { useMutate } from "restful-react";
+
+const { Option } = AutoComplete;
 
 const { Header, Content } = Layout;
 
 const App: React.FC = () => {
   const ALL_PIPELINES = "all pipelines";
   const [currentPipeline, setCurrentPipeline] = useState(ALL_PIPELINES);
-  const [selectedNodeID, setSelectedNodeID] = useState<string | null>(null);
+  const [detailNode, setDetailNode] = useState<string | null>(null);
+  const [focusedNode, setFocusedNode] = useState<string | null>(null);
+  const [searchWidth, setSearchWidth] = useState<number>(300);
   const ref = useRef<HTMLDivElement>(null!);
   const onResize = useCallback(() => {}, []);
   const { width, height } = useResizeDetector({
@@ -80,6 +85,16 @@ const App: React.FC = () => {
     }
   }, [refetchMetrics, refreshInterval]);
 
+  // find longest node name and multiply string length by char width 8
+  // doesn't cause long delays as builtin function
+  useEffect(() => {
+    if (graph) {
+      setSearchWidth(
+        Math.max(...graph.nodes.map((node) => node.label.length)) * 8
+      );
+    }
+  }, [graph]); // eslint-disable-line react-hooks/exhaustive-deps
+
   if (graphError) {
     message.error(graphError.message);
     return <Spin spinning={false} tip="Failed to load graph" />;
@@ -127,7 +142,44 @@ const App: React.FC = () => {
                   <Button>{currentPipeline}</Button>
                 </Dropdown>
               </Menu.Item>
+              <Menu.Item>
+                <AutoComplete
+                  style={{
+                    width: searchWidth,
+                    maxWidth: 480,
+                  }}
+                  placeholder="Search Node"
+                  allowClear={true}
+                  defaultActiveFirstOption={true}
+                  listHeight={512}
+                  dropdownStyle={{
+                    minWidth: searchWidth,
+                  }}
+                  filterOption={(inputValue, option) =>
+                    option?.value
+                      .toUpperCase()
+                      .indexOf(inputValue.toUpperCase()) !== -1
+                  }
+                  onSelect={(nodeId: string) => {
+                    setFocusedNode(nodeId);
+                    setDetailNode(nodeId);
+                  }}
+                >
+                  {graph?.nodes.map((node) => (
+                    <Option value={node.id}>{node.id}</Option>
+                  ))}
+                </AutoComplete>
+              </Menu.Item>
+              <Menu.Item style={{ float: "right" }}>
+                Metrics refresh:&nbsp;
+                <Dropdown overlay={menuRefresh}>
+                  <a href={"/#"}>
+                    {refreshIntervals[refreshInterval]} <DownOutlined />
+                  </a>
+                </Dropdown>
+              </Menu.Item>
               <Menu.Item
+                style={{ float: "right" }}
                 onClick={() => {
                   update({})
                     .then(() => window.location.reload())
@@ -137,14 +189,6 @@ const App: React.FC = () => {
                 <Button type="dashed" ghost={true}>
                   Update Graphs
                 </Button>
-              </Menu.Item>
-              <Menu.Item style={{ float: "right" }}>
-                Metrics refresh:&nbsp;
-                <Dropdown overlay={menuRefresh}>
-                  <a>
-                    {refreshIntervals[refreshInterval]} <DownOutlined />
-                  </a>
-                </Dropdown>
               </Menu.Item>
             </Menu>
           </Header>
@@ -163,9 +207,10 @@ const App: React.FC = () => {
                   config={graphConfig}
                   metrics={metrics}
                   refetchMetrics={() => refetchMetrics()}
-                  onClickNode={(nodeId: string) => setSelectedNodeID(nodeId)}
+                  onClickNode={(nodeId: string) => setDetailNode(nodeId)}
                   width={width}
                   height={height! - 64}
+                  focusedNode={focusedNode}
                 />
               ) : (
                 <Alert
@@ -185,7 +230,7 @@ const App: React.FC = () => {
                 position: "absolute",
               }}
             >
-              <DetailsCard nodeID={selectedNodeID} />
+              <DetailsCard nodeID={detailNode} />
             </Row>
           </Content>
         </Layout>
