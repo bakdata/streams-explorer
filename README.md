@@ -2,13 +2,13 @@
 
 > Explore Data Pipelines in Apache Kafka.
 
-![streams-explorer](screens/streams-explorer.png)
+![streams-explorer](https://github.com/bakdata/streams-explorer/blob/main/screens/overview.png?raw=true)
 
 ## Contents
 
 - [Streams Explorer](#streams-explorer)
-  - [Contents](#contents)
   - [Features](#features)
+  - [Overview](#overview)
   - [Installation](#installation)
     - [Docker Compose](#docker-compose)
     - [Deploying to Kubernetes cluster](#deploying-to-kubernetes-cluster)
@@ -30,13 +30,17 @@
 
 ## Features
 
-- Visualization of streaming applications and topics
+- Visualization of streaming applications, topics, and connectors
 - Monitor all or individual pipelines from multiple namespaces
 - Inspection of Avro schema from schema registry
 - Integration with [streams-bootstrap](https://github.com/bakdata/streams-bootstrap) and [faust-bootstrap](https://github.com/bakdata/faust-bootstrap) for deploying Kafka Streams applications
-- Real-time metrics from Prometheus (consumer lag, topic size, messages in/out per second)
+- Real-time metrics from Prometheus (consumer lag & read rate, replicas, topic size, messages in & out per second, connector tasks)
 - Linking to external services for logging and analysis, such as Kibana, Grafana, AKHQ, Elasticsearch
 - Customizable through Python plugins
+
+## Overview
+
+Visit our introduction [blogpost](https://medium.com/bakdata/exploring-data-pipelines-in-apache-kafka-with-streams-explorer-8337dd11fdad) for a complete overview and demo of Streams Explorer.
 
 ## Installation
 
@@ -113,7 +117,7 @@ The following configuration options are available:
 
 #### General
 
-- `graph_update_every` Update the graph every X seconds (integer, **required**, default: 300)
+- `graph_update_every` Update the graph every X seconds (integer, **required**, default: `300`)
 
 #### Kafka Connect
 
@@ -139,6 +143,12 @@ The following configuration options are available:
 
 - `prometheus.url` URL of Prometheus (string, **required**, default: `http://localhost:9090`)
 
+The following exporters are required to collect Kafka metrics for Prometheus:
+
+- [Kafka Exporter](https://github.com/danielqsj/kafka_exporter)
+- [Kafka Lag Exporter](https://github.com/lightbend/kafka-lag-exporter)
+- [Kafka Connect Exporter](https://github.com/wakeful/kafka_connect_exporter)
+
 #### AKHQ
 
 - `akhq.url` URL of AKHQ (string, default: `http://localhost:8080`)
@@ -147,7 +157,7 @@ The following configuration options are available:
 #### Grafana
 
 - `grafana.url` URL of Grafana (string, default: `http://localhost:3000`)
-- `grafana.dashboards.topics` Path to topics dashboard (string)
+- `grafana.dashboards.topics` Path to topics dashboard (string), sample dashboards for topics and consumer groups are included in the [`./grafana`](https://github.com/bakdata/streams-explorer/tree/main/grafana) subfolder
 - `grafana.dashboards.consumergroups` Path to consumer groups dashboard (string)
 
 #### Kibana
@@ -167,8 +177,15 @@ for Kafka Connect Elasticsearch connector
 
 ## Demo pipeline
 
+![demo-pipeline](https://github.com/bakdata/streams-explorer/blob/main/screens/demo-pipeline.png?raw=true)
+
 [ATM Fraud detection with streams-bootstrap](https://github.com/bakdata/streams-explorer/blob/main/demo-atm-fraud/README.md)
 
 ## Plugin customization
 
-It is possible to create your own linker and extractors in Python by implementing the `LinkingService` or `Extractor` classes. This way you can customize it to your specific setup and services. As an example we provide the [DefaultLinker](https://github.com/bakdata/streams-explorer/blob/main/backend/streams_explorer/defaultlinker.py) and [ElasticsearchSink](https://github.com/bakdata/streams-explorer/blob/main/backend/streams_explorer/core/extractor/default/elasticsearch_sink.py) classes which are used by default.
+It is possible to create your own linker and extractors in Python by implementing the `LinkingService` or `Extractor` classes. This way you can customize it to your specific setup and services. As an example we provide the [`DefaultLinker`](https://github.com/bakdata/streams-explorer/blob/main/backend/streams_explorer/defaultlinker.py) as `LinkingService`. Furthermore the following default `Extractor` plugins are included:
+
+- [`ElasticsearchSink`](https://github.com/bakdata/streams-explorer/blob/main/backend/streams_explorer/core/extractor/default/elasticsearch_sink.py)
+- [`JdbcSink`](https://github.com/bakdata/streams-explorer/blob/main/backend/streams_explorer/core/extractor/default/jdbc_sink.py)
+- [`S3Sink`](https://github.com/bakdata/streams-explorer/blob/main/backend/streams_explorer/core/extractor/default/s3_sink.py)
+- [`GenericSink`/`GenericSource`](https://github.com/bakdata/streams-explorer/blob/main/backend/streams_explorer/core/extractor/default/generic.py)

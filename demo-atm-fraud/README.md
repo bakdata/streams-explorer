@@ -1,5 +1,7 @@
 # Demo: ATM Fraud detection with streams-bootstrap
 
+![demo-pipeline](https://github.com/bakdata/streams-explorer/blob/main/screens/demo-pipeline.png?raw=true)
+
 > This is an adaption of the example pipeline for ATM fraud detection using [streams-bootstrap](https://github.com/bakdata/streams-bootstrap). The original by Confluent is written in KSQL and can be found in the [ksql-atm-fraud-detection](https://github.com/confluentinc/demo-scene/tree/master/ksql-atm-fraud-detection) repo. Details can be found in their [blogpost](https://www.confluent.io/blog/atm-fraud-detection-apache-kafka-ksql/)
 
 ## Usage
