@@ -15,7 +15,8 @@ from streams_explorer.extractors import extractor_container
 
 class K8sApp:
     def __init__(self):
-        self._env_prefix = None
+        self.name = None
+        self.metadata = None
         self.input_topics = None
         self.output_topic = None
         self.error_topic = None
@@ -74,11 +75,11 @@ class K8sApp:
 
 class K8sAppCronJob(K8sApp):
     def __init__(self, cron_job: V1beta1CronJob):
+        super().__init__()
         self.cron_job = cron_job
         self.metadata: V1ObjectMeta = cron_job.metadata
         self.name = K8sApp.get_name(self.metadata)
         self.spec = cron_job.spec.job_template.spec.template.spec
-        super().__init__()
         self.container = self.get_app_container(self.spec)
         self._env_prefix = self.get_env_prefix(self.container)
 
@@ -100,12 +101,12 @@ class K8sAppCronJob(K8sApp):
 
 class K8sAppDeployment(K8sApp):
     def __init__(self, deployment: V1Deployment):
+        super().__init__()
         self.deployment = deployment
         self.metadata: V1ObjectMeta = deployment.metadata
         self.name = K8sApp.get_name(self.metadata)
         self.spec = deployment.spec.template.spec
         self._ignore_containers = self.get_ignore_containers()
-        super().__init__()
         self.container = self.get_app_container(self.spec, self._ignore_containers)
         self._env_prefix = self.get_env_prefix(self.container)
 

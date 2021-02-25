@@ -1,4 +1,4 @@
-from typing import Any, List, Optional, Tuple
+from typing import List, Optional, Tuple
 
 from kubernetes.client import V1beta1CronJob
 from loguru import logger
@@ -42,7 +42,7 @@ class ExtractorContainer:
                 return connector
         return None
 
-    def on_cron_job(self, cron_job: V1beta1CronJob) -> Any:
+    def on_cron_job(self, cron_job: V1beta1CronJob):
         for extractor in self.extractors:
             app = extractor.on_cron_job_parsing(cron_job)
             if app:
