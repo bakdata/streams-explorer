@@ -2,7 +2,6 @@ from typing import Dict, List, Optional
 
 import kubernetes
 from kubernetes.client import V1beta1CronJob, V1Deployment
-from kubernetes.client.api_client import ApiClient
 from loguru import logger
 
 from streams_explorer.core.config import settings
@@ -25,9 +24,6 @@ from streams_explorer.models.node_information import (
 
 
 class StreamsExplorer:
-    k8s_app_client: Optional[ApiClient] = None
-    k8s_batch_client: Optional[ApiClient] = None
-    v1_client: Optional[ApiClient] = None
     context = settings.k8s.deployment.context
     namespaces = settings.k8s.deployment.namespaces
 
