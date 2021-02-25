@@ -27,9 +27,8 @@ class K8sApp:
     def to_dict(self) -> dict:
         pass
 
-    @staticmethod
-    def get_name(metadata: V1ObjectMeta) -> Optional[str]:
-        return metadata.labels.get("app")
+    def get_name(self) -> Optional[str]:
+        pass
 
     @staticmethod
     def get_env_prefix(container: V1Container) -> Optional[str]:
@@ -78,12 +77,15 @@ class K8sAppCronJob(K8sApp):
         super().__init__()
         self.cron_job = cron_job
         self.metadata: V1ObjectMeta = cron_job.metadata
-        self.name = K8sApp.get_name(self.metadata)
+        self.name = self.get_name()
         self.spec = cron_job.spec.job_template.spec.template.spec
         self.container = self.get_app_container(self.spec)
         self._env_prefix = self.get_env_prefix(self.container)
 
         self.__get_common_configuration()
+
+    def get_name(self) -> Optional[str]:
+        return self.metadata.name
 
     def _get_env_name(self, variable_name) -> str:
         return f"{self._env_prefix}{variable_name}"
@@ -104,7 +106,7 @@ class K8sAppDeployment(K8sApp):
         super().__init__()
         self.deployment = deployment
         self.metadata: V1ObjectMeta = deployment.metadata
-        self.name = K8sApp.get_name(self.metadata)
+        self.name = self.get_name()
         self.spec = deployment.spec.template.spec
         self._ignore_containers = self.get_ignore_containers()
         self.container = self.get_app_container(self.spec, self._ignore_containers)
@@ -112,6 +114,9 @@ class K8sAppDeployment(K8sApp):
 
         self.__get_common_configuration()
         self.__get_attributes()
+
+    def get_name(self) -> Optional[str]:
+        return self.metadata.labels.get("app")
 
     def __get_common_configuration(self):
         for env in self.container.env:
