@@ -16,7 +16,7 @@ class K8sApp:
         self.container = self.__get_app_container(self.spec)
 
         self._env_prefix = None
-        self.name = None
+        self.name = self.metadata.labels.get("app")
         self.input_topics = None
         self.output_topic = None
         self.error_topic = None
@@ -24,13 +24,9 @@ class K8sApp:
         self.extra_output_topics = None
         self.attributes: Dict[str, str] = {}
 
-        self.get_name()
         self.get_env_prefix()
         self.__get_common_configuration()
         self.__get_attributes()
-
-    def get_name(self):
-        self.name = self.metadata.labels.get("app")
 
     def __get_common_configuration(self):
         for env in self.container.env:
