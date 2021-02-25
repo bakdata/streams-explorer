@@ -1,6 +1,12 @@
 from typing import Dict, List, Optional, Set
 
-from kubernetes.client import V1Container, V1Deployment, V1ObjectMeta, V1PodSpec
+from kubernetes.client import (
+    V1beta1CronJob,
+    V1Container,
+    V1Deployment,
+    V1ObjectMeta,
+    V1PodSpec,
+)
 from loguru import logger
 
 from streams_explorer.core.config import settings
@@ -8,15 +14,8 @@ from streams_explorer.extractors import extractor_container
 
 
 class K8sApp:
-    def __init__(self, deployment: V1Deployment):
-        self.deployment = deployment
-        self.metadata: V1ObjectMeta = deployment.metadata
-        self.spec = deployment.spec.template.spec
-        self._ignore_containers = self.get_ignore_containers()
-        self.container = self.__get_app_container(self.spec)
-
+    def __init__(self):
         self._env_prefix = None
-        self.name = self.metadata.labels.get("app")
         self.input_topics = None
         self.output_topic = None
         self.error_topic = None
@@ -24,7 +23,48 @@ class K8sApp:
         self.extra_output_topics = None
         self.attributes: Dict[str, str] = {}
 
-        self.get_env_prefix()
+    @staticmethod
+    def get_name(metadata: V1ObjectMeta) -> Optional[str]:
+        return metadata.labels.get("app")
+
+    @staticmethod
+    def get_env_prefix(container: V1Container) -> Optional[str]:
+        for env_var in container.env:
+            if env_var.name == "ENV_PREFIX":
+                return env_var.value
+        return None
+
+    @staticmethod
+    def get_app_container(
+        spec: V1PodSpec, ignore_containers: Set[str] = set()
+    ) -> Optional[V1Container]:
+        for container in spec.containers:
+            if container.name not in ignore_containers:
+                return container
+        return None
+
+
+class K8sAppCronJob(K8sApp):
+    def __init__(self, cron_job: V1beta1CronJob):
+        self.cron_job = cron_job
+        self.metadata: V1ObjectMeta = cron_job.metadata
+        self.name = K8sApp.get_name(self.metadata)
+        self.spec = cron_job.spec.job_template.spec.template.spec
+        super().__init__()
+        self.container = self.get_app_container(self.spec)
+
+
+class K8sAppDeployment(K8sApp):
+    def __init__(self, deployment: V1Deployment):
+        self.deployment = deployment
+        self.metadata: V1ObjectMeta = deployment.metadata
+        self.name = K8sApp.get_name(self.metadata)
+        self.spec = deployment.spec.template.spec
+        self._ignore_containers = self.get_ignore_containers()
+        super().__init__()
+        self.container = self.get_app_container(self.spec, self._ignore_containers)
+        self._env_prefix = self.get_env_prefix(self.container)
+
         self.__get_common_configuration()
         self.__get_attributes()
 
@@ -43,12 +83,6 @@ class K8sApp:
                 self.extra_output_topics = self.parse_extra_topics(env.value)
 
             extractor_container.on_streaming_app_env_parsing(env, self.name)
-
-    def get_env_prefix(self):
-        for env_var in self.container.env:
-            if env_var.name == "ENV_PREFIX":
-                self._env_prefix = env_var.value
-                break
 
     def __get_attributes(self):
         labels = self.metadata.labels
@@ -78,17 +112,11 @@ class K8sApp:
             return False
         return True
 
-    def __get_app_container(self, spec: V1PodSpec) -> Optional[V1Container]:
-        for container in spec.containers:
-            if container.name not in self._ignore_containers:
-                return container
-        return None
-
     def to_dict(self) -> Dict:
         return self.deployment.to_dict()
 
     @staticmethod
-    def get_ignore_containers() -> Set:
+    def get_ignore_containers() -> Set[str]:
         return set(
             [container.get("name") for container in settings.k8s.containers.ignore]
         )

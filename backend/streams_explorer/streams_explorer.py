@@ -5,7 +5,7 @@ from kubernetes.client import V1beta1CronJob, V1Deployment
 from loguru import logger
 
 from streams_explorer.core.config import settings
-from streams_explorer.core.k8s_app import K8sApp
+from streams_explorer.core.k8s_app import K8sApp, K8sAppCronJob, K8sAppDeployment
 from streams_explorer.core.node_info_extractor import (
     get_displayed_information_connector,
     get_displayed_information_deployment,
@@ -130,7 +130,7 @@ class StreamsExplorer:
         deployments = self.get_deployments()
         for item in deployments:
             try:
-                app = K8sApp(item)
+                app = K8sAppDeployment(item)
                 if app.is_common_streams_app():
                     self.applications[app.name] = app
             except Exception as e:
@@ -153,7 +153,7 @@ class StreamsExplorer:
                 cron_job
             )
             if deployment:
-                app = K8sApp(deployment)
+                app = K8sAppCronJob(deployment)
                 self.applications[app.name] = app
 
     def get_cron_jobs(self) -> List[V1beta1CronJob]:
