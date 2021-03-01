@@ -1,5 +1,5 @@
 from streams_explorer.core.config import settings
-from streams_explorer.core.k8s_app import K8sApp
+from streams_explorer.core.k8s_app import K8sAppDeployment
 from streams_explorer.core.node_info_extractor import (
     get_displayed_information_connector,
     get_displayed_information_deployment,
@@ -73,7 +73,7 @@ class TestNodeInfoExtractor:
             "error-topic1",
             pipeline="pipeline1",
         )
-        output = get_displayed_information_deployment(K8sApp(k8s_app))
+        output = get_displayed_information_deployment(K8sAppDeployment(k8s_app))
 
         assert len(output) == 2
         value = output[0].value

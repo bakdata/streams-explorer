@@ -44,7 +44,10 @@ class ExtractorContainer:
 
     def on_cron_job(self, cron_job: V1beta1CronJob):
         for extractor in self.extractors:
-            extractor.on_cron_job_parsing(cron_job)
+            app = extractor.on_cron_job_parsing(cron_job)
+            if app:
+                return app
+        return None
 
     def get_sources_sinks(self) -> Tuple[List[Source], List[Sink]]:
         sources: List[Source] = []

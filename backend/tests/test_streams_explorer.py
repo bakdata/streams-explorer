@@ -1,12 +1,23 @@
 from typing import List
 
 import pytest
-from kubernetes.client import V1beta1CronJob, V1ObjectMeta
+from kubernetes.client import (
+    V1beta1CronJob,
+    V1beta1CronJobSpec,
+    V1beta1JobTemplateSpec,
+    V1Container,
+    V1EnvVar,
+    V1JobSpec,
+    V1ObjectMeta,
+    V1PodSpec,
+    V1PodTemplateSpec,
+)
 
 from streams_explorer.core.config import settings
 from streams_explorer.core.extractor.default.elasticsearch_sink import ElasticsearchSink
 from streams_explorer.core.extractor.default.generic import GenericSink, GenericSource
 from streams_explorer.core.extractor.extractor import Extractor
+from streams_explorer.core.k8s_app import K8sAppCronJob
 from streams_explorer.core.services.dataflow_graph import NodeTypesEnum
 from streams_explorer.defaultlinker import DefaultLinker
 from streams_explorer.extractors import extractor_container
@@ -67,7 +78,21 @@ class TestStreamsExplorer:
 
     @pytest.fixture()
     def cron_jobs(self):
-        return [V1beta1CronJob(metadata=V1ObjectMeta(name="test"))]
+        env_prefix = "APP_"
+        envs = [
+            V1EnvVar(name="ENV_PREFIX", value=env_prefix),
+            V1EnvVar(name=env_prefix + "OUTPUT_TOPIC", value="output-topic"),
+        ]
+        container = V1Container(name="test-container", env=envs)
+        pod_spec = V1PodSpec(containers=[container])
+        pod_template_spec = V1PodTemplateSpec(spec=pod_spec)
+        job_spec = V1JobSpec(
+            template=pod_template_spec,
+            selector="",
+        )
+        job_template = V1beta1JobTemplateSpec(spec=job_spec)
+        spec = V1beta1CronJobSpec(job_template=job_template, schedule="* * * * *")
+        return [V1beta1CronJob(metadata=V1ObjectMeta(name="test-cronjob"), spec=spec)]
 
     @pytest.fixture()
     def fake_linker(self, mocker):
@@ -210,11 +235,13 @@ class TestStreamsExplorer:
 
             def on_cron_job_parsing(self, cron_job: V1beta1CronJob):
                 self.cron_job = cron_job
+                return K8sAppCronJob(cron_job)
 
         extractor = MockCronjobExtractor()
         extractor_container.extractors = [extractor]
         streams_explorer.update()
-        assert extractor.cron_job.metadata.name == "test"
+        assert extractor.cron_job.metadata.name == "test-cronjob"
+        assert "test-cronjob" in streams_explorer.applications
         extractor_container.extractors = []
 
     def test_get_link(self, streams_explorer):

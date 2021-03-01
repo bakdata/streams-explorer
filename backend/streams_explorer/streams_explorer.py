@@ -2,11 +2,10 @@ from typing import Dict, List, Optional
 
 import kubernetes
 from kubernetes.client import V1beta1CronJob, V1Deployment
-from kubernetes.client.api_client import ApiClient
 from loguru import logger
 
 from streams_explorer.core.config import settings
-from streams_explorer.core.k8s_app import K8sApp
+from streams_explorer.core.k8s_app import K8sApp, K8sAppDeployment
 from streams_explorer.core.node_info_extractor import (
     get_displayed_information_connector,
     get_displayed_information_deployment,
@@ -25,9 +24,6 @@ from streams_explorer.models.node_information import (
 
 
 class StreamsExplorer:
-    k8s_app_client: Optional[ApiClient] = None
-    k8s_batch_client: Optional[ApiClient] = None
-    v1_client: Optional[ApiClient] = None
     context = settings.k8s.deployment.context
     namespaces = settings.k8s.deployment.namespaces
 
@@ -134,7 +130,7 @@ class StreamsExplorer:
         deployments = self.get_deployments()
         for item in deployments:
             try:
-                app = K8sApp(item)
+                app = K8sAppDeployment(item)
                 if app.is_common_streams_app():
                     self.applications[app.name] = app
             except Exception as e:
@@ -153,7 +149,9 @@ class StreamsExplorer:
         logger.info("Retrieve cronjob descriptions")
         cron_jobs = self.get_cron_jobs()
         for cron_job in cron_jobs:
-            extractor_container.on_cron_job(cron_job)
+            app: Optional[K8sApp] = extractor_container.on_cron_job(cron_job)
+            if app:
+                self.applications[app.name] = app
 
     def get_cron_jobs(self) -> List[V1beta1CronJob]:
         cron_jobs: List[V1beta1CronJob] = []

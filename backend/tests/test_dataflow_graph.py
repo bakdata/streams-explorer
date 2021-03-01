@@ -1,5 +1,5 @@
 from streams_explorer.core.config import settings
-from streams_explorer.core.k8s_app import K8sApp
+from streams_explorer.core.k8s_app import K8sAppDeployment
 from streams_explorer.core.services.dataflow_graph import DataFlowGraph
 from streams_explorer.models.kafka_connector import (
     KafkaConnector,
@@ -152,7 +152,7 @@ class TestDataFlowGraph:
         multiple_outputs=None,
         pipeline=None,
     ):
-        return K8sApp(
+        return K8sAppDeployment(
             get_streaming_app_deployment(
                 name,
                 input_topics,
