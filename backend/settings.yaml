@@ -6,6 +6,7 @@ kafkaconnect:
 
 # update graph (fetch deployments and connectors) every X seconds
 graph_update_every: 300
+graph_layout_arguments: "-Grankdir=LR -Gnodesep=0.8 -Gpad=10"
 
 k8s:
   deployment:

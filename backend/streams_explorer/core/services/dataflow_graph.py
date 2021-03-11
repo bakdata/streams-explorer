@@ -179,7 +179,7 @@ class DataFlowGraph:
 
     @staticmethod
     def __get_positioned_json_graph(graph: Graph) -> dict:
-        pos = graphviz_layout(graph, prog="dot", args="-Grankdir=LR -Gnodesep=0.8")
+        pos = graphviz_layout(graph, prog="dot", args=settings.graph_layout_arguments)
         x = {n: p[0] for n, p in pos.items()}
         y = {n: p[1] for n, p in pos.items()}
         networkx.set_node_attributes(graph, x, "x")
