@@ -1,3 +1,5 @@
+import pytest
+
 from streams_explorer.core.config import settings
 from streams_explorer.core.k8s_app import K8sAppDeployment
 from streams_explorer.core.services.dataflow_graph import DataFlowGraph
@@ -12,8 +14,11 @@ from tests.utils import get_streaming_app_deployment
 
 
 class TestDataFlowGraph:
-    def test_add_streaming_app(self):
-        df = DataFlowGraph(metric_provider=MetricProvider)
+    @pytest.fixture()
+    def df(self) -> DataFlowGraph:
+        return DataFlowGraph(metric_provider=MetricProvider)
+
+    def test_add_streaming_app(self, df: DataFlowGraph):
         df.add_streaming_app(self.get_k8s_app())
 
         assert len(df.graph.nodes) == 4
@@ -22,7 +27,7 @@ class TestDataFlowGraph:
         assert df.graph.has_edge("test-app", "error-topic")
 
         # should have multiple input topic
-        df = DataFlowGraph(metric_provider=MetricProvider)
+        df.reset()
         df.add_streaming_app(self.get_k8s_app(input_topics="input-topic1,input-topic2"))
 
         assert len(df.graph.nodes) == 5
@@ -31,7 +36,7 @@ class TestDataFlowGraph:
         assert df.graph.has_edge("test-app", "output-topic")
         assert df.graph.has_edge("test-app", "error-topic")
 
-        df = DataFlowGraph(metric_provider=MetricProvider)
+        df.reset()
         df.add_streaming_app(
             self.get_k8s_app(multiple_outputs="1=extra-output1,2=extra-output2")
         )
@@ -43,7 +48,7 @@ class TestDataFlowGraph:
         assert df.graph.has_edge("test-app", "extra-output1")
         assert df.graph.has_edge("test-app", "extra-output2")
 
-    def test_add_connector(self):
+    def test_add_connector(self, df: DataFlowGraph):
         sink_connector = KafkaConnector(
             name="test-sink-connector",
             type=KafkaConnectorTypesEnum.SINK,
@@ -57,7 +62,6 @@ class TestDataFlowGraph:
             topics=["input-topic", "input-topic2"],
             config={},
         )
-        df = DataFlowGraph(metric_provider=MetricProvider)
         df.add_streaming_app(self.get_k8s_app())
         df.add_connector(sink_connector)
         df.add_connector(source_connector)
@@ -67,32 +71,29 @@ class TestDataFlowGraph:
         assert df.graph.has_edge("test-source-connector", "input-topic")
         assert df.graph.has_edge("test-source-connector", "input-topic2")
 
-    def test_add_source(self):
+    def test_add_source(self, df: DataFlowGraph):
         source = Source(
             name="test-source",
             node_type="test-type",
             target="test-app",
         )
-        df = DataFlowGraph(metric_provider=MetricProvider)
         df.add_streaming_app(self.get_k8s_app())
         df.add_source(source)
         assert len(df.graph.nodes) == 5
         assert df.graph.has_edge("test-source", "test-app")
 
-    def test_add_sink(self):
+    def test_add_sink(self, df: DataFlowGraph):
         sink = Sink(
             name="test-sink",
             node_type="test-type",
             source="test-app",
         )
-        df = DataFlowGraph(metric_provider=MetricProvider)
         df.add_streaming_app(self.get_k8s_app())
         df.add_sink(sink)
         assert len(df.graph.nodes) == 5
         assert df.graph.has_edge("test-app", "test-sink")
 
-    def test_get_positioned_json_graph(self):
-        df = DataFlowGraph(metric_provider=MetricProvider)
+    def test_get_positioned_json_graph(self, df: DataFlowGraph):
         df.add_streaming_app(self.get_k8s_app())
         df.get_positioned_graph()
         nodes = df.graph.nodes(data=True)
@@ -100,13 +101,11 @@ class TestDataFlowGraph:
             assert data.get("x") is not None
             assert data.get("y") is not None
 
-    def test_get_node_type(self):
-        df = DataFlowGraph(metric_provider=MetricProvider)
+    def test_get_node_type(self, df: DataFlowGraph):
         df.add_streaming_app(self.get_k8s_app())
         assert df.get_node_type("test-app") == "streaming-app"
 
-    def test_node_attributes(self):
-        df = DataFlowGraph(metric_provider=MetricProvider)
+    def test_node_attributes(self, df: DataFlowGraph):
         df.add_streaming_app(
             self.get_k8s_app(
                 name="test-app1",
@@ -122,9 +121,8 @@ class TestDataFlowGraph:
         )
         assert df.graph.nodes["test-app2"].get("pipeline") is None
 
-    def test_extract_independent_pipelines(self):
+    def test_extract_independent_pipelines(self, df: DataFlowGraph):
         settings.k8s.independent_graph.label = "pipeline"
-        df = DataFlowGraph(metric_provider=MetricProvider)
         df.add_streaming_app(self.get_k8s_app())
         df.add_streaming_app(
             self.get_k8s_app(
