@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Type
 
 import kubernetes
 from kubernetes.client import V1beta1CronJob, V1Deployment
@@ -13,6 +13,7 @@ from streams_explorer.core.node_info_extractor import (
 from streams_explorer.core.services.dataflow_graph import DataFlowGraph, NodeTypesEnum
 from streams_explorer.core.services.kafkaconnect import KafkaConnect
 from streams_explorer.core.services.linking_services import LinkingService
+from streams_explorer.core.services.metric_providers import MetricProvider
 from streams_explorer.core.services.schemaregistry import SchemaRegistry
 from streams_explorer.extractors import extractor_container
 from streams_explorer.models.kafka_connector import KafkaConnector
@@ -27,10 +28,12 @@ class StreamsExplorer:
     context = settings.k8s.deployment.context
     namespaces = settings.k8s.deployment.namespaces
 
-    def __init__(self, linking_service: LinkingService):
+    def __init__(
+        self, linking_service: LinkingService, metric_provider: Type[MetricProvider]
+    ):
         self.applications: Dict[str, K8sApp] = {}
         self.kafka_connectors: List[KafkaConnector] = []
-        self.data_flow = DataFlowGraph()
+        self.data_flow = DataFlowGraph(metric_provider=metric_provider)
         self.linking_service = linking_service
 
     def setup(self):

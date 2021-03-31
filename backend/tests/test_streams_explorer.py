@@ -19,6 +19,7 @@ from streams_explorer.core.extractor.default.generic import GenericSink, Generic
 from streams_explorer.core.extractor.extractor import Extractor
 from streams_explorer.core.k8s_app import K8sAppCronJob
 from streams_explorer.core.services.dataflow_graph import NodeTypesEnum
+from streams_explorer.core.services.metric_providers import MetricProvider
 from streams_explorer.defaultlinker import DefaultLinker
 from streams_explorer.extractors import extractor_container
 from streams_explorer.models.kafka_connector import KafkaConnectorTypesEnum
@@ -111,7 +112,9 @@ class TestStreamsExplorer:
     def streams_explorer(
         self, mocker, deployments, cron_jobs, monkeypatch, fake_linker
     ):
-        explorer = StreamsExplorer(linking_service=fake_linker)
+        explorer = StreamsExplorer(
+            linking_service=fake_linker, metric_provider=MetricProvider
+        )
         extractor_container.extractors = [
             ElasticsearchSink(),
             GenericSink(),
