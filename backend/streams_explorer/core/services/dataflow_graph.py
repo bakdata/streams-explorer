@@ -1,8 +1,6 @@
 from typing import Dict, List, Optional, Tuple, Type
 
 import networkx
-from fastapi import FastAPI
-from loguru import logger
 from networkx import Graph
 from networkx.drawing.nx_agraph import graphviz_layout
 
@@ -152,7 +150,7 @@ class DataFlowGraph:
 
     def reset(self):
         self.graph = networkx.DiGraph()
-        self.independent_graphs: Dict[str, networkx.DiGraph] = {}
+        self.independent_graphs = {}
         self.metric_provider = self.metric_provider_class(self.graph.nodes(data=True))
 
     @staticmethod
@@ -187,8 +185,3 @@ class DataFlowGraph:
         networkx.set_node_attributes(graph, x, "x")
         networkx.set_node_attributes(graph, y, "y")
         return DataFlowGraph.__get_json_graph(graph)
-
-
-async def setup_dataflow_graph(app: FastAPI) -> None:
-    logger.info("Setup dataflow graph")
-    app.state.dataflow_graph = DataFlowGraph()
