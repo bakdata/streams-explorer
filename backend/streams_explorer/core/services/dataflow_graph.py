@@ -1,14 +1,12 @@
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Type
 
 import networkx
-from fastapi import FastAPI
-from loguru import logger
 from networkx import Graph
 from networkx.drawing.nx_agraph import graphviz_layout
 
 from streams_explorer.core.config import settings
 from streams_explorer.core.k8s_app import K8sApp
-from streams_explorer.core.services.metric_providers import PrometheusMetricProvider
+from streams_explorer.core.services.metric_providers import MetricProvider
 from streams_explorer.models.graph import Metric
 from streams_explorer.models.kafka_connector import (
     KafkaConnector,
@@ -24,10 +22,10 @@ class NodeNotFound(Exception):
 
 
 class DataFlowGraph:
-    def __init__(self):
+    def __init__(self, metric_provider: Type[MetricProvider]):
         self.graph = networkx.DiGraph()
         self.independent_graphs: Dict[str, networkx.DiGraph] = {}
-        self.metrics_provider = PrometheusMetricProvider(self.graph.nodes(data=True))
+        self.metric_provider_class = metric_provider
 
     def add_streaming_app(self, app: K8sApp):
         self.graph.add_node(
@@ -93,7 +91,9 @@ class DataFlowGraph:
         return self.__get_positioned_json_graph(self.graph)
 
     def get_metrics(self) -> List[Metric]:
-        return self.metrics_provider.get()
+        if self.metric_provider is not None:
+            return self.metric_provider.get()
+        return []
 
     def get_node_type(self, id: str) -> str:
         try:
@@ -151,7 +151,7 @@ class DataFlowGraph:
     def reset(self):
         self.graph = networkx.DiGraph()
         self.independent_graphs = {}
-        self.metrics_provider = PrometheusMetricProvider(self.graph.nodes(data=True))
+        self.metric_provider = self.metric_provider_class(self.graph.nodes(data=True))
 
     @staticmethod
     def __filter_streaming_apps(node: Tuple[str, dict]):
@@ -185,8 +185,3 @@ class DataFlowGraph:
         networkx.set_node_attributes(graph, x, "x")
         networkx.set_node_attributes(graph, y, "y")
         return DataFlowGraph.__get_json_graph(graph)
-
-
-async def setup_dataflow_graph(app: FastAPI) -> None:
-    logger.info("Setup dataflow graph")
-    app.state.dataflow_graph = DataFlowGraph()

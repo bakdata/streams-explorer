@@ -1,12 +1,52 @@
+import textwrap
+from pathlib import Path
+
 import pytest
 from prometheus_api_client import PrometheusConnect
 
+from streams_explorer.core.config import settings
 from streams_explorer.core.services.metric_providers import (
     MetricProvider,
     PrometheusMetricProvider,
 )
+from streams_explorer.metric_provider import load_metric_provider
 from streams_explorer.models.graph import Metric
 from tests.test_metricprovider_data import nodes, prometheus_data
+
+
+class TestMetricProvider:
+    fake_metric_provider = textwrap.dedent(
+        """\
+        from typing import List, Tuple
+
+        from streams_explorer.core.services.metric_providers import MetricProvider
+        from streams_explorer.models.graph import Metric
+
+
+        class FakeMetricProvider(MetricProvider):
+            def __init__(self, nodes: List[Tuple[str, dict]]):
+                super().__init__(nodes)
+    """
+    )
+
+    def test_load_default_metric_provider(self):
+        metric_provider = load_metric_provider()(nodes)
+        assert type(metric_provider) is PrometheusMetricProvider
+
+    def test_load_metric_provider_plugin(self):
+        settings.plugins.path = Path.cwd() / "plugins"
+        fake_metric_provider_path = settings.plugins.path / "fake_metric_provider.py"
+        try:
+            with open(fake_metric_provider_path, "w") as f:
+                f.write(self.fake_metric_provider)
+
+            metric_provider = load_metric_provider()(nodes)
+
+            assert isinstance(metric_provider, MetricProvider)
+            assert not isinstance(metric_provider, PrometheusMetricProvider)
+            assert metric_provider.__class__.__name__ == "FakeMetricProvider"
+        finally:
+            fake_metric_provider_path.unlink()
 
 
 class TestPrometheusMetricProvider:
