@@ -1,3 +1,4 @@
+import textwrap
 from pathlib import Path
 
 import pytest
@@ -14,16 +15,19 @@ from tests.test_metricprovider_data import nodes, prometheus_data
 
 
 class TestMetricProvider:
-    fake_metric_provider = """from typing import List, Tuple
+    fake_metric_provider = textwrap.dedent(
+        """\
+        from typing import List, Tuple
 
-    from streams_explorer.core.services.metric_providers import MetricProvider
-    from streams_explorer.models.graph import Metric
+        from streams_explorer.core.services.metric_providers import MetricProvider
+        from streams_explorer.models.graph import Metric
 
 
-    class FakeMetricProvider(MetricProvider):
-        def __init__(self, nodes: List[Tuple[str, dict]]):
-            super().__init__(nodes)
+        class FakeMetricProvider(MetricProvider):
+            def __init__(self, nodes: List[Tuple[str, dict]]):
+                super().__init__(nodes)
     """
+    )
 
     def test_load_default_metric_provider(self):
         metric_provider = load_metric_provider()(nodes)
