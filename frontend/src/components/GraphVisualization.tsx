@@ -139,6 +139,7 @@ function setFocusedNode(graph: Graph, focusedNode: string) {
   if (graph.getZoom() < 1) {
     graph.zoomTo(1);
   }
+
   graph.focusItem(focusedNode, true, {
     easing: "easeCubic",
     duration: 1500,
@@ -167,7 +168,7 @@ const GraphVisualization = ({
     if (graph && focusedNode) {
       setFocusedNode(graph, focusedNode);
     }
-  }, [focusedNode]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [focusedNode, graph]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (graph && metrics) {
     updateNodeMetrics(graph, metrics);

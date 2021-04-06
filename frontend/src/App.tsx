@@ -22,6 +22,8 @@ import { AutoComplete } from "antd";
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import { useMutate } from "restful-react";
+import { useHistory, useLocation } from "react-router-dom";
+import qs, { ParsedQs } from "qs";
 
 const { Option } = AutoComplete;
 
@@ -33,6 +35,9 @@ const App: React.FC = () => {
   const [detailNode, setDetailNode] = useState<string | null>(null);
   const [focusedNode, setFocusedNode] = useState<string | null>(null);
   const [searchWidth, setSearchWidth] = useState<number>(300);
+  const history = useHistory();
+
+  const location = useLocation();
   const ref = useRef<HTMLDivElement>(null!);
   const onResize = useCallback(() => {}, []);
   const { width, height } = useResizeDetector({
@@ -95,6 +100,21 @@ const App: React.FC = () => {
     }
   }, [graph]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  useEffect(() => {
+    const parsedQs: ParsedQs = qs.parse(location.search, {
+      ignoreQueryPrefix: true,
+    });
+    const pipeline: string = parsedQs.pipeline as string;
+    if (pipeline) {
+      setCurrentPipeline(pipeline);
+    }
+    const focusNode: string = parsedQs.focusNode as string;
+    if (focusNode) {
+      setFocusedNode(focusNode);
+      setDetailNode(focusNode);
+    }
+  }, [location]);
+
   if (graphError) {
     message.error(graphError.message);
     return <Spin spinning={false} tip="Failed to load graph" />;
@@ -106,7 +126,9 @@ const App: React.FC = () => {
   const menuPipeline = (
     <Menu
       onClick={(e) => {
+        history.push(`/?pipeline=${e.key.toString()}`);
         setCurrentPipeline(e.key.toString());
+        setFocusedNode(null);
       }}
     >
       <Menu.Item key={ALL_PIPELINES}>
@@ -163,10 +185,13 @@ const App: React.FC = () => {
                   onSelect={(nodeId: string) => {
                     setFocusedNode(nodeId);
                     setDetailNode(nodeId);
+                    history.push(`/?focusNode=${nodeId}`);
                   }}
                 >
                   {graph?.nodes.map((node) => (
-                    <Option value={node.id}>{node.id}</Option>
+                    <Option value={node.id} key={node.id}>
+                      {node.id}
+                    </Option>
                   ))}
                 </AutoComplete>
               </Menu.Item>
