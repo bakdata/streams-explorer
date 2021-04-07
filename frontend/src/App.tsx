@@ -108,7 +108,7 @@ const App: React.FC = () => {
     if (pipeline) {
       setCurrentPipeline(pipeline);
     }
-    const focusNode: string = parsedQs.focusNode as string;
+    const focusNode: string = parsedQs["focus-node"] as string;
     if (focusNode) {
       setFocusedNode(focusNode);
       setDetailNode(focusNode);
@@ -182,10 +182,11 @@ const App: React.FC = () => {
                       .toUpperCase()
                       .indexOf(inputValue.toUpperCase()) !== -1
                   }
+                  value={focusedNode ? focusedNode : undefined}
                   onSelect={(nodeId: string) => {
                     setFocusedNode(nodeId);
                     setDetailNode(nodeId);
-                    history.push(`/?focusNode=${nodeId}`);
+                    history.push(`/?focus-node=${nodeId}`);
                   }}
                 >
                   {graph?.nodes.map((node) => (
