@@ -34,11 +34,12 @@ class DataFlowGraph:
             node_type=NodeTypesEnum.STREAMING_APP,
             **app.attributes,
         )
-        self._add_topic(app.output_topic)
-        self._add_output_topic(app.name, app.output_topic)
+        if app.output_topic:
+            self._add_topic(app.output_topic)
+            self._add_output_topic(app.name, app.output_topic)
         if app.error_topic is not None:
             self._add_error_topic(app.name, app.error_topic)
-        if app.input_topics is not None:
+        if app.input_topics:
             for input_topic in app.input_topics:
                 self._add_topic(input_topic)
                 self._add_input_topic(app.name, input_topic)
@@ -111,7 +112,7 @@ class DataFlowGraph:
             pipeline_name = self.__extract_pipeline_name(pipeline_graph)
             self.independent_graphs[pipeline_name] = pipeline_graph
 
-    def _add_topic(self, name):
+    def _add_topic(self, name: str):
         self.graph.add_node(
             name,
             label=name,
@@ -154,12 +155,11 @@ class DataFlowGraph:
         self.metric_provider = self.metric_provider_class(self.graph.nodes(data=True))
 
     @staticmethod
-    def __filter_streaming_apps(node: Tuple[str, dict]):
-        node_type = node[1].get("node_type")
-        return node_type is not None and node_type == NodeTypesEnum.STREAMING_APP
+    def __filter_streaming_apps(node: Tuple[str, dict]) -> bool:
+        return node[1].get("node_type") == NodeTypesEnum.STREAMING_APP
 
     @staticmethod
-    def __get_streaming_app_pipeline(streaming_app) -> str:
+    def __get_streaming_app_pipeline(streaming_app: Tuple[str, dict]) -> str:
         streaming_app_name, streaming_app_labels = streaming_app
         pipeline: Optional[str] = None
         if (

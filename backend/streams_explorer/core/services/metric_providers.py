@@ -48,7 +48,7 @@ class MetricProvider:
     def __init__(self, nodes: List[Tuple[str, dict]]):
         self._nodes: List[Tuple[str, dict]] = nodes
         self.metrics: List[Metric] = []
-        self._data: Dict[str, List] = {}
+        self._data: Dict[str, dict] = {}
 
     def refresh_data(self):
         pass

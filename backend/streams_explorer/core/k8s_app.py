@@ -15,26 +15,27 @@ from streams_explorer.extractors import extractor_container
 
 class K8sApp:
     def __init__(self):
-        self.name = None
-        self.metadata = None
-        self.input_topics = None
-        self.output_topic = None
-        self.error_topic = None
-        self.extra_input_topics = None
-        self.extra_output_topics = None
+        self.name: str
+        self.metadata: Optional[V1ObjectMeta] = None
+        self.input_topics: List[str] = []
+        self.output_topic: Optional[str] = None
+        self.error_topic: Optional[str] = None
+        self.extra_input_topics: List[str] = []
+        self.extra_output_topics: List[str] = []
         self.attributes: Dict[str, str] = {}
 
     def to_dict(self) -> dict:
-        pass
+        return {}
 
-    def get_name(self) -> Optional[str]:
-        pass
+    def get_name(self) -> str:
+        return ""
 
     @staticmethod
-    def get_env_prefix(container: V1Container) -> Optional[str]:
-        for env_var in container.env:
-            if env_var.name == "ENV_PREFIX":
-                return env_var.value
+    def get_env_prefix(container: Optional[V1Container]) -> Optional[str]:
+        if container:
+            for env_var in container.env:
+                if env_var.name == "ENV_PREFIX":
+                    return env_var.value
         return None
 
     @staticmethod
@@ -76,7 +77,7 @@ class K8sAppCronJob(K8sApp):
     def __init__(self, cron_job: V1beta1CronJob):
         super().__init__()
         self.cron_job = cron_job
-        self.metadata: V1ObjectMeta = cron_job.metadata
+        self.metadata = cron_job.metadata
         self.name = self.get_name()
         self.spec = cron_job.spec.job_template.spec.template.spec
         self.container = self.get_app_container(self.spec)
@@ -84,7 +85,9 @@ class K8sAppCronJob(K8sApp):
 
         self.__get_common_configuration()
 
-    def get_name(self) -> Optional[str]:
+    def get_name(self) -> str:
+        if not self.metadata.name:
+            raise TypeError("Name is required for cronjob")
         return self.metadata.name
 
     def _get_env_name(self, variable_name) -> str:
@@ -105,7 +108,7 @@ class K8sAppDeployment(K8sApp):
     def __init__(self, deployment: V1Deployment):
         super().__init__()
         self.deployment = deployment
-        self.metadata: V1ObjectMeta = deployment.metadata
+        self.metadata = deployment.metadata
         self.name = self.get_name()
         self.spec = deployment.spec.template.spec
         self._ignore_containers = self.get_ignore_containers()
@@ -115,8 +118,11 @@ class K8sAppDeployment(K8sApp):
         self.__get_common_configuration()
         self.__get_attributes()
 
-    def get_name(self) -> Optional[str]:
-        return self.metadata.labels.get("app")
+    def get_name(self) -> str:
+        name = self.metadata.labels.get("app")
+        if not name:
+            raise TypeError("Name is required for deployment")
+        return name
 
     def __get_common_configuration(self):
         for env in self.container.env:
@@ -132,7 +138,8 @@ class K8sAppDeployment(K8sApp):
             elif name == self._get_env_name("EXTRA_OUTPUT_TOPICS"):
                 self.extra_output_topics = self.parse_extra_topics(env.value)
 
-            extractor_container.on_streaming_app_env_parsing(env, self.name)
+            if self.name:
+                extractor_container.on_streaming_app_env_parsing(env, self.name)
 
     def __get_attributes(self):
         labels = self.metadata.labels
