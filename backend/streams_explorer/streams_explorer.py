@@ -134,7 +134,7 @@ class StreamsExplorer:
         for item in deployments:
             try:
                 app = K8sAppDeployment(item)
-                if app.is_common_streams_app() and app.name:
+                if app.is_common_streams_app():
                     self.applications[app.name] = app
             except Exception as e:
                 logger.debug(e)
