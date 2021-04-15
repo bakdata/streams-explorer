@@ -49,10 +49,10 @@ class K8sApp:
 
     @staticmethod
     def get_ignore_containers() -> Set[str]:
-        return {container["name"] for container in settings.k8s.containers.ignore}  # type: ignore
+        return {container["name"] for container in settings.k8s.containers.ignore}
 
     @staticmethod
-    def get_labels() -> Set:
+    def get_labels() -> Set[str]:
         return set(settings.k8s.labels)
 
     @staticmethod
