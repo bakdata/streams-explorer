@@ -57,10 +57,16 @@ class TestApplication:
                 ),
             ]
 
+        def mock_get_stateful_sets(*args, **kwargs):
+            return []
+
         def mock_get_cron_jobs(*args, **kwargs):
             return [V1beta1CronJob(metadata=V1ObjectMeta(name="test"))]
 
         monkeypatch.setattr(StreamsExplorer, "get_deployments", mock_get_deployments)
+        monkeypatch.setattr(
+            StreamsExplorer, "get_stateful_sets", mock_get_stateful_sets
+        )
         monkeypatch.setattr(StreamsExplorer, "get_cron_jobs", mock_get_cron_jobs)
         monkeypatch.setattr(StreamsExplorer, "setup", lambda _: None)
 
@@ -123,6 +129,9 @@ class TestApplication:
 
             monkeypatch.setattr(
                 StreamsExplorer, "get_deployments", mock_get_deployments
+            )
+            monkeypatch.setattr(
+                StreamsExplorer, "get_stateful_sets", mock_get_stateful_sets
             )
             await asyncio.sleep(2)
             response = client.get(f"{API_PREFIX}/graph")
