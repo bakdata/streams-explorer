@@ -29,10 +29,11 @@ class K8sApp:
     def to_dict(self) -> dict:
         return self.k8s_object.to_dict()
 
-    def get_name(self) -> Optional[str]:
+    def get_name(self) -> str:
         name = self.metadata.labels.get("app")
         if not name:
             raise TypeError(f"Name is required for {self.__class__.__name__}")
+        return name
 
     def get_common_configuration(self):
         for env in self.container.env:
@@ -128,6 +129,12 @@ class K8sAppCronJob(K8sApp):
         self.env_prefix = self.get_env_prefix(self.container)
 
         self.get_common_configuration()
+
+    def get_name(self) -> str:
+        name = self.metadata.name
+        if not name:
+            raise TypeError(f"Name is required for {self.__class__.__name__}")
+        return name
 
     def get_common_configuration(self):
         for env in self.container.env:
