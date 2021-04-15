@@ -7,6 +7,7 @@ from kubernetes.client import (
     V1ObjectMeta,
     V1PodSpec,
 )
+from kubernetes.client.models.v1_stateful_set import V1StatefulSet
 from loguru import logger
 
 from streams_explorer.core.config import settings
@@ -14,9 +15,10 @@ from streams_explorer.extractors import extractor_container
 
 
 class K8sApp:
-    def __init__(self):
-        self.name: str
-        self.metadata: Optional[V1ObjectMeta] = None
+    def __init__(self, k8s_object):
+        self.k8s_object = k8s_object
+        self.metadata: Optional[V1ObjectMeta] = k8s_object.metadata
+        self.name = self.get_name()
         self.input_topics: List[str] = []
         self.output_topic: Optional[str] = None
         self.error_topic: Optional[str] = None
@@ -25,10 +27,57 @@ class K8sApp:
         self.attributes: Dict[str, str] = {}
 
     def to_dict(self) -> dict:
-        return {}
+        return self.k8s_object.to_dict()
 
-    def get_name(self) -> str:
-        return ""
+    def get_name(self) -> Optional[str]:
+        name = self.metadata.labels.get("app")
+        if not name:
+            raise TypeError(f"Name is required for {self.__class__.__name__}")
+
+    def get_common_configuration(self):
+        for env in self.container.env:
+            name = env.name
+            if name == self.get_env_name("INPUT_TOPICS"):
+                self.input_topics = self.parse_input_topics(env.value)
+            elif name == self.get_env_name("OUTPUT_TOPIC"):
+                self.output_topic = env.value
+            elif name == self.get_env_name("ERROR_TOPIC"):
+                self.error_topic = env.value
+            elif name == self.get_env_name("EXTRA_INPUT_TOPICS"):
+                self.extra_input_topics = self.parse_extra_topics(env.value)
+            elif name == self.get_env_name("EXTRA_OUTPUT_TOPICS"):
+                self.extra_output_topics = self.parse_extra_topics(env.value)
+
+            if self.name:
+                extractor_container.on_streaming_app_env_parsing(env, self.name)
+
+    def is_common_streams_app(self) -> bool:
+        if self.input_topics is None and self.output_topic is None:
+            return False
+        return True
+
+    def get_env_name(self, variable_name) -> str:
+        return f"{self.env_prefix}{variable_name}"
+
+    def get_attributes(self):
+        labels = self.metadata.labels
+        labels_to_use = self.get_labels()
+
+        for key in labels_to_use:
+            value = labels.get(key)
+            if value is not None:
+                self.attributes[key] = value
+            elif self.is_common_streams_app():
+                logger.warning(
+                    f"{self.__class__.__name__} {self.name} does not have a label with the name: {key}"
+                )
+
+        if (
+            self.k8s_object.spec.template.metadata
+            and self.k8s_object.spec.template.metadata.annotations
+        ):
+            annotations = self.k8s_object.spec.template.metadata.annotations
+            self.attributes.update(annotations)
 
     @staticmethod
     def get_env_prefix(container: Optional[V1Container]) -> Optional[str]:
@@ -72,100 +121,44 @@ class K8sApp:
 
 
 class K8sAppCronJob(K8sApp):
-    def __init__(self, cron_job: V1beta1CronJob):
-        super().__init__()
-        self.cron_job = cron_job
-        self.metadata = cron_job.metadata
-        self.name = self.get_name()
-        self.spec = cron_job.spec.job_template.spec.template.spec
+    def __init__(self, k8s_object: V1beta1CronJob):
+        super().__init__(k8s_object)
+        self.spec = self.k8s_object.spec.job_template.spec.template.spec
         self.container = self.get_app_container(self.spec)
-        self._env_prefix = self.get_env_prefix(self.container)
+        self.env_prefix = self.get_env_prefix(self.container)
 
-        self.__get_common_configuration()
+        self.get_common_configuration()
 
-    def get_name(self) -> str:
-        if not self.metadata.name:
-            raise TypeError("Name is required for cronjob")
-        return self.metadata.name
-
-    def _get_env_name(self, variable_name) -> str:
-        return f"{self._env_prefix}{variable_name}"
-
-    def __get_common_configuration(self):
+    def get_common_configuration(self):
         for env in self.container.env:
             name = env.name
-            if name == self._get_env_name("INPUT_TOPICS"):
+            if name == self.get_env_name("INPUT_TOPICS"):
                 self.input_topics = self.parse_input_topics(env.value)
-            elif name == self._get_env_name("OUTPUT_TOPIC"):
+            elif name == self.get_env_name("OUTPUT_TOPIC"):
                 self.output_topic = env.value
-            elif name == self._get_env_name("ERROR_TOPIC"):
+            elif name == self.get_env_name("ERROR_TOPIC"):
                 self.error_topic = env.value
 
 
 class K8sAppDeployment(K8sApp):
-    def __init__(self, deployment: V1Deployment):
-        super().__init__()
-        self.deployment = deployment
-        self.metadata = deployment.metadata
-        self.name = self.get_name()
-        self.spec = deployment.spec.template.spec
+    def __init__(self, k8s_object: V1Deployment):
+        super().__init__(k8s_object)
+        self.spec = self.k8s_object.spec.template.spec
         self._ignore_containers = self.get_ignore_containers()
         self.container = self.get_app_container(self.spec, self._ignore_containers)
-        self._env_prefix = self.get_env_prefix(self.container)
+        self.env_prefix = self.get_env_prefix(self.container)
 
-        self.__get_common_configuration()
-        self.__get_attributes()
+        self.get_common_configuration()
+        self.get_attributes()
 
-    def get_name(self) -> str:
-        name = self.metadata.labels.get("app")
-        if not name:
-            raise TypeError("Name is required for deployment")
-        return name
 
-    def __get_common_configuration(self):
-        for env in self.container.env:
-            name = env.name
-            if name == self._get_env_name("INPUT_TOPICS"):
-                self.input_topics = self.parse_input_topics(env.value)
-            elif name == self._get_env_name("OUTPUT_TOPIC"):
-                self.output_topic = env.value
-            elif name == self._get_env_name("ERROR_TOPIC"):
-                self.error_topic = env.value
-            elif name == self._get_env_name("EXTRA_INPUT_TOPICS"):
-                self.extra_input_topics = self.parse_extra_topics(env.value)
-            elif name == self._get_env_name("EXTRA_OUTPUT_TOPICS"):
-                self.extra_output_topics = self.parse_extra_topics(env.value)
+class K8sAppStatefulSet(K8sApp):
+    def __init__(self, k8s_object: V1StatefulSet):
+        super().__init__(k8s_object)
+        self.spec = self.k8s_object.spec.template.spec
+        self._ignore_containers = self.get_ignore_containers()
+        self.container = self.get_app_container(self.spec, self._ignore_containers)
+        self.env_prefix = self.get_env_prefix(self.container)
 
-            if self.name:
-                extractor_container.on_streaming_app_env_parsing(env, self.name)
-
-    def __get_attributes(self):
-        labels = self.metadata.labels
-        labels_to_use = self.get_labels()
-
-        for key in labels_to_use:
-            value = labels.get(key)
-            if value is not None:
-                self.attributes[key] = value
-            elif self.is_common_streams_app():
-                logger.warning(
-                    f"Deployment {self.name} does not have a label with the name: {key}"
-                )
-
-        if (
-            self.deployment.spec.template.metadata
-            and self.deployment.spec.template.metadata.annotations
-        ):
-            annotations = self.deployment.spec.template.metadata.annotations
-            self.attributes.update(annotations)
-
-    def _get_env_name(self, variable_name) -> str:
-        return f"{self._env_prefix}{variable_name}"
-
-    def is_common_streams_app(self) -> bool:
-        if self.input_topics is None and self.output_topic is None:
-            return False
-        return True
-
-    def to_dict(self) -> dict:
-        return self.deployment.to_dict()
+        self.get_common_configuration()
+        self.get_attributes()

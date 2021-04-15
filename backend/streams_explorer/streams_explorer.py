@@ -1,11 +1,11 @@
 from typing import Dict, List, Optional, Type
 
 import kubernetes
-from kubernetes.client import V1beta1CronJob, V1Deployment
+from kubernetes.client import V1beta1CronJob, V1Deployment, V1StatefulSet
 from loguru import logger
 
 from streams_explorer.core.config import settings
-from streams_explorer.core.k8s_app import K8sApp, K8sAppDeployment
+from streams_explorer.core.k8s_app import K8sApp, K8sAppDeployment, K8sAppStatefulSet
 from streams_explorer.core.node_info_extractor import (
     get_displayed_information_connector,
     get_displayed_information_deployment,
@@ -45,6 +45,7 @@ class StreamsExplorer:
         extractor_container.reset()
         self.data_flow.reset()
         self.__retrieve_deployments()
+        self.__retrieve_stateful_sets()
         self.__retrieve_cron_jobs()
         self.__get_connectors()
         self.__create_graph()
@@ -139,6 +140,17 @@ class StreamsExplorer:
             except Exception as e:
                 logger.debug(e)
 
+    def __retrieve_stateful_sets(self):
+        logger.info("Retrieve stateful_sets descriptions")
+        stateful_sets = self.get_stateful_sets()
+        for item in stateful_sets:
+            try:
+                app = K8sAppStatefulSet(item)
+                if app.is_common_streams_app():
+                    self.applications[app.name] = app
+            except Exception as e:
+                logger.debug(e)
+
     def get_deployments(self) -> List[V1Deployment]:
         deployments: List[V1Deployment] = []
         for namespace in self.namespaces:
@@ -147,6 +159,15 @@ class StreamsExplorer:
                 namespace=namespace, watch=False
             ).items
         return deployments
+
+    def get_stateful_sets(self) -> List[V1StatefulSet]:
+        stateful_sets: List[V1StatefulSet] = []
+        for namespace in self.namespaces:
+            logger.info(f"List statefulsets in namespace {namespace}")
+            stateful_sets += self.k8s_app_client.list_namespaced_stateful_set(
+                namespace=namespace, watch=False
+            ).items
+        return stateful_sets
 
     def __retrieve_cron_jobs(self):
         logger.info("Retrieve cronjob descriptions")
