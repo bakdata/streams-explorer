@@ -129,7 +129,6 @@ class StreamsExplorer:
         self.k8s_batch_client = kubernetes.client.BatchV1beta1Api()
 
     def __retrieve_deployments(self):
-        logger.info("Retrieve deployment descriptions")
         items = self.get_deployments() + self.get_stateful_sets()
         for item in items:
             try:
