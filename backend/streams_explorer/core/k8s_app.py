@@ -34,8 +34,8 @@ class K8sApp:
         self._ignore_containers = self.get_ignore_containers()
         self.container = self.get_app_container(self.spec, self._ignore_containers)
         self.env_prefix = self.get_env_prefix(self.container)
-        self.get_common_configuration()
-        self.get_attributes()
+        self.__get_common_configuration()
+        self.__get_attributes()
 
     def to_dict(self) -> dict:
         return self.k8s_object.to_dict()
@@ -46,18 +46,18 @@ class K8sApp:
             raise TypeError(f"Name is required for {self.__class__.__name__}")
         return name
 
-    def get_common_configuration(self):
+    def __get_common_configuration(self):
         for env in self.container.env:
             name = env.name
-            if name == self.get_env_name("INPUT_TOPICS"):
+            if name == self._get_env_name("INPUT_TOPICS"):
                 self.input_topics = self.parse_input_topics(env.value)
-            elif name == self.get_env_name("OUTPUT_TOPIC"):
+            elif name == self._get_env_name("OUTPUT_TOPIC"):
                 self.output_topic = env.value
-            elif name == self.get_env_name("ERROR_TOPIC"):
+            elif name == self._get_env_name("ERROR_TOPIC"):
                 self.error_topic = env.value
-            elif name == self.get_env_name("EXTRA_INPUT_TOPICS"):
+            elif name == self._get_env_name("EXTRA_INPUT_TOPICS"):
                 self.extra_input_topics = self.parse_extra_topics(env.value)
-            elif name == self.get_env_name("EXTRA_OUTPUT_TOPICS"):
+            elif name == self._get_env_name("EXTRA_OUTPUT_TOPICS"):
                 self.extra_output_topics = self.parse_extra_topics(env.value)
 
             if self.name:
@@ -68,10 +68,10 @@ class K8sApp:
             return False
         return True
 
-    def get_env_name(self, variable_name) -> str:
+    def _get_env_name(self, variable_name) -> str:
         return f"{self.env_prefix}{variable_name}"
 
-    def get_attributes(self):
+    def __get_attributes(self):
         labels = self.metadata.labels
         labels_to_use = self.get_labels()
 
@@ -151,7 +151,7 @@ class K8sAppCronJob(K8sApp):
         self.spec = self.k8s_object.spec.job_template.spec.template.spec
         self.container = self.get_app_container(self.spec)
         self.env_prefix = self.get_env_prefix(self.container)
-        self.get_common_configuration()
+        self.__get_common_configuration()
 
     def get_name(self) -> str:
         name = self.metadata.name
@@ -159,14 +159,14 @@ class K8sAppCronJob(K8sApp):
             raise TypeError(f"Name is required for {self.__class__.__name__}")
         return name
 
-    def get_common_configuration(self):
+    def __get_common_configuration(self):
         for env in self.container.env:
             name = env.name
-            if name == self.get_env_name("INPUT_TOPICS"):
+            if name == self._get_env_name("INPUT_TOPICS"):
                 self.input_topics = self.parse_input_topics(env.value)
-            elif name == self.get_env_name("OUTPUT_TOPIC"):
+            elif name == self._get_env_name("OUTPUT_TOPIC"):
                 self.output_topic = env.value
-            elif name == self.get_env_name("ERROR_TOPIC"):
+            elif name == self._get_env_name("ERROR_TOPIC"):
                 self.error_topic = env.value
 
 
