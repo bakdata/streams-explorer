@@ -6,8 +6,8 @@ from kubernetes.client import (
     V1Deployment,
     V1ObjectMeta,
     V1PodSpec,
+    V1StatefulSet,
 )
-from kubernetes.client.models.v1_stateful_set import V1StatefulSet
 from loguru import logger
 
 from streams_explorer.core.config import settings
@@ -25,6 +25,15 @@ class K8sApp:
         self.extra_input_topics: List[str] = []
         self.extra_output_topics: List[str] = []
         self.attributes: Dict[str, str] = {}
+        self.setup()
+
+    def setup(self):
+        self.spec = self.k8s_object.spec.template.spec
+        self._ignore_containers = self.get_ignore_containers()
+        self.container = self.get_app_container(self.spec, self._ignore_containers)
+        self.env_prefix = self.get_env_prefix(self.container)
+        self.get_common_configuration()
+        self.get_attributes()
 
     def to_dict(self) -> dict:
         return self.k8s_object.to_dict()
@@ -124,10 +133,11 @@ class K8sApp:
 class K8sAppCronJob(K8sApp):
     def __init__(self, k8s_object: V1beta1CronJob):
         super().__init__(k8s_object)
+
+    def setup(self):
         self.spec = self.k8s_object.spec.job_template.spec.template.spec
         self.container = self.get_app_container(self.spec)
         self.env_prefix = self.get_env_prefix(self.container)
-
         self.get_common_configuration()
 
     def get_name(self) -> str:
@@ -150,22 +160,8 @@ class K8sAppCronJob(K8sApp):
 class K8sAppDeployment(K8sApp):
     def __init__(self, k8s_object: V1Deployment):
         super().__init__(k8s_object)
-        self.spec = self.k8s_object.spec.template.spec
-        self._ignore_containers = self.get_ignore_containers()
-        self.container = self.get_app_container(self.spec, self._ignore_containers)
-        self.env_prefix = self.get_env_prefix(self.container)
-
-        self.get_common_configuration()
-        self.get_attributes()
 
 
 class K8sAppStatefulSet(K8sApp):
     def __init__(self, k8s_object: V1StatefulSet):
         super().__init__(k8s_object)
-        self.spec = self.k8s_object.spec.template.spec
-        self._ignore_containers = self.get_ignore_containers()
-        self.container = self.get_app_container(self.spec, self._ignore_containers)
-        self.env_prefix = self.get_env_prefix(self.container)
-
-        self.get_common_configuration()
-        self.get_attributes()
