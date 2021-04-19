@@ -92,7 +92,7 @@ class K8sApp:
             self.attributes.update(annotations)
 
     @staticmethod
-    def factory(k8s_object: type) -> K8sApp:
+    def factory(k8s_object: object) -> K8sApp:
         if isinstance(k8s_object, V1Deployment):
             return K8sAppDeployment(k8s_object)
         elif isinstance(k8s_object, V1StatefulSet):
