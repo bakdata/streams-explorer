@@ -136,8 +136,7 @@ class K8sAppDeployment(K8sApp):
             elif name == self._get_env_name("EXTRA_OUTPUT_TOPICS"):
                 self.extra_output_topics = self.parse_extra_topics(env.value)
 
-            if self.name:
-                extractor_container.on_streaming_app_env_parsing(env, self.name)
+            extractor_container.on_streaming_app_env_parsing(env, self.name)
 
     def __get_attributes(self):
         labels = self.metadata.labels

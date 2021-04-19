@@ -37,22 +37,17 @@ class DataFlowGraph:
         if app.output_topic:
             self._add_topic(app.output_topic)
             self._add_output_topic(app.name, app.output_topic)
-        if app.error_topic is not None:
+        if app.error_topic:
             self._add_error_topic(app.name, app.error_topic)
-        if app.input_topics:
-            for input_topic in app.input_topics:
-                self._add_topic(input_topic)
-                self._add_input_topic(app.name, input_topic)
-
-        if app.extra_input_topics is not None:
-            for extra_input in app.extra_input_topics:
-                self._add_topic(extra_input)
-                self._add_input_topic(app.name, extra_input)
-
-        if app.extra_output_topics is not None:
-            for extra_output in app.extra_output_topics:
-                self._add_topic(extra_output)
-                self._add_output_topic(app.name, extra_output)
+        for input_topic in app.input_topics:
+            self._add_topic(input_topic)
+            self._add_input_topic(app.name, input_topic)
+        for extra_input in app.extra_input_topics:
+            self._add_topic(extra_input)
+            self._add_input_topic(app.name, extra_input)
+        for extra_output in app.extra_output_topics:
+            self._add_topic(extra_output)
+            self._add_output_topic(app.name, extra_output)
 
     def add_connector(self, connector: KafkaConnector):
         self.graph.add_node(
