@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Dict, List, Optional, Set
 
 from kubernetes.client import (
@@ -88,6 +90,17 @@ class K8sApp:
         ):
             annotations = self.k8s_object.spec.template.metadata.annotations
             self.attributes.update(annotations)
+
+    @staticmethod
+    def factory(k8s_object: type) -> K8sApp:
+        if isinstance(k8s_object, V1Deployment):
+            return K8sAppDeployment(k8s_object)
+        elif isinstance(k8s_object, V1StatefulSet):
+            return K8sAppStatefulSet(k8s_object)
+        elif isinstance(k8s_object, V1beta1CronJob):
+            return K8sAppCronJob(k8s_object)
+        else:
+            raise ValueError(k8s_object)
 
     @staticmethod
     def get_env_prefix(container: Optional[V1Container]) -> Optional[str]:

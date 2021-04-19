@@ -5,7 +5,7 @@ from kubernetes.client import V1beta1CronJob, V1Deployment, V1StatefulSet
 from loguru import logger
 
 from streams_explorer.core.config import settings
-from streams_explorer.core.k8s_app import K8sApp, K8sAppDeployment, K8sAppStatefulSet
+from streams_explorer.core.k8s_app import K8sApp
 from streams_explorer.core.node_info_extractor import (
     get_displayed_information_connector,
     get_displayed_information_deployment,
@@ -45,7 +45,6 @@ class StreamsExplorer:
         extractor_container.reset()
         self.data_flow.reset()
         self.__retrieve_deployments()
-        self.__retrieve_stateful_sets()
         self.__retrieve_cron_jobs()
         self.__get_connectors()
         self.__create_graph()
@@ -131,21 +130,10 @@ class StreamsExplorer:
 
     def __retrieve_deployments(self):
         logger.info("Retrieve deployment descriptions")
-        deployments = self.get_deployments()
-        for item in deployments:
+        items = self.get_deployments() + self.get_stateful_sets()
+        for item in items:
             try:
-                app = K8sAppDeployment(item)
-                if app.is_common_streams_app():
-                    self.applications[app.name] = app
-            except Exception as e:
-                logger.debug(e)
-
-    def __retrieve_stateful_sets(self):
-        logger.info("Retrieve stateful_sets descriptions")
-        stateful_sets = self.get_stateful_sets()
-        for item in stateful_sets:
-            try:
-                app = K8sAppStatefulSet(item)
+                app = K8sApp.factory(item)
                 if app.is_common_streams_app():
                     self.applications[app.name] = app
             except Exception as e:
