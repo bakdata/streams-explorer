@@ -20,7 +20,7 @@ class K8sApp:
     def __init__(self, k8s_object):
         self.k8s_object = k8s_object
         self.metadata: Optional[V1ObjectMeta] = k8s_object.metadata
-        self.name = self.get_name()
+        self.name: str = self.get_name()
         self.input_topics: List[str] = []
         self.output_topic: Optional[str] = None
         self.error_topic: Optional[str] = None
