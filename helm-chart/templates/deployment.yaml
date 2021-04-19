@@ -71,7 +71,7 @@ spec:
             successThreshold: {{ .Values.health.livenessProbeSuccessThreshold }}
           readinessProbe:
             httpGet:
-              path: /health
+              path: /api/health
               port: http
             initialDelaySeconds: {{ .Values.health.readinessProbeInitialDelay }}
             periodSeconds: {{ .Values.health.readinessProbePeriodSeconds }}
