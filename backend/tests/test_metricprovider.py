@@ -51,11 +51,11 @@ class TestMetricProvider:
 
 class TestPrometheusMetricProvider:
     @pytest.fixture()
-    def metrics_provider(self, mocker, monkeypatch):
-        metrics_provider = PrometheusMetricProvider(nodes)
-        return metrics_provider
+    def metric_provider(self):
+        metric_provider = PrometheusMetricProvider(nodes)
+        return metric_provider
 
-    def test_get_consumer_group(self, metrics_provider):
+    def test_get_consumer_group(self):
         node_id, node = nodes[0]  # streaming-app
         assert (
             MetricProvider.get_consumer_group(node_id, node)
@@ -64,13 +64,13 @@ class TestPrometheusMetricProvider:
         node_id, node = nodes[4]  # connector
         assert MetricProvider.get_consumer_group(node_id, node) == "connect-demo-sink"
 
-    def test_empty_query(self, monkeypatch, metrics_provider):
+    def test_empty_query(self, monkeypatch, metric_provider):
         def mock_query(*args, **kwargs):
             return []
 
         monkeypatch.setattr(PrometheusConnect, "custom_query", mock_query)
 
-        result = metrics_provider.get()
+        result = metric_provider.get()
         assert result == [
             Metric(
                 node_id="atm-fraud-transactionavroproducer",
@@ -86,14 +86,14 @@ class TestPrometheusMetricProvider:
             ),
         ]
 
-    def test_update(self, mocker, monkeypatch, metrics_provider):
+    def test_update(self, monkeypatch, metric_provider):
         def mock_get_metric(*args, **kwargs):
             metric = kwargs.get("metric")
             return prometheus_data[metric.metric]
 
         monkeypatch.setattr(PrometheusMetricProvider, "get_metric", mock_get_metric)
 
-        result = metrics_provider.get()
+        result = metric_provider.get()
         assert result == [
             Metric(
                 node_id="atm-fraud-transactionavroproducer",

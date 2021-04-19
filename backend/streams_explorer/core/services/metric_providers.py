@@ -1,7 +1,8 @@
 from enum import Enum
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 
 from loguru import logger
+from networkx.classes.reportviews import NodeDataView
 from prometheus_api_client import PrometheusApiClientException, PrometheusConnect
 
 from streams_explorer.core.config import settings
@@ -45,10 +46,10 @@ class PrometheusMetric(Enum):
 
 
 class MetricProvider:
-    def __init__(self, nodes: List[Tuple[str, dict]]):
-        self._nodes: List[Tuple[str, dict]] = nodes
+    def __init__(self, nodes: NodeDataView):
+        self._nodes: NodeDataView = nodes
         self.metrics: List[Metric] = []
-        self._data: Dict[str, List] = {}
+        self._data: Dict[str, dict] = {}
 
     def refresh_data(self):
         pass
@@ -87,7 +88,7 @@ class MetricProvider:
 
 
 class PrometheusMetricProvider(MetricProvider):
-    def __init__(self, nodes: List[Tuple[str, dict]]):
+    def __init__(self, nodes: NodeDataView):
         super().__init__(nodes)
         self._prom = PrometheusConnect(url=settings.prometheus.url)
 

@@ -17,6 +17,7 @@ if settings.plugins.extractors.default:
 
 def load_extractors():
     extractors = load_plugin(Extractor, all=True)
-    for extractor in extractors:
-        extractor_container.add(extractor())
+    if isinstance(extractors, list):
+        for extractor in extractors:
+            extractor_container.add(extractor())
     extractor_container.add_generic()
