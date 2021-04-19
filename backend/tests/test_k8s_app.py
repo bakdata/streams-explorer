@@ -29,6 +29,7 @@ class TestK8sApp:
 
         assert isinstance(k8s_apps[0], K8sAppDeployment)
         assert isinstance(k8s_apps[1], K8sAppStatefulSet)
+        assert k8s_apps[1].get_service_name() == "test-service"
 
     def test_error_topic_undefined(self):
         k8s_app = K8sAppDeployment(

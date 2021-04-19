@@ -178,3 +178,6 @@ class K8sAppDeployment(K8sApp):
 class K8sAppStatefulSet(K8sApp):
     def __init__(self, k8s_object: V1StatefulSet):
         super().__init__(k8s_object)
+
+    def get_service_name(self) -> str:
+        return self.k8s_object.spec.service_name

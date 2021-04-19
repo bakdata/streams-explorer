@@ -50,6 +50,7 @@ def get_streaming_app_stateful_set(
     env_prefix="APP_",
     pipeline=None,
     consumer_group=None,
+    service_name="test-service",
 ) -> V1StatefulSet:
     template = get_template(
         input_topics,
@@ -62,7 +63,7 @@ def get_streaming_app_stateful_set(
     )
     metadata = get_metadata(name, pipeline=pipeline)
     spec = V1StatefulSetSpec(
-        service_name="test-service",
+        service_name=service_name,
         template=template,
         selector="app=test-app,release=test-release",
     )
