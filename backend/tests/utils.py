@@ -61,11 +61,12 @@ def get_streaming_app_stateful_set(
         consumer_group=consumer_group,
     )
     metadata = get_metadata(name, pipeline=pipeline)
-    spec = (
-        V1StatefulSetSpec(
-            template=template, selector="app=test-app,release=test-release"
-        ),
+    spec = V1StatefulSetSpec(
+        service_name="test-service",
+        template=template,
+        selector="app=test-app,release=test-release",
     )
+
     return V1StatefulSet(metadata=metadata, spec=spec)
 
 
@@ -95,22 +96,22 @@ def get_template(
     env_prefix="APP_",
     consumer_group=None,
 ) -> List[V1EnvVar]:
-    envs = [
+    env = [
         V1EnvVar(name="ENV_PREFIX", value=env_prefix),
         V1EnvVar(name=env_prefix + "INPUT_TOPICS", value=input_topics),
         V1EnvVar(name=env_prefix + "OUTPUT_TOPIC", value=output_topic),
         V1EnvVar(name=env_prefix + "ERROR_TOPIC", value=error_topic),
     ]
-
     if multiple_inputs:
-        envs.append(
+        env.append(
             V1EnvVar(name=env_prefix + "EXTRA_INPUT_TOPICS", value=multiple_inputs)
         )
     if multiple_outputs:
-        envs.append(
+        env.append(
             V1EnvVar(name=env_prefix + "EXTRA_OUTPUT_TOPICS", value=multiple_outputs)
         )
-    container = V1Container(name="test-container", env=envs)
+
+    container = V1Container(name="test-container", env=env)
     pod_spec = V1PodSpec(containers=[container])
     spec_metadata = None
     if consumer_group is not None:

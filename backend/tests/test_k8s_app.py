@@ -1,21 +1,34 @@
-from streams_explorer.core.k8s_app import K8sAppDeployment
-from tests.utils import get_streaming_app_deployment
+from streams_explorer.core.k8s_app import K8sApp, K8sAppDeployment, K8sAppStatefulSet
+from tests.utils import get_streaming_app_deployment, get_streaming_app_stateful_set
 
 
 class TestK8sApp:
     def test_init(self):
-        k8s_app = K8sAppDeployment(
+        k8s_objects = [
             get_streaming_app_deployment(
                 name="test-app",
                 input_topics="input-topic",
                 output_topic="output-topic",
                 error_topic="error-topic",
-            )
-        )
-        assert k8s_app.name == "test-app"
-        assert k8s_app.error_topic == "error-topic"
-        assert k8s_app.output_topic == "output-topic"
-        assert k8s_app.input_topics == ["input-topic"]
+            ),
+            get_streaming_app_stateful_set(
+                name="test-app",
+                input_topics="input-topic",
+                output_topic="output-topic",
+                error_topic="error-topic",
+            ),
+        ]
+
+        k8s_apps = [K8sApp.factory(k8s_object) for k8s_object in k8s_objects]
+
+        for k8s_app in k8s_apps:
+            assert k8s_app.name == "test-app"
+            assert k8s_app.error_topic == "error-topic"
+            assert k8s_app.output_topic == "output-topic"
+            assert k8s_app.input_topics == ["input-topic"]
+
+        assert isinstance(k8s_apps[0], K8sAppDeployment)
+        assert isinstance(k8s_apps[1], K8sAppStatefulSet)
 
     def test_error_topic_undefined(self):
         k8s_app = K8sAppDeployment(
