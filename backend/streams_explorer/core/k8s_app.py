@@ -43,7 +43,7 @@ class K8sApp:
     def get_name(self) -> str:
         name = self.metadata.labels.get("app")
         if not name:
-            raise TypeError(f"Name is required for {self.__class__.__name__}")
+            raise TypeError(f"Name is required for {self.get_class_name()}")
         return name
 
     def __get_common_configuration(self):
@@ -63,10 +63,13 @@ class K8sApp:
             if self.name:
                 extractor_container.on_streaming_app_env_parsing(env, self.name)
 
-    def is_common_streams_app(self) -> bool:
+    def is_streams_bootstrap_app(self) -> bool:
         if self.input_topics is None and self.output_topic is None:
             return False
         return True
+
+    def get_class_name(self) -> str:
+        return self.__class__.__name__
 
     def _get_env_name(self, variable_name) -> str:
         return f"{self.env_prefix}{variable_name}"
@@ -79,9 +82,9 @@ class K8sApp:
             value = labels.get(key)
             if value is not None:
                 self.attributes[key] = value
-            elif self.is_common_streams_app():
+            elif self.is_streams_bootstrap_app():
                 logger.warning(
-                    f"{self.__class__.__name__} {self.name} does not have a label with the name: {key}"
+                    f"{self.get_class_name()} {self.name} does not have a label with the name: {key}"
                 )
 
         if (
@@ -156,7 +159,7 @@ class K8sAppCronJob(K8sApp):
     def get_name(self) -> str:
         name = self.metadata.name
         if not name:
-            raise TypeError(f"Name is required for {self.__class__.__name__}")
+            raise TypeError(f"Name is required for {self.get_class_name()}")
         return name
 
     def __get_common_configuration(self):

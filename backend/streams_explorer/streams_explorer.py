@@ -133,7 +133,7 @@ class StreamsExplorer:
         for item in items:
             try:
                 app = K8sApp.factory(item)
-                if app.is_common_streams_app():
+                if app.is_streams_bootstrap_app():
                     self.applications[app.name] = app
             except Exception as e:
                 logger.debug(e)
