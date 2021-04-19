@@ -10,6 +10,6 @@ metadata:
   name: {{ template "streams-explorer.fullname" . }}
 rules:
   - apiGroups: ["apps", "batch"]
-    resources: ["deployments", "cronjobs"]
+    resources: ["deployments", "cronjobs", "statefulsets"]
     verbs: ["get", "list", "watch"]
 {{- end -}}

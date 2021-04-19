@@ -125,6 +125,8 @@ class TestStreamsExplorer:
             explorer, attribute="get_deployments", return_value=deployments
         )
 
+        mocker.patch.object(explorer, attribute="get_stateful_sets", return_value=[])
+
         mocker.patch.object(explorer, attribute="get_cron_jobs", return_value=cron_jobs)
 
         def get_connectors():
