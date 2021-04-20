@@ -1,5 +1,4 @@
-
-{{- if .Values.serviceAccount.create -}}
+{{- if and .Values.rbac.create (not .Values.rbac.clusterScope.enabled) }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
@@ -12,9 +11,47 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
+  {{- if (not .Values.rbac.useExistingRole) }}
   name: {{ template "streams-explorer.fullname" . }}
+  {{- else }}
+  name: {{ .Values.rbac.useExistingRole }}
+  {{- end }}
 subjects:
   - kind: ServiceAccount
-    name: {{ template "streams-explorer.serviceAccountName" . }}
     namespace: {{ .Release.Namespace }}
-{{- end -}}
+    {{- if (not .Values.rbac.useExisting) }}
+    name: {{ template "streams-explorer.serviceAccountName" . }}
+    {{- else }}
+    name: {{ .Values.serviceAccount.useExisting }}
+    {{- end }}
+{{- else if and .Values.rbac.create .Values.rbac.clusterScope.enabled -}}
+{{- $root := . -}}
+{{- range .Values.rbac.clusterScope.namespaces }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/name: {{ include "streams-explorer.name" . }}
+    app.kubernetes.io/instance: {{ $root.Release.Name }}
+    app.kubernetes.io/managed-by: {{ $root.Release.Service }}
+    helm.sh/chart: {{ include "streams-explorer.chart" . }}
+  name: {{ template "streams-explorer.fullname" . }}
+  namespace: {{ . | quote }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  {{- if (not $root.Values.rbac.useExistingRole) }}
+  name: {{ template "streams-explorer.fullname" . }}
+  {{- else }}
+  name: {{ $root.Values.rbac.useExistingRole }}
+  {{- end }}
+subjects:
+  - kind: ServiceAccount
+    namespace: {{ $root.Release.Namespace }}
+    {{- if (not $root.Values.rbac.useExisting) }}
+    name: {{ template "streams-explorer.serviceAccountName" . }}
+    {{- else }}
+    name: {{ $root.Values.serviceAccount.useExisting }}
+    {{- end }}
+{{- end }}
+{{- end }}
