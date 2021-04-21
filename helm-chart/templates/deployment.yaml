@@ -89,7 +89,7 @@ spec:
           {{- end }}
           {{- if .Values.rbac.clusterScope.enabled }}
             - name: "SE_K8S__deployment__namespaces"
-              value: {{ .Values.rbac.clusterScope.namespaces | quote }}
+              value: {{ .Values.rbac.clusterScope.namespaces }}
           {{- end }}
           {{- range $key, $value := .Values.env }}
             - name: {{ $key | quote }}
