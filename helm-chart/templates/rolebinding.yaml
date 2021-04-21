@@ -27,6 +27,7 @@ subjects:
 {{- else if and .Values.rbac.create .Values.rbac.clusterScope.enabled -}}
 {{- $root := . -}}
 {{- range .Values.rbac.clusterScope.namespaces }}
+---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
