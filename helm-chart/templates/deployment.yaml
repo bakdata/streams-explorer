@@ -44,7 +44,7 @@ spec:
       {{- end }}
     spec:
       {{- if (not .Values.rbac.useExisting) }}
-      serviceAccountName: "streams-explorer-sa"
+      serviceAccountName: streams-explorer-sa
       {{- else }}
       serviceAccountName: {{ .Values.serviceAccount.useExisting }}
       {{- end }}

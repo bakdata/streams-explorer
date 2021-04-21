@@ -20,7 +20,7 @@ subjects:
   - kind: ServiceAccount
     namespace: {{ .Release.Namespace }}
     {{- if (not .Values.rbac.useExisting) }}
-    name: {{ template "streams-explorer.serviceAccountName" . }}
+    name: streams-explorer-sa
     {{- else }}
     name: {{ .Values.serviceAccount.useExisting }}
     {{- end }}
