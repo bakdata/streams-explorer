@@ -24,7 +24,7 @@ subjects:
   - kind: ServiceAccount
     namespace: {{ $root.Release.Namespace }}
     {{- if (not $root.Values.rbac.useExisting) }}
-    name: streams-explorer-sa
+    name: {{ cat "streams-explorer-sa-" . | quote}}
     {{- else }}
     name: {{ $root.Values.serviceAccount.useExisting }}
     {{- end }}
