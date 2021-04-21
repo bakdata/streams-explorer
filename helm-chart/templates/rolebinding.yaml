@@ -1,4 +1,3 @@
-{{- $root := . -}}
 {{- if and .Values.rbac.create (not .Values.rbac.clusterScope.enabled) }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -26,6 +25,7 @@ subjects:
     name: {{ .Values.serviceAccount.useExisting }}
     {{- end }}
 {{- else if and .Values.rbac.create .Values.rbac.clusterScope.enabled -}}
+{{- $root := . -}}
 {{- range .Values.rbac.clusterScope.namespaces }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
