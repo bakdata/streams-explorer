@@ -14,7 +14,7 @@ metadata:
   namespace: {{ . | quote }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
-  kind: Role
+  kind: ClusterRole
   {{- if (not $root.Values.rbac.useExistingRole) }}
   name: {{ template "streams-explorer.fullname" $ }}
   {{- else }}
