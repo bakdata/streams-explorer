@@ -32,7 +32,11 @@ Create chart name and version as used by the chart label.
 {{- end -}}
 
 {{- define "streams-explorer.serviceAccountName" -}}
+{{- if and .Values.rbac.create .Values.rbac.useExistingServiceAccount -}}
+    {{- default .Values.rbac.useExistingServiceAccount -}}
+{{- else -}}
     {{- default "streams-explorer-sa" -}}
+{{- end -}}
 {{- end -}}
 
 {{- define "streams-explorer.roleName" -}}
