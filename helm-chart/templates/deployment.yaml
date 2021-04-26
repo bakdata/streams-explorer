@@ -89,7 +89,8 @@ spec:
           {{- end }}
           {{- if .Values.rbac.clusterScope.enabled }}
             - name: "SE_K8S__deployment__namespaces"
-              value: {{ .Values.rbac.clusterScope.namespaces | quote | replace "[" "['" | replace " " "','" | replace "]" "']" }}
+              value: {{ .Values.rbac.clusterScope.namespaces | toJson | squote | join "," }}
+              #value: {{ .Values.rbac.clusterScope.namespaces | quote | replace "[" "['" | replace " " "','" | replace "]" "']" }}
           {{- end }}
           {{- range $key, $value := .Values.env }}
             - name: {{ $key | quote }}
