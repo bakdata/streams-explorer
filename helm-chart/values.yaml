@@ -13,7 +13,6 @@ env:
     SE_PROMETHEUS__url: 'http://prometheus:9090'
     SE_K8S__deployment__cluster: true
     SE_K8S__deployment__context: 'kubernetes-cluster'
-    # SE_K8S__deployment__namespaces: "['kubernetes-namespace']"
 
 # Configure secret env variables here
 secrets: {}
