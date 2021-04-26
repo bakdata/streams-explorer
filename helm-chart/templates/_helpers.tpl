@@ -43,6 +43,6 @@ Create chart name and version as used by the chart label.
 {{- if and .Values.rbac.create .Values.rbac.useExistingRole -}}
     {{ default .Values.rbac.useExistingRole }}
 {{ else }}
-    {{ template "streams-explorer.fullname" . }}
+    {{ default "streams-explorer-role" . }}
 {{- end -}}
 {{- end -}}
