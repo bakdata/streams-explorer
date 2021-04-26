@@ -13,7 +13,6 @@ env:
     SE_PROMETHEUS__url: 'http://prometheus:9090'
     SE_K8S__deployment__cluster: true
     SE_K8S__deployment__context: 'kubernetes-cluster'
-    SE_K8S__deployment__namespaces: "['kubernetes-namespace']"
 
 # Configure secret env variables here
 secrets: {}
@@ -44,10 +43,17 @@ podLabels: {}
 service:
   type: ClusterIP
 
-# Create a service account, role binding and role to list/get/watch all deployments in the same namespace the explorer is deployed to. To support different namespaces, you need to set up a service account manually.
-serviceAccount:
+# Create a role and role binding to scrape only the namespace
+# the Streams Explorer is deployed to.
+# To scrape multiple namespaces create a cluster role and 
+# multiple role bindings.
+rbac:
   create: true
-  name: "streams-explorer-sa"
+  # useExistingRole: "streams-explorer-role"
+  # useExistingServiceAccount: "streams-explorer-sa"
+  clusterScope:
+    enabled: false
+    namespaces: ["kubernetes-namespace"]
 
 ingress:
   enabled: true

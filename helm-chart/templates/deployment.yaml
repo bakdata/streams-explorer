@@ -43,12 +43,7 @@ spec:
       {{- end }}
       {{- end }}
     spec:
-      {{ if .Values.serviceAccount.create }}
-      serviceAccountName:  {{ template "streams-explorer.serviceAccountName" . }}
-      {{ end }}
-      {{ if and (eq .Values.serviceAccount.create false) (.Values.serviceAccount.name)}}
-      serviceAccountName:  {{ .Values.serviceAccount.name }}
-      {{ end }}
+      serviceAccountName: {{ template "streams-explorer.serviceAccountName" . }}
       {{- if .Values.tolerations }}
       tolerations:
 {{ toYaml .Values.tolerations | indent 8 }}
@@ -87,6 +82,13 @@ spec:
                 secretKeyRef:
                   name: {{ template "streams-explorer.fullname" $ }}
                   key: "{{ $key }}"
+          {{- end }}
+          {{- if .Values.rbac.clusterScope.enabled }}
+            - name: "SE_K8S__deployment__namespaces"
+              value: {{ .Values.rbac.clusterScope.namespaces | toJson | squote | join "," }}
+          {{- else }}
+            - name: "SE_K8S__deployment__namespaces"
+              value: "['{{ .Release.Namespace }}']"
           {{- end }}
           {{- range $key, $value := .Values.env }}
             - name: {{ $key | quote }}
