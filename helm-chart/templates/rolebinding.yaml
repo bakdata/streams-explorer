@@ -33,10 +33,10 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: {{ template "streams-explorer.roleName" . }}
+  name: {{ template "streams-explorer.roleName" $ }}
 subjects:
   - kind: ServiceAccount
     namespace: {{ $root.Release.Namespace }}
-    name: {{ template "streams-explorer.serviceAccountName" . }}
+    name: {{ template "streams-explorer.serviceAccountName" $ }}
 {{- end }}
 {{- end }}
