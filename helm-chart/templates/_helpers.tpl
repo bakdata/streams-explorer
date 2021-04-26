@@ -31,18 +31,18 @@ Create chart name and version as used by the chart label.
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
-{{- define "streams-explorer.serviceAccountName" -}}
-{{- if and .Values.rbac.create .Values.rbac.useExistingServiceAccount -}}
-    {{- default .Values.rbac.useExistingServiceAccount -}}
-{{- else -}}
-    {{- default "streams-explorer-sa" -}}
-{{- end -}}
-{{- end -}}
-
 {{- define "streams-explorer.roleName" -}}
 {{- if and .Values.rbac.create .Values.rbac.useExistingRole -}}
     {{- default .Values.rbac.useExistingRole -}}
 {{- else -}}
     {{- default "streams-explorer-role" -}}
+{{- end -}}
+{{- end -}}
+
+{{- define "streams-explorer.serviceAccountName" -}}
+{{- if and .Values.rbac.create .Values.rbac.useExistingServiceAccount -}}
+    {{- default .Values.rbac.useExistingServiceAccount -}}
+{{- else -}}
+    {{- default "streams-explorer-sa" -}}
 {{- end -}}
 {{- end -}}
