@@ -60,7 +60,7 @@ class K8sApp:
             elif name == self._get_env_name("EXTRA_OUTPUT_TOPICS"):
                 self.extra_output_topics = self.parse_extra_topics(env.value)
 
-            if self.name:
+            if self.is_streams_bootstrap_app():
                 extractor_container.on_streaming_app_env_parsing(env, self.name)
 
     def is_streams_bootstrap_app(self) -> bool:
