@@ -64,7 +64,7 @@ class K8sApp:
                 extractor_container.on_streaming_app_env_parsing(env, self.name)
 
     def is_streams_bootstrap_app(self) -> bool:
-        if self.input_topics is None and self.output_topic is None:
+        if not self.input_topics and not self.output_topic:
             return False
         return True
 
