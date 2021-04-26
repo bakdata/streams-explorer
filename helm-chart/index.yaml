@@ -2,11 +2,11 @@ apiVersion: v1
 entries:
   streams-explorer:
   - apiVersion: v1
-    created: "2021-04-26T08:20:35.813394469+02:00"
+    created: "2021-04-26T08:32:36.171749625+02:00"
     description: A Helm chart for the Streams Explorer on Kubernetes
-    digest: b04d907a0923a599d78f7ef3bbfd5d1dbea3c051bea42bf5e146614a2f433cdd
+    digest: da433aa91a9112182431de47bd8b8a4ee80144ec19a0dc3d5f0b410d61556c28
     name: streams-explorer
     urls:
     - streams-explorer-0.1.0.tgz
     version: 0.1.0
-generated: "2021-04-26T08:20:35.812673406+02:00"
+generated: "2021-04-26T08:32:36.171041112+02:00"
