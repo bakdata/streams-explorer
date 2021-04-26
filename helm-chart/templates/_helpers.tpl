@@ -35,7 +35,7 @@ Create chart name and version as used by the chart label.
 {{- if and .Values.rbac.create .Values.rbac.useExistingServiceAccount -}}
     {{ default .Values.rbac.useExistingServiceAccount }}
 {{ else }}
-    {{ default "streams-explorer-sa"}}
+    {{ default "streams-explorer-sa" }}
 {{- end -}}
 {{- end -}}
 
@@ -43,6 +43,6 @@ Create chart name and version as used by the chart label.
 {{- if and .Values.rbac.create .Values.rbac.useExistingRole -}}
     {{ default .Values.rbac.useExistingRole }}
 {{ else }}
-    {{ default "streams-explorer-role" . }}
+    {{ default "streams-explorer-role" }}
 {{- end -}}
 {{- end -}}
