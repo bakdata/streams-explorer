@@ -43,9 +43,9 @@ podLabels: {}
 service:
   type: ClusterIP
 
-# Create a role binding and (cluster-)role to list/get/watch all deployments in the
-# same namespace the explorer is deployed to. To support different namespaces, 
-# you need to set up a service account manually.
+# Create a role binding and role to list/get/watch all deployments in the namespace
+# the explorer is deployed to or create multiple rolebindings and a cluster
+# role to list/get/watch all deployments in multiple namespaces.
 rbac:
   create: true
   # useExistingRole: "streams-explorer-role"
