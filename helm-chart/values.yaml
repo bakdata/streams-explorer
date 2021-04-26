@@ -43,9 +43,10 @@ podLabels: {}
 service:
   type: ClusterIP
 
-# Create a role binding and role to list/get/watch all deployments in the namespace
-# the explorer is deployed to or create multiple rolebindings and a cluster
-# role to list/get/watch all deployments in multiple namespaces.
+# Create a role and role binding to scrape only the namespace
+# the Streams Explorer is deployed to.
+# To scrape multiple namespaces create a cluster role and 
+# multiple role bindings.
 rbac:
   create: true
   # useExistingRole: "streams-explorer-role"
