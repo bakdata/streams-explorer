@@ -1,5 +1,7 @@
 image: "bakdata/streams-explorer"
 imageTag: "latest"
+imagePullSecrets: []
+# - name: "image-pull-secret"
 
 replicaCount: 1
 imagePullPolicy: Always
