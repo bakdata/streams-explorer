@@ -11,19 +11,11 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  {{- if (not .Values.rbac.useExistingRole) }}
-  name: {{ template "streams-explorer.fullname" . }}
-  {{- else }}
-  name: {{ .Values.rbac.useExistingRole }}
-  {{- end }}
+  name: {{ template "streams-explorer.roleName" . }}
 subjects:
   - kind: ServiceAccount
     namespace: {{ .Release.Namespace }}
-    {{- if (not .Values.rbac.useExisting) }}
-    name: streams-explorer-sa
-    {{- else }}
-    name: {{ .Values.serviceAccount.useExisting }}
-    {{- end }}
+    name: {{ template "streams-explorer.serviceAccountName" . }}
 {{- else if and .Values.rbac.create .Values.rbac.clusterScope.enabled -}}
 {{- $root := . -}}
 {{- range .Values.rbac.clusterScope.namespaces }}
@@ -41,18 +33,10 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  {{- if (not $root.Values.rbac.useExistingRole) }}
-  name: {{ template "streams-explorer.fullname" $ }}
-  {{- else }}
-  name: {{ $root.Values.rbac.useExistingRole }}
-  {{- end }}
+  name: {{ template "streams-explorer.roleName" . }}
 subjects:
   - kind: ServiceAccount
     namespace: {{ $root.Release.Namespace }}
-    {{- if (not $root.Values.rbac.useExisting) }}
-    name: streams-explorer-sa
-    {{- else }}
-    name: {{ $root.Values.serviceAccount.useExisting }}
-    {{- end }}
+    name: {{ template "streams-explorer.serviceAccountName" . }}
 {{- end }}
 {{- end }}

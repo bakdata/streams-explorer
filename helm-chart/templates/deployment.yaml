@@ -43,11 +43,7 @@ spec:
       {{- end }}
       {{- end }}
     spec:
-      {{- if (not .Values.rbac.useExisting) }}
-      serviceAccountName: streams-explorer-sa
-      {{- else }}
-      serviceAccountName: {{ .Values.serviceAccount.useExisting }}
-      {{- end }}
+      serviceAccountName: {{ template "streams-explorer.serviceAccountName" . }}
       {{- if .Values.tolerations }}
       tolerations:
 {{ toYaml .Values.tolerations | indent 8 }}

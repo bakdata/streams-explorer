@@ -30,3 +30,19 @@ Create chart name and version as used by the chart label.
 {{- define "streams-explorer.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
+
+{{- define "streams-explorer.serviceAccountName" -}}
+{{- if and .Values.rbac.create .Values.rbac.useExistingServiceAccount -}}
+    {{ default .Values.rbac.useExistingServiceAccount }}
+{{ else }}
+    {{ default "streams-explorer-sa"}}
+{{- end -}}
+{{- end -}}
+
+{{- define "streams-explorer.roleName" -}}
+{{- if and .Values.rbac.create .Values.rbac.useExistingRole -}}
+    {{ default .Values.rbac.useExistingRole }}
+{{ else }}
+    {{ default (template "streams-explorer.fullname" .) }}
+{{- end -}}
+{{- end -}}
