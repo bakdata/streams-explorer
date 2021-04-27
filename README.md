@@ -92,7 +92,7 @@ uvicorn main:app
 1. Install dependencies
 
 ```sh
-npm install
+npm ci
 ```
 
 2. Start the frontend server

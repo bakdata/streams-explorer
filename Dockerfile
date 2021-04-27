@@ -15,7 +15,7 @@ RUN pip install -U pip && \
 
 COPY ./frontend /frontend
 RUN mkdir -p /app/static && \
-    npm install --prefix /frontend && \
+    npm ci --production --prefix /frontend && \
     npm run build --prefix /frontend && \
     mv /frontend/build/* /app/static/ && \
     rm -rf /frontend

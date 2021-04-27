@@ -76,7 +76,7 @@ stages:
             inputs:
               versionSpec: $(node.version)
 
-          - script: npm install
+          - script: npm ci
             displayName: "Install dependencies"
             workingDirectory: $(frontendPath)
 
