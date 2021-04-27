@@ -10,39 +10,90 @@ from streams_explorer.models.graph import Metric
 from streams_explorer.models.node_types import NodeTypesEnum
 
 
-class PrometheusMetric(Enum):
-    def __init__(self, metric: str, query: str):
-        self.metric: str = metric
-        self.query: str = query
+class PrometheusMetricInterface():
+    class MetricPair:
+        def __init__(self, metric: str, query: str):
+            self.metric = metric
+            self.query = query
 
-    MESSAGES_IN = (
-        "messages_in",
-        "sum by(topic) (rate(kafka_topic_partition_current_offset[5m]))",
-    )
-    MESSAGES_OUT = (
-        "messages_out",
-        "sum by(topic) (rate(kafka_consumergroup_group_offset[5m]) >= 0)",
-    )
-    CONSUMER_LAG = (
-        "consumer_lag",
-        'sum by(group) (kafka_consumergroup_group_topic_sum_lag{group=~".+"})',
-    )
-    CONSUMER_READ_RATE = (
-        "consumer_read_rate",
-        'sum by(group) (rate(kafka_consumergroup_group_offset{group=~".+"}[5m]) >= 0)',
-    )
-    TOPIC_SIZE = (
-        "topic_size",
-        "sum by(topic) (kafka_topic_partition_current_offset - kafka_topic_partition_oldest_offset)",
-    )
-    REPLICAS = (
-        "replicas",
-        "sum by(deployment) (kube_deployment_status_replicas)",
-    )
-    CONNECTOR_TASKS = (
-        "connector_tasks",
-        "sum by(connector) (kafka_connect_connector_tasks_state == 1) or clamp_max(sum by(connector) (kafka_connect_connector_tasks_state), 0)",
-    )
+    def get_messages_in_metric_pair(self) -> MetricPair:
+        return PrometheusMetricInterface.MetricPair("messages_in", self.get_messages_in_metric_name())
+
+    def get_messages_in_metric_name(self) -> str:
+        """Returns the name of the message in rate metric."""
+        pass
+
+    def get_messages_out_metric_pair(self) -> MetricPair:
+        return PrometheusMetricInterface.MetricPair("messages_out", self.get_messages_out_metric_name())
+
+    def get_messages_out_metric_name(self) -> str:
+        """Returns the name of the message out rate metric."""
+        pass
+
+    def get_consumer_lag_metric_pair(self) -> MetricPair:
+        return PrometheusMetricInterface.MetricPair("consumer_lag", self.get_consumer_lag_metric_name())
+
+    def get_consumer_lag_metric_name(self) -> str:
+        """Returns the name of the consumer lag metric."""
+        pass
+
+    def get_consumer_read_rate_metric_pair(self) -> MetricPair:
+        return PrometheusMetricInterface.MetricPair("consumer_read_rate", self.get_consumer_read_rate_metric_name())
+
+    def get_consumer_read_rate_metric_name(self) -> str:
+        """Returns the name of the consumer read rate metric."""
+        pass
+
+    def get_topic_size_metric_pair(self) -> MetricPair:
+        return PrometheusMetricInterface.MetricPair("topic_size", self.get_topic_size_metric_name())
+
+    def get_topic_size_metric_name(self) -> str:
+        """Returns the name of the topic size (max - min offset) metric."""
+        pass
+
+    def get_replicas_metric_pair(self) -> MetricPair:
+        return PrometheusMetricInterface.MetricPair("replicas", self.get_replicas_metric_name())
+
+    def get_replicas_metric_name(self) -> str:
+        """Returns the name of the replicas (pod count) metric."""
+        pass
+
+    def get_connector_tasks_metric_pair(self) -> MetricPair:
+        return PrometheusMetricInterface.MetricPair("connector_tasks", self.get_connector_tasks_metric_name())
+
+    def get_connector_tasks_metric_name(self) -> str:
+        """Returns the name of the conector task count metric."""
+        pass
+
+
+class DanielqsjKafkaExporterMetrics:
+
+    def get_topic_size_metric_name(self) -> str:
+        return "sum by(topic) (kafka_topic_partition_current_offset - kafka_topic_partition_oldest_offset)"
+
+    def get_messages_in_metric_name(self) -> str:
+        return "sum by(topic) (rate(kafka_topic_partition_current_offset[5m]))"
+
+
+class KafkaLagExporterMetrics:
+
+    def get_messages_out_metric_name(self) -> str:
+        return "sum by(topic) (rate(kafka_consumergroup_group_offset[5m]) >= 0)"
+
+    def get_consumer_lag_metric_name(self) -> str:
+        return 'sum by(group) (kafka_consumergroup_group_topic_sum_lag{group=~".+"})'
+
+    def get_consumer_read_rate_metric_name(self) -> str:
+        return 'sum by(group) (rate(kafka_consumergroup_group_offset{group=~".+"}[5m]) >= 0)'
+
+
+class BundledPrometheusMetrics(PrometheusMetricInterface, DanielqsjKafkaExporterMetrics, KafkaLagExporterMetrics):
+
+    def get_replicas_metric_name(self) -> str:
+        return "sum by(deployment) (kube_deployment_status_replicas)"
+
+    def get_connector_tasks_metric_name(self) -> str:
+        return "sum by(connector) (kafka_connect_connector_tasks_state == 1) or clamp_max(sum by(connector) (kafka_connect_connector_tasks_state), 0)"
 
 
 class MetricProvider:
@@ -88,11 +139,18 @@ class MetricProvider:
 
 
 class PrometheusMetricProvider(MetricProvider):
-    def __init__(self, nodes: NodeDataView):
+    def __init__(self, nodes: NodeDataView, prometheus_metrics: PrometheusMetricInterface = None):
         super().__init__(nodes)
+        if prometheus_metrics is None:
+            self._prometheus_metrics = BundledPrometheusMetrics()
+        else:
+            self._prometheus_metrics = prometheus_metrics
         self._prom = PrometheusConnect(url=settings.prometheus.url)
 
-    def get_metric(self, metric: PrometheusMetric) -> List:
+    def get_prometheus_metrics(self) -> PrometheusMetricInterface:
+        return self._prometheus_metrics
+
+    def get_metric(self, metric: PrometheusMetricInterface.MetricPair) -> List:
         try:
             return self.__prom_request(metric.query)
         except PrometheusApiClientException as e:
@@ -113,41 +171,41 @@ class PrometheusMetricProvider(MetricProvider):
         self._data["connector_tasks"] = self.__get_connector_tasks()
 
     def __get_messages_in(self) -> Dict[str, float]:
-        prom_messages_in = self.get_metric(metric=PrometheusMetric.MESSAGES_IN)
+        prom_messages_in = self.get_metric(metric=self.get_prometheus_metrics().get_messages_in_metric_pair())
         return {
             d["metric"]["topic"]: round(float(d["value"][-1]), 2)
             for d in prom_messages_in
         }
 
     def __get_messages_out(self) -> Dict[str, float]:
-        prom_messages_out = self.get_metric(metric=PrometheusMetric.MESSAGES_OUT)
+        prom_messages_out = self.get_metric(metric=self.get_prometheus_metrics().get_messages_out_metric_pair())
         return {
             d["metric"]["topic"]: round(float(d["value"][-1]), 2)
             for d in prom_messages_out
         }
 
     def __get_consumer_lag(self) -> Dict[str, int]:
-        prom_consumer_lag = self.get_metric(metric=PrometheusMetric.CONSUMER_LAG)
+        prom_consumer_lag = self.get_metric(metric=self.get_prometheus_metrics().get_consumer_lag_metric_pair())
         return {d["metric"]["group"]: int(d["value"][-1]) for d in prom_consumer_lag}
 
     def __get_consumer_read_rate(self) -> Dict[str, float]:
         prom_consumer_read_rate = self.get_metric(
-            metric=PrometheusMetric.CONSUMER_READ_RATE
+            metric=self.get_prometheus_metrics().get_consumer_read_rate_metric_pair()
         )
         return {
             d["metric"]["group"]: float(d["value"][-1]) for d in prom_consumer_read_rate
         }
 
     def __get_topic_size(self) -> Dict[str, int]:
-        prom_topic_size = self.get_metric(metric=PrometheusMetric.TOPIC_SIZE)
+        prom_topic_size = self.get_metric(metric=self.get_prometheus_metrics().get_topic_size_metric_pair())
         return {d["metric"]["topic"]: int(d["value"][-1]) for d in prom_topic_size}
 
     def __get_replicas(self) -> Dict[str, int]:
-        prom_replicas = self.get_metric(metric=PrometheusMetric.REPLICAS)
+        prom_replicas = self.get_metric(metric=self.get_prometheus_metrics().get_replicas_metric_pair())
         return {d["metric"]["deployment"]: int(d["value"][-1]) for d in prom_replicas}
 
     def __get_connector_tasks(self) -> Dict[str, int]:
-        prom_connector_tasks = self.get_metric(metric=PrometheusMetric.CONNECTOR_TASKS)
+        prom_connector_tasks = self.get_metric(metric=self.get_prometheus_metrics().get_connector_tasks_metric_pair())
         return {
             d["metric"]["connector"]: int(d["value"][-1]) for d in prom_connector_tasks
         }
