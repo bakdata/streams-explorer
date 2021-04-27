@@ -16,82 +16,82 @@ class PrometheusMetricInterface():
             self.query = query
 
     def get_messages_in_metric_pair(self) -> MetricPair:
-        return PrometheusMetricInterface.MetricPair("messages_in", self.get_messages_in_metric_name())
+        return PrometheusMetricInterface.MetricPair("messages_in", self.get_messages_in_metric_query())
 
-    def get_messages_in_metric_name(self) -> str:
+    def get_messages_in_metric_query(self) -> str:
         """Returns the name of the message in rate metric."""
         pass
 
     def get_messages_out_metric_pair(self) -> MetricPair:
-        return PrometheusMetricInterface.MetricPair("messages_out", self.get_messages_out_metric_name())
+        return PrometheusMetricInterface.MetricPair("messages_out", self.get_messages_out_metric_query())
 
-    def get_messages_out_metric_name(self) -> str:
+    def get_messages_out_metric_query(self) -> str:
         """Returns the name of the message out rate metric."""
         pass
 
     def get_consumer_lag_metric_pair(self) -> MetricPair:
-        return PrometheusMetricInterface.MetricPair("consumer_lag", self.get_consumer_lag_metric_name())
+        return PrometheusMetricInterface.MetricPair("consumer_lag", self.get_consumer_lag_metric_query())
 
-    def get_consumer_lag_metric_name(self) -> str:
+    def get_consumer_lag_metric_query(self) -> str:
         """Returns the name of the consumer lag metric."""
         pass
 
     def get_consumer_read_rate_metric_pair(self) -> MetricPair:
-        return PrometheusMetricInterface.MetricPair("consumer_read_rate", self.get_consumer_read_rate_metric_name())
+        return PrometheusMetricInterface.MetricPair("consumer_read_rate", self.get_consumer_read_rate_metric_query())
 
-    def get_consumer_read_rate_metric_name(self) -> str:
+    def get_consumer_read_rate_metric_query(self) -> str:
         """Returns the name of the consumer read rate metric."""
         pass
 
     def get_topic_size_metric_pair(self) -> MetricPair:
-        return PrometheusMetricInterface.MetricPair("topic_size", self.get_topic_size_metric_name())
+        return PrometheusMetricInterface.MetricPair("topic_size", self.get_topic_size_metric_query())
 
-    def get_topic_size_metric_name(self) -> str:
+    def get_topic_size_metric_query(self) -> str:
         """Returns the name of the topic size (max - min offset) metric."""
         pass
 
     def get_replicas_metric_pair(self) -> MetricPair:
-        return PrometheusMetricInterface.MetricPair("replicas", self.get_replicas_metric_name())
+        return PrometheusMetricInterface.MetricPair("replicas", self.get_replicas_metric_query())
 
-    def get_replicas_metric_name(self) -> str:
+    def get_replicas_metric_query(self) -> str:
         """Returns the name of the replicas (pod count) metric."""
         pass
 
     def get_connector_tasks_metric_pair(self) -> MetricPair:
-        return PrometheusMetricInterface.MetricPair("connector_tasks", self.get_connector_tasks_metric_name())
+        return PrometheusMetricInterface.MetricPair("connector_tasks", self.get_connector_tasks_metric_query())
 
-    def get_connector_tasks_metric_name(self) -> str:
+    def get_connector_tasks_metric_query(self) -> str:
         """Returns the name of the conector task count metric."""
         pass
 
 
 class DanielqsjKafkaExporterMetrics:
 
-    def get_topic_size_metric_name(self) -> str:
+    def get_topic_size_metric_query(self) -> str:
         return "sum by(topic) (kafka_topic_partition_current_offset - kafka_topic_partition_oldest_offset)"
 
-    def get_messages_in_metric_name(self) -> str:
+    def get_messages_in_metric_query(self) -> str:
         return "sum by(topic) (rate(kafka_topic_partition_current_offset[5m]))"
 
 
 class KafkaLagExporterMetrics:
 
-    def get_messages_out_metric_name(self) -> str:
+    def get_messages_out_metric_query(self) -> str:
         return "sum by(topic) (rate(kafka_consumergroup_group_offset[5m]) >= 0)"
 
-    def get_consumer_lag_metric_name(self) -> str:
+    def get_consumer_lag_metric_query(self) -> str:
         return 'sum by(group) (kafka_consumergroup_group_topic_sum_lag{group=~".+"})'
 
-    def get_consumer_read_rate_metric_name(self) -> str:
+    def get_consumer_read_rate_metric_query(self) -> str:
         return 'sum by(group) (rate(kafka_consumergroup_group_offset{group=~".+"}[5m]) >= 0)'
 
 
 class BundledPrometheusMetrics(PrometheusMetricInterface, DanielqsjKafkaExporterMetrics, KafkaLagExporterMetrics):
 
-    def get_replicas_metric_name(self) -> str:
+    def get_replicas_metric_query(self) -> str:
         return "sum by(deployment) (kube_deployment_status_replicas)"
 
-    def get_connector_tasks_metric_name(self) -> str:
+    def get_connector_tasks_metric_query(self) -> str:
         return "sum by(connector) (kafka_connect_connector_tasks_state == 1) or clamp_max(sum by(connector) (kafka_connect_connector_tasks_state), 0)"
 
 
