@@ -66,6 +66,9 @@ ingress:
   tls: []
   # Redirect http to https: https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.1/guide/tasks/ssl_redirect/
   sslRedirect: true
+  # Commonly used to map ingres objects to specific ingress controller installations within your cluster
+  #ingressClassName: nginx-web-ingress
+
 
 resources:
   requests:
