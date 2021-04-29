@@ -9,6 +9,7 @@ from kubernetes.client import (
     V1ObjectMeta,
     V1PodSpec,
     V1StatefulSet,
+    V1ConfigMap
 )
 from loguru import logger
 
@@ -102,6 +103,8 @@ class K8sApp:
             return K8sAppStatefulSet(k8s_object)
         elif isinstance(k8s_object, V1beta1CronJob):
             return K8sAppCronJob(k8s_object)
+        elif isinstance(k8s_object, V1ConfigMap):
+            return K8sConfigMap(k8s_object)
         else:
             raise ValueError(k8s_object)
 
@@ -184,3 +187,51 @@ class K8sAppStatefulSet(K8sApp):
 
     def get_service_name(self) -> str:
         return self.k8s_object.spec.service_name
+
+
+class K8sConfigMap(K8sApp):
+    def __init__(self, k8s_object: V1ConfigMap):
+        super().__init__(k8s_object)
+
+    def setup(self):
+        self.spec = self.k8s_object.data
+        self.env_prefix = self.get_env_prefix(self.spec)
+        self.__get_common_configuration()
+        self.__get_attributes()
+
+
+    @staticmethod
+    def get_env_prefix(data: Optional[dict[str, str]]) -> Optional[str]:
+        if data:
+            for key in data:
+                if key == "ENV_PREFIX":
+                    return data[key]
+        return None
+
+    def __get_attributes(self):
+        labels = self.metadata.labels
+        labels_to_use = self.get_labels()
+
+        for key in labels_to_use:
+            value = labels.get(key)
+            if value is not None:
+                self.attributes[key] = value
+            elif self.is_streams_bootstrap_app():
+                logger.warning(
+                    f"{self.get_class_name()} {self.name} does not have a label with the name: {key}"
+                )
+
+        if self.k8s_object.metadata.annotations:
+            annotations = self.k8s_object.metadata.annotations
+            self.attributes.update(annotations)
+
+
+    def __get_common_configuration(self):
+        for key in self.spec:
+            name = key
+            if name == self._get_env_name("INPUT_TOPICS"):
+                self.input_topics = self.parse_input_topics(self.spec[name])
+            elif name == self._get_env_name("OUTPUT_TOPIC"):
+                self.output_topic = self.spec[name]
+            elif name == self._get_env_name("ERROR_TOPIC"):
+                self.error_topic = self.spec[name]

@@ -1,7 +1,7 @@
 from typing import Dict, List, Optional, Type
 
 import kubernetes
-from kubernetes.client import V1beta1CronJob, V1Deployment, V1StatefulSet
+from kubernetes.client import V1beta1CronJob, V1Deployment, V1StatefulSet, V1ConfigMap
 from loguru import logger
 
 from streams_explorer.core.config import settings
@@ -129,7 +129,7 @@ class StreamsExplorer:
         self.k8s_batch_client = kubernetes.client.BatchV1beta1Api()
 
     def __retrieve_deployments(self):
-        items = self.get_deployments() + self.get_stateful_sets()
+        items = self.get_deployments() + self.get_stateful_sets() + self.get_configmaps()
         for item in items:
             try:
                 app = K8sApp.factory(item)
@@ -146,6 +146,17 @@ class StreamsExplorer:
                 namespace=namespace, watch=False
             ).items
         return deployments
+
+    def get_configmaps(self) -> List[V1ConfigMap]:
+        configmaps: List[V1ConfigMap] = []
+        for namespace in self.namespaces:
+            logger.info(f"List configmaps in namespace {namespace}")
+            configmaps += self.k8s_app_client.list_namespaced_config_map(
+                namespace=namespace, watch=False
+            ).items
+        return configmaps
+
+
 
     def get_stateful_sets(self) -> List[V1StatefulSet]:
         stateful_sets: List[V1StatefulSet] = []

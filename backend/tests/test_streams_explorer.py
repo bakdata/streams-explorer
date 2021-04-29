@@ -30,7 +30,7 @@ from streams_explorer.models.node_information import (
 )
 from streams_explorer.models.source import Source
 from streams_explorer.streams_explorer import StreamsExplorer
-from tests.utils import get_streaming_app_deployment
+from tests.utils import get_streaming_app_deployment, get_streaming_app_configmap
 
 
 class TestStreamsExplorer:
@@ -78,6 +78,30 @@ class TestStreamsExplorer:
         ]
 
     @pytest.fixture()
+    def configmaps(self):
+        return [
+            get_streaming_app_configmap(
+                "streaming-app4", "input-topic4", "output-topic4", "error-topic4",
+                pipeline="base"
+            ),
+            get_streaming_app_configmap(
+                "streaming-app5",
+                "input-topic5",
+                "output-topic5",
+                "error-topic5",
+                consumer_group="consumer-group4",
+            ),
+            get_streaming_app_configmap(
+                "streaming-app6",
+                "input-topic6",
+                "output-topic6",
+                "error-topic6",
+                pipeline="pipeline3",
+            ),
+        ]
+
+
+    @pytest.fixture()
     def cron_jobs(self):
         env_prefix = "APP_"
         envs = [
@@ -110,7 +134,7 @@ class TestStreamsExplorer:
 
     @pytest.fixture()
     def streams_explorer(
-        self, mocker, deployments, cron_jobs, monkeypatch, fake_linker
+        self, mocker, deployments, configmaps, cron_jobs, monkeypatch, fake_linker
     ):
         explorer = StreamsExplorer(
             linking_service=fake_linker, metric_provider=MetricProvider
@@ -124,6 +148,11 @@ class TestStreamsExplorer:
         mocker.patch.object(
             explorer, attribute="get_deployments", return_value=deployments
         )
+
+        mocker.patch.object(
+            explorer, attribute="get_configmaps", return_value=configmaps
+        )
+
 
         mocker.patch.object(explorer, attribute="get_stateful_sets", return_value=[])
 
@@ -177,14 +206,17 @@ class TestStreamsExplorer:
 
     def test_update(self, streams_explorer):
         streams_explorer.update()
-        assert len(streams_explorer.applications) == 3
+        assert len(streams_explorer.applications) == 6
         assert len(streams_explorer.kafka_connectors) == 2
 
     def test_get_pipeline_names(self, streams_explorer):
         streams_explorer.update()
         assert streams_explorer.get_pipeline_names() == [
-            "streaming-app1",
+            "streaming-app2",
             "pipeline2",
+            "base",
+            "streaming-app5",
+            "pipeline33",
             "generic-source-connector",
         ]
 

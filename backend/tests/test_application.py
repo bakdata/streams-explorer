@@ -8,7 +8,7 @@ from kubernetes.client import V1beta1CronJob, V1ObjectMeta
 from streams_explorer.application import get_application
 from streams_explorer.core.config import API_PREFIX, settings
 from streams_explorer.streams_explorer import StreamsExplorer
-from tests.utils import get_streaming_app_deployment
+from tests.utils import get_streaming_app_deployment, get_streaming_app_configmap
 
 
 class TestApplication:
@@ -60,10 +60,19 @@ class TestApplication:
         def mock_get_stateful_sets(*args, **kwargs):
             return []
 
+        def mock_get_configmaps(*args, **kwargs):
+            return [
+                get_streaming_app_configmap(
+                    "streaming-app4", "input-topic4", "output-topic4", "error-topic4"
+                ),
+            ]
+
         def mock_get_cron_jobs(*args, **kwargs):
             return [V1beta1CronJob(metadata=V1ObjectMeta(name="test"))]
 
         monkeypatch.setattr(StreamsExplorer, "get_deployments", mock_get_deployments)
+        monkeypatch.setattr(StreamsExplorer, "get_configmaps", mock_get_configmaps)
+
         monkeypatch.setattr(
             StreamsExplorer, "get_stateful_sets", mock_get_stateful_sets
         )
@@ -108,8 +117,7 @@ class TestApplication:
         with TestClient(app) as client:
             await asyncio.sleep(0.1)
             response = client.get(f"{API_PREFIX}/graph")
-
-            assert len(response.json().get("nodes")) == 15
+            assert len(response.json().get("nodes")) == 19
 
             def mock_get_deployments(*args, **kwargs):
                 return [
@@ -130,13 +138,16 @@ class TestApplication:
             monkeypatch.setattr(
                 StreamsExplorer, "get_deployments", mock_get_deployments
             )
+
+            monkeypatch.setattr(
+                StreamsExplorer, "get_configmaps", mock_get_configmaps
+            )
             monkeypatch.setattr(
                 StreamsExplorer, "get_stateful_sets", mock_get_stateful_sets
             )
             await asyncio.sleep(2)
             response = client.get(f"{API_PREFIX}/graph")
-
-            assert len(response.json().get("nodes")) == 12
+            assert len(response.json().get("nodes")) == 16
 
             mocker.patch(
                 "streams_explorer.core.services.kafkaconnect.KafkaConnect.get_connectors",
@@ -144,4 +155,4 @@ class TestApplication:
             )
             await asyncio.sleep(2)
             response = client.get(f"{API_PREFIX}/graph")
-            assert len(response.json().get("nodes")) == 9
+            assert len(response.json().get("nodes")) == 13
