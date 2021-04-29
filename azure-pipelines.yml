@@ -18,6 +18,8 @@ variables:
   - group: pypi
   - name: vmImage
     value: ubuntu-20.04
+  - name: pythonVersion
+    value: "3.8"
   - name: imageRepository
     value: $(Build.repository.name)
   - name: dockerfilePath
@@ -44,7 +46,7 @@ stages:
         strategy:
           matrix:
             Python38:
-              python.version: "3.8"
+              python.version: $(pythonVersion)
         steps:
           - task: UsePythonVersion@0
             inputs:
@@ -56,9 +58,14 @@ stages:
             displayName: "Install dependencies"
             workingDirectory: $(backendPath)
 
-          - script: python -m flake8 --config .flake8 .
-            displayName: "Lint"
-            workingDirectory: $(backendPath)
+          - script: pre-commit run flake8 --all-files
+            displayName: "Lint (flake8)"
+
+          - script: pre-commit run isort --all-files
+            displayName: "Order of imports (isort)"
+
+          - script: pre-commit run black --all-files
+            displayName: "Formatting (black)"
 
           - script: python -m pytest tests
             displayName: "Run Tests"
@@ -80,9 +87,22 @@ stages:
             displayName: "Install dependencies"
             workingDirectory: $(frontendPath)
 
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: $(pythonVersion)
+
+          - script: python -m pip install pre-commit
+            displayName: "Install pre-commit"
+
           - script: npm run lint
             displayName: "Lint"
             workingDirectory: $(frontendPath)
+
+          - script: pre-commit run prettier --all-files
+            displayName: "Formatting (prettier)"
+
+          - script: pre-commit run generate-fetchers --all-files
+            displayName: "Fetchers"
 
           - script: CI=true npm test
             displayName: "Run Tests"
