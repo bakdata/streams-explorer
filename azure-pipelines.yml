@@ -60,6 +60,9 @@ stages:
             displayName: "Lint"
             workingDirectory: $(backendPath)
 
+          - script: pre-commit run --all-files
+            displayName: "Check pre-commit"
+
           - script: python -m pytest tests
             displayName: "Run Tests"
             workingDirectory: $(backendPath)
