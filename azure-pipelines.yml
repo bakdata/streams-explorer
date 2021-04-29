@@ -58,9 +58,14 @@ stages:
             displayName: "Install dependencies"
             workingDirectory: $(backendPath)
 
-          - script: python -m flake8 --config .flake8 .
-            displayName: "Lint"
-            workingDirectory: $(backendPath)
+          - script: pre-commit run flake8 --all-files
+            displayName: "Lint (flake8)"
+
+          - script: pre-commit run isort --all-files
+            displayName: "Order of imports (isort)"
+
+          - script: pre-commit run black --all-files
+            displayName: "Formatting (black)"
 
           - script: python -m pytest tests
             displayName: "Run Tests"
@@ -89,13 +94,6 @@ stages:
           - script: CI=true npm test
             displayName: "Run Tests"
             workingDirectory: $(frontendPath)
-
-      - job: Check
-        pool:
-          vmImage: $(vmImage)
-        steps:
-          - script: pre-commit run --all-files
-            displayName: "Check pre-commit"
 
   - stage: Publish
     condition: succeeded()
