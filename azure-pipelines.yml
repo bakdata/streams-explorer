@@ -18,6 +18,8 @@ variables:
   - group: pypi
   - name: vmImage
     value: ubuntu-20.04
+  - name: pythonVersion
+    value: "3.8"
   - name: imageRepository
     value: $(Build.repository.name)
   - name: dockerfilePath
@@ -44,7 +46,7 @@ stages:
         strategy:
           matrix:
             Python38:
-              python.version: "3.8"
+              python.version: $(pythonVersion)
         steps:
           - task: UsePythonVersion@0
             inputs:
@@ -59,9 +61,6 @@ stages:
           - script: python -m flake8 --config .flake8 .
             displayName: "Lint"
             workingDirectory: $(backendPath)
-
-          - script: pre-commit run --all-files
-            displayName: "Check pre-commit"
 
           - script: python -m pytest tests
             displayName: "Run Tests"
@@ -90,6 +89,13 @@ stages:
           - script: CI=true npm test
             displayName: "Run Tests"
             workingDirectory: $(frontendPath)
+
+      - job: Check
+        pool:
+          vmImage: $(vmImage)
+        steps:
+          - script: pre-commit run --all-files
+            displayName: "Check pre-commit"
 
   - stage: Publish
     condition: succeeded()
