@@ -40,6 +40,7 @@ def get_streaming_app_deployment(
     metadata = get_metadata(name, pipeline=pipeline)
     return V1Deployment(metadata=metadata, spec=spec)
 
+
 def get_streaming_app_configmap(
         name,
         input_topics,
@@ -52,20 +53,20 @@ def get_streaming_app_configmap(
         consumer_group=None,
 ) -> V1ConfigMap:
 
-
-    data = {env_prefix + "INPUT_TOPICS" : input_topics,
-            env_prefix + "OUTPUT_TOPIC" : output_topic,
-            env_prefix + "ERROR_TOPIC" : error_topic,
-            "ENV_PREFIX" : env_prefix}
+    data = {env_prefix + "INPUT_TOPICS": input_topics,
+            env_prefix + "OUTPUT_TOPIC": output_topic,
+            env_prefix + "ERROR_TOPIC": error_topic,
+            "ENV_PREFIX": env_prefix}
 
     if multiple_inputs:
-        data[env_prefix + "EXTRA_INPUT_TOPICS"]= multiple_inputs
+        data[env_prefix + "EXTRA_INPUT_TOPICS"] = multiple_inputs
 
     if multiple_outputs:
-        data[env_prefix + "EXTRA_OUTPUT_TOPICS"]= multiple_outputs
+        data[env_prefix + "EXTRA_OUTPUT_TOPICS"] = multiple_outputs
 
     metadata = get_metadata(name, pipeline=pipeline, group=consumer_group)
     return V1ConfigMap(metadata=metadata, data=data)
+
 
 def get_streaming_app_stateful_set(
     name,

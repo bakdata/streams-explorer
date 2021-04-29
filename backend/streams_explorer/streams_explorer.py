@@ -129,7 +129,6 @@ class StreamsExplorer:
         self.k8s_batch_client = kubernetes.client.BatchV1beta1Api()
         self.k8s_core_client = kubernetes.client.CoreV1Api()
 
-
     def __retrieve_deployments(self):
         items = self.get_deployments() + self.get_stateful_sets() + self.get_configmaps()
         for item in items:
@@ -157,8 +156,6 @@ class StreamsExplorer:
                 namespace=namespace, watch=False
             ).items
         return configmaps
-
-
 
     def get_stateful_sets(self) -> List[V1StatefulSet]:
         stateful_sets: List[V1StatefulSet] = []

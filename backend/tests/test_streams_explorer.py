@@ -100,7 +100,6 @@ class TestStreamsExplorer:
             ),
         ]
 
-
     @pytest.fixture()
     def cron_jobs(self):
         env_prefix = "APP_"
@@ -153,9 +152,7 @@ class TestStreamsExplorer:
             explorer, attribute="get_configmaps", return_value=configmaps
         )
 
-
         mocker.patch.object(explorer, attribute="get_stateful_sets", return_value=[])
-
         mocker.patch.object(explorer, attribute="get_cron_jobs", return_value=cron_jobs)
 
         def get_connectors():

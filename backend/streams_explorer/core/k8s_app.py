@@ -199,7 +199,6 @@ class K8sConfigMap(K8sApp):
         self.__get_common_configuration()
         self.__get_attributes()
 
-
     @staticmethod
     def get_env_prefix(data: Optional[dict[str, str]]) -> Optional[str]:
         if data:
@@ -225,13 +224,11 @@ class K8sConfigMap(K8sApp):
             annotations = self.k8s_object.metadata.annotations
             self.attributes.update(annotations)
 
-
     def __get_common_configuration(self):
         for key in self.spec:
-            name = key
-            if name == self._get_env_name("INPUT_TOPICS"):
-                self.input_topics = self.parse_input_topics(self.spec[name])
-            elif name == self._get_env_name("OUTPUT_TOPIC"):
-                self.output_topic = self.spec[name]
-            elif name == self._get_env_name("ERROR_TOPIC"):
-                self.error_topic = self.spec[name]
+            if key == self._get_env_name("INPUT_TOPICS"):
+                self.input_topics = self.parse_input_topics(self.spec[key])
+            elif key == self._get_env_name("OUTPUT_TOPIC"):
+                self.output_topic = self.spec[key]
+            elif key == self._get_env_name("ERROR_TOPIC"):
+                self.error_topic = self.spec[key]
