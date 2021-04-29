@@ -30,7 +30,7 @@ from streams_explorer.models.node_information import (
 )
 from streams_explorer.models.source import Source
 from streams_explorer.streams_explorer import StreamsExplorer
-from tests.utils import get_streaming_app_deployment, get_streaming_app_configmap
+from tests.utils import get_streaming_app_configmap, get_streaming_app_deployment
 
 
 class TestStreamsExplorer:

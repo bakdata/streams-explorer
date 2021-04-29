@@ -8,7 +8,7 @@ from kubernetes.client import V1beta1CronJob, V1ObjectMeta
 from streams_explorer.application import get_application
 from streams_explorer.core.config import API_PREFIX, settings
 from streams_explorer.streams_explorer import StreamsExplorer
-from tests.utils import get_streaming_app_deployment, get_streaming_app_configmap
+from tests.utils import get_streaming_app_configmap, get_streaming_app_deployment
 
 
 class TestApplication:

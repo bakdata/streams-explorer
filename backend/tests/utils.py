@@ -1,6 +1,7 @@
 from typing import List
 
 from kubernetes.client import (
+    V1ConfigMap,
     V1Container,
     V1Deployment,
     V1DeploymentSpec,
@@ -10,7 +11,6 @@ from kubernetes.client import (
     V1PodTemplateSpec,
     V1StatefulSet,
     V1StatefulSetSpec,
-    V1ConfigMap
 )
 
 

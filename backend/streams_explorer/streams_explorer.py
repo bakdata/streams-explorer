@@ -1,7 +1,7 @@
 from typing import Dict, List, Optional, Type
 
 import kubernetes
-from kubernetes.client import V1beta1CronJob, V1Deployment, V1StatefulSet, V1ConfigMap
+from kubernetes.client import V1beta1CronJob, V1ConfigMap, V1Deployment, V1StatefulSet
 from loguru import logger
 
 from streams_explorer.core.config import settings

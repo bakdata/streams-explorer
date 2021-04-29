@@ -4,12 +4,12 @@ from typing import Dict, List, Optional, Set
 
 from kubernetes.client import (
     V1beta1CronJob,
+    V1ConfigMap,
     V1Container,
     V1Deployment,
     V1ObjectMeta,
     V1PodSpec,
     V1StatefulSet,
-    V1ConfigMap
 )
 from loguru import logger
 
