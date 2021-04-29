@@ -127,6 +127,8 @@ class StreamsExplorer:
 
         self.k8s_app_client = kubernetes.client.AppsV1Api()
         self.k8s_batch_client = kubernetes.client.BatchV1beta1Api()
+        self.k8s_core_client = kubernetes.client.CoreV1Api()
+
 
     def __retrieve_deployments(self):
         items = self.get_deployments() + self.get_stateful_sets() + self.get_configmaps()
@@ -151,7 +153,7 @@ class StreamsExplorer:
         configmaps: List[V1ConfigMap] = []
         for namespace in self.namespaces:
             logger.info(f"List configmaps in namespace {namespace}")
-            configmaps += self.k8s_app_client.list_namespaced_config_map(
+            configmaps += self.k8s_core_client.list_namespaced_config_map(
                 namespace=namespace, watch=False
             ).items
         return configmaps
