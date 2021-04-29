@@ -99,10 +99,11 @@ def get_template(
 ) -> List[V1EnvVar]:
     env = [
         V1EnvVar(name="ENV_PREFIX", value=env_prefix),
-        V1EnvVar(name=env_prefix + "INPUT_TOPICS", value=input_topics),
         V1EnvVar(name=env_prefix + "OUTPUT_TOPIC", value=output_topic),
         V1EnvVar(name=env_prefix + "ERROR_TOPIC", value=error_topic),
     ]
+    if input_topics:
+        env.append(V1EnvVar(name=env_prefix + "INPUT_TOPICS", value=input_topics))
     if multiple_inputs:
         env.append(
             V1EnvVar(name=env_prefix + "EXTRA_INPUT_TOPICS", value=multiple_inputs)
