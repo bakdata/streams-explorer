@@ -87,9 +87,22 @@ stages:
             displayName: "Install dependencies"
             workingDirectory: $(frontendPath)
 
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: $(pythonVersion)
+
+          - script: python -m pip install pre-commit
+            displayName: "Install pre-commit"
+
           - script: npm run lint
             displayName: "Lint"
             workingDirectory: $(frontendPath)
+
+          - script: pre-commit run prettier --all-files
+            displayName: "Formatting (prettier)"
+
+          - script: pre-commit run generate-fetchers --all-files
+            displayName: "Fetchers"
 
           - script: CI=true npm test
             displayName: "Run Tests"
