@@ -130,7 +130,9 @@ class StreamsExplorer:
         self.k8s_core_client = kubernetes.client.CoreV1Api()
 
     def __retrieve_deployments(self):
-        items = self.get_deployments() + self.get_stateful_sets() + self.get_configmaps()
+        items = (
+            self.get_deployments() + self.get_stateful_sets() + self.get_configmaps()
+        )
         for item in items:
             try:
                 app = K8sApp.factory(item)

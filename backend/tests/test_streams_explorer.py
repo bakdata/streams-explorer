@@ -81,8 +81,11 @@ class TestStreamsExplorer:
     def configmaps(self):
         return [
             get_streaming_app_configmap(
-                "streaming-app4", "input-topic4", "output-topic4", "error-topic4",
-                pipeline="base"
+                "streaming-app4",
+                "input-topic4",
+                "output-topic4",
+                "error-topic4",
+                pipeline="base",
             ),
             get_streaming_app_configmap(
                 "streaming-app5",

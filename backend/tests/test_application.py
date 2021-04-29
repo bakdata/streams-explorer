@@ -139,9 +139,7 @@ class TestApplication:
                 StreamsExplorer, "get_deployments", mock_get_deployments
             )
 
-            monkeypatch.setattr(
-                StreamsExplorer, "get_configmaps", mock_get_configmaps
-            )
+            monkeypatch.setattr(StreamsExplorer, "get_configmaps", mock_get_configmaps)
             monkeypatch.setattr(
                 StreamsExplorer, "get_stateful_sets", mock_get_stateful_sets
             )

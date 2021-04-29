@@ -42,21 +42,23 @@ def get_streaming_app_deployment(
 
 
 def get_streaming_app_configmap(
-        name,
-        input_topics,
-        output_topic,
-        error_topic,
-        multiple_inputs=None,
-        multiple_outputs=None,
-        env_prefix="APP_",
-        pipeline=None,
-        consumer_group=None,
+    name,
+    input_topics,
+    output_topic,
+    error_topic,
+    multiple_inputs=None,
+    multiple_outputs=None,
+    env_prefix="APP_",
+    pipeline=None,
+    consumer_group=None,
 ) -> V1ConfigMap:
 
-    data = {env_prefix + "INPUT_TOPICS": input_topics,
-            env_prefix + "OUTPUT_TOPIC": output_topic,
-            env_prefix + "ERROR_TOPIC": error_topic,
-            "ENV_PREFIX": env_prefix}
+    data = {
+        env_prefix + "INPUT_TOPICS": input_topics,
+        env_prefix + "OUTPUT_TOPIC": output_topic,
+        env_prefix + "ERROR_TOPIC": error_topic,
+        "ENV_PREFIX": env_prefix,
+    }
 
     if multiple_inputs:
         data[env_prefix + "EXTRA_INPUT_TOPICS"] = multiple_inputs

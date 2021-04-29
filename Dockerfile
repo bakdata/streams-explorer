@@ -8,14 +8,10 @@ RUN apt-get -y update && \
     apt-get --no-install-recommends -y install nodejs python3-dev graphviz libgraphviz-dev pkg-config && \
     rm -rf /var/lib/apt/lists/*
 
-COPY ./backend/requirements.txt /app/requirements.txt
-
+COPY ./backend /app
 RUN pip install -U pip && \
     sed -E -i.bak '/^(fastapi|uvicorn|click|h11)=/d' requirements.txt && \
     pip install -r requirements.txt
-
-COPY ./backend /app/
-RUN python -m pytest tests
 
 COPY ./frontend /frontend
 RUN mkdir -p /app/static && \
