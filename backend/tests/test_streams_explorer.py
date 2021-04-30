@@ -216,7 +216,7 @@ class TestStreamsExplorer:
             "pipeline2",
             "base",
             "streaming-app5",
-            "pipeline33",
+            "pipeline3",
             "generic-source-connector",
         ]
 
