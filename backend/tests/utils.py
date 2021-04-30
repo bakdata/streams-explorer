@@ -1,6 +1,7 @@
 from typing import List
 
 from kubernetes.client import (
+    V1ConfigMap,
     V1Container,
     V1Deployment,
     V1DeploymentSpec,
@@ -40,6 +41,35 @@ def get_streaming_app_deployment(
     return V1Deployment(metadata=metadata, spec=spec)
 
 
+def get_streaming_app_configmap(
+    name,
+    input_topics,
+    output_topic,
+    error_topic,
+    multiple_inputs=None,
+    multiple_outputs=None,
+    env_prefix="APP_",
+    pipeline=None,
+    consumer_group=None,
+) -> V1ConfigMap:
+
+    data = {
+        env_prefix + "INPUT_TOPICS": input_topics,
+        env_prefix + "OUTPUT_TOPIC": output_topic,
+        env_prefix + "ERROR_TOPIC": error_topic,
+        "ENV_PREFIX": env_prefix,
+    }
+
+    if multiple_inputs:
+        data[env_prefix + "EXTRA_INPUT_TOPICS"] = multiple_inputs
+
+    if multiple_outputs:
+        data[env_prefix + "EXTRA_OUTPUT_TOPICS"] = multiple_outputs
+
+    metadata = get_metadata(name, pipeline=pipeline, group=consumer_group)
+    return V1ConfigMap(metadata=metadata, data=data)
+
+
 def get_streaming_app_stateful_set(
     name,
     input_topics,
@@ -71,10 +101,11 @@ def get_streaming_app_stateful_set(
     return V1StatefulSet(metadata=metadata, spec=spec)
 
 
-def get_metadata(name, pipeline=None) -> V1ObjectMeta:
+def get_metadata(name, pipeline=None, group="defaultGroup") -> V1ObjectMeta:
     return V1ObjectMeta(
         annotations={
             "deployment.kubernetes.io/revision": "1",
+            "consumerGroup": group,
         },
         labels={
             "app": name,
