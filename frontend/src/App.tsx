@@ -225,7 +225,6 @@ const App: React.FC = () => {
             <Row style={{ position: "fixed" }}>
               {graph ? (
                 <GraphVisualization
-                  id="topology-graph"
                   data={graph}
                   config={graphConfig}
                   metrics={metrics}

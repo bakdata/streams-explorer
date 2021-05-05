@@ -16,7 +16,6 @@ import ReactDOM from "react-dom";
 import { message } from "antd";
 
 interface GraphVisualizationProps {
-  id: string;
   data: Data | GraphData;
   config: GraphOptions;
   metrics: Metric[] | null;
@@ -157,7 +156,6 @@ function setFocusedNode(graph: Graph, focusedNode: string) {
 }
 
 const GraphVisualization = ({
-  id,
   data,
   config,
   metrics,
