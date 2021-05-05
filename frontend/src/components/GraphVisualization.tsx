@@ -136,11 +136,16 @@ export function updateNodeMetrics(graph: Graph, metrics: Metric[]) {
 }
 
 function setFocusedNode(graph: Graph, focusedNode: string) {
+  const node = graph.findById(focusedNode) as INode;
+  if (!node) {
+    return;
+  }
+
   if (graph.getZoom() < 1) {
     graph.zoomTo(1);
   }
 
-  graph.focusItem(focusedNode, true, {
+  graph.focusItem(node, true, {
     easing: "easeCubic",
     duration: 1500,
   });
