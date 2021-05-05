@@ -82,6 +82,17 @@ const App: React.FC = () => {
     {}
   );
 
+  const getParams = useCallback(() => {
+    return new URLSearchParams(location.search);
+  }, [location.search]);
+
+  function pushHistoryFocusNode(nodeId: string) {
+    const pipeline = getParams().get("pipeline");
+    history.push(
+      `/?${pipeline ? `pipeline=${pipeline}&` : ""}focus-node=${nodeId}`
+    );
+  }
+
   useEffect(() => {
     if (refreshInterval && refreshInterval > 0) {
       const interval = setInterval(refetchMetrics, refreshInterval * 1000);
@@ -100,7 +111,7 @@ const App: React.FC = () => {
   }, [graph]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
+    const params = getParams();
     const pipeline = params.get("pipeline");
     if (pipeline) {
       setCurrentPipeline(pipeline);
@@ -110,7 +121,7 @@ const App: React.FC = () => {
       setFocusedNode(focusNode);
       setDetailNode(focusNode);
     }
-  }, [location]);
+  }, [getParams, location]);
 
   if (graphError) {
     message.error(graphError.message);
@@ -183,7 +194,7 @@ const App: React.FC = () => {
                   onSelect={(nodeId: string) => {
                     setFocusedNode(nodeId);
                     setDetailNode(nodeId);
-                    history.push(`/?focus-node=${nodeId}`);
+                    pushHistoryFocusNode(nodeId);
                   }}
                 >
                   {graph?.nodes.map((node) => (
