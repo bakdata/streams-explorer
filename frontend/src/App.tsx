@@ -23,7 +23,6 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import { useMutate } from "restful-react";
 import { useHistory, useLocation } from "react-router-dom";
-import qs, { ParsedQs } from "qs";
 
 const { Option } = AutoComplete;
 
@@ -101,14 +100,12 @@ const App: React.FC = () => {
   }, [graph]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    const parsedQs: ParsedQs = qs.parse(location.search, {
-      ignoreQueryPrefix: true,
-    });
-    const pipeline: string = parsedQs.pipeline as string;
+    const params = new URLSearchParams(location.search);
+    const pipeline: string = params.get("pipeline") as string;
     if (pipeline) {
       setCurrentPipeline(pipeline);
     }
-    const focusNode: string = parsedQs["focus-node"] as string;
+    const focusNode: string = params.get("focus-node") as string;
     if (focusNode) {
       setFocusedNode(focusNode);
       setDetailNode(focusNode);
