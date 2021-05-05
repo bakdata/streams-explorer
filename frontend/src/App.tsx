@@ -32,7 +32,6 @@ const App: React.FC = () => {
   const ALL_PIPELINES = "all pipelines";
   const [currentPipeline, setCurrentPipeline] = useState(ALL_PIPELINES);
   const [detailNode, setDetailNode] = useState<string | null>(null);
-  const [inputValue, setInputValue] = useState<string | undefined>(undefined);
   const [focusedNode, setFocusedNode] = useState<string | null>(null);
   const [searchWidth, setSearchWidth] = useState<number>(300);
   const history = useHistory();
@@ -108,7 +107,6 @@ const App: React.FC = () => {
     }
     const focusNode = params.get("focus-node");
     if (focusNode) {
-      setInputValue(focusNode);
       setFocusedNode(focusNode);
       setDetailNode(focusNode);
     }
@@ -181,11 +179,7 @@ const App: React.FC = () => {
                       .toUpperCase()
                       .indexOf(inputValue.toUpperCase()) !== -1
                   }
-                  value={inputValue}
-                  onChange={(value: string) => {
-                    console.log(value);
-                    setInputValue(value);
-                  }}
+                  defaultValue={focusedNode ? focusedNode : undefined}
                   onSelect={(nodeId: string) => {
                     setFocusedNode(nodeId);
                     setDetailNode(nodeId);
