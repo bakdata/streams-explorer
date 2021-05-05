@@ -137,7 +137,7 @@ export function updateNodeMetrics(graph: Graph, metrics: Metric[]) {
 }
 
 const nodeError = (name: string) => {
-  message.error(`Node "${name}" doesn't exist`);
+  message.error(`Node "${name}" doesn't exist`, 5);
 };
 
 function setFocusedNode(graph: Graph, focusedNode: string) {
