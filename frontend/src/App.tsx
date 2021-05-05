@@ -101,11 +101,11 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
-    const pipeline: string = params.get("pipeline") as string;
+    const pipeline = params.get("pipeline");
     if (pipeline) {
       setCurrentPipeline(pipeline);
     }
-    const focusNode: string = params.get("focus-node") as string;
+    const focusNode = params.get("focus-node");
     if (focusNode) {
       setFocusedNode(focusNode);
       setDetailNode(focusNode);
