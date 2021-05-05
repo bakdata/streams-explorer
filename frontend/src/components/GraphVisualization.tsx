@@ -13,6 +13,7 @@ import {
 import { millify } from "millify";
 import React, { useRef, useEffect, useCallback, useState } from "react";
 import ReactDOM from "react-dom";
+import { message } from "antd";
 
 interface GraphVisualizationProps {
   id: string;
@@ -135,10 +136,14 @@ export function updateNodeMetrics(graph: Graph, metrics: Metric[]) {
   });
 }
 
+const nodeError = (name: string) => {
+  message.error(`Node "${name}" doesn't exist`);
+};
+
 function setFocusedNode(graph: Graph, focusedNode: string) {
   const node = graph.findById(focusedNode) as INode;
   if (!node) {
-    return;
+    return nodeError(focusedNode);
   }
 
   if (graph.getZoom() < 1) {
