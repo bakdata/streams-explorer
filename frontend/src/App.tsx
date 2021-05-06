@@ -23,6 +23,7 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import { useMutate } from "restful-react";
 import { useHistory, useLocation } from "react-router-dom";
+import { withRouter } from "react-router";
 
 const { Option } = AutoComplete;
 
@@ -279,4 +280,4 @@ const App: React.FC = () => {
   );
 };
 
-export default App;
+export default withRouter(App);
