@@ -35,7 +35,6 @@ const App: React.FC = () => {
   const [focusedNode, setFocusedNode] = useState<string | null>(null);
   const [searchWidth, setSearchWidth] = useState<number>(300);
   const history = useHistory();
-
   const location = useLocation();
   const ref = useRef<HTMLDivElement>(null!);
   const onResize = useCallback(() => {}, []);
