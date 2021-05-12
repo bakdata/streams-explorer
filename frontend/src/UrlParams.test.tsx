@@ -1,4 +1,5 @@
 import nock from "nock";
+import { createMemoryHistory } from "history";
 import React from "react";
 import { RestfulProvider } from "restful-react";
 import App from "./App";
@@ -10,7 +11,7 @@ import {
   wait,
   fireEvent,
 } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { useLocation } from "react-router-dom";
 
 beforeAll(() => {
   Object.defineProperty(window, "matchMedia", {
@@ -35,48 +36,27 @@ beforeAll(() => {
   };
 });
 
-const createMocks = () => {
-  const historyMock: Record<string, any> = {
-    push: jest.fn(),
-    location: {},
-    listen: jest.fn(),
-  };
-  const locationMock: Record<string, any> = {
-    hash: "",
-    key: "",
-    pathname: "",
-    search: "",
-    state: {},
-  };
-  return { historyMock, locationMock };
-};
-
+// -- Mock GraphVisualization
 jest.mock("./components/GraphVisualization", () => {
-  return function DummyGraphVisualization(props: any) {
+  return function DummyGraphVisualization() {
     return <div data-testid="graph"></div>;
   };
 });
 
+const LocationDisplay = () => {
+  const location = useLocation();
+  return (
+    <div>
+      <div data-testid="location-pathname">{location.pathname}</div>
+      <div data-testid="location-search">{location.search}</div>
+    </div>
+  );
+};
+
 describe("url parameters", () => {
-  // const mockLocation = new URL("http://localhost");
-
-  // beforeEach(() => {
-  //   delete window.location;
-  //   window.location = mockLocation;
-  // });
-
+  // -- Mock backend endpoints
   it("should update focus-node param", async () => {
     jest.setTimeout(30000);
-    // set pipeline
-    // window.location.search = "?pipeline=test-pipeline";
-    // expect(window.location.search).toEqual("?pipeline=test-pipeline");
-
-    // TODO: remove debug
-    // nock("http://localhost")
-    //   .persist()
-    //   .get(/.*/)
-    //   .reply(404, "Nock all GET requests");
-
     nock("http://localhost")
       .get("/api/graph")
       .reply(200, {
@@ -140,24 +120,30 @@ describe("url parameters", () => {
         },
       ]);
 
-    const { historyMock, locationMock } = createMocks();
+    nock("http://localhost").get("/api/node/test-app").reply(200, {
+      node_id: "test-app",
+      node_type: "streaming-app",
+      info: [],
+    });
+
+    const history = createMemoryHistory();
+    history.push("/");
 
     const { getByTestId, asFragment, getAllByTestId } = render(
-      <Router history={historyMock as never}>
-        <RestfulProvider base="http://localhost">
+      <RestfulProvider base="http://localhost">
+        <Router history={history}>
+          <LocationDisplay />
           <App />
-        </RestfulProvider>
-      </Router>
+        </Router>
+      </RestfulProvider>
     );
+    expect(getByTestId("location-pathname")).toHaveTextContent("/");
 
     await waitForElement(() => getByTestId("loading"));
     expect(asFragment()).toMatchSnapshot();
 
     await waitForElement(() => getByTestId("graph"));
     expect(asFragment()).toMatchSnapshot();
-
-    // await waitForElement(() => getByTestId("pipeline-select"));
-    // expect(asFragment()).toMatchSnapshot();
 
     const currentPipeline = getByTestId("pipeline-current");
     expect(
@@ -168,30 +154,43 @@ describe("url parameters", () => {
     // );
     // expect(pipelineOptions).toHaveLength(1);
 
+    // -- set focus-node through URL
+    // history.push("/static?focus-node=test-app");
+    // window.location.search = "?focus-node=test-app";
+    // expect(window.location.search).toEqual("?focus-node=test-app");
+
     const nodeSelect = getByTestId("node-select");
     const input = within(nodeSelect).getByRole("combobox") as HTMLInputElement;
     expect(input).toHaveValue("");
 
-    // set focusedNode
-    fireEvent.change(input, { target: { value: "test-app" } });
-    expect(input).toHaveValue("test-app");
-    // let options = getAllByTestId("node-option");
-    // expect(options).toHaveLength(1);
+    // -- set focus-node through UI
+    await wait(() => {
+      fireEvent.change(input, { target: { value: "test-app" } });
+      fireEvent.submit(input);
+      expect(input).toHaveValue("test-app");
+      // let options = getAllByTestId("node-option");
+      // expect(options).toHaveLength(1);
 
-    // check result
-    await wait(() =>
-      expect(window.location.search).toEqual("?focus-node=test-app")
-    );
+      // -- check result
+      expect(getByTestId("location-search")).toHaveTextContent(
+        "?focus-node=test-app"
+      );
+    });
 
-    // add focus-node
-    // instance is null on stateless functional components (React 16+)
-    // wrapper.instance().pushHistoryFocusNode("test-node-id");
-
-    // pipeline kept
-    // expect(window.location.search).toEqual(
-    //   "?pipeline=test-pipeline&focus-node=test-node-id"
-    // );
+    // -- set pipeline through URL
+    // window.location.search = "?pipeline=test-pipeline";
+    // expect(window.location.search).toEqual("?pipeline=test-pipeline");
   });
 });
+
+// -- first approach
+// add focus-node
+// instance is null on stateless functional components (React 16+)
+// wrapper.instance().pushHistoryFocusNode("test-node-id");
+
+// -- pipeline kept
+// expect(window.location.search).toEqual(
+//   "?pipeline=test-pipeline&focus-node=test-node-id"
+// );
 
 export {};

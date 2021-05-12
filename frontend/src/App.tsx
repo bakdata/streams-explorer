@@ -258,7 +258,7 @@ const App: React.FC = () => {
                   refetchMetrics={() => refetchMetrics()}
                   onClickNode={(nodeId: string) => setDetailNode(nodeId)}
                   width={width}
-                  height={height ? height - 64 : 300}
+                  height={height ? height - 64 : 500}
                   focusedNode={focusedNode}
                 />
               ) : (
@@ -275,7 +275,7 @@ const App: React.FC = () => {
                 padding: "0 50px",
                 width: width,
                 zIndex: 1,
-                top: height ? height - 147 : 0,
+                top: height ? height - 147 : 400,
                 position: "absolute",
               }}
             >
