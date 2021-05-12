@@ -10,7 +10,9 @@ exports[`url parameters should update focus-node param 1`] = `
     </div>
     <div
       data-testid="location-search"
-    />
+    >
+      ?pipeline=test-pipeline
+    </div>
   </div>
   <div
     class="application"
@@ -59,7 +61,9 @@ exports[`url parameters should update focus-node param 2`] = `
     </div>
     <div
       data-testid="location-search"
-    />
+    >
+      ?pipeline=test-pipeline
+    </div>
   </div>
   <div
     class="application"
@@ -105,7 +109,7 @@ exports[`url parameters should update focus-node param 2`] = `
               type="button"
             >
               <span>
-                all pipelines
+                test-pipeline
               </span>
             </button>
           </li>

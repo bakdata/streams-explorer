@@ -54,11 +54,45 @@ const LocationDisplay = () => {
 };
 
 describe("url parameters", () => {
-  // -- Mock backend endpoints
   it("should update focus-node param", async () => {
     jest.setTimeout(30000);
+
+    // -- Mock backend endpoints
     nock("http://localhost")
       .get("/api/graph")
+      .reply(200, {
+        directed: true,
+        multigraph: false,
+        graph: {},
+        nodes: [
+          {
+            id: "test-app",
+            label: "test-app",
+            node_type: "streaming-app",
+            icon: null,
+            x: 0,
+            y: 0,
+          },
+          {
+            id: "test-topic",
+            label: "test-topic",
+            node_type: "topic",
+            icon: null,
+            x: 10,
+            y: 0,
+          },
+        ],
+        edges: [
+          {
+            source: "test-app",
+            target: "test-topic",
+          },
+        ],
+      });
+
+    // TODO: combine using regex
+    nock("http://localhost")
+      .get("/api/graph?pipeline_name=test-pipeline")
       .reply(200, {
         directed: true,
         multigraph: false,
@@ -127,9 +161,9 @@ describe("url parameters", () => {
     });
 
     const history = createMemoryHistory();
-    history.push("/");
+    history.push({ pathname: "/", search: "?pipeline=test-pipeline" });
 
-    const { getByTestId, asFragment, getAllByTestId } = render(
+    const { getByTestId, asFragment } = render(
       <RestfulProvider base="http://localhost">
         <Router history={history}>
           <LocationDisplay />
@@ -138,6 +172,9 @@ describe("url parameters", () => {
       </RestfulProvider>
     );
     expect(getByTestId("location-pathname")).toHaveTextContent("/");
+    expect(getByTestId("location-search")).toHaveTextContent(
+      "?pipeline=test-pipeline"
+    );
 
     await waitForElement(() => getByTestId("loading"));
     expect(asFragment()).toMatchSnapshot();
@@ -147,17 +184,12 @@ describe("url parameters", () => {
 
     const currentPipeline = getByTestId("pipeline-current");
     expect(
-      within(currentPipeline).getByText("all pipelines")
+      within(currentPipeline).getByText("test-pipeline")
     ).toBeInTheDocument();
     // const pipelineOptions = within(pipelineSelect).getAllByTestId(
     //   "pipeline-option"
     // );
     // expect(pipelineOptions).toHaveLength(1);
-
-    // -- set focus-node through URL
-    // history.push("/static?focus-node=test-app");
-    // window.location.search = "?focus-node=test-app";
-    // expect(window.location.search).toEqual("?focus-node=test-app");
 
     const nodeSelect = getByTestId("node-select");
     const input = within(nodeSelect).getByRole("combobox") as HTMLInputElement;
@@ -169,17 +201,23 @@ describe("url parameters", () => {
       fireEvent.submit(input);
       expect(input).toHaveValue("test-app");
       // let options = getAllByTestId("node-option");
-      // expect(options).toHaveLength(1);
+      // expect(options).toHaveLength(2);
 
       // -- check result
       expect(getByTestId("location-search")).toHaveTextContent(
-        "?focus-node=test-app"
+        "?pipeline=test-pipeline&focus-node=test-app"
       );
     });
+  });
 
+  it("should update pipeline param", async () => {
     // -- set pipeline through URL
     // window.location.search = "?pipeline=test-pipeline";
     // expect(window.location.search).toEqual("?pipeline=test-pipeline");
+    // -- set focus-node through URL
+    // history.push("/static?focus-node=test-app");
+    // window.location.search = "?focus-node=test-app";
+    // expect(window.location.search).toEqual("?focus-node=test-app");
   });
 });
 
