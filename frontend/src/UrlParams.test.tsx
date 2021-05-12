@@ -58,7 +58,8 @@ describe("url parameters", () => {
     jest.setTimeout(30000);
 
     // -- Mock backend endpoints
-    nock("http://localhost")
+    const nockGraph = nock("http://localhost")
+      .persist()
       .get("/api/graph")
       .reply(200, {
         directed: true,
@@ -90,8 +91,8 @@ describe("url parameters", () => {
         ],
       });
 
-    // TODO: combine using regex
-    nock("http://localhost")
+    const nockPipelineGraph = nock("http://localhost")
+      .persist()
       .get("/api/graph?pipeline_name=test-pipeline")
       .reply(200, {
         directed: true,
@@ -123,13 +124,15 @@ describe("url parameters", () => {
         ],
       });
 
-    nock("http://localhost")
+    const nockPipelines = nock("http://localhost")
+      .persist()
       .get("/api/pipelines")
       .reply(200, {
         pipelines: ["test-pipeline"],
       });
 
-    nock("http://localhost")
+    const nockMetrics = nock("http://localhost")
+      .persist()
       .get("/api/metrics")
       .reply(200, [
         {
@@ -154,11 +157,13 @@ describe("url parameters", () => {
         },
       ]);
 
-    nock("http://localhost").get("/api/node/test-app").reply(200, {
-      node_id: "test-app",
-      node_type: "streaming-app",
-      info: [],
-    });
+    const nockNode = nock("http://localhost")
+      .get("/api/node/test-app")
+      .reply(200, {
+        node_id: "test-app",
+        node_type: "streaming-app",
+        info: [],
+      });
 
     const history = createMemoryHistory();
     history.push({ pathname: "/", search: "?pipeline=test-pipeline" });
@@ -186,6 +191,9 @@ describe("url parameters", () => {
     expect(
       within(currentPipeline).getByText("test-pipeline")
     ).toBeInTheDocument();
+    expect(nockPipelineGraph.isDone()).toBeTruthy(); // specific graph endpoint was called
+    expect(nockGraph.isDone()).toBeFalsy();
+
     // const pipelineOptions = within(pipelineSelect).getAllByTestId(
     //   "pipeline-option"
     // );
@@ -197,6 +205,7 @@ describe("url parameters", () => {
 
     // -- set focus-node through UI
     await wait(() => {
+      expect(nockNode.isDone()).toBeFalsy();
       fireEvent.change(input, { target: { value: "test-app" } });
       fireEvent.submit(input);
       expect(input).toHaveValue("test-app");
@@ -207,6 +216,7 @@ describe("url parameters", () => {
       expect(getByTestId("location-search")).toHaveTextContent(
         "?pipeline=test-pipeline&focus-node=test-app"
       );
+      expect(nockNode.isDone()).toBeTruthy();
     });
   });
 
