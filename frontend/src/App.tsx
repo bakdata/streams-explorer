@@ -23,7 +23,6 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import { useMutate } from "restful-react";
 import { useHistory, useLocation } from "react-router-dom";
-import { withRouter } from "react-router";
 
 const { Option } = AutoComplete;
 
@@ -247,6 +246,7 @@ const App: React.FC = () => {
                 />
               ) : (
                 <Alert
+                  data-testid="graph-error"
                   message="Error"
                   description="Could not load graph"
                   type="error"
@@ -274,10 +274,13 @@ const App: React.FC = () => {
   return (
     <div ref={ref} className="application">
       <div className="spinningContainer">
-        <Spin tip={isUpdating ? "Updating Pipelines..." : "Loading..."} />
+        <Spin
+          data-testid="loading"
+          tip={isUpdating ? "Updating Pipelines..." : "Loading..."}
+        />
       </div>
     </div>
   );
 };
 
-export default withRouter(App);
+export default App;

@@ -4,7 +4,6 @@ import { RestfulProvider } from "restful-react";
 
 import Details from "./Details";
 import { waitForElement, render } from "@testing-library/react";
-import { act } from "react-dom/test-utils";
 
 describe("display node information", () => {
   beforeAll(() => {
