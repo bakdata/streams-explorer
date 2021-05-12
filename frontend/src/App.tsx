@@ -148,7 +148,9 @@ const App: React.FC = () => {
         <i>{ALL_PIPELINES}</i>
       </Menu.Item>
       {pipelines?.pipelines.map((name: string) => (
-        <Menu.Item key={name}>{name}</Menu.Item>
+        <Menu.Item data-testid="pipeline-option" key={name}>
+          {name}
+        </Menu.Item>
       ))}
     </Menu>
   );
@@ -174,12 +176,14 @@ const App: React.FC = () => {
               <Menu.Item key="1">
                 Pipeline:&nbsp;
                 <Dropdown overlay={menuPipeline} placement="bottomLeft" arrow>
-                  <Button>{currentPipeline}</Button>
+                  <Button data-testid="pipeline-select">
+                    {currentPipeline}
+                  </Button>
                 </Dropdown>
               </Menu.Item>
               <Menu.Item>
                 <AutoComplete
-                  data-testid="searchbar"
+                  data-testid="node-select"
                   style={{
                     width: searchWidth,
                     maxWidth: 480,
@@ -205,7 +209,7 @@ const App: React.FC = () => {
                 >
                   {graph?.nodes.map((node) => (
                     <Option
-                      data-testid="select-option"
+                      data-testid="node-option"
                       value={node.id}
                       key={node.id}
                     >

@@ -10,26 +10,29 @@ import {
   wait,
   fireEvent,
 } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 
-// disable resize observer
-(window as any).ResizeObserver = class MockResizeObserver {
-  observe() {}
-  unobserve() {}
-  disconnect() {}
-};
+beforeAll(() => {
+  Object.defineProperty(window, "matchMedia", {
+    writable: true,
+    value: jest.fn().mockImplementation((query) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: jest.fn(), // Deprecated
+      removeListener: jest.fn(), // Deprecated
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+      dispatchEvent: jest.fn(),
+    })),
+  });
 
-Object.defineProperty(window, "matchMedia", {
-  writable: true,
-  value: jest.fn().mockImplementation((query) => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: jest.fn(), // Deprecated
-    removeListener: jest.fn(), // Deprecated
-    addEventListener: jest.fn(),
-    removeEventListener: jest.fn(),
-    dispatchEvent: jest.fn(),
-  })),
+  // disable resize observer
+  (window as any).ResizeObserver = class MockResizeObserver {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  };
 });
 
 const createMocks = () => {
@@ -45,13 +48,7 @@ const createMocks = () => {
     search: "",
     state: {},
   };
-  const matchMock: Record<string, any> = {
-    isExact: true,
-    params: {},
-    path: "",
-    url: "",
-  };
-  return { historyMock, locationMock, matchMock };
+  return { historyMock, locationMock };
 };
 
 jest.mock("./components/GraphVisualization", () => {
@@ -143,8 +140,7 @@ describe("url parameters", () => {
         },
       ]);
 
-    const { historyMock, locationMock, matchMock } = createMocks();
-    // const historyMock = { push: jest.fn(), location: {}, listen: jest.fn() };
+    const { historyMock, locationMock } = createMocks();
 
     const { getByTestId, asFragment, getAllByTestId } = render(
       <Router history={historyMock as never}>
@@ -160,22 +156,41 @@ describe("url parameters", () => {
     await waitForElement(() => getByTestId("graph"));
     expect(asFragment()).toMatchSnapshot();
 
-    const searchBar = getByTestId("searchbar");
-    const input = within(searchBar).getByRole("combobox") as HTMLInputElement;
+    await waitForElement(() => getByTestId("pipeline-select"));
+    expect(asFragment()).toMatchSnapshot();
+
+    const pipelineSelect = getByTestId("pipeline-select");
+    const { getByText } = within(pipelineSelect);
+    expect(getByText("all pipelines")).toBeInTheDocument();
+    // const pipelineOptions = within(pipelineSelect).getAllByTestId(
+    //   "pipeline-option"
+    // );
+    // expect(pipelineOptions).toHaveLength(1);
+
+    const nodeSelect = getByTestId("node-select");
+    const input = within(nodeSelect).getByRole("combobox") as HTMLInputElement;
 
     expect(input).toHaveValue("");
 
     // input.setAttribute("value", "test-app");
 
+    // -- method 1: using fireEvent
     fireEvent.change(input, { target: { value: "test-app" } });
-    let options = getAllByTestId("select-option");
-    expect(options).toHaveLength(1);
     expect(input).toHaveValue("test-app");
+    // let options = getAllByTestId("node-option");
+    // expect(options).toHaveLength(1);
 
+    // -- method 2: using userEvent select
+    // userEvent.selectOptions(input, "test-app");
+    // expect(input).toHaveValue("test-app");
+    // let nodeOptions = getAllByTestId("node-option");
+    // expect(nodeOptions).toHaveLength(2);
+    // expect((nodeOptions[0] as HTMLOptionElement).selected).toBeTruthy();
+
+    // check result
     await wait(() =>
       expect(window.location.search).toEqual("?focus-node=test-app")
     );
-    // expect(window.location.search).toEqual("?focus-node=test-app");
 
     // await waitForElement(() => getByTestId("graph-error"), { timeout: 30000 });
     // expect(asFragment()).toMatchSnapshot();
