@@ -81,7 +81,7 @@ exports[`url parameters should update focus-node param 2`] = `
             Pipeline: 
             <button
               class="ant-btn ant-dropdown-trigger"
-              data-testid="pipeline-select"
+              data-testid="pipeline-current"
               type="button"
             >
               <span>
@@ -339,6 +339,7 @@ exports[`url parameters should update focus-node param 3`] = `
           >
             Pipeline: 
             <button
+              ant-click-animating-without-extra-node="false"
               class="ant-btn ant-dropdown-trigger"
               data-testid="pipeline-select"
               type="button"

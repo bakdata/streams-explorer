@@ -138,6 +138,7 @@ const App: React.FC = () => {
 
   const menuPipeline = (
     <Menu
+      data-testid="pipeline-select"
       onClick={(e) => {
         history.push(`/?pipeline=${e.key.toString()}`);
         setCurrentPipeline(e.key.toString());
@@ -176,7 +177,7 @@ const App: React.FC = () => {
               <Menu.Item key="1">
                 Pipeline:&nbsp;
                 <Dropdown overlay={menuPipeline} placement="bottomLeft" arrow>
-                  <Button data-testid="pipeline-select">
+                  <Button data-testid="pipeline-current">
                     {currentPipeline}
                   </Button>
                 </Dropdown>

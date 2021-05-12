@@ -156,12 +156,13 @@ describe("url parameters", () => {
     await waitForElement(() => getByTestId("graph"));
     expect(asFragment()).toMatchSnapshot();
 
-    await waitForElement(() => getByTestId("pipeline-select"));
-    expect(asFragment()).toMatchSnapshot();
+    // await waitForElement(() => getByTestId("pipeline-select"));
+    // expect(asFragment()).toMatchSnapshot();
 
-    const pipelineSelect = getByTestId("pipeline-select");
-    const { getByText } = within(pipelineSelect);
-    expect(getByText("all pipelines")).toBeInTheDocument();
+    const currentPipeline = getByTestId("pipeline-current");
+    expect(
+      within(currentPipeline).getByText("all pipelines")
+    ).toBeInTheDocument();
     // const pipelineOptions = within(pipelineSelect).getAllByTestId(
     //   "pipeline-option"
     // );
@@ -169,31 +170,18 @@ describe("url parameters", () => {
 
     const nodeSelect = getByTestId("node-select");
     const input = within(nodeSelect).getByRole("combobox") as HTMLInputElement;
-
     expect(input).toHaveValue("");
 
-    // input.setAttribute("value", "test-app");
-
-    // -- method 1: using fireEvent
+    // set focusedNode
     fireEvent.change(input, { target: { value: "test-app" } });
     expect(input).toHaveValue("test-app");
     // let options = getAllByTestId("node-option");
     // expect(options).toHaveLength(1);
 
-    // -- method 2: using userEvent select
-    // userEvent.selectOptions(input, "test-app");
-    // expect(input).toHaveValue("test-app");
-    // let nodeOptions = getAllByTestId("node-option");
-    // expect(nodeOptions).toHaveLength(2);
-    // expect((nodeOptions[0] as HTMLOptionElement).selected).toBeTruthy();
-
     // check result
     await wait(() =>
       expect(window.location.search).toEqual("?focus-node=test-app")
     );
-
-    // await waitForElement(() => getByTestId("graph-error"), { timeout: 30000 });
-    // expect(asFragment()).toMatchSnapshot();
 
     // add focus-node
     // instance is null on stateless functional components (React 16+)
