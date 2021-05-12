@@ -204,7 +204,11 @@ const App: React.FC = () => {
                   }}
                 >
                   {graph?.nodes.map((node) => (
-                    <Option value={node.id} key={node.id}>
+                    <Option
+                      data-testid="select-option"
+                      value={node.id}
+                      key={node.id}
+                    >
                       {node.id}
                     </Option>
                   ))}

@@ -3,7 +3,13 @@ import React from "react";
 import { RestfulProvider } from "restful-react";
 import App from "./App";
 import { Router } from "react-router";
-import { waitForElement, render, within, wait } from "@testing-library/react";
+import {
+  waitForElement,
+  render,
+  within,
+  wait,
+  fireEvent,
+} from "@testing-library/react";
 
 // disable resize observer
 (window as any).ResizeObserver = class MockResizeObserver {
@@ -25,6 +31,28 @@ Object.defineProperty(window, "matchMedia", {
     dispatchEvent: jest.fn(),
   })),
 });
+
+const createMocks = () => {
+  const historyMock: Record<string, any> = {
+    push: jest.fn(),
+    location: {},
+    listen: jest.fn(),
+  };
+  const locationMock: Record<string, any> = {
+    hash: "",
+    key: "",
+    pathname: "",
+    search: "",
+    state: {},
+  };
+  const matchMock: Record<string, any> = {
+    isExact: true,
+    params: {},
+    path: "",
+    url: "",
+  };
+  return { historyMock, locationMock, matchMock };
+};
 
 jest.mock("./components/GraphVisualization", () => {
   return function DummyGraphVisualization(props: any) {
@@ -115,9 +143,10 @@ describe("url parameters", () => {
         },
       ]);
 
-    const historyMock = { push: jest.fn(), location: {}, listen: jest.fn() };
+    const { historyMock, locationMock, matchMock } = createMocks();
+    // const historyMock = { push: jest.fn(), location: {}, listen: jest.fn() };
 
-    const { getByTestId, asFragment } = render(
+    const { getByTestId, asFragment, getAllByTestId } = render(
       <Router history={historyMock as never}>
         <RestfulProvider base="http://localhost">
           <App />
@@ -128,7 +157,7 @@ describe("url parameters", () => {
     await waitForElement(() => getByTestId("loading"));
     expect(asFragment()).toMatchSnapshot();
 
-    await waitForElement(() => getByTestId("graph"), { timeout: 60000 });
+    await waitForElement(() => getByTestId("graph"));
     expect(asFragment()).toMatchSnapshot();
 
     const searchBar = getByTestId("searchbar");
@@ -136,8 +165,12 @@ describe("url parameters", () => {
 
     expect(input).toHaveValue("");
 
-    input.setAttribute("value", "test-app");
-    expect(input).toHaveValue("test-app"); // TODO: remove debug
+    // input.setAttribute("value", "test-app");
+
+    fireEvent.change(input, { target: { value: "test-app" } });
+    let options = getAllByTestId("select-option");
+    expect(options).toHaveLength(1);
+    expect(input).toHaveValue("test-app");
 
     await wait(() =>
       expect(window.location.search).toEqual("?focus-node=test-app")
