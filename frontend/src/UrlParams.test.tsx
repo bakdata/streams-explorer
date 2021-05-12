@@ -124,14 +124,14 @@ describe("url parameters", () => {
         ],
       });
 
-    const nockPipelines = nock("http://localhost")
+    nock("http://localhost")
       .persist()
       .get("/api/pipelines")
       .reply(200, {
         pipelines: ["test-pipeline"],
       });
 
-    const nockMetrics = nock("http://localhost")
+    nock("http://localhost")
       .persist()
       .get("/api/metrics")
       .reply(200, [
