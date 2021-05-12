@@ -179,6 +179,7 @@ const App: React.FC = () => {
               </Menu.Item>
               <Menu.Item>
                 <AutoComplete
+                  data-testid="searchbar"
                   style={{
                     width: searchWidth,
                     maxWidth: 480,

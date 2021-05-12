@@ -3,13 +3,7 @@ import React from "react";
 import { RestfulProvider } from "restful-react";
 import App from "./App";
 import { Router } from "react-router";
-import {
-  waitForElement,
-  render,
-  waitForElementToBeRemoved,
-  wait,
-} from "@testing-library/react";
-import MockedGraphVisualization from "./components/GraphVisualization";
+import { waitForElement, render, within, wait } from "@testing-library/react";
 
 // disable resize observer
 (window as any).ResizeObserver = class MockResizeObserver {
@@ -33,7 +27,7 @@ Object.defineProperty(window, "matchMedia", {
 });
 
 jest.mock("./components/GraphVisualization", () => {
-  return function DummyGraphVisualization(props) {
+  return function DummyGraphVisualization(props: any) {
     return <div data-testid="graph"></div>;
   };
 });
@@ -134,13 +128,21 @@ describe("url parameters", () => {
     await waitForElement(() => getByTestId("loading"));
     expect(asFragment()).toMatchSnapshot();
 
-    // await wait(() => expect(getByTestId("loading")).not.toBeInTheDocument(), {
-    //   timeout: 20000,
-    // });
-    // expect(asFragment()).toMatchSnapshot();
-
     await waitForElement(() => getByTestId("graph"), { timeout: 60000 });
     expect(asFragment()).toMatchSnapshot();
+
+    const searchBar = getByTestId("searchbar");
+    const input = within(searchBar).getByRole("combobox") as HTMLInputElement;
+
+    expect(input).toHaveValue("");
+
+    input.setAttribute("value", "test-app");
+    expect(input).toHaveValue("test-app"); // TODO: remove debug
+
+    await wait(() =>
+      expect(window.location.search).toEqual("?focus-node=test-app")
+    );
+    // expect(window.location.search).toEqual("?focus-node=test-app");
 
     // await waitForElement(() => getByTestId("graph-error"), { timeout: 30000 });
     // expect(asFragment()).toMatchSnapshot();

@@ -113,6 +113,7 @@ exports[`url parameters should update focus-node param 2`] = `
           >
             <div
               class="ant-select ant-select-auto-complete ant-select-single ant-select-allow-clear ant-select-show-search"
+              data-testid="searchbar"
               style="width: 80px; max-width: 480px;"
             >
               <div
