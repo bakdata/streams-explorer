@@ -124,7 +124,13 @@ const App: React.FC = () => {
 
   if (graphError) {
     message.error(graphError.message);
-    return <Spin spinning={false} tip="Failed to load graph" />;
+    return (
+      <Spin
+        data-testid="graph-error"
+        spinning={false}
+        tip="Failed to load graph"
+      />
+    );
   }
   if (pipelineError) {
     message.error(pipelineError?.message);
@@ -235,18 +241,18 @@ const App: React.FC = () => {
             <Row style={{ position: "fixed" }}>
               {graph ? (
                 <GraphVisualization
+                  data-testid="graph"
                   data={graph}
                   config={graphConfig}
                   metrics={metrics}
                   refetchMetrics={() => refetchMetrics()}
                   onClickNode={(nodeId: string) => setDetailNode(nodeId)}
                   width={width}
-                  height={height! - 64}
+                  height={height ? height - 64 : 300}
                   focusedNode={focusedNode}
                 />
               ) : (
                 <Alert
-                  data-testid="graph-error"
                   message="Error"
                   description="Could not load graph"
                   type="error"
@@ -259,7 +265,7 @@ const App: React.FC = () => {
                 padding: "0 50px",
                 width: width,
                 zIndex: 1,
-                top: height! - 147,
+                top: height ? height - 147 : 0,
                 position: "absolute",
               }}
             >

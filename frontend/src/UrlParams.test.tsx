@@ -3,7 +3,13 @@ import React from "react";
 import { RestfulProvider } from "restful-react";
 import App from "./App";
 import { Router } from "react-router";
-import { waitForElement, render } from "@testing-library/react";
+import {
+  waitForElement,
+  render,
+  waitForElementToBeRemoved,
+  wait,
+} from "@testing-library/react";
+import MockedGraphVisualization from "./components/GraphVisualization";
 
 // disable resize observer
 (window as any).ResizeObserver = class MockResizeObserver {
@@ -12,18 +18,45 @@ import { waitForElement, render } from "@testing-library/react";
   disconnect() {}
 };
 
-describe("url parameters", () => {
-  const mockLocation = new URL("http://localhost");
+Object.defineProperty(window, "matchMedia", {
+  writable: true,
+  value: jest.fn().mockImplementation((query) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: jest.fn(), // Deprecated
+    removeListener: jest.fn(), // Deprecated
+    addEventListener: jest.fn(),
+    removeEventListener: jest.fn(),
+    dispatchEvent: jest.fn(),
+  })),
+});
 
-  beforeEach(() => {
-    delete window.location;
-    window.location = mockLocation;
-  });
+jest.mock("./components/GraphVisualization", () => {
+  return function DummyGraphVisualization(props) {
+    return <div data-testid="graph"></div>;
+  };
+});
+
+describe("url parameters", () => {
+  // const mockLocation = new URL("http://localhost");
+
+  // beforeEach(() => {
+  //   delete window.location;
+  //   window.location = mockLocation;
+  // });
 
   it("should update focus-node param", async () => {
+    jest.setTimeout(30000);
     // set pipeline
-    window.location.search = "?pipeline=test-pipeline";
-    expect(window.location.search).toEqual("?pipeline=test-pipeline");
+    // window.location.search = "?pipeline=test-pipeline";
+    // expect(window.location.search).toEqual("?pipeline=test-pipeline");
+
+    // TODO: remove debug
+    // nock("http://localhost")
+    //   .persist()
+    //   .get(/.*/)
+    //   .reply(404, "Nock all GET requests");
 
     nock("http://localhost")
       .get("/api/graph")
@@ -100,6 +133,17 @@ describe("url parameters", () => {
 
     await waitForElement(() => getByTestId("loading"));
     expect(asFragment()).toMatchSnapshot();
+
+    // await wait(() => expect(getByTestId("loading")).not.toBeInTheDocument(), {
+    //   timeout: 20000,
+    // });
+    // expect(asFragment()).toMatchSnapshot();
+
+    await waitForElement(() => getByTestId("graph"), { timeout: 60000 });
+    expect(asFragment()).toMatchSnapshot();
+
+    // await waitForElement(() => getByTestId("graph-error"), { timeout: 30000 });
+    // expect(asFragment()).toMatchSnapshot();
 
     // add focus-node
     // instance is null on stateless functional components (React 16+)
