@@ -54,9 +54,10 @@ const LocationDisplay = () => {
   );
 };
 
-describe("test url parameters", () => {
+describe("handles url parameters", () => {
   // -- Mock backend endpoints
   const nockGraph = nock("http://localhost")
+    .persist()
     .get("/api/graph")
     .reply(200, {
       directed: true,
@@ -89,6 +90,7 @@ describe("test url parameters", () => {
     });
 
   const nockPipelineGraph = nock("http://localhost")
+    .persist()
     .get("/api/graph?pipeline_name=test-pipeline")
     .reply(200, {
       directed: true,
@@ -121,12 +123,14 @@ describe("test url parameters", () => {
     });
 
   nock("http://localhost")
+    .persist()
     .get("/api/pipelines")
     .reply(200, {
       pipelines: ["test-pipeline"],
     });
 
   nock("http://localhost")
+    .persist()
     .get("/api/metrics")
     .reply(200, [
       {
@@ -152,6 +156,7 @@ describe("test url parameters", () => {
     ]);
 
   const nockNode = nock("http://localhost")
+    .persist()
     .get("/api/node/test-app")
     .reply(200, {
       node_id: "test-app",
@@ -160,11 +165,11 @@ describe("test url parameters", () => {
     });
 
   const history = createMemoryHistory();
-  history.push({ pathname: "/", search: "?pipeline=test-pipeline" });
 
-  it("should update focus-node & pipeline parameters", async () => {
-    // render App
-    const { getByTestId, getAllByTestId, getByText, asFragment } = render(
+  it("should set pipeline from url parameter", async () => {
+    history.push({ pathname: "/", search: "?pipeline=test-pipeline" });
+
+    const { getByTestId, asFragment } = render(
       <RestfulProvider base="http://localhost">
         <Router history={history}>
           <LocationDisplay />
@@ -191,9 +196,94 @@ describe("test url parameters", () => {
     const nodeSelect = getByTestId("node-select");
     const input = within(nodeSelect).getByRole("combobox") as HTMLInputElement;
     expect(input).toHaveValue("");
+  });
+
+  it("should set focus-node from url parameter", async () => {
+    history.push({ pathname: "/", search: "?focus-node=test-app" });
+
+    const { getByTestId, asFragment } = render(
+      <RestfulProvider base="http://localhost">
+        <Router history={history}>
+          <LocationDisplay />
+          <App />
+        </Router>
+      </RestfulProvider>
+    );
+
+    expect(getByTestId("location-pathname")).toHaveTextContent("/");
+    expect(getByTestId("location-search")).toHaveTextContent(
+      "?focus-node=test-app"
+    );
+
+    await waitForElement(() => getByTestId("graph"));
+    expect(asFragment()).toMatchSnapshot();
+
+    const currentPipeline = getByTestId("pipeline-current");
+    expect(
+      within(currentPipeline).getByText("all pipelines")
+    ).toBeInTheDocument();
+    // expect(nockPipelineGraph.isDone()).toBeTruthy(); // specific graph endpoint was called
+    // expect(nockGraph.isDone()).toBeFalsy();
+
+    const nodeSelect = getByTestId("node-select");
+    const input = within(nodeSelect).getByRole("combobox") as HTMLInputElement;
+    expect(input).toHaveValue("test-app");
+  });
+
+  it("should render without url parameters", async () => {
+    history.push({ pathname: "/", search: "" });
+
+    // render App
+    const { getByTestId } = render(
+      <RestfulProvider base="http://localhost">
+        <Router history={history}>
+          <LocationDisplay />
+          <App />
+        </Router>
+      </RestfulProvider>
+    );
+
+    await waitForElement(() => getByTestId("graph"));
+
+    // check pipeline set to all
+    const currentPipeline = getByTestId("pipeline-current");
+    expect(
+      within(currentPipeline).getByText("all pipelines")
+    ).toBeInTheDocument();
+
+    // check focus-node empty
+    const nodeSelect = getByTestId("node-select");
+    const input = within(nodeSelect).getByRole("combobox") as HTMLInputElement;
+    expect(input).toHaveValue("");
+  });
+
+  it("should update focus-node & pipeline parameters", async () => {
+    history.push({ pathname: "/", search: "?pipeline=test-pipeline" });
+
+    // render App
+    const { getByTestId, getAllByTestId, getByText } = render(
+      <RestfulProvider base="http://localhost">
+        <Router history={history}>
+          <LocationDisplay />
+          <App />
+        </Router>
+      </RestfulProvider>
+    );
+
+    // const currentPipeline = getByTestId("pipeline-current");
+    // expect(
+    //   within(currentPipeline).getByText("test-pipeline")
+    // ).toBeInTheDocument();
+    // expect(nockPipelineGraph.isDone()).toBeTruthy(); // specific graph endpoint was called
+    // expect(nockGraph.isDone()).toBeFalsy();
+
+    await waitForElement(() => getByTestId("graph"));
+    const nodeSelect = getByTestId("node-select");
+    const input = within(nodeSelect).getByRole("combobox") as HTMLInputElement;
+    expect(input).toHaveValue("");
 
     // -- set focus-node through UI
-    expect(nockNode.isDone()).toBeFalsy();
+    // expect(nockNode.isDone()).toBeFalsy();
     await wait(() => {
       fireEvent.change(input, { target: { value: "test-app" } });
       expect(input).toHaveValue("test-app");
