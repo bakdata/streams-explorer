@@ -57,7 +57,7 @@ pyasn1==0.4.8
 pyasn1-modules==0.2.8
 pycodestyle==2.6.0
 pyct==0.4.8
-pydantic==1.7.3
+pydantic==1.7.4
 pyflakes==2.2.0
 pygraphviz==1.6
 pyparsing==2.4.7
