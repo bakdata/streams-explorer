@@ -169,7 +169,7 @@ describe("url parameters", () => {
     const history = createMemoryHistory();
     history.push({ pathname: "/", search: "?pipeline=test-pipeline" });
 
-    const { getByTestId, getAllByTestId, asFragment } = render(
+    const { getByTestId, getAllByTestId, getByText, asFragment } = render(
       <RestfulProvider base="http://localhost">
         <Router history={history}>
           <LocationDisplay />
@@ -195,11 +195,6 @@ describe("url parameters", () => {
     expect(nockPipelineGraph.isDone()).toBeTruthy(); // specific graph endpoint was called
     expect(nockGraph.isDone()).toBeFalsy();
 
-    // const pipelineOptions = within(pipelineSelect).getAllByTestId(
-    //   "pipeline-option"
-    // );
-    // expect(pipelineOptions).toHaveLength(1);
-
     const nodeSelect = getByTestId("node-select");
     const input = within(nodeSelect).getByRole("combobox") as HTMLInputElement;
     expect(input).toHaveValue("");
@@ -213,33 +208,25 @@ describe("url parameters", () => {
       expect(options).toHaveLength(1);
       fireEvent.click(options[0]);
 
-      // -- check result
+      // -- check result: pipeline should be present
       expect(getByTestId("location-search")).toHaveTextContent(
         "?pipeline=test-pipeline&focus-node=test-app"
       );
       expect(nockNode.isDone()).toBeTruthy();
     });
-  });
 
-  it("should update pipeline param", async () => {
-    // -- set pipeline through URL
-    // window.location.search = "?pipeline=test-pipeline";
-    // expect(window.location.search).toEqual("?pipeline=test-pipeline");
-    // -- set focus-node through URL
-    // history.push("/static?focus-node=test-app");
-    // window.location.search = "?focus-node=test-app";
-    // expect(window.location.search).toEqual("?focus-node=test-app");
+    // -- set pipeline through UI
+    fireEvent.mouseOver(getByTestId("pipeline-current"));
+    await wait(() => {
+      expect(getByTestId("pipeline-select")).toBeInTheDocument();
+      const pipeline = getByText("all pipelines");
+      expect(pipeline).toBeInTheDocument();
+      fireEvent.click(pipeline);
+      expect(getByTestId("location-search")).toHaveTextContent(
+        "?pipeline=all pipelines"
+      );
+    });
   });
 });
-
-// -- first approach
-// add focus-node
-// instance is null on stateless functional components (React 16+)
-// wrapper.instance().pushHistoryFocusNode("test-node-id");
-
-// -- pipeline kept
-// expect(window.location.search).toEqual(
-//   "?pipeline=test-pipeline&focus-node=test-node-id"
-// );
 
 export {};
