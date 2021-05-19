@@ -43,6 +43,7 @@ jest.mock("./components/GraphVisualization", () => {
   };
 });
 
+// -- Mock component to display url location & search paramters
 const LocationDisplay = () => {
   const location = useLocation();
   return (
@@ -53,122 +54,116 @@ const LocationDisplay = () => {
   );
 };
 
-describe("url parameters", () => {
-  it("should update focus-node param", async () => {
-    jest.setTimeout(30000);
-
-    // -- Mock backend endpoints
-    const nockGraph = nock("http://localhost")
-      .persist()
-      .get("/api/graph")
-      .reply(200, {
-        directed: true,
-        multigraph: false,
-        graph: {},
-        nodes: [
-          {
-            id: "test-app",
-            label: "test-app",
-            node_type: "streaming-app",
-            icon: null,
-            x: 0,
-            y: 0,
-          },
-          {
-            id: "test-topic",
-            label: "test-topic",
-            node_type: "topic",
-            icon: null,
-            x: 10,
-            y: 0,
-          },
-        ],
-        edges: [
-          {
-            source: "test-app",
-            target: "test-topic",
-          },
-        ],
-      });
-
-    const nockPipelineGraph = nock("http://localhost")
-      .persist()
-      .get("/api/graph?pipeline_name=test-pipeline")
-      .reply(200, {
-        directed: true,
-        multigraph: false,
-        graph: {},
-        nodes: [
-          {
-            id: "test-app",
-            label: "test-app",
-            node_type: "streaming-app",
-            icon: null,
-            x: 0,
-            y: 0,
-          },
-          {
-            id: "test-topic",
-            label: "test-topic",
-            node_type: "topic",
-            icon: null,
-            x: 10,
-            y: 0,
-          },
-        ],
-        edges: [
-          {
-            source: "test-app",
-            target: "test-topic",
-          },
-        ],
-      });
-
-    nock("http://localhost")
-      .persist()
-      .get("/api/pipelines")
-      .reply(200, {
-        pipelines: ["test-pipeline"],
-      });
-
-    nock("http://localhost")
-      .persist()
-      .get("/api/metrics")
-      .reply(200, [
+describe("test url parameters", () => {
+  // -- Mock backend endpoints
+  const nockGraph = nock("http://localhost")
+    .get("/api/graph")
+    .reply(200, {
+      directed: true,
+      multigraph: false,
+      graph: {},
+      nodes: [
         {
-          node_id: "test-app",
-          messages_in: null,
-          messages_out: null,
-          consumer_lag: null,
-          consumer_read_rate: null,
-          topic_size: null,
-          replicas: null,
-          connector_tasks: null,
+          id: "test-app",
+          label: "test-app",
+          node_type: "streaming-app",
+          icon: null,
+          x: 0,
+          y: 0,
         },
         {
-          node_id: "test-topic",
-          messages_in: null,
-          messages_out: null,
-          consumer_lag: null,
-          consumer_read_rate: null,
-          topic_size: null,
-          replicas: null,
-          connector_tasks: null,
+          id: "test-topic",
+          label: "test-topic",
+          node_type: "topic",
+          icon: null,
+          x: 10,
+          y: 0,
         },
-      ]);
+      ],
+      edges: [
+        {
+          source: "test-app",
+          target: "test-topic",
+        },
+      ],
+    });
 
-    const nockNode = nock("http://localhost")
-      .persist()
-      .get("/api/node/test-app")
-      .reply(200, {
+  const nockPipelineGraph = nock("http://localhost")
+    .get("/api/graph?pipeline_name=test-pipeline")
+    .reply(200, {
+      directed: true,
+      multigraph: false,
+      graph: {},
+      nodes: [
+        {
+          id: "test-app",
+          label: "test-app",
+          node_type: "streaming-app",
+          icon: null,
+          x: 0,
+          y: 0,
+        },
+        {
+          id: "test-topic",
+          label: "test-topic",
+          node_type: "topic",
+          icon: null,
+          x: 10,
+          y: 0,
+        },
+      ],
+      edges: [
+        {
+          source: "test-app",
+          target: "test-topic",
+        },
+      ],
+    });
+
+  nock("http://localhost")
+    .get("/api/pipelines")
+    .reply(200, {
+      pipelines: ["test-pipeline"],
+    });
+
+  nock("http://localhost")
+    .get("/api/metrics")
+    .reply(200, [
+      {
         node_id: "test-app",
-        node_type: "streaming-app",
-        info: [],
-      });
+        messages_in: null,
+        messages_out: null,
+        consumer_lag: null,
+        consumer_read_rate: null,
+        topic_size: null,
+        replicas: null,
+        connector_tasks: null,
+      },
+      {
+        node_id: "test-topic",
+        messages_in: null,
+        messages_out: null,
+        consumer_lag: null,
+        consumer_read_rate: null,
+        topic_size: null,
+        replicas: null,
+        connector_tasks: null,
+      },
+    ]);
 
-    const history = createMemoryHistory();
-    history.push({ pathname: "/", search: "?pipeline=test-pipeline" });
+  const nockNode = nock("http://localhost")
+    .get("/api/node/test-app")
+    .reply(200, {
+      node_id: "test-app",
+      node_type: "streaming-app",
+      info: [],
+    });
 
+  const history = createMemoryHistory();
+  history.push({ pathname: "/", search: "?pipeline=test-pipeline" });
+
+  it("should update focus-node & pipeline parameters", async () => {
+    // render App
     const { getByTestId, getAllByTestId, getByText, asFragment } = render(
       <RestfulProvider base="http://localhost">
         <Router history={history}>
@@ -177,6 +172,7 @@ describe("url parameters", () => {
         </Router>
       </RestfulProvider>
     );
+
     expect(getByTestId("location-pathname")).toHaveTextContent("/");
     expect(getByTestId("location-search")).toHaveTextContent(
       "?pipeline=test-pipeline"
