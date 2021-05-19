@@ -54,73 +54,45 @@ const LocationDisplay = () => {
   );
 };
 
+function mockBackendGraph(pipelineName?: string) {
+  return nock("http://localhost")
+    .persist()
+    .get(`/api/graph${pipelineName ? "?pipeline_name=" + pipelineName : ""}`)
+    .reply(200, {
+      directed: true,
+      multigraph: false,
+      graph: {},
+      nodes: [
+        {
+          id: "test-app",
+          label: "test-app",
+          node_type: "streaming-app",
+          icon: null,
+          x: 0,
+          y: 0,
+        },
+        {
+          id: "test-topic",
+          label: "test-topic",
+          node_type: "topic",
+          icon: null,
+          x: 10,
+          y: 0,
+        },
+      ],
+      edges: [
+        {
+          source: "test-app",
+          target: "test-topic",
+        },
+      ],
+    });
+}
+
 describe("handles url parameters", () => {
   // -- Mock backend endpoints
-  const nockGraph = nock("http://localhost")
-    .persist()
-    .get("/api/graph")
-    .reply(200, {
-      directed: true,
-      multigraph: false,
-      graph: {},
-      nodes: [
-        {
-          id: "test-app",
-          label: "test-app",
-          node_type: "streaming-app",
-          icon: null,
-          x: 0,
-          y: 0,
-        },
-        {
-          id: "test-topic",
-          label: "test-topic",
-          node_type: "topic",
-          icon: null,
-          x: 10,
-          y: 0,
-        },
-      ],
-      edges: [
-        {
-          source: "test-app",
-          target: "test-topic",
-        },
-      ],
-    });
-
-  const nockPipelineGraph = nock("http://localhost")
-    .persist()
-    .get("/api/graph?pipeline_name=test-pipeline")
-    .reply(200, {
-      directed: true,
-      multigraph: false,
-      graph: {},
-      nodes: [
-        {
-          id: "test-app",
-          label: "test-app",
-          node_type: "streaming-app",
-          icon: null,
-          x: 0,
-          y: 0,
-        },
-        {
-          id: "test-topic",
-          label: "test-topic",
-          node_type: "topic",
-          icon: null,
-          x: 10,
-          y: 0,
-        },
-      ],
-      edges: [
-        {
-          source: "test-app",
-          target: "test-topic",
-        },
-      ],
-    });
+  const nockGraph = mockBackendGraph();
+  const nockPipelineGraph = mockBackendGraph("test-pipeline");
 
   nock("http://localhost")
     .persist()
@@ -155,15 +127,6 @@ describe("handles url parameters", () => {
       },
     ]);
 
-  const nockNode = nock("http://localhost")
-    .persist()
-    .get("/api/node/test-app")
-    .reply(200, {
-      node_id: "test-app",
-      node_type: "streaming-app",
-      info: [],
-    });
-
   const history = createMemoryHistory();
 
   it("should set pipeline from url parameter", async () => {
@@ -192,7 +155,6 @@ describe("handles url parameters", () => {
     ).toBeInTheDocument();
     expect(nockPipelineGraph.isDone()).toBeTruthy(); // specific graph endpoint was called
     expect(nockGraph.isDone()).toBeFalsy();
-    expect(nockNode.isDone()).toBeFalsy();
 
     const nodeSelect = getByTestId("node-select");
     const input = within(nodeSelect).getByRole("combobox") as HTMLInputElement;
@@ -201,6 +163,14 @@ describe("handles url parameters", () => {
 
   it("should set focus-node from url parameter", async () => {
     history.push({ pathname: "/", search: "?focus-node=test-app" });
+
+    const nockAppNode = nock("http://localhost")
+      .get("/api/node/test-app")
+      .reply(200, {
+        node_id: "test-app",
+        node_type: "streaming-app",
+        info: [],
+      });
 
     const { getByTestId, asFragment } = render(
       <RestfulProvider base="http://localhost">
@@ -230,7 +200,7 @@ describe("handles url parameters", () => {
         "combobox"
       ) as HTMLInputElement;
       expect(input).toHaveValue("test-app");
-      expect(nockNode.isDone()).toBeTruthy();
+      expect(nockAppNode.isDone()).toBeTruthy();
     });
   });
 
@@ -283,14 +253,23 @@ describe("handles url parameters", () => {
     const input = within(nodeSelect).getByRole("combobox") as HTMLInputElement;
     expect(input).toBeEmpty();
 
-    const nockTopic = nock("http://localhost")
+    const nockAppNode = nock("http://localhost")
+      .get("/api/node/test-app")
+      .reply(200, {
+        node_id: "test-app",
+        node_type: "streaming-app",
+        info: [],
+      });
+
+    const nockTopicNode = nock("http://localhost")
       .get("/api/node/test-topic")
       .reply(200, {
         node_id: "test-topic",
         node_type: "topic",
         info: [],
       });
-    expect(nockTopic.isDone()).toBeFalsy();
+    expect(nockAppNode.isDone()).toBeFalsy();
+    expect(nockTopicNode.isDone()).toBeFalsy();
 
     // -- set focus-node through UI
     fireEvent.change(input, { target: { value: "test-app" } });
@@ -304,7 +283,7 @@ describe("handles url parameters", () => {
       expect(getByTestId("location-search")).toHaveTextContent(
         "?pipeline=test-pipeline&focus-node=test-app"
       );
-      expect(nockNode.isDone()).toBeTruthy();
+      expect(nockAppNode.isDone()).toBeTruthy();
     });
 
     // -- update focus-node through UI
@@ -319,7 +298,7 @@ describe("handles url parameters", () => {
       expect(getByTestId("location-search")).toHaveTextContent(
         "?pipeline=test-pipeline&focus-node=test-topic"
       );
-      expect(nockTopic.isDone()).toBeTruthy();
+      expect(nockTopicNode.isDone()).toBeTruthy();
     });
 
     // -- (re-)set pipeline through UI
