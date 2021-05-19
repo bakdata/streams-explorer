@@ -54,9 +54,9 @@ const LocationDisplay = () => {
   );
 };
 
-function mockBackendGraph(pipelineName?: string) {
+function mockBackendGraph(persist?: boolean, pipelineName?: string) {
   return nock("http://localhost")
-    .persist()
+    .persist(persist)
     .get(`/api/graph${pipelineName ? "?pipeline_name=" + pipelineName : ""}`)
     .reply(200, {
       directed: true,
@@ -91,8 +91,8 @@ function mockBackendGraph(pipelineName?: string) {
 
 describe("handles url parameters", () => {
   // -- Mock backend endpoints
-  const nockGraph = mockBackendGraph();
-  const nockPipelineGraph = mockBackendGraph("test-pipeline");
+  const nockGraph = mockBackendGraph(true);
+  const nockPipelineGraph = mockBackendGraph(true, "test-pipeline");
 
   nock("http://localhost")
     .persist()
@@ -172,7 +172,7 @@ describe("handles url parameters", () => {
         info: [],
       });
 
-    const { getByTestId, asFragment } = render(
+    const { getByTestId } = render(
       <RestfulProvider base="http://localhost">
         <Router history={history}>
           <LocationDisplay />
@@ -187,7 +187,6 @@ describe("handles url parameters", () => {
     );
 
     await waitForElement(() => getByTestId("graph"));
-    expect(asFragment()).toMatchSnapshot();
 
     wait(() => {
       const currentPipeline = getByTestId("pipeline-current");
