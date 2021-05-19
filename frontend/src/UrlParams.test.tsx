@@ -182,9 +182,6 @@ describe("url parameters", () => {
       "?pipeline=test-pipeline"
     );
 
-    await waitForElement(() => getByTestId("loading"));
-    expect(asFragment()).toMatchSnapshot();
-
     await waitForElement(() => getByTestId("graph"));
     expect(asFragment()).toMatchSnapshot();
 

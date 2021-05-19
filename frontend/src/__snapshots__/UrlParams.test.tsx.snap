@@ -17,57 +17,6 @@ exports[`url parameters should update focus-node param 1`] = `
   <div
     class="application"
   >
-    <div
-      class="spinningContainer"
-    >
-      <div
-        class="ant-spin ant-spin-spinning ant-spin-show-text"
-        data-testid="loading"
-      >
-        <span
-          class="ant-spin-dot ant-spin-dot-spin"
-        >
-          <i
-            class="ant-spin-dot-item"
-          />
-          <i
-            class="ant-spin-dot-item"
-          />
-          <i
-            class="ant-spin-dot-item"
-          />
-          <i
-            class="ant-spin-dot-item"
-          />
-        </span>
-        <div
-          class="ant-spin-text"
-        >
-          Loading...
-        </div>
-      </div>
-    </div>
-  </div>
-</DocumentFragment>
-`;
-
-exports[`url parameters should update focus-node param 2`] = `
-<DocumentFragment>
-  <div>
-    <div
-      data-testid="location-pathname"
-    >
-      /
-    </div>
-    <div
-      data-testid="location-search"
-    >
-      ?pipeline=test-pipeline
-    </div>
-  </div>
-  <div
-    class="application"
-  >
     <section
       class="ant-layout layout"
     >
