@@ -195,7 +195,7 @@ describe("handles url parameters", () => {
 
     const nodeSelect = getByTestId("node-select");
     const input = within(nodeSelect).getByRole("combobox") as HTMLInputElement;
-    expect(input).toHaveValue("");
+    expect(input).toBeEmpty();
   });
 
   it("should set focus-node from url parameter", async () => {
@@ -218,16 +218,20 @@ describe("handles url parameters", () => {
     await waitForElement(() => getByTestId("graph"));
     expect(asFragment()).toMatchSnapshot();
 
-    const currentPipeline = getByTestId("pipeline-current");
-    expect(
-      within(currentPipeline).getByText("all pipelines")
-    ).toBeInTheDocument();
-    // expect(nockPipelineGraph.isDone()).toBeTruthy(); // specific graph endpoint was called
-    // expect(nockGraph.isDone()).toBeFalsy();
+    await wait(() => {
+      const currentPipeline = getByTestId("pipeline-current");
+      expect(
+        within(currentPipeline).getByText("all pipelines")
+      ).toBeInTheDocument();
+      // expect(nockPipelineGraph.isDone()).toBeTruthy(); // specific graph endpoint was called
+      // expect(nockGraph.isDone()).toBeFalsy();
 
-    const nodeSelect = getByTestId("node-select");
-    const input = within(nodeSelect).getByRole("combobox") as HTMLInputElement;
-    expect(input).toHaveValue("test-app");
+      const nodeSelect = getByTestId("node-select");
+      const input = within(nodeSelect).getByRole(
+        "combobox"
+      ) as HTMLInputElement;
+      expect(input).toHaveValue("test-app");
+    });
   });
 
   it("should render without url parameters", async () => {
@@ -245,16 +249,20 @@ describe("handles url parameters", () => {
 
     await waitForElement(() => getByTestId("graph"));
 
-    // check pipeline set to all
-    const currentPipeline = getByTestId("pipeline-current");
-    expect(
-      within(currentPipeline).getByText("all pipelines")
-    ).toBeInTheDocument();
+    await wait(() => {
+      // check pipeline set to all
+      const currentPipeline = getByTestId("pipeline-current");
+      expect(
+        within(currentPipeline).getByText("all pipelines")
+      ).toBeInTheDocument();
 
-    // check focus-node empty
-    const nodeSelect = getByTestId("node-select");
-    const input = within(nodeSelect).getByRole("combobox") as HTMLInputElement;
-    expect(input).toHaveValue("");
+      // check focus-node empty
+      const nodeSelect = getByTestId("node-select");
+      const input = within(nodeSelect).getByRole(
+        "combobox"
+      ) as HTMLInputElement;
+      expect(input).toBeEmpty();
+    });
   });
 
   it("should update focus-node & pipeline parameters", async () => {
@@ -280,7 +288,7 @@ describe("handles url parameters", () => {
     await waitForElement(() => getByTestId("graph"));
     const nodeSelect = getByTestId("node-select");
     const input = within(nodeSelect).getByRole("combobox") as HTMLInputElement;
-    expect(input).toHaveValue("");
+    expect(input).toBeEmpty();
 
     // -- set focus-node through UI
     // expect(nockNode.isDone()).toBeFalsy();
