@@ -1,17 +1,17 @@
-import nock from "nock";
+import {
+  fireEvent,
+  render,
+  wait,
+  waitForElement,
+  within,
+} from "@testing-library/react";
 import { createMemoryHistory } from "history";
+import nock from "nock";
 import React from "react";
+import { Router } from "react-router";
+import { useLocation } from "react-router-dom";
 import { RestfulProvider } from "restful-react";
 import App from "./App";
-import { Router } from "react-router";
-import {
-  waitForElement,
-  render,
-  within,
-  wait,
-  fireEvent,
-} from "@testing-library/react";
-import { useLocation } from "react-router-dom";
 
 beforeAll(() => {
   Object.defineProperty(window, "matchMedia", {
@@ -158,6 +158,7 @@ describe("url parameters", () => {
       ]);
 
     const nockNode = nock("http://localhost")
+      .persist()
       .get("/api/node/test-app")
       .reply(200, {
         node_id: "test-app",
@@ -168,7 +169,7 @@ describe("url parameters", () => {
     const history = createMemoryHistory();
     history.push({ pathname: "/", search: "?pipeline=test-pipeline" });
 
-    const { getByTestId, asFragment } = render(
+    const { getByTestId, getAllByTestId, asFragment } = render(
       <RestfulProvider base="http://localhost">
         <Router history={history}>
           <LocationDisplay />
@@ -204,13 +205,13 @@ describe("url parameters", () => {
     expect(input).toHaveValue("");
 
     // -- set focus-node through UI
+    expect(nockNode.isDone()).toBeFalsy();
     await wait(() => {
-      expect(nockNode.isDone()).toBeFalsy();
       fireEvent.change(input, { target: { value: "test-app" } });
-      fireEvent.submit(input);
       expect(input).toHaveValue("test-app");
-      // let options = getAllByTestId("node-option");
-      // expect(options).toHaveLength(2);
+      let options = getAllByTestId("node-option");
+      expect(options).toHaveLength(1);
+      fireEvent.click(options[0]);
 
       // -- check result
       expect(getByTestId("location-search")).toHaveTextContent(
