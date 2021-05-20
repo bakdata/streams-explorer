@@ -13,29 +13,6 @@ import { HashRouter, useLocation } from "react-router-dom";
 import { RestfulProvider } from "restful-react";
 import App from "./App";
 
-beforeAll(() => {
-  Object.defineProperty(window, "matchMedia", {
-    writable: true,
-    value: jest.fn().mockImplementation((query) => ({
-      matches: false,
-      media: query,
-      onchange: null,
-      addListener: jest.fn(), // Deprecated
-      removeListener: jest.fn(), // Deprecated
-      addEventListener: jest.fn(),
-      removeEventListener: jest.fn(),
-      dispatchEvent: jest.fn(),
-    })),
-  });
-
-  // disable resize observer
-  (window as any).ResizeObserver = class MockResizeObserver {
-    observe() {}
-    unobserve() {}
-    disconnect() {}
-  };
-});
-
 // -- Mock GraphVisualization
 jest.mock("./components/GraphVisualization", () => {
   return function DummyGraphVisualization() {
@@ -90,6 +67,29 @@ function mockBackendGraph(persist?: boolean, pipelineName?: string) {
 }
 
 describe("Streams Explorer", () => {
+  beforeAll(() => {
+    Object.defineProperty(window, "matchMedia", {
+      writable: true,
+      value: jest.fn().mockImplementation((query) => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addListener: jest.fn(), // Deprecated
+        removeListener: jest.fn(), // Deprecated
+        addEventListener: jest.fn(),
+        removeEventListener: jest.fn(),
+        dispatchEvent: jest.fn(),
+      })),
+    });
+
+    // disable resize observer
+    (window as any).ResizeObserver = class MockResizeObserver {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    };
+  });
+
   describe("renders", () => {
     mockBackendGraph(false);
     it("without crashing", () => {
