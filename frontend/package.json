@@ -12,7 +12,8 @@
     "@types/node": "^12.12.53",
     "@types/react": "^16.9.43",
     "@types/react-dom": "^16.9.8",
-    "antd": "^4.4.3",
+    "@types/react-router-dom": "^5.1.7",
+    "antd": "^4.15.6",
     "copy-to-clipboard": "^3.3.1",
     "d3": "^5.16.0",
     "d3-drag": "^1.2.5",
@@ -23,6 +24,7 @@
     "react-dom": "^16.13.1",
     "react-json-view": "^1.19.1",
     "react-resize-detector": "^6.5.0",
+    "react-router-dom": "^5.2.0",
     "react-scripts": "^3.4.3",
     "restful-react": "^14.4.0",
     "typescript": "^3.7.5"

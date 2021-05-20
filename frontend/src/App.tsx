@@ -22,6 +22,7 @@ import { AutoComplete } from "antd";
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import { useMutate } from "restful-react";
+import { useHistory, useLocation } from "react-router-dom";
 
 const { Option } = AutoComplete;
 
@@ -33,6 +34,8 @@ const App: React.FC = () => {
   const [detailNode, setDetailNode] = useState<string | null>(null);
   const [focusedNode, setFocusedNode] = useState<string | null>(null);
   const [searchWidth, setSearchWidth] = useState<number>(300);
+  const history = useHistory();
+  const location = useLocation();
   const ref = useRef<HTMLDivElement>(null!);
   const onResize = useCallback(() => {}, []);
   const { width, height } = useResizeDetector({
@@ -78,6 +81,17 @@ const App: React.FC = () => {
     {}
   );
 
+  const getParams = useCallback(() => {
+    return new URLSearchParams(location.search);
+  }, [location.search]);
+
+  function pushHistoryFocusNode(nodeId: string) {
+    const pipeline = getParams().get("pipeline");
+    history.push(
+      `/?${pipeline ? `pipeline=${pipeline}&` : ""}focus-node=${nodeId}`
+    );
+  }
+
   useEffect(() => {
     if (refreshInterval && refreshInterval > 0) {
       const interval = setInterval(refetchMetrics, refreshInterval * 1000);
@@ -95,9 +109,28 @@ const App: React.FC = () => {
     }
   }, [graph]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  useEffect(() => {
+    const params = getParams();
+    const pipeline = params.get("pipeline");
+    if (pipeline) {
+      setCurrentPipeline(pipeline);
+    }
+    const focusNode = params.get("focus-node");
+    if (focusNode) {
+      setFocusedNode(focusNode);
+      setDetailNode(focusNode);
+    }
+  }, [getParams, location]);
+
   if (graphError) {
     message.error(graphError.message);
-    return <Spin spinning={false} tip="Failed to load graph" />;
+    return (
+      <Spin
+        data-testid="graph-error"
+        spinning={false}
+        tip="Failed to load graph"
+      />
+    );
   }
   if (pipelineError) {
     message.error(pipelineError?.message);
@@ -105,15 +138,20 @@ const App: React.FC = () => {
 
   const menuPipeline = (
     <Menu
+      data-testid="pipeline-select"
       onClick={(e) => {
+        history.push(`/?pipeline=${e.key.toString()}`);
         setCurrentPipeline(e.key.toString());
+        setFocusedNode(null);
       }}
     >
       <Menu.Item key={ALL_PIPELINES}>
         <i>{ALL_PIPELINES}</i>
       </Menu.Item>
       {pipelines?.pipelines.map((name: string) => (
-        <Menu.Item key={name}>{name}</Menu.Item>
+        <Menu.Item data-testid="pipeline-option" key={name}>
+          {name}
+        </Menu.Item>
       ))}
     </Menu>
   );
@@ -139,11 +177,14 @@ const App: React.FC = () => {
               <Menu.Item key="1">
                 Pipeline:&nbsp;
                 <Dropdown overlay={menuPipeline} placement="bottomLeft" arrow>
-                  <Button>{currentPipeline}</Button>
+                  <Button data-testid="pipeline-current">
+                    {currentPipeline}
+                  </Button>
                 </Dropdown>
               </Menu.Item>
               <Menu.Item>
                 <AutoComplete
+                  data-testid="node-select"
                   style={{
                     width: searchWidth,
                     maxWidth: 480,
@@ -160,13 +201,21 @@ const App: React.FC = () => {
                       .toUpperCase()
                       .indexOf(inputValue.toUpperCase()) !== -1
                   }
+                  defaultValue={focusedNode ? focusedNode : undefined}
                   onSelect={(nodeId: string) => {
                     setFocusedNode(nodeId);
                     setDetailNode(nodeId);
+                    pushHistoryFocusNode(nodeId);
                   }}
                 >
                   {graph?.nodes.map((node) => (
-                    <Option value={node.id}>{node.id}</Option>
+                    <Option
+                      data-testid="node-option"
+                      value={node.id}
+                      key={node.id}
+                    >
+                      {node.id}
+                    </Option>
                   ))}
                 </AutoComplete>
               </Menu.Item>
@@ -202,14 +251,14 @@ const App: React.FC = () => {
             <Row style={{ position: "fixed" }}>
               {graph ? (
                 <GraphVisualization
-                  id="topology-graph"
+                  data-testid="graph"
                   data={graph}
                   config={graphConfig}
                   metrics={metrics}
                   refetchMetrics={() => refetchMetrics()}
                   onClickNode={(nodeId: string) => setDetailNode(nodeId)}
                   width={width}
-                  height={height! - 64}
+                  height={height ? height - 64 : 500}
                   focusedNode={focusedNode}
                 />
               ) : (
@@ -226,7 +275,7 @@ const App: React.FC = () => {
                 padding: "0 50px",
                 width: width,
                 zIndex: 1,
-                top: height! - 147,
+                top: height ? height - 147 : 400,
                 position: "absolute",
               }}
             >
@@ -241,7 +290,10 @@ const App: React.FC = () => {
   return (
     <div ref={ref} className="application">
       <div className="spinningContainer">
-        <Spin tip={isUpdating ? "Updating Pipelines..." : "Loading..."} />
+        <Spin
+          data-testid="loading"
+          tip={isUpdating ? "Updating Pipelines..." : "Loading..."}
+        />
       </div>
     </div>
   );

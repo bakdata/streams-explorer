@@ -13,9 +13,9 @@ import {
 import { millify } from "millify";
 import React, { useRef, useEffect, useCallback, useState } from "react";
 import ReactDOM from "react-dom";
+import { message } from "antd";
 
 interface GraphVisualizationProps {
-  id: string;
   data: Data | GraphData;
   config: GraphOptions;
   metrics: Metric[] | null;
@@ -135,18 +135,27 @@ export function updateNodeMetrics(graph: Graph, metrics: Metric[]) {
   });
 }
 
+const nodeError = (name: string) => {
+  message.error(`Node "${name}" doesn't exist`, 5);
+};
+
 function setFocusedNode(graph: Graph, focusedNode: string) {
+  const node = graph.findById(focusedNode) as INode;
+  if (!node) {
+    return nodeError(focusedNode);
+  }
+
   if (graph.getZoom() < 1) {
     graph.zoomTo(1);
   }
-  graph.focusItem(focusedNode, true, {
+
+  graph.focusItem(node, true, {
     easing: "easeCubic",
     duration: 1500,
   });
 }
 
 const GraphVisualization = ({
-  id,
   data,
   config,
   metrics,
@@ -167,7 +176,7 @@ const GraphVisualization = ({
     if (graph && focusedNode) {
       setFocusedNode(graph, focusedNode);
     }
-  }, [focusedNode]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [focusedNode, graph]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (graph && metrics) {
     updateNodeMetrics(graph, metrics);
