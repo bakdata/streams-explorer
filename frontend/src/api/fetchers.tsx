@@ -14,6 +14,22 @@ import {
 
 export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 
+const encodingFn = encodeURIComponent;
+
+const encodingTagFactory = (encodingFn: typeof encodeURIComponent) => (
+  strings: TemplateStringsArray,
+  ...params: (string | number | boolean)[]
+) =>
+  strings.reduce(
+    (accumulatedPath, pathPart, idx) =>
+      `${accumulatedPath}${pathPart}${
+        idx < params.length ? encodingFn(params[idx]) : ""
+      }`,
+    ""
+  );
+
+const encode = encodingTagFactory(encodingFn);
+
 export interface Edge {
   source: string;
   target: string;
@@ -107,7 +123,7 @@ export type FrontendStaticGetProps = Omit<
  */
 export const FrontendStaticGet = (props: FrontendStaticGetProps) => (
   <Get<FrontendStaticGetResponse, unknown, void, void>
-    path={`/static`}
+    path={encode`/static`}
     {...props}
   />
 );
@@ -121,7 +137,10 @@ export type UseFrontendStaticGetProps = Omit<
  * Frontend
  */
 export const useFrontendStaticGet = (props: UseFrontendStaticGetProps) =>
-  useGet<FrontendStaticGetResponse, unknown, void, void>(`/static`, props);
+  useGet<FrontendStaticGetResponse, unknown, void, void>(
+    encode`/static`,
+    props
+  );
 
 export interface FrontendGetResponse {}
 
@@ -134,7 +153,7 @@ export type FrontendGetProps = Omit<
  * Frontend
  */
 export const FrontendGet = (props: FrontendGetProps) => (
-  <Get<FrontendGetResponse, unknown, void, void> path={`/`} {...props} />
+  <Get<FrontendGetResponse, unknown, void, void> path={encode`/`} {...props} />
 );
 
 export type UseFrontendGetProps = Omit<
@@ -146,7 +165,7 @@ export type UseFrontendGetProps = Omit<
  * Frontend
  */
 export const useFrontendGet = (props: UseFrontendGetProps) =>
-  useGet<FrontendGetResponse, unknown, void, void>(`/`, props);
+  useGet<FrontendGetResponse, unknown, void, void>(encode`/`, props);
 
 export interface UpdateApiUpdatePostResponse {}
 
@@ -161,7 +180,7 @@ export type UpdateApiUpdatePostProps = Omit<
 export const UpdateApiUpdatePost = (props: UpdateApiUpdatePostProps) => (
   <Mutate<UpdateApiUpdatePostResponse, unknown, void, void, void>
     verb="POST"
-    path={`/api/update`}
+    path={encode`/api/update`}
     {...props}
   />
 );
@@ -177,7 +196,7 @@ export type UseUpdateApiUpdatePostProps = Omit<
 export const useUpdateApiUpdatePost = (props: UseUpdateApiUpdatePostProps) =>
   useMutate<UpdateApiUpdatePostResponse, unknown, void, void, void>(
     "POST",
-    `/api/update`,
+    encode`/api/update`,
     props
   );
 
@@ -202,7 +221,7 @@ export const GraphPositionedApiGraphGet = (
   props: GraphPositionedApiGraphGetProps
 ) => (
   <Get<Graph, HTTPValidationError, GraphPositionedApiGraphGetQueryParams, void>
-    path={`/api/graph`}
+    path={encode`/api/graph`}
     {...props}
   />
 );
@@ -228,7 +247,7 @@ export const useGraphPositionedApiGraphGet = (
     HTTPValidationError,
     GraphPositionedApiGraphGetQueryParams,
     void
-  >(`/api/graph`, props);
+  >(encode`/api/graph`, props);
 
 export type PipelinesApiPipelinesGetProps = Omit<
   GetProps<Pipelines, unknown, void, void>,
@@ -240,7 +259,12 @@ export type PipelinesApiPipelinesGetProps = Omit<
  */
 export const PipelinesApiPipelinesGet = (
   props: PipelinesApiPipelinesGetProps
-) => <Get<Pipelines, unknown, void, void> path={`/api/pipelines`} {...props} />;
+) => (
+  <Get<Pipelines, unknown, void, void>
+    path={encode`/api/pipelines`}
+    {...props}
+  />
+);
 
 export type UsePipelinesApiPipelinesGetProps = Omit<
   UseGetProps<Pipelines, unknown, void, void>,
@@ -252,7 +276,7 @@ export type UsePipelinesApiPipelinesGetProps = Omit<
  */
 export const usePipelinesApiPipelinesGet = (
   props: UsePipelinesApiPipelinesGetProps
-) => useGet<Pipelines, unknown, void, void>(`/api/pipelines`, props);
+) => useGet<Pipelines, unknown, void, void>(encode`/api/pipelines`, props);
 
 export interface NodeInfoApiNodeNodeIdGetPathParams {
   node_id: string;
@@ -282,7 +306,7 @@ export const NodeInfoApiNodeNodeIdGet = ({
     void,
     NodeInfoApiNodeNodeIdGetPathParams
   >
-    path={`/api/node/${node_id}`}
+    path={encode`/api/node/${node_id}`}
     {...props}
   />
 );
@@ -312,7 +336,7 @@ export const useNodeInfoApiNodeNodeIdGet = ({
     NodeInfoApiNodeNodeIdGetPathParams
   >(
     (paramsInPath: NodeInfoApiNodeNodeIdGetPathParams) =>
-      `/api/node/${paramsInPath.node_id}`,
+      encode`/api/node/${paramsInPath.node_id}`,
     { pathParams: { node_id }, ...props }
   );
 
@@ -348,7 +372,7 @@ export const LinkingApiNodeLinkingNodeIdGet = ({
     LinkingApiNodeLinkingNodeIdGetQueryParams,
     LinkingApiNodeLinkingNodeIdGetPathParams
   >
-    path={`/api/node/linking/${node_id}`}
+    path={encode`/api/node/linking/${node_id}`}
     {...props}
   />
 );
@@ -378,7 +402,7 @@ export const useLinkingApiNodeLinkingNodeIdGet = ({
     LinkingApiNodeLinkingNodeIdGetPathParams
   >(
     (paramsInPath: LinkingApiNodeLinkingNodeIdGetPathParams) =>
-      `/api/node/linking/${paramsInPath.node_id}`,
+      encode`/api/node/linking/${paramsInPath.node_id}`,
     { pathParams: { node_id }, ...props }
   );
 
@@ -391,7 +415,7 @@ export type MetricsApiMetricsGetProps = Omit<
  * Metrics
  */
 export const MetricsApiMetricsGet = (props: MetricsApiMetricsGetProps) => (
-  <Get<Metric[], unknown, void, void> path={`/api/metrics`} {...props} />
+  <Get<Metric[], unknown, void, void> path={encode`/api/metrics`} {...props} />
 );
 
 export type UseMetricsApiMetricsGetProps = Omit<
@@ -403,4 +427,4 @@ export type UseMetricsApiMetricsGetProps = Omit<
  * Metrics
  */
 export const useMetricsApiMetricsGet = (props: UseMetricsApiMetricsGetProps) =>
-  useGet<Metric[], unknown, void, void>(`/api/metrics`, props);
+  useGet<Metric[], unknown, void, void>(encode`/api/metrics`, props);

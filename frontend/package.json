@@ -65,7 +65,6 @@
     "eslint-plugin-react": "^7.21.4",
     "jest-canvas-mock": "^2.3.1",
     "nock": "^13.0.5",
-    "openapi-typescript-codegen": "^0.4.10",
     "prettier": "^2.1.2",
     "react-test-renderer": "^17.0.1"
   },
