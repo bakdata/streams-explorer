@@ -98,7 +98,7 @@ stages:
             displayName: "Lint"
             workingDirectory: $(frontendPath)
 
-          - script: pre-commit run prettier --all-files
+          - script: pre-commit run prettier frontend/
             displayName: "Formatting (prettier)"
 
           - script: pre-commit run generate-fetchers --all-files
