@@ -1,0 +1,6 @@
+backend/
+helm-chart/**/*.yaml
+grafana/
+hooks/
+screens/
+README.md
