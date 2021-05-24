@@ -1,10 +1,14 @@
-import G6 from "@antv/g6";
-import { Item, NodeConfig, ShapeStyle } from "@antv/g6/lib/types";
+import G6, {
+  Global,
+  Item,
+  ModelConfig,
+  NodeConfig,
+  ShapeOptions,
+  ShapeStyle,
+} from "@antv/g6";
 import GGroup from "@antv/g-canvas/lib/group";
-import { IShape } from "@antv/g-canvas/lib/interfaces";
+import { IGroup, IShape } from "@antv/g-canvas/lib/interfaces";
 import deepMix from "@antv/util/lib/deep-mix";
-import { ShapeOptions } from "@antv/g6/lib/interface/shape";
-import Global from "@antv/g6/lib/global";
 
 G6.registerNode(
   "MetricCustomNode",
@@ -14,8 +18,8 @@ G6.registerNode(
       style: {
         x: 0,
         y: 0,
-        stroke: Global.defaultShapeStrokeColor,
-        fill: Global.defaultShapeFillColor,
+        stroke: Global.defaultNode.style.stroke,
+        fill: Global.defaultNode.style.fill,
         lineWidth: Global.defaultNode.style.lineWidth,
       },
       labelCfg: {
@@ -42,13 +46,13 @@ G6.registerNode(
     },
     shapeType: "circle",
     labelPosition: "center",
-    drawShape(cfg: NodeConfig, group: GGroup): IShape {
+    drawShape(cfg: ModelConfig | undefined, group: IGroup | undefined): IShape {
       const { icon: defaultIcon = {} } = (this as any).getOptions(
         cfg
       ) as NodeConfig;
       const style = (this as any).getShapeStyle!(cfg);
-      const icon = deepMix({}, defaultIcon, cfg.icon);
-      const keyShape: IShape = group.addShape("circle", {
+      const icon = deepMix({}, defaultIcon, cfg!.icon);
+      const keyShape: IShape = group!.addShape("circle", {
         attrs: style,
         className: `${(this as any).type}-keyShape`,
         draggable: true,
@@ -56,7 +60,7 @@ G6.registerNode(
 
       const { width, height, show } = icon;
       if (show) {
-        group.addShape("image", {
+        group!.addShape("image", {
           attrs: {
             x: -width / 2,
             y: -height / 2,
@@ -69,7 +73,7 @@ G6.registerNode(
       }
 
       // metrics text
-      group.addShape("text", {
+      group!.addShape("text", {
         attrs: {
           textBaseline: "top",
           y: 38,
@@ -178,7 +182,7 @@ G6.registerNode(
       };
       return styles;
     },
-    update(cfg: NodeConfig, item: Item) {
+    update(cfg: ModelConfig, item: Item) {
       const group = item.getContainer();
       const metricLabel = group.get("children")[2]; // Get the shape which contains our label
       const metric = metricLabel.attr();

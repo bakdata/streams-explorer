@@ -1,15 +1,15 @@
 import { Graph as Data, Icon as IIcon, Metric } from "../api/fetchers";
 import "./DashedEdge";
 import "./MetricCustomNode";
-import G6 from "@antv/g6";
-import Graph from "@antv/g6/lib/graph/graph";
-import { IEdge, INode } from "@antv/g6/lib/interface/item";
-import {
-  GraphOptions,
+import G6, {
+  Graph,
   GraphData,
-  NodeConfig,
+  GraphOptions,
+  IEdge,
   IG6GraphEvent,
-} from "@antv/g6/lib/types";
+  INode,
+  NodeConfig,
+} from "@antv/g6";
 import { millify } from "millify";
 import React, { useRef, useEffect, useCallback, useState } from "react";
 import ReactDOM from "react-dom";
