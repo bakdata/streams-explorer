@@ -1,4 +1,4 @@
-import { GraphOptions } from "@antv/g6/lib/types";
+import { GraphOptions } from "@antv/g6";
 
 export const graphConfig: GraphOptions = {
   container: "",

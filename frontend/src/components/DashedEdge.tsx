@@ -1,13 +1,11 @@
-import G6 from "@antv/g6";
-import { ModelConfig } from "@antv/g6/lib/types";
-import GGroup from "@antv/g-canvas/lib/group";
-import { IShape } from "@antv/g-canvas/lib/interfaces";
+import G6, { ModelConfig } from "@antv/g6";
+import { IGroup, IShape } from "@antv/g-canvas/lib/interfaces";
 
 const lineDash = [4, 2, 1, 2];
 G6.registerEdge(
   "line-dash",
   {
-    afterDraw(cfg?: ModelConfig, group?: GGroup, rst?: IShape) {
+    afterDraw(cfg?: ModelConfig, group?: IGroup, rst?: IShape) {
       const shape = group!.get("children")[0];
       let index = 0;
       shape.animate(
