@@ -18,7 +18,7 @@ G6.registerNode(
       style: {
         x: 0,
         y: 0,
-        stroke: Global.defaultNode.style.stroke,
+        stroke: undefined,
         fill: Global.defaultNode.style.fill,
         lineWidth: Global.defaultNode.style.lineWidth,
       },
