@@ -30,6 +30,11 @@ const encodingTagFactory = (encodingFn: typeof encodeURIComponent) => (
 
 const encode = encodingTagFactory(encodingFn);
 
+export interface Combo {
+  id: string;
+  label: string;
+}
+
 export interface Edge {
   source: string;
   target: string;
@@ -41,6 +46,7 @@ export interface Graph {
   graph?: {};
   nodes: Node[];
   edges: Edge[];
+  combos: Combo[];
 }
 
 export interface HTTPValidationError {
@@ -70,8 +76,7 @@ export interface Node {
   label: string;
   node_type: string;
   icon?: Icon;
-  x?: number;
-  y?: number;
+  comboId?: string;
 }
 
 export interface NodeInfoListItem {

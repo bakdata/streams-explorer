@@ -1,4 +1,4 @@
-import { GraphOptions } from "@antv/g6";
+import { GraphOptions } from "@antv/g6/lib/types";
 
 export const graphConfig: GraphOptions = {
   container: "",
@@ -7,7 +7,18 @@ export const graphConfig: GraphOptions = {
   minZoom: 0.2,
   maxZoom: 3,
   modes: {
-    default: ["drag-canvas", "zoom-canvas", "click-select"],
+    default: ["drag-canvas", "zoom-canvas", "click-select", "drag-combo"],
+  },
+  layout: {
+    type: "dagre",
+    align: undefined,
+    rankdir: "LR",
+    nodesep: 20,
+    ranksep: 120,
+    sortByCombo: false,
+  },
+  defaultCombo: {
+    type: "rect",
   },
   defaultNode: {
     type: "MetricCustomNode",

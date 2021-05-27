@@ -15,8 +15,7 @@ class Node(BaseModel):
     label: str
     node_type: str
     icon: Optional[Icon]
-    x: Optional[int]
-    y: Optional[int]
+    comboId: Optional[str]
 
 
 class Metric(BaseModel):
@@ -35,9 +34,15 @@ class Edge(BaseModel):
     target: str
 
 
+class Combo(BaseModel):
+    id: str
+    label: str
+
+
 class Graph(BaseModel):
     directed: bool
     multigraph: bool
     graph: Any
     nodes: List[Node]
     edges: List[Edge]
+    combos: List[Combo]
