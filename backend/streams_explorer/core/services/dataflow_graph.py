@@ -1,7 +1,7 @@
+from collections import defaultdict
 from typing import Dict, List, Optional, Tuple, Type
 
 import networkx as nx
-from networkx.classes.reportviews import NodeDataView
 from networkx.drawing.nx_agraph import graphviz_layout
 
 from streams_explorer.core.config import settings
@@ -105,20 +105,15 @@ class DataFlowGraph:
 
     def extract_independent_pipelines(self):
         undirected_graph = self.graph.to_undirected()
-        pipeline_nodes: Dict[str, List[NodeDataView]] = {}
         nodes = list(undirected_graph.nodes(data=True))
         edges = list(undirected_graph.edges())
+        pipeline_nodes = defaultdict(list)
 
-        for node in nodes:
-            pipeline = node[1].get("pipeline")
-            if pipeline is not None:
-                existing_list = pipeline_nodes.get(pipeline)
-                if isinstance(existing_list, list):
-                    existing_list.append(node)
-                    pipeline_nodes[pipeline] = existing_list
-                else:
-                    pipeline_nodes[pipeline] = [node]
+        # sort in dictionary by pipeline name
+        for node in list(filter(self.__filter_pipeline, nodes)):
+            pipeline_nodes[node[1].get("pipeline")].append(node)
 
+        # build pipeline graphs
         for pipeline_name, nodes in pipeline_nodes.items():
             graph = nx.DiGraph()
             graph.add_nodes_from(nodes)
@@ -177,6 +172,10 @@ class DataFlowGraph:
     @staticmethod
     def __filter_streaming_apps(node: Tuple[str, dict]) -> bool:
         return node[1].get("node_type") == NodeTypesEnum.STREAMING_APP
+
+    @staticmethod
+    def __filter_pipeline(node: Tuple[str, dict]) -> bool:
+        return node[1].get("pipeline") is not None
 
     @staticmethod
     def __get_streaming_app_pipeline(streaming_app: Tuple[str, dict]) -> Optional[str]:
