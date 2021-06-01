@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Tuple, Type
+from typing import Dict, List, Optional, Tuple, Type, cast
 
 import networkx as nx
 from networkx.drawing.nx_agraph import graphviz_layout
@@ -104,7 +104,7 @@ class DataFlowGraph:
             pipeline_name = self.__extract_pipeline_name(pipeline_graph)
             existing_graph: Optional[nx.DiGraph] = self.pipelines.get(pipeline_name)
             if existing_graph is not None:
-                graph = existing_graph.copy()
+                graph = cast(nx.DiGraph, existing_graph.copy())
                 graph.update(
                     edges=pipeline_graph.edges(data=True),
                     nodes=pipeline_graph.nodes(data=True),
