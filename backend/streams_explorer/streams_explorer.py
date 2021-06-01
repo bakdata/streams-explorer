@@ -56,7 +56,7 @@ class StreamsExplorer:
         return self.data_flow.get_positioned_pipeline_graph(pipeline_name)
 
     def get_pipeline_names(self) -> List[str]:
-        return list(self.data_flow.independent_graphs.keys())
+        return list(self.data_flow.pipelines.keys())
 
     def get_metrics(self) -> List:
         return self.data_flow.get_metrics()

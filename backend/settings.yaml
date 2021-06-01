@@ -26,7 +26,7 @@ k8s:
   labels:
     # used to set attributes of nodes in the graph (used to extract pipeline names)
     - "pipeline"
-  independent_graph:
+  pipeline:
     # refers to the attribute of nodes the pipeline name should be extracted from
     label: "pipeline"
 

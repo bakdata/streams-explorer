@@ -23,7 +23,7 @@ class NodeNotFound(Exception):
 class DataFlowGraph:
     def __init__(self, metric_provider: Type[MetricProvider]):
         self.graph = nx.DiGraph()
-        self.independent_graphs: Dict[str, nx.DiGraph] = {}
+        self.pipelines: Dict[str, nx.DiGraph] = {}
         self.metric_provider_class = metric_provider
 
     def add_streaming_app(self, app: K8sApp):
@@ -80,7 +80,7 @@ class DataFlowGraph:
         self.graph.add_edge(sink.source, sink.name)
 
     def get_positioned_pipeline_graph(self, pipeline_name: str) -> dict:
-        return self.__get_positioned_json_graph(self.independent_graphs[pipeline_name])
+        return self.__get_positioned_json_graph(self.pipelines[pipeline_name])
 
     def get_positioned_graph(self) -> dict:
         return self.__get_positioned_json_graph(self.graph)
@@ -102,18 +102,16 @@ class DataFlowGraph:
         for pipeline in independent_pipeline_nodes:
             pipeline_graph = self.graph.subgraph(pipeline)
             pipeline_name = self.__extract_pipeline_name(pipeline_graph)
-            existing_graph: Optional[nx.DiGraph] = self.independent_graphs.get(
-                pipeline_name
-            )
+            existing_graph: Optional[nx.DiGraph] = self.pipelines.get(pipeline_name)
             if existing_graph is not None:
                 graph = existing_graph.copy()
                 graph.update(
                     edges=pipeline_graph.edges(data=True),
                     nodes=pipeline_graph.nodes(data=True),
                 )
-                self.independent_graphs[pipeline_name] = graph
+                self.pipelines[pipeline_name] = graph
             else:
-                self.independent_graphs[pipeline_name] = pipeline_graph
+                self.pipelines[pipeline_name] = pipeline_graph
 
     def _add_topic(self, name: str):
         self.graph.add_node(
@@ -149,7 +147,7 @@ class DataFlowGraph:
 
     def reset(self):
         self.graph = nx.DiGraph()
-        self.independent_graphs = {}
+        self.pipelines = {}
         self.metric_provider = self.metric_provider_class(self.graph.nodes(data=True))
 
     @staticmethod
@@ -159,11 +157,8 @@ class DataFlowGraph:
     @staticmethod
     def __get_streaming_app_pipeline(streaming_app: Tuple[str, dict]) -> Optional[str]:
         _, streaming_app_labels = streaming_app
-        if (
-            settings.k8s.independent_graph
-            and settings.k8s.independent_graph.label is not None
-        ):
-            return streaming_app_labels.get(settings.k8s.independent_graph.label)
+        if settings.k8s.pipeline and settings.k8s.pipeline.label is not None:
+            return streaming_app_labels.get(settings.k8s.pipeline.label)
 
     @staticmethod
     def __get_json_graph(graph: nx.Graph) -> dict:
