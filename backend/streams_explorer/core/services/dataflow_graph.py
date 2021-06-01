@@ -141,9 +141,11 @@ class DataFlowGraph:
         streaming_apps = list(
             filter(self.__filter_streaming_apps, pipeline_graph.nodes(data=True))
         )
-        if len(streaming_apps) < 1:
-            return list(pipeline_graph.nodes)[0]
-        return self.__get_streaming_app_pipeline(streaming_apps[0])
+        for streaming_app in streaming_apps:
+            pipeline = self.__get_streaming_app_pipeline(streaming_app)
+            if pipeline is not None:
+                return pipeline
+        return list(pipeline_graph.nodes)[0]
 
     def reset(self):
         self.graph = nx.DiGraph()
@@ -155,17 +157,13 @@ class DataFlowGraph:
         return node[1].get("node_type") == NodeTypesEnum.STREAMING_APP
 
     @staticmethod
-    def __get_streaming_app_pipeline(streaming_app: Tuple[str, dict]) -> str:
-        streaming_app_name, streaming_app_labels = streaming_app
-        pipeline: Optional[str] = None
+    def __get_streaming_app_pipeline(streaming_app: Tuple[str, dict]) -> Optional[str]:
+        _, streaming_app_labels = streaming_app
         if (
             settings.k8s.independent_graph
             and settings.k8s.independent_graph.label is not None
         ):
-            pipeline = streaming_app_labels.get(settings.k8s.independent_graph.label)
-        if pipeline is None:
-            pipeline = streaming_app_name
-        return pipeline
+            return streaming_app_labels.get(settings.k8s.independent_graph.label)
 
     @staticmethod
     def __get_json_graph(graph: nx.Graph) -> dict:
