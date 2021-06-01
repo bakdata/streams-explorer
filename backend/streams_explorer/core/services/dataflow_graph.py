@@ -1,7 +1,6 @@
 from typing import Dict, List, Optional, Tuple, Type
 
-import networkx
-from networkx import Graph
+import networkx as nx
 from networkx.drawing.nx_agraph import graphviz_layout
 
 from streams_explorer.core.config import settings
@@ -23,8 +22,8 @@ class NodeNotFound(Exception):
 
 class DataFlowGraph:
     def __init__(self, metric_provider: Type[MetricProvider]):
-        self.graph = networkx.DiGraph()
-        self.independent_graphs: Dict[str, networkx.DiGraph] = {}
+        self.graph = nx.DiGraph()
+        self.independent_graphs: Dict[str, nx.DiGraph] = {}
         self.metric_provider_class = metric_provider
 
     def add_streaming_app(self, app: K8sApp):
@@ -99,13 +98,22 @@ class DataFlowGraph:
 
     def extract_independent_pipelines(self):
         undirected_graph = self.graph.to_undirected()
-        independent_pipeline_nodes = list(
-            networkx.connected_components(undirected_graph)
-        )
+        independent_pipeline_nodes = list(nx.connected_components(undirected_graph))
         for pipeline in independent_pipeline_nodes:
             pipeline_graph = self.graph.subgraph(pipeline)
             pipeline_name = self.__extract_pipeline_name(pipeline_graph)
-            self.independent_graphs[pipeline_name] = pipeline_graph
+            existing_graph: Optional[nx.DiGraph] = self.independent_graphs.get(
+                pipeline_name
+            )
+            if existing_graph is not None:
+                graph = existing_graph.copy()
+                graph.update(
+                    edges=pipeline_graph.edges(data=True),
+                    nodes=pipeline_graph.nodes(data=True),
+                )
+                self.independent_graphs[pipeline_name] = graph
+            else:
+                self.independent_graphs[pipeline_name] = pipeline_graph
 
     def _add_topic(self, name: str):
         self.graph.add_node(
@@ -129,23 +137,16 @@ class DataFlowGraph:
         )
         self.graph.add_edge(streaming_app, topic_name)
 
-    def __extract_pipeline_name(self, pipeline_graph):
+    def __extract_pipeline_name(self, pipeline_graph: nx.DiGraph) -> str:
         streaming_apps = list(
             filter(self.__filter_streaming_apps, pipeline_graph.nodes(data=True))
         )
         if len(streaming_apps) < 1:
             return list(pipeline_graph.nodes)[0]
-
-        name = unique_name = self.__get_streaming_app_pipeline(streaming_apps[0])
-
-        index = 0
-        while self.independent_graphs.get(unique_name) is not None:
-            index += 1
-            unique_name = f"{name}{index}"
-        return unique_name
+        return self.__get_streaming_app_pipeline(streaming_apps[0])
 
     def reset(self):
-        self.graph = networkx.DiGraph()
+        self.graph = nx.DiGraph()
         self.independent_graphs = {}
         self.metric_provider = self.metric_provider_class(self.graph.nodes(data=True))
 
@@ -167,16 +168,16 @@ class DataFlowGraph:
         return pipeline
 
     @staticmethod
-    def __get_json_graph(graph: Graph) -> dict:
-        json_graph: dict = networkx.node_link_data(graph)
+    def __get_json_graph(graph: nx.Graph) -> dict:
+        json_graph: dict = nx.node_link_data(graph)
         json_graph["edges"] = json_graph.pop("links")
         return json_graph
 
     @staticmethod
-    def __get_positioned_json_graph(graph: Graph) -> dict:
+    def __get_positioned_json_graph(graph: nx.Graph) -> dict:
         pos = graphviz_layout(graph, prog="dot", args=settings.graph_layout_arguments)
         x = {n: p[0] for n, p in pos.items()}
         y = {n: p[1] for n, p in pos.items()}
-        networkx.set_node_attributes(graph, x, "x")
-        networkx.set_node_attributes(graph, y, "y")
+        nx.set_node_attributes(graph, x, "x")
+        nx.set_node_attributes(graph, y, "y")
         return DataFlowGraph.__get_json_graph(graph)
