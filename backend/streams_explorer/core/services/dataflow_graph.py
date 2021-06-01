@@ -1,6 +1,7 @@
-from typing import Dict, List, Optional, Tuple, Type, cast
+from typing import Dict, List, Optional, Tuple, Type
 
 import networkx as nx
+from networkx.classes.reportviews import NodeDataView
 from networkx.drawing.nx_agraph import graphviz_layout
 
 from streams_explorer.core.config import settings
@@ -27,26 +28,32 @@ class DataFlowGraph:
         self.metric_provider_class = metric_provider
 
     def add_streaming_app(self, app: K8sApp):
+        # TODO: extract method
+        pipeline = None
+        if settings.k8s.pipeline and settings.k8s.pipeline.label is not None:
+            pipeline = app.attributes.get(settings.k8s.pipeline.label)
+
         self.graph.add_node(
             app.name,
             label=app.name,
             node_type=NodeTypesEnum.STREAMING_APP,
+            pipeline=pipeline,
             **app.attributes,
         )
         if app.output_topic:
-            self._add_topic(app.output_topic)
-            self._add_output_topic(app.name, app.output_topic)
+            self._add_topic(app.output_topic, pipeline)
+            self._add_output_topic(app.name, app.output_topic, pipeline)
         if app.error_topic:
-            self._add_error_topic(app.name, app.error_topic)
+            self._add_error_topic(app.name, app.error_topic, pipeline)
         for input_topic in app.input_topics:
-            self._add_topic(input_topic)
+            self._add_topic(input_topic, pipeline)
             self._add_input_topic(app.name, input_topic)
         for extra_input in app.extra_input_topics:
-            self._add_topic(extra_input)
+            self._add_topic(extra_input, pipeline)
             self._add_input_topic(app.name, extra_input)
         for extra_output in app.extra_output_topics:
-            self._add_topic(extra_output)
-            self._add_output_topic(app.name, extra_output)
+            self._add_topic(extra_output, pipeline)
+            self._add_output_topic(app.name, extra_output, pipeline)
 
     def add_connector(self, connector: KafkaConnector):
         self.graph.add_node(
@@ -98,40 +105,57 @@ class DataFlowGraph:
 
     def extract_independent_pipelines(self):
         undirected_graph = self.graph.to_undirected()
-        independent_pipeline_nodes = list(nx.connected_components(undirected_graph))
-        for pipeline in independent_pipeline_nodes:
-            pipeline_graph = self.graph.subgraph(pipeline)
-            pipeline_name = self.__extract_pipeline_name(pipeline_graph)
-            existing_graph: Optional[nx.DiGraph] = self.pipelines.get(pipeline_name)
-            if existing_graph is not None:
-                graph = cast(nx.DiGraph, existing_graph.copy())
-                graph.update(
-                    edges=pipeline_graph.edges(data=True),
-                    nodes=pipeline_graph.nodes(data=True),
-                )
-                self.pipelines[pipeline_name] = graph
-            else:
-                self.pipelines[pipeline_name] = pipeline_graph
+        pipeline_nodes: Dict[str, List[NodeDataView]] = {}
+        nodes = list(undirected_graph.nodes(data=True))
+        edges = list(undirected_graph.edges())
 
-    def _add_topic(self, name: str):
+        for node in nodes:
+            pipeline = node[1].get("pipeline")
+            if pipeline is not None:
+                existing_list = pipeline_nodes.get(pipeline)
+                if isinstance(existing_list, list):
+                    existing_list.append(node)
+                    pipeline_nodes[pipeline] = existing_list
+                else:
+                    pipeline_nodes[pipeline] = [node]
+
+        for pipeline_name, nodes in pipeline_nodes.items():
+            graph = nx.DiGraph()
+            graph.add_nodes_from(nodes)
+            self.pipelines[pipeline_name] = graph
+
+            # find edges belonging to pipeline
+            node_names = [node[0] for node in nodes]
+            for edge in edges:
+                if edge[0] in node_names and edge[1] in node_names:
+                    graph.add_edge(edge[0], edge[1])
+
+    def _add_topic(self, name: str, pipeline: Optional[str] = None):
         self.graph.add_node(
-            name,
-            label=name,
-            node_type=NodeTypesEnum.TOPIC,
+            name, label=name, node_type=NodeTypesEnum.TOPIC, pipeline=pipeline
         )
 
-    def _add_input_topic(self, streaming_app, topic_name):
+    def _add_input_topic(
+        self,
+        streaming_app: str,
+        topic_name: str,
+    ):
         self.graph.add_edge(topic_name, streaming_app)
 
-    def _add_output_topic(self, streaming_app, topic_name):
-        self._add_topic(topic_name)
+    def _add_output_topic(
+        self, streaming_app: str, topic_name: str, pipeline: Optional[str] = None
+    ):
+        self._add_topic(topic_name, pipeline=pipeline)
         self.graph.add_edge(streaming_app, topic_name)
 
-    def _add_error_topic(self, streaming_app, topic_name):
+    def _add_error_topic(
+        self, streaming_app: str, topic_name: str, pipeline: Optional[str] = None
+    ):
         self.graph.add_node(
             topic_name,
             label=topic_name,
             node_type=NodeTypesEnum.ERROR_TOPIC,
+            pipeline=pipeline,
         )
         self.graph.add_edge(streaming_app, topic_name)
 
