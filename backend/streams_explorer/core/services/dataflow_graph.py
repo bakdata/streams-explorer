@@ -116,14 +116,13 @@ class DataFlowGraph:
             neighborhood = ego_graph(
                 undirected_graph, connector, radius=2, undirected=True
             ).nodes(data=True)
-            for node in neighborhood:
-                pipeline = node[1].get("pipeline")
+            for _, node in neighborhood:
+                pipeline = node.get("pipeline")
                 if pipeline is not None:
                     logger.debug(
                         "Pipeline found for connector {}: {}", connector, pipeline
                     )
-                    for n in neighborhood:
-                        pipeline_nodes[pipeline].append(n)
+                    pipeline_nodes[pipeline].extend(neighborhood)
                     break
 
         # build pipeline graphs
@@ -187,7 +186,6 @@ class DataFlowGraph:
     @staticmethod
     def __filter_connectors(node: Tuple[str, dict]) -> bool:
         return node[1]["node_type"] == NodeTypesEnum.CONNECTOR
-        # [node for node in self.graph.nodes(data=True) if node[1]["node_type"] == NodeTypesEnum.CONNECTOR]
 
     @staticmethod
     def __get_json_graph(graph: nx.Graph) -> dict:
