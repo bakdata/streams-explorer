@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import Dict, List, Optional, Tuple, Type
+from typing import Dict, List, Optional, Tuple, Type, cast
 
 import networkx as nx
 from networkx.drawing.nx_agraph import graphviz_layout
@@ -28,10 +28,7 @@ class DataFlowGraph:
         self.metric_provider_class = metric_provider
 
     def add_streaming_app(self, app: K8sApp):
-        # TODO: extract method
-        pipeline = None
-        if settings.k8s.pipeline and settings.k8s.pipeline.label is not None:
-            pipeline = app.attributes.get(settings.k8s.pipeline.label)
+        pipeline = app.get_pipeline()
 
         self.graph.add_node(
             app.name,
@@ -106,24 +103,28 @@ class DataFlowGraph:
     def extract_independent_pipelines(self):
         undirected_graph = self.graph.to_undirected()
         nodes = list(undirected_graph.nodes(data=True))
-        edges = list(undirected_graph.edges())
-        pipeline_nodes = defaultdict(list)
+        # fix for networkx always reporting EdgeView tuple size 3 when it should be 2 for data=False
+        edges = [cast(Tuple[str, str], edge) for edge in undirected_graph.edges()]
 
-        # sort in dictionary by pipeline name
-        for node in list(filter(self.__filter_pipeline, nodes)):
-            pipeline_nodes[node[1].get("pipeline")].append(node)
+        # sort nodes by pipeline
+        pipeline_nodes = defaultdict(list)
+        for node in list(filter(self.__filter_pipeline_nodes, nodes)):
+            pipeline_nodes[node[1]["pipeline"]].append(node)
 
         # build pipeline graphs
-        for pipeline_name, nodes in pipeline_nodes.items():
+        for pipeline, nodes in pipeline_nodes.items():
             graph = nx.DiGraph()
             graph.add_nodes_from(nodes)
-            self.pipelines[pipeline_name] = graph
+            self.pipelines[pipeline] = graph
 
             # find edges belonging to pipeline
-            node_names = [node[0] for node in nodes]
-            for edge in edges:
-                if edge[0] in node_names and edge[1] in node_names:
-                    graph.add_edge(edge[0], edge[1])
+            node_names = [name for name, _ in nodes]
+            for source, target in list(
+                filter(
+                    lambda edge: self.__filter_pipeline_edges(edge, node_names), edges
+                )
+            ):
+                graph.add_edge(source, target)
 
     def _add_topic(self, name: str, pipeline: Optional[str] = None):
         self.graph.add_node(
@@ -154,34 +155,19 @@ class DataFlowGraph:
         )
         self.graph.add_edge(streaming_app, topic_name)
 
-    def __extract_pipeline_name(self, pipeline_graph: nx.DiGraph) -> str:
-        streaming_apps = list(
-            filter(self.__filter_streaming_apps, pipeline_graph.nodes(data=True))
-        )
-        for streaming_app in streaming_apps:
-            pipeline = self.__get_streaming_app_pipeline(streaming_app)
-            if pipeline is not None:
-                return pipeline
-        return list(pipeline_graph.nodes)[0]
-
     def reset(self):
         self.graph = nx.DiGraph()
         self.pipelines = {}
         self.metric_provider = self.metric_provider_class(self.graph.nodes(data=True))
 
     @staticmethod
-    def __filter_streaming_apps(node: Tuple[str, dict]) -> bool:
-        return node[1].get("node_type") == NodeTypesEnum.STREAMING_APP
-
-    @staticmethod
-    def __filter_pipeline(node: Tuple[str, dict]) -> bool:
+    def __filter_pipeline_nodes(node: Tuple[str, dict]) -> bool:
         return node[1].get("pipeline") is not None
 
     @staticmethod
-    def __get_streaming_app_pipeline(streaming_app: Tuple[str, dict]) -> Optional[str]:
-        _, streaming_app_labels = streaming_app
-        if settings.k8s.pipeline and settings.k8s.pipeline.label is not None:
-            return streaming_app_labels.get(settings.k8s.pipeline.label)
+    def __filter_pipeline_edges(edge: Tuple[str, str], nodes: List[str]) -> bool:
+        source, target = edge
+        return source in nodes and target in nodes
 
     @staticmethod
     def __get_json_graph(graph: nx.Graph) -> dict:

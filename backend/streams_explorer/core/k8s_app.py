@@ -46,6 +46,10 @@ class K8sApp:
             raise TypeError(f"Name is required for {self.get_class_name()}")
         return name
 
+    def get_pipeline(self) -> Optional[str]:
+        if settings.k8s.pipeline and settings.k8s.pipeline.label is not None:
+            return self.attributes.get(settings.k8s.pipeline.label)
+
     def __get_common_configuration(self):
         for env in self.container.env:
             name = env.name
