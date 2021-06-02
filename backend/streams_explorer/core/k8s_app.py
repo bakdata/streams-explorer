@@ -47,8 +47,7 @@ class K8sApp:
         return name
 
     def get_pipeline(self) -> Optional[str]:
-        if settings.k8s.pipeline and settings.k8s.pipeline.label is not None:
-            return self.attributes.get(settings.k8s.pipeline.label)
+        return self.attributes.get(settings.k8s.pipeline.label)
 
     def __get_common_configuration(self):
         for env in self.container.env:
@@ -90,6 +89,10 @@ class K8sApp:
                 logger.warning(
                     f"{self.get_class_name()} {self.name} does not have a label with the name: {key}"
                 )
+
+        pipeline = self.get_pipeline()
+        if pipeline is not None:
+            self.attributes["pipeline"] = pipeline
 
         if (
             self.k8s_object.spec.template.metadata

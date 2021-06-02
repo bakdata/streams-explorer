@@ -28,14 +28,13 @@ class DataFlowGraph:
         self.metric_provider_class = metric_provider
 
     def add_streaming_app(self, app: K8sApp):
-        pipeline = app.get_pipeline()
-
         self.graph.add_node(
             app.name,
             label=app.name,
             node_type=NodeTypesEnum.STREAMING_APP,
             **app.attributes,
         )
+        pipeline = app.attributes.get("pipeline")
         if app.output_topic:
             self._add_topic(app.output_topic, pipeline)
             self._add_output_topic(app.name, app.output_topic, pipeline)

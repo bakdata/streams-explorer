@@ -17,7 +17,7 @@ settings = Dynaconf(
         Validator("k8s.deployment.namespaces", must_exist=True, is_type_of=list),
         Validator("k8s.containers.ignore", is_type_of=list),
         Validator("k8s.labels", must_exist=True, is_type_of=list),
-        Validator("k8s.pipeline", must_exist=True, is_type_of=dict),
+        Validator("k8s.pipeline.label", must_exist=True, is_type_of=str),
         Validator("schemaregistry.url", must_exist=True, is_type_of=str),
         Validator("prometheus.url", must_exist=True, is_type_of=str),
         Validator("plugins.path", must_exist=True, is_type_of=str),
