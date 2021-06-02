@@ -104,26 +104,27 @@ class DataFlowGraph:
         undirected_graph = self.graph.to_undirected()
         nodes = list(undirected_graph.nodes(data=True))
         # fix for networkx always reporting EdgeView tuple size 3 when it should be 2 for data=False
-        edges = [cast(Tuple[str, str], edge) for edge in undirected_graph.edges()]
+        edges = [cast(Tuple[str, str], edge) for edge in self.graph.edges()]
 
         # sort nodes by pipeline
         pipeline_nodes = defaultdict(list)
         for current_node in list(filter(self.__filter_pipeline_nodes, nodes)):
             pipeline_nodes[current_node[1]["pipeline"]].append(current_node)
 
-        # find connector pipelines
+        # assign pipeline for nodes without label
         for connector, _ in list(filter(self.__filter_connectors, nodes)):
             neighborhood = ego_graph(
-                undirected_graph, connector, radius=2, undirected=True
+                undirected_graph, connector, radius=3, undirected=True
             ).nodes(data=True)
+            pipeline = None
             for _, node in neighborhood:
                 pipeline = node.get("pipeline")
                 if pipeline is not None:
-                    logger.debug(
-                        "Pipeline found for connector {}: {}", connector, pipeline
-                    )
+                    logger.debug("Pipeline found for {}: {}", connector, pipeline)
                     pipeline_nodes[pipeline].extend(neighborhood)
                     break
+            if pipeline is None:
+                logger.warning("No pipeline found for {}", connector)
 
         # build pipeline graphs
         for pipeline, nodes in pipeline_nodes.items():
@@ -179,13 +180,13 @@ class DataFlowGraph:
         return node[1].get("pipeline") is not None
 
     @staticmethod
+    def __filter_connectors(node: Tuple[str, dict]) -> bool:
+        return node[1].get("pipeline") is None
+
+    @staticmethod
     def __filter_pipeline_edges(edge: Tuple[str, str], nodes: List[str]) -> bool:
         source, target = edge
         return source in nodes and target in nodes
-
-    @staticmethod
-    def __filter_connectors(node: Tuple[str, dict]) -> bool:
-        return node[1]["node_type"] == NodeTypesEnum.CONNECTOR
 
     @staticmethod
     def __get_json_graph(graph: nx.Graph) -> dict:
