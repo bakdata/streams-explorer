@@ -123,7 +123,7 @@ class TestDataFlowGraph:
 
     def test_extract_independent_pipelines(self, df: DataFlowGraph):
         settings.k8s.pipeline.label = "pipeline"
-        df.add_streaming_app(self.get_k8s_app())
+        df.add_streaming_app(self.get_k8s_app(pipeline="pipeline1"))
         df.add_streaming_app(
             self.get_k8s_app(
                 name="type2-app2",
@@ -134,12 +134,14 @@ class TestDataFlowGraph:
             )
         )
         df.extract_independent_pipelines()
-        assert "test-app" in df.pipelines
+        assert "pipeline1" in df.pipelines
         assert "pipeline2" in df.pipelines
+        assert len(df.pipelines) == 2
 
         df.graph.add_node("test-node")
         df.extract_independent_pipelines()
-        assert "test-node" in df.pipelines
+        assert "test-node" not in df.pipelines
+        assert len(df.pipelines) == 2
 
     @staticmethod
     def get_k8s_app(

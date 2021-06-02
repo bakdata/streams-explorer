@@ -183,9 +183,7 @@ class TestStreamsExplorer:
     def test_get_pipeline_names(self, streams_explorer):
         streams_explorer.update()
         assert streams_explorer.get_pipeline_names() == [
-            "streaming-app1",
             "pipeline2",
-            "generic-source-connector",
         ]
 
     def test_get_node_information(self, streams_explorer, monkeypatch):

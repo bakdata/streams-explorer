@@ -34,7 +34,6 @@ class DataFlowGraph:
             app.name,
             label=app.name,
             node_type=NodeTypesEnum.STREAMING_APP,
-            pipeline=pipeline,
             **app.attributes,
         )
         if app.output_topic:
