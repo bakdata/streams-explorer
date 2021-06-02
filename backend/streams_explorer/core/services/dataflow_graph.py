@@ -112,7 +112,9 @@ class DataFlowGraph:
             pipeline_nodes[current_node[1]["pipeline"]].append(current_node)
 
         # assign pipeline for nodes without label
-        for connector, _ in list(filter(self.__filter_connectors, nodes)):
+        for connector, _ in list(
+            filter(lambda node: not self.__filter_pipeline_nodes(node), nodes)
+        ):
             neighborhood = ego_graph(
                 undirected_graph, connector, radius=3, undirected=True
             ).nodes(data=True)
@@ -178,10 +180,6 @@ class DataFlowGraph:
     @staticmethod
     def __filter_pipeline_nodes(node: Tuple[str, dict]) -> bool:
         return node[1].get("pipeline") is not None
-
-    @staticmethod
-    def __filter_connectors(node: Tuple[str, dict]) -> bool:
-        return node[1].get("pipeline") is None
 
     @staticmethod
     def __filter_pipeline_edges(edge: Tuple[str, str], nodes: List[str]) -> bool:
