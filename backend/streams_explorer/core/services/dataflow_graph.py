@@ -2,7 +2,9 @@ from collections import defaultdict
 from typing import Dict, List, Optional, Tuple, Type, cast
 
 import networkx as nx
+from loguru import logger
 from networkx.drawing.nx_agraph import graphviz_layout
+from networkx.generators.ego import ego_graph
 
 from streams_explorer.core.config import settings
 from streams_explorer.core.k8s_app import K8sApp
@@ -106,8 +108,23 @@ class DataFlowGraph:
 
         # sort nodes by pipeline
         pipeline_nodes = defaultdict(list)
-        for node in list(filter(self.__filter_pipeline_nodes, nodes)):
-            pipeline_nodes[node[1]["pipeline"]].append(node)
+        for current_node in list(filter(self.__filter_pipeline_nodes, nodes)):
+            pipeline_nodes[current_node[1]["pipeline"]].append(current_node)
+
+        # find connector pipelines
+        for connector, _ in list(filter(self.__filter_connectors, nodes)):
+            neighborhood = ego_graph(
+                undirected_graph, connector, radius=2, undirected=True
+            ).nodes(data=True)
+            for node in neighborhood:
+                pipeline = node[1].get("pipeline")
+                if pipeline is not None:
+                    logger.debug(
+                        "Pipeline found for connector {}: {}", connector, pipeline
+                    )
+                    for n in neighborhood:
+                        pipeline_nodes[pipeline].append(n)
+                    break
 
         # build pipeline graphs
         for pipeline, nodes in pipeline_nodes.items():
@@ -166,6 +183,11 @@ class DataFlowGraph:
     def __filter_pipeline_edges(edge: Tuple[str, str], nodes: List[str]) -> bool:
         source, target = edge
         return source in nodes and target in nodes
+
+    @staticmethod
+    def __filter_connectors(node: Tuple[str, dict]) -> bool:
+        return node[1]["node_type"] == NodeTypesEnum.CONNECTOR
+        # [node for node in self.graph.nodes(data=True) if node[1]["node_type"] == NodeTypesEnum.CONNECTOR]
 
     @staticmethod
     def __get_json_graph(graph: nx.Graph) -> dict:
