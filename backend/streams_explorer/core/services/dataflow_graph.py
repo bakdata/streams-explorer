@@ -126,10 +126,12 @@ class DataFlowGraph:
         if pipeline is None:
             logger.warning("No pipeline found for {}", node_name)
 
-    def _add_topic(self, graph: nx.DiGraph, name: str):
+    @staticmethod
+    def _add_topic(graph: nx.DiGraph, name: str):
         graph.add_node(name, label=name, node_type=NodeTypesEnum.TOPIC)
 
-    def _add_input_topic(self, graph: nx.DiGraph, streaming_app: str, topic_name: str):
+    @staticmethod
+    def _add_input_topic(graph: nx.DiGraph, streaming_app: str, topic_name: str):
         graph.add_edge(topic_name, streaming_app)
 
     def _add_output_topic(
@@ -141,8 +143,8 @@ class DataFlowGraph:
         self._add_topic(graph, topic_name)
         graph.add_edge(streaming_app, topic_name)
 
+    @staticmethod
     def _add_error_topic(
-        self,
         graph: nx.DiGraph,
         streaming_app: str,
         topic_name: str,

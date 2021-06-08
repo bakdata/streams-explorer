@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Dict, List, Optional, Set
+from typing import Dict, List, Optional, Set, Union
 
 from kubernetes.client import (
     V1beta1CronJob,
@@ -15,9 +15,11 @@ from loguru import logger
 from streams_explorer.core.config import settings
 from streams_explorer.extractors import extractor_container
 
+K8sObject = Union[V1Deployment, V1StatefulSet, V1beta1CronJob]
+
 
 class K8sApp:
-    def __init__(self, k8s_object):
+    def __init__(self, k8s_object: K8sObject):
         self.k8s_object = k8s_object
         self.metadata: Optional[V1ObjectMeta] = k8s_object.metadata
         self.name: str = self.get_name()
@@ -47,7 +49,7 @@ class K8sApp:
         return name
 
     def get_pipeline(self) -> Optional[str]:
-        return self.attributes.get(settings.k8s.pipeline.label)
+        return self.attributes.get(settings.k8s.pipeline.label)  # type: ignore
 
     def __get_common_configuration(self):
         for env in self.container.env:
@@ -102,7 +104,7 @@ class K8sApp:
             self.attributes.update(annotations)
 
     @staticmethod
-    def factory(k8s_object: object) -> K8sApp:
+    def factory(k8s_object: K8sObject) -> K8sApp:
         if isinstance(k8s_object, V1Deployment):
             return K8sAppDeployment(k8s_object)
         elif isinstance(k8s_object, V1StatefulSet):
