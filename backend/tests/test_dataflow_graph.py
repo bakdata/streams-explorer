@@ -133,7 +133,7 @@ class TestDataFlowGraph:
                 pipeline="pipeline2",
             )
         )
-        df.extract_independent_pipelines()
+        # df.extract_independent_pipelines()
         assert "pipeline1" in df.pipelines
         assert "pipeline2" in df.pipelines
         assert len(df.pipelines) == 2

@@ -193,5 +193,5 @@ class StreamsExplorer:
             self.data_flow.add_sink(sink)
 
         # extract subgraphs
-        logger.info("Extract independent pipelines")
-        self.data_flow.extract_independent_pipelines()
+        # logger.info("Extract independent pipelines")
+        # self.data_flow.extract_independent_pipelines()

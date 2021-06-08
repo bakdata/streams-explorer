@@ -1,5 +1,4 @@
-from collections import defaultdict
-from typing import Dict, List, Optional, Tuple, Type, cast
+from typing import Dict, List, Optional, Type
 
 import networkx as nx
 from loguru import logger
@@ -30,27 +29,35 @@ class DataFlowGraph:
         self.metric_provider_class = metric_provider
 
     def add_streaming_app(self, app: K8sApp):
-        self.graph.add_node(
+        pipeline = app.attributes.get("pipeline")
+
+        self._add_streaming_app(self.graph, app)
+        if pipeline:
+            self._add_streaming_app(
+                self.pipelines.setdefault(pipeline, nx.DiGraph()), app
+            )
+
+    def _add_streaming_app(self, graph: nx.DiGraph, app: K8sApp):
+        graph.add_node(
             app.name,
             label=app.name,
             node_type=NodeTypesEnum.STREAMING_APP,
             **app.attributes,
         )
-        pipeline = app.attributes.get("pipeline")
         if app.output_topic:
-            self._add_topic(app.output_topic, pipeline)
-            self._add_output_topic(app.name, app.output_topic, pipeline)
+            self._add_topic(graph, app.output_topic)
+            self._add_output_topic(graph, app.name, app.output_topic)
         if app.error_topic:
-            self._add_error_topic(app.name, app.error_topic, pipeline)
+            self._add_error_topic(graph, app.name, app.error_topic)
         for input_topic in app.input_topics:
-            self._add_topic(input_topic, pipeline)
-            self._add_input_topic(app.name, input_topic)
+            self._add_topic(graph, input_topic)
+            self._add_input_topic(graph, app.name, input_topic)
         for extra_input in app.extra_input_topics:
-            self._add_topic(extra_input, pipeline)
-            self._add_input_topic(app.name, extra_input)
+            self._add_topic(graph, extra_input)
+            self._add_input_topic(graph, app.name, extra_input)
         for extra_output in app.extra_output_topics:
-            self._add_topic(extra_output, pipeline)
-            self._add_output_topic(app.name, extra_output, pipeline)
+            self._add_topic(graph, extra_output)
+            self._add_output_topic(graph, app.name, extra_output)
 
     def add_connector(self, connector: KafkaConnector):
         self.graph.add_node(
@@ -59,13 +66,15 @@ class DataFlowGraph:
             node_type=NodeTypesEnum.CONNECTOR,
         )
         for topic in connector.topics:
-            self._add_topic(topic)
+            self._add_topic(self.graph, topic)
             if connector.type == KafkaConnectorTypesEnum.SINK:
                 self.graph.add_edge(topic, connector.name)
             if connector.type == KafkaConnectorTypesEnum.SOURCE:
                 self.graph.add_edge(connector.name, topic)
         if connector.error_topic:
-            self._add_error_topic(connector.name, connector.error_topic)
+            self._add_error_topic(self.graph, connector.name, connector.error_topic)
+
+        self.assign_pipeline(connector.name)
 
     def add_source(self, source: Source):
         self.graph.add_node(
@@ -74,6 +83,7 @@ class DataFlowGraph:
             node_type=source.node_type,
         )
         self.graph.add_edge(source.name, source.target)
+        self.assign_pipeline(source.name)
 
     def add_sink(self, sink: Sink):
         self.graph.add_node(
@@ -82,6 +92,7 @@ class DataFlowGraph:
             node_type=sink.node_type,
         )
         self.graph.add_edge(sink.source, sink.name)
+        self.assign_pipeline(sink.name)
 
     def get_positioned_pipeline_graph(self, pipeline_name: str) -> dict:
         return self.__get_positioned_json_graph(self.pipelines[pipeline_name])
@@ -100,91 +111,53 @@ class DataFlowGraph:
         except KeyError:
             raise NodeNotFound()
 
-    def extract_independent_pipelines(self):
-        undirected_graph = self.graph.to_undirected()
-        nodes = list(undirected_graph.nodes(data=True))
-        # fix for networkx always reporting EdgeView tuple size 3 when it should be 2 for data=False
-        edges = [cast(Tuple[str, str], edge) for edge in self.graph.edges()]
-
-        # sort nodes by pipeline
-        pipeline_nodes = defaultdict(list)
-        for current_node in list(filter(self.__filter_pipeline_nodes, nodes)):
-            pipeline_nodes[current_node[1]["pipeline"]].append(current_node)
-
-        # assign pipeline for nodes without label
-        for connector, _ in list(
-            filter(lambda node: not self.__filter_pipeline_nodes(node), nodes)
-        ):
-            neighborhood = ego_graph(
-                undirected_graph, connector, radius=3, undirected=True
-            ).nodes(data=True)
-            pipeline = None
-            for _, node in neighborhood:
-                pipeline = node.get("pipeline")
-                if pipeline is not None:
-                    logger.debug("Pipeline found for {}: {}", connector, pipeline)
-                    pipeline_nodes[pipeline].extend(neighborhood)
-                    break
-            if pipeline is None:
-                logger.warning("No pipeline found for {}", connector)
-
-        # build pipeline graphs
-        for pipeline, nodes in pipeline_nodes.items():
-            graph = nx.DiGraph()
-            graph.add_nodes_from(nodes)
-            self.pipelines[pipeline] = graph
-
-            # find edges belonging to pipeline
-            node_names = [name for name, _ in nodes]
-            for source, target in list(
-                filter(
-                    lambda edge: self.__filter_pipeline_edges(edge, node_names), edges
+    def assign_pipeline(self, node_name: str) -> Optional[str]:
+        neighborhood = ego_graph(self.graph, node_name, radius=3, undirected=True)
+        pipeline = None
+        for _, node in neighborhood.nodes(data=True):
+            pipeline = node.get("pipeline")
+            if pipeline is not None:
+                logger.debug("Pipeline found for {}: {}", node_name, pipeline)
+                self.pipelines[pipeline].update(
+                    nodes=neighborhood.nodes(data=True),
+                    edges=neighborhood.edges(),
                 )
-            ):
-                graph.add_edge(source, target)
+                break
+        if pipeline is None:
+            logger.warning("No pipeline found for {}", node_name)
 
-    def _add_topic(self, name: str, pipeline: Optional[str] = None):
-        self.graph.add_node(
-            name, label=name, node_type=NodeTypesEnum.TOPIC, pipeline=pipeline
-        )
+    def _add_topic(self, graph: nx.DiGraph, name: str):
+        graph.add_node(name, label=name, node_type=NodeTypesEnum.TOPIC)
 
-    def _add_input_topic(
+    def _add_input_topic(self, graph: nx.DiGraph, streaming_app: str, topic_name: str):
+        graph.add_edge(topic_name, streaming_app)
+
+    def _add_output_topic(
         self,
+        graph: nx.DiGraph,
         streaming_app: str,
         topic_name: str,
     ):
-        self.graph.add_edge(topic_name, streaming_app)
-
-    def _add_output_topic(
-        self, streaming_app: str, topic_name: str, pipeline: Optional[str] = None
-    ):
-        self._add_topic(topic_name, pipeline=pipeline)
-        self.graph.add_edge(streaming_app, topic_name)
+        self._add_topic(graph, topic_name)
+        graph.add_edge(streaming_app, topic_name)
 
     def _add_error_topic(
-        self, streaming_app: str, topic_name: str, pipeline: Optional[str] = None
+        self,
+        graph: nx.DiGraph,
+        streaming_app: str,
+        topic_name: str,
     ):
-        self.graph.add_node(
+        graph.add_node(
             topic_name,
             label=topic_name,
             node_type=NodeTypesEnum.ERROR_TOPIC,
-            pipeline=pipeline,
         )
-        self.graph.add_edge(streaming_app, topic_name)
+        graph.add_edge(streaming_app, topic_name)
 
     def reset(self):
         self.graph = nx.DiGraph()
         self.pipelines = {}
         self.metric_provider = self.metric_provider_class(self.graph.nodes(data=True))
-
-    @staticmethod
-    def __filter_pipeline_nodes(node: Tuple[str, dict]) -> bool:
-        return node[1].get("pipeline") is not None
-
-    @staticmethod
-    def __filter_pipeline_edges(edge: Tuple[str, str], nodes: List[str]) -> bool:
-        source, target = edge
-        return source in nodes and target in nodes
 
     @staticmethod
     def __get_json_graph(graph: nx.Graph) -> dict:
