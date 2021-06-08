@@ -82,6 +82,7 @@ class TestDataFlowGraph:
         df.add_source(source)
         assert len(df.graph.nodes) == 5
         assert df.graph.has_edge("test-source", "test-app")
+        assert len(df.pipelines) == 0
 
     def test_add_sink(self, df: DataFlowGraph):
         sink = Sink(
@@ -93,6 +94,7 @@ class TestDataFlowGraph:
         df.add_sink(sink)
         assert len(df.graph.nodes) == 5
         assert df.graph.has_edge("test-app", "test-sink")
+        assert len(df.pipelines) == 0
 
     def test_get_positioned_json_graph(self, df: DataFlowGraph):
         df.add_streaming_app(self.get_k8s_app())
@@ -138,11 +140,11 @@ class TestDataFlowGraph:
         assert len(df.pipelines) == 2
         assert "pipeline1" in df.pipelines
         assert "pipeline2" in df.pipelines
-
         pipeline1 = df.pipelines["pipeline1"]
         pipeline2 = df.pipelines["pipeline2"]
         assert len(pipeline1.nodes) == 4
         assert len(pipeline2.nodes) == 5
+        assert "output-topic" in pipeline1.nodes
         assert "output-topic" in pipeline2.nodes
 
         df.add_sink(Sink("test-sink", "output-topic"))
