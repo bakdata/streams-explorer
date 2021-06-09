@@ -11,10 +11,12 @@ url = settings.schemaregistry.url
 
 class SchemaRegistry:
     @staticmethod
-    def get_topic_value_schema_versions(topic: str) -> dict:
+    def get_topic_value_schema_versions(topic: str) -> list:
         logger.info(f"Fetch schema versions for topic {topic}")
         response = requests.get(f"{url}/subjects/{topic}-value/versions/")
-        return response.json()
+        if response.status_code == 200:
+            return response.json()
+        return []
 
     @staticmethod
     def get_topic_value_schema(topic: str, version: int = 1) -> dict:
@@ -29,5 +31,7 @@ class SchemaRegistry:
     def get_newest_topic_value_schema(topic) -> dict:
         logger.info(f"Fetch newest schema for topic {topic}")
         versions = SchemaRegistry.get_topic_value_schema_versions(topic)
+        if not versions:
+            return {}
         newest_version = max(versions)
         return SchemaRegistry.get_topic_value_schema(topic, newest_version)
