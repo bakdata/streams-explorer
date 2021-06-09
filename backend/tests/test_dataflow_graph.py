@@ -142,10 +142,19 @@ class TestDataFlowGraph:
         assert "pipeline2" in df.pipelines
         pipeline1 = df.pipelines["pipeline1"]
         pipeline2 = df.pipelines["pipeline2"]
-        assert len(pipeline1.nodes) == 4
-        assert len(pipeline2.nodes) == 5
-        assert "output-topic" in pipeline1.nodes
-        assert "output-topic" in pipeline2.nodes
+        assert set(pipeline1.nodes) == {
+            "input-topic",
+            "output-topic",
+            "test-app",
+            "error-topic",
+        }
+        assert set(pipeline2.nodes) == {
+            "output-topic",
+            "input-topic2",
+            "output-topic2",
+            "test-app2",
+            "error-topic2",
+        }
 
         df.add_sink(Sink("test-sink", "output-topic"))
         assert "test-sink" in pipeline1.nodes
