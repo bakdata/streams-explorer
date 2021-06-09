@@ -1,7 +1,7 @@
 import pytest
 
 from streams_explorer.core.config import settings
-from streams_explorer.core.k8s_app import K8sAppDeployment
+from streams_explorer.core.k8s_app import ATTR_PIPELINE, K8sAppDeployment
 from streams_explorer.core.services.dataflow_graph import DataFlowGraph
 from streams_explorer.core.services.metric_providers import MetricProvider
 from streams_explorer.models.kafka_connector import (
@@ -70,6 +70,7 @@ class TestDataFlowGraph:
         assert df.graph.has_edge("test-sink-connector", "dead-letter-topic")
         assert df.graph.has_edge("test-source-connector", "input-topic")
         assert df.graph.has_edge("test-source-connector", "input-topic2")
+        assert len(df.pipelines) == 0
 
     def test_add_source(self, df: DataFlowGraph):
         source = Source(
@@ -81,6 +82,7 @@ class TestDataFlowGraph:
         df.add_source(source)
         assert len(df.graph.nodes) == 5
         assert df.graph.has_edge("test-source", "test-app")
+        assert len(df.pipelines) == 0
 
     def test_add_sink(self, df: DataFlowGraph):
         sink = Sink(
@@ -92,12 +94,13 @@ class TestDataFlowGraph:
         df.add_sink(sink)
         assert len(df.graph.nodes) == 5
         assert df.graph.has_edge("test-app", "test-sink")
+        assert len(df.pipelines) == 0
 
     def test_get_positioned_json_graph(self, df: DataFlowGraph):
         df.add_streaming_app(self.get_k8s_app())
         df.get_positioned_graph()
         nodes = df.graph.nodes(data=True)
-        for _, data in nodes:
+        for _, data in iter(nodes):
             assert data.get("x") is not None
             assert data.get("y") is not None
 
@@ -112,34 +115,59 @@ class TestDataFlowGraph:
                 pipeline="pipeline1",
             )
         )
-        assert df.graph.nodes["test-app1"].get("pipeline") == "pipeline1"
+        assert df.graph.nodes["test-app1"].get(ATTR_PIPELINE) == "pipeline1"
         df.add_streaming_app(
             self.get_k8s_app(
                 name="test-app2",
                 pipeline=None,
             )
         )
-        assert df.graph.nodes["test-app2"].get("pipeline") is None
+        assert df.graph.nodes["test-app2"].get(ATTR_PIPELINE) is None
 
-    def test_extract_independent_pipelines(self, df: DataFlowGraph):
-        settings.k8s.independent_graph.label = "pipeline"
-        df.add_streaming_app(self.get_k8s_app())
+    def test_pipeline_graph(self, df: DataFlowGraph):
+        settings.k8s.pipeline.label = "pipeline"  # type: ignore
+        df.add_streaming_app(self.get_k8s_app(pipeline="pipeline1"))
         df.add_streaming_app(
             self.get_k8s_app(
-                name="type2-app2",
+                name="test-app2",
                 input_topics="input-topic2",
                 error_topic="error-topic2",
                 output_topic="output-topic2",
                 pipeline="pipeline2",
+                multiple_inputs="0=output-topic",
             )
         )
-        df.extract_independent_pipelines()
-        assert "test-app" in df.independent_graphs
-        assert "pipeline2" in df.independent_graphs
+        assert len(df.pipelines) == 2
+        assert "pipeline1" in df.pipelines
+        assert "pipeline2" in df.pipelines
+        pipeline1 = df.pipelines["pipeline1"]
+        pipeline2 = df.pipelines["pipeline2"]
+        assert set(pipeline1.nodes) == {
+            "input-topic",
+            "output-topic",
+            "test-app",
+            "error-topic",
+        }
+        assert set(pipeline2.nodes) == {
+            "output-topic",
+            "input-topic2",
+            "output-topic2",
+            "test-app2",
+            "error-topic2",
+        }
 
-        df.graph.add_node("test-node")
-        df.extract_independent_pipelines()
-        assert "test-node" in df.independent_graphs
+        df.add_sink(Sink("test-sink", "output-topic"))
+        assert "test-sink" in pipeline1.nodes
+
+        source_connector = KafkaConnector(
+            name="test-source-connector",
+            type=KafkaConnectorTypesEnum.SOURCE,
+            topics=["input-topic2", "source-topic"],
+            config={},
+        )
+        df.add_connector(source_connector)
+        assert "test-source-connector" in pipeline2.nodes
+        assert "source-topic" in pipeline2.nodes
 
     @staticmethod
     def get_k8s_app(

@@ -12,6 +12,8 @@ from kubernetes.client import (
     V1StatefulSetSpec,
 )
 
+from streams_explorer.core.k8s_app import ATTR_PIPELINE
+
 
 def get_streaming_app_deployment(
     name,
@@ -81,7 +83,7 @@ def get_metadata(name, pipeline=None) -> V1ObjectMeta:
             "app_name": "test-app-name",
             "chart": "streams-app-0.1.0",
             "release": "test-release",
-            "pipeline": pipeline,
+            ATTR_PIPELINE: pipeline,
         },
         name="test-app-name",
         namespace="test-namespace",

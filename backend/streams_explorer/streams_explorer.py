@@ -5,7 +5,7 @@ from kubernetes.client import V1beta1CronJob, V1Deployment, V1StatefulSet
 from loguru import logger
 
 from streams_explorer.core.config import settings
-from streams_explorer.core.k8s_app import K8sApp
+from streams_explorer.core.k8s_app import K8sApp, K8sObject
 from streams_explorer.core.node_info_extractor import (
     get_displayed_information_connector,
     get_displayed_information_deployment,
@@ -56,7 +56,7 @@ class StreamsExplorer:
         return self.data_flow.get_positioned_pipeline_graph(pipeline_name)
 
     def get_pipeline_names(self) -> List[str]:
-        return list(self.data_flow.independent_graphs.keys())
+        return list(self.data_flow.pipelines.keys())
 
     def get_metrics(self) -> List:
         return self.data_flow.get_metrics()
@@ -129,7 +129,9 @@ class StreamsExplorer:
         self.k8s_batch_client = kubernetes.client.BatchV1beta1Api()
 
     def __retrieve_deployments(self):
-        items = self.get_deployments() + self.get_stateful_sets()
+        items: List[K8sObject] = []
+        items += self.get_deployments()
+        items += self.get_stateful_sets()
         for item in items:
             try:
                 app = K8sApp.factory(item)
@@ -191,7 +193,3 @@ class StreamsExplorer:
 
         for sink in sinks:
             self.data_flow.add_sink(sink)
-
-        # extract subgraphs
-        logger.info("Extract independent pipelines")
-        self.data_flow.extract_independent_pipelines()
