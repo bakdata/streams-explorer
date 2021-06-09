@@ -139,6 +139,7 @@ class TestStreamsExplorer:
                         "connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
                         "test": "test_value",
                         "topics": "output-topic1,output-topic2",
+                        "errors.deadletterqueue.topic.name": "es-sink-connector-dead-letter-topic",
                     },
                     "type": KafkaConnectorTypesEnum.SINK,
                 }
@@ -150,6 +151,11 @@ class TestStreamsExplorer:
                     },
                     "type": KafkaConnectorTypesEnum.SOURCE,
                 }
+
+        def get_topic_value_schema_versions(topic: str) -> list:
+            if topic == "es-sink-connector-dead-letter-topic":
+                return []
+            return [1, 2]
 
         mocker.patch(
             "streams_explorer.core.services.kafkaconnect.KafkaConnect.get_connectors",
@@ -166,7 +172,7 @@ class TestStreamsExplorer:
 
         mocker.patch(
             "streams_explorer.core.services.schemaregistry.SchemaRegistry.get_topic_value_schema_versions",
-            lambda topic: [1, 2],
+            get_topic_value_schema_versions,
         )
         mocker.patch(
             "streams_explorer.core.services.schemaregistry.SchemaRegistry.get_topic_value_schema",
@@ -209,6 +215,13 @@ class TestStreamsExplorer:
                     name="test", value="test_value", type=NodeInfoType.BASIC
                 )
             ],
+        )
+        assert streams_explorer.get_node_information(
+            "es-sink-connector-dead-letter-topic"
+        ) == NodeInformation(
+            node_id="es-sink-connector-dead-letter-topic",
+            node_type=NodeTypesEnum.ERROR_TOPIC,
+            info=[],
         )
         assert streams_explorer.get_node_information(
             "streaming-app2"
