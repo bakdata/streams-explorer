@@ -73,7 +73,7 @@ class StreamsExplorer:
             )
         if node_type == NodeTypesEnum.TOPIC or node_type == NodeTypesEnum.ERROR_TOPIC:
             schema = SchemaRegistry.get_newest_topic_value_schema(node_id)
-            info = self.linking_service.topic_info.copy()
+            info = self.linking_service.topic_info
             if schema:
                 info.append(
                     NodeInfoListItem(
