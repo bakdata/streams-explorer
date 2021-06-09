@@ -15,6 +15,8 @@ from loguru import logger
 from streams_explorer.core.config import settings
 from streams_explorer.extractors import extractor_container
 
+ATTR_PIPELINE = "pipeline"
+
 K8sObject = Union[V1Deployment, V1StatefulSet, V1beta1CronJob]
 
 
@@ -94,7 +96,7 @@ class K8sApp:
 
         pipeline = self.get_pipeline()
         if pipeline is not None:
-            self.attributes["pipeline"] = pipeline
+            self.attributes[ATTR_PIPELINE] = pipeline
 
         if (
             self.k8s_object.spec.template.metadata

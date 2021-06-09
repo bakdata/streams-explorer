@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Type
+from typing import Dict, List, Type
 
 import networkx as nx
 from loguru import logger
@@ -6,7 +6,7 @@ from networkx.drawing.nx_agraph import graphviz_layout
 from networkx.generators.ego import ego_graph
 
 from streams_explorer.core.config import settings
-from streams_explorer.core.k8s_app import K8sApp
+from streams_explorer.core.k8s_app import ATTR_PIPELINE, K8sApp
 from streams_explorer.core.services.metric_providers import MetricProvider
 from streams_explorer.models.graph import Metric
 from streams_explorer.models.kafka_connector import (
@@ -29,7 +29,7 @@ class DataFlowGraph:
         self.metric_provider_class = metric_provider
 
     def add_streaming_app(self, app: K8sApp):
-        pipeline = app.attributes.get("pipeline")
+        pipeline = app.attributes.get(ATTR_PIPELINE)
 
         self._add_streaming_app(self.graph, app)
         if pipeline:
@@ -111,11 +111,11 @@ class DataFlowGraph:
         except KeyError:
             raise NodeNotFound()
 
-    def assign_pipeline(self, node_name: str) -> Optional[str]:
+    def assign_pipeline(self, node_name: str):
         neighborhood = ego_graph(self.graph, node_name, radius=3, undirected=True)
         pipeline = None
         for _, node in neighborhood.nodes(data=True):
-            pipeline = node.get("pipeline")
+            pipeline = node.get(ATTR_PIPELINE)
             if pipeline is not None:
                 logger.debug("Pipeline found for {}: {}", node_name, pipeline)
                 self.pipelines[pipeline].update(

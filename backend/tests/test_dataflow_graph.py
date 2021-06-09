@@ -1,7 +1,7 @@
 import pytest
 
 from streams_explorer.core.config import settings
-from streams_explorer.core.k8s_app import K8sAppDeployment
+from streams_explorer.core.k8s_app import ATTR_PIPELINE, K8sAppDeployment
 from streams_explorer.core.services.dataflow_graph import DataFlowGraph
 from streams_explorer.core.services.metric_providers import MetricProvider
 from streams_explorer.models.kafka_connector import (
@@ -115,14 +115,14 @@ class TestDataFlowGraph:
                 pipeline="pipeline1",
             )
         )
-        assert df.graph.nodes["test-app1"].get("pipeline") == "pipeline1"
+        assert df.graph.nodes["test-app1"].get(ATTR_PIPELINE) == "pipeline1"
         df.add_streaming_app(
             self.get_k8s_app(
                 name="test-app2",
                 pipeline=None,
             )
         )
-        assert df.graph.nodes["test-app2"].get("pipeline") is None
+        assert df.graph.nodes["test-app2"].get(ATTR_PIPELINE) is None
 
     def test_pipeline_graph(self, df: DataFlowGraph):
         settings.k8s.pipeline.label = "pipeline"  # type: ignore
