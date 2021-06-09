@@ -14,8 +14,10 @@ class SchemaRegistry:
     def get_topic_value_schema_versions(topic: str) -> list:
         logger.info(f"Fetch schema versions for topic {topic}")
         response = requests.get(f"{url}/subjects/{topic}-value/versions/")
+        data = response.json()
         if response.status_code == 200:
-            return response.json()
+            return data
+        logger.debug(f"Error fetching schema versions for topic {topic}: {data}")
         return []
 
     @staticmethod
