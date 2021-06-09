@@ -72,16 +72,16 @@ class StreamsExplorer:
                 + get_displayed_information_connector(config),
             )
         if node_type == NodeTypesEnum.TOPIC or node_type == NodeTypesEnum.ERROR_TOPIC:
-            info = self.linking_service.topic_info
             schema = SchemaRegistry.get_newest_topic_value_schema(node_id)
+            info = self.linking_service.topic_info.copy()
             if schema:
-                info += [
+                info.append(
                     NodeInfoListItem(
                         name="Schema",
                         value=schema,
                         type=NodeInfoType.JSON,
                     )
-                ]
+                )
             return NodeInformation(
                 node_id=node_id,
                 node_type=node_type,
