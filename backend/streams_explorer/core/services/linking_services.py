@@ -1,3 +1,4 @@
+from collections import defaultdict
 from typing import Dict, List, Optional
 
 from streams_explorer.core.k8s_app import K8sApp
@@ -9,7 +10,7 @@ class LinkingService:
     _connector_info: List[NodeInfoListItem] = []
     _streaming_app_info: List[NodeInfoListItem] = []
     _topic_info: List[NodeInfoListItem] = []
-    _sink_source_info: Dict[str, List[NodeInfoListItem]] = {}
+    _sink_source_info: Dict[str, List[NodeInfoListItem]] = defaultdict(list)
 
     @property
     def connector_info(self):
@@ -75,7 +76,4 @@ class LinkingService:
 
     @staticmethod
     def add_sink_source_info_item(sink_source_type: str, info_item: NodeInfoListItem):
-        if sink_source_type not in LinkingService._sink_source_info:
-            LinkingService._sink_source_info[sink_source_type] = [info_item]
-        else:
-            LinkingService._sink_source_info[sink_source_type].append(info_item)
+        LinkingService._sink_source_info[sink_source_type].append(info_item)
