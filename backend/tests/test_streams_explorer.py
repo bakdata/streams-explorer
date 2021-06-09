@@ -206,6 +206,24 @@ class TestStreamsExplorer:
         )
 
         assert streams_explorer.get_node_information(
+            "streaming-app2"
+        ) == NodeInformation(
+            node_id="streaming-app2",
+            node_type=NodeTypesEnum.STREAMING_APP,
+            info=[],
+        )
+        assert streams_explorer.get_node_information("input-topic1") == NodeInformation(
+            node_id="input-topic1",
+            node_type=NodeTypesEnum.TOPIC,
+            info=[
+                NodeInfoListItem(
+                    name="Schema",
+                    value=self.get_topic_value_schema("", 2),
+                    type=NodeInfoType.JSON,
+                )
+            ],
+        )
+        assert streams_explorer.get_node_information(
             "es-sink-connector"
         ) == NodeInformation(
             node_id="es-sink-connector",
@@ -222,25 +240,6 @@ class TestStreamsExplorer:
             node_id="es-sink-connector-dead-letter-topic",
             node_type=NodeTypesEnum.ERROR_TOPIC,
             info=[],
-        )
-        assert streams_explorer.get_node_information(
-            "streaming-app2"
-        ) == NodeInformation(
-            node_id="streaming-app2",
-            node_type=NodeTypesEnum.STREAMING_APP,
-            info=[],
-        )
-
-        assert streams_explorer.get_node_information("input-topic1") == NodeInformation(
-            node_id="input-topic1",
-            node_type=NodeTypesEnum.TOPIC,
-            info=[
-                NodeInfoListItem(
-                    name="Schema",
-                    value=self.get_topic_value_schema("", 2),
-                    type=NodeInfoType.JSON,
-                )
-            ],
         )
 
     def test_cron_job_extractor(self, streams_explorer):
