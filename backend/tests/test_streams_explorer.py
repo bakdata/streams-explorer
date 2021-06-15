@@ -35,7 +35,7 @@ from tests.utils import get_streaming_app_deployment
 
 class TestStreamsExplorer:
     @staticmethod
-    def get_topic_value_schema(topic, version):
+    def get_topic_value_schema(topic: str, version: int = 1) -> dict:
         if version == 1:
             return {
                 "type": "record",
@@ -97,10 +97,14 @@ class TestStreamsExplorer:
 
     @pytest.fixture()
     def fake_linker(self, mocker):
-        """Creates LinkingService without default NodeInfoListItems."""
+        """Creates LinkingService with non-default NodeInfoListItems."""
 
         def fake_linker_init(self):
-            pass
+            self.topic_info = [
+                NodeInfoListItem(
+                    name="Test Topic Monitoring", value="test", type=NodeInfoType.LINK
+                ),
+            ]
 
         mocker.patch(
             "streams_explorer.defaultlinker.DefaultLinker.__init__",
@@ -217,10 +221,13 @@ class TestStreamsExplorer:
             node_type=NodeTypesEnum.TOPIC,
             info=[
                 NodeInfoListItem(
+                    name="Test Topic Monitoring", value="test", type=NodeInfoType.LINK
+                ),
+                NodeInfoListItem(
                     name="Schema",
                     value=self.get_topic_value_schema("", 2),
                     type=NodeInfoType.JSON,
-                )
+                ),
             ],
         )
         assert streams_explorer.get_node_information(
@@ -239,7 +246,11 @@ class TestStreamsExplorer:
         ) == NodeInformation(
             node_id="es-sink-connector-dead-letter-topic",
             node_type=NodeTypesEnum.ERROR_TOPIC,
-            info=[],
+            info=[
+                NodeInfoListItem(
+                    name="Test Topic Monitoring", value="test", type=NodeInfoType.LINK
+                ),
+            ],
         )
 
     def test_cron_job_extractor(self, streams_explorer):
