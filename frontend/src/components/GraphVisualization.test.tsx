@@ -22,6 +22,9 @@ describe("visualize node metrics", () => {
         { id: "sink-connector3", node_type: "connector" },
         { id: "source1", node_type: "sink/source" },
         { id: "sink2", node_type: "sink/source" },
+        { id: "sink-topic4", node_type: "topic" },
+        { id: "sink-connector4", node_type: "connector" },
+        { id: "sink4", node_type: "sink/source" },
       ],
       edges: [
         {
@@ -78,6 +81,16 @@ describe("visualize node metrics", () => {
           id: "in-edge-sink-connector3",
           source: "topic-out3",
           target: "sink-connector3",
+        },
+        {
+          id: "in-edge-sink-connector4",
+          source: "sink-topic4",
+          target: "sink-connector4",
+        },
+        {
+          id: "in-edge-sink4",
+          source: "sink-connector4",
+          target: "sink4",
         },
       ],
     });
@@ -185,6 +198,26 @@ describe("visualize node metrics", () => {
         replicas: undefined,
         connector_tasks: 1,
       },
+      {
+        node_id: "sink-topic4",
+        messages_in: 0,
+        messages_out: undefined,
+        consumer_lag: undefined,
+        consumer_read_rate: undefined,
+        topic_size: 0,
+        replicas: undefined,
+        connector_tasks: undefined,
+      },
+      {
+        node_id: "sink-connector4",
+        messages_in: undefined,
+        messages_out: undefined,
+        consumer_lag: 0,
+        consumer_read_rate: undefined,
+        topic_size: undefined,
+        replicas: undefined,
+        connector_tasks: 1,
+      },
     ]);
 
     expect(graph.findById("out-edge-source1").getModel().type).toEqual(
@@ -213,6 +246,12 @@ describe("visualize node metrics", () => {
     );
     expect(graph.findById("in-edge-sink-connector3").getModel().type).toEqual(
       "line-dash"
+    );
+    expect(graph.findById("in-edge-sink-connector4").getModel().type).toEqual(
+      "cubic-horizontal"
+    );
+    expect(graph.findById("in-edge-sink4").getModel().type).toEqual(
+      "cubic-horizontal"
     );
   });
 });

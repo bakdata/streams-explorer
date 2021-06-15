@@ -122,7 +122,7 @@ export function updateNodeMetrics(graph: Graph, metrics: Metric[]) {
       } else if (nodeType === "connector") {
         // animate edges on connector nodes if read rate and running tasks is not 0
         const active: boolean = !(
-          metric.consumer_read_rate === 0 || metric.connector_tasks === 0
+          !metric.consumer_read_rate || metric.connector_tasks === 0
         );
         setEdgeActivity(graph, node.getEdges(), active);
       }
