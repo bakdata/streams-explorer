@@ -80,7 +80,7 @@ export function updateNodeMetrics(graph: Graph, metrics: Metric[]) {
         typeof metric.replicas === "number"
           ? `REPLICAS ${
               typeof metric.replicas_available === "number"
-                ? `${metric.replicas_available} !`
+                ? `${metric.replicas_available}/`
                 : ""
             }${metric.replicas}`
           : ""
