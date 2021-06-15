@@ -35,7 +35,7 @@ from tests.utils import get_streaming_app_deployment
 
 class TestStreamsExplorer:
     @staticmethod
-    def get_topic_value_schema(topic, version):
+    def get_topic_value_schema(topic: str, version: int = 1) -> dict:
         if version == 1:
             return {
                 "type": "record",
@@ -97,10 +97,14 @@ class TestStreamsExplorer:
 
     @pytest.fixture()
     def fake_linker(self, mocker):
-        """Creates LinkingService without default NodeInfoListItems."""
+        """Creates LinkingService with non-default NodeInfoListItems."""
 
         def fake_linker_init(self):
-            pass
+            self.topic_info = [
+                NodeInfoListItem(
+                    name="Test Topic Monitoring", value="test", type=NodeInfoType.LINK
+                ),
+            ]
 
         mocker.patch(
             "streams_explorer.defaultlinker.DefaultLinker.__init__",
@@ -139,6 +143,7 @@ class TestStreamsExplorer:
                         "connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
                         "test": "test_value",
                         "topics": "output-topic1,output-topic2",
+                        "errors.deadletterqueue.topic.name": "es-sink-connector-dead-letter-topic",
                     },
                     "type": KafkaConnectorTypesEnum.SINK,
                 }
@@ -150,6 +155,11 @@ class TestStreamsExplorer:
                     },
                     "type": KafkaConnectorTypesEnum.SOURCE,
                 }
+
+        def get_topic_value_schema_versions(topic: str) -> list:
+            if topic == "es-sink-connector-dead-letter-topic":
+                return []
+            return [1, 2]
 
         mocker.patch(
             "streams_explorer.core.services.kafkaconnect.KafkaConnect.get_connectors",
@@ -166,7 +176,7 @@ class TestStreamsExplorer:
 
         mocker.patch(
             "streams_explorer.core.services.schemaregistry.SchemaRegistry.get_topic_value_schema_versions",
-            lambda topic: [1, 2],
+            get_topic_value_schema_versions,
         )
         mocker.patch(
             "streams_explorer.core.services.schemaregistry.SchemaRegistry.get_topic_value_schema",
@@ -200,6 +210,27 @@ class TestStreamsExplorer:
         )
 
         assert streams_explorer.get_node_information(
+            "streaming-app2"
+        ) == NodeInformation(
+            node_id="streaming-app2",
+            node_type=NodeTypesEnum.STREAMING_APP,
+            info=[],
+        )
+        assert streams_explorer.get_node_information("input-topic1") == NodeInformation(
+            node_id="input-topic1",
+            node_type=NodeTypesEnum.TOPIC,
+            info=[
+                NodeInfoListItem(
+                    name="Test Topic Monitoring", value="test", type=NodeInfoType.LINK
+                ),
+                NodeInfoListItem(
+                    name="Schema",
+                    value=self.get_topic_value_schema("", 2),
+                    type=NodeInfoType.JSON,
+                ),
+            ],
+        )
+        assert streams_explorer.get_node_information(
             "es-sink-connector"
         ) == NodeInformation(
             node_id="es-sink-connector",
@@ -211,23 +242,25 @@ class TestStreamsExplorer:
             ],
         )
         assert streams_explorer.get_node_information(
-            "streaming-app2"
+            "es-sink-connector-dead-letter-topic"
         ) == NodeInformation(
-            node_id="streaming-app2",
-            node_type=NodeTypesEnum.STREAMING_APP,
-            info=[],
-        )
-
-        assert streams_explorer.get_node_information("input-topic1") == NodeInformation(
-            node_id="input-topic1",
-            node_type=NodeTypesEnum.TOPIC,
+            node_id="es-sink-connector-dead-letter-topic",
+            node_type=NodeTypesEnum.ERROR_TOPIC,
             info=[
                 NodeInfoListItem(
-                    name="Schema",
-                    value=self.get_topic_value_schema("", 2),
-                    type=NodeInfoType.JSON,
-                )
+                    name="Test Topic Monitoring", value="test", type=NodeInfoType.LINK
+                ),
             ],
+        )
+
+        # clear topic_info
+        streams_explorer.linking_service.topic_info = []
+        assert streams_explorer.get_node_information(
+            "es-sink-connector-dead-letter-topic"
+        ) == NodeInformation(
+            node_id="es-sink-connector-dead-letter-topic",
+            node_type=NodeTypesEnum.ERROR_TOPIC,
+            info=[],
         )
 
     def test_cron_job_extractor(self, streams_explorer):

@@ -72,17 +72,20 @@ class StreamsExplorer:
                 + get_displayed_information_connector(config),
             )
         if node_type == NodeTypesEnum.TOPIC or node_type == NodeTypesEnum.ERROR_TOPIC:
+            schema = SchemaRegistry.get_newest_topic_value_schema(node_id)
+            info = self.linking_service.topic_info
+            if schema:
+                info.append(
+                    NodeInfoListItem(
+                        name="Schema",
+                        value=schema,
+                        type=NodeInfoType.JSON,
+                    )
+                )
             return NodeInformation(
                 node_id=node_id,
                 node_type=node_type,
-                info=self.linking_service.topic_info
-                + [
-                    NodeInfoListItem(
-                        name="Schema",
-                        value=SchemaRegistry.get_newest_topic_value_schema(node_id),
-                        type=NodeInfoType.JSON,
-                    )
-                ],
+                info=info,
             )
         if node_type == NodeTypesEnum.STREAMING_APP:
             info = get_displayed_information_deployment(self.applications[node_id])
