@@ -62,6 +62,7 @@ export interface Metric {
   consumer_read_rate?: number;
   topic_size?: number;
   replicas?: number;
+  replicas_available?: number;
   connector_tasks?: number;
 }
 
