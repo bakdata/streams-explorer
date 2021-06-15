@@ -253,6 +253,16 @@ class TestStreamsExplorer:
             ],
         )
 
+        # clear topic_info
+        streams_explorer.linking_service.topic_info = []
+        assert streams_explorer.get_node_information(
+            "es-sink-connector-dead-letter-topic"
+        ) == NodeInformation(
+            node_id="es-sink-connector-dead-letter-topic",
+            node_type=NodeTypesEnum.ERROR_TOPIC,
+            info=[],
+        )
+
     def test_cron_job_extractor(self, streams_explorer):
         class MockCronjobExtractor(Extractor):
             def __init__(self):
