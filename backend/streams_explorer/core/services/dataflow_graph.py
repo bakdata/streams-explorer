@@ -83,7 +83,14 @@ class DataFlowGraph:
             node_type=source.node_type,
         )
         self.graph.add_edge(source.name, source.target)
-        self.assign_pipeline(source.name)
+
+        if pipeline := self.find_associated_pipeline(source.name):
+            self.pipelines[pipeline].add_node(
+                source.name,
+                label=source.name,
+                node_type=source.node_type,
+            )
+            self.pipelines[pipeline].add_edge(source.name, source.target)
 
     def add_sink(self, sink: Sink):
         self.graph.add_node(
@@ -92,8 +99,8 @@ class DataFlowGraph:
             node_type=sink.node_type,
         )
         self.graph.add_edge(sink.source, sink.name)
-        pipeline = self.find_associated_pipeline(sink.name)
-        if pipeline:
+
+        if pipeline := self.find_associated_pipeline(sink.name):
             self.pipelines[pipeline].add_node(
                 sink.name,
                 label=sink.name,
