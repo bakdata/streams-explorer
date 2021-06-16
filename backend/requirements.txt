@@ -17,9 +17,11 @@ decorator==4.4.2
 distlib==0.3.1
 dynaconf==3.1.2
 fastapi==0.63.0
+fastapi-utils==0.2.1
 filelock==3.0.12
 flake8==3.8.4
 google-auth==1.24.0
+greenlet==1.1.0
 h11==0.12.0
 holoviews==1.14.1
 httptools==0.1.1
@@ -37,8 +39,9 @@ Markdown==3.3.3
 MarkupSafe==1.1.1
 matplotlib==3.3.3
 mccabe==0.6.1
-mypy==0.790
+mypy==0.902
 mypy-extensions==0.4.3
+nest-asyncio==1.5.1
 networkx==2.5
 nodeenv==1.5.0
 numpy==1.19.5
@@ -62,6 +65,7 @@ pyflakes==2.2.0
 pygraphviz==1.6
 pyparsing==2.4.7
 pytest==6.2.1
+pytest-asyncio==0.14.0
 pytest-cov==2.10.1
 pytest-mock==3.5.1
 python-dateutil==2.8.1
@@ -74,6 +78,7 @@ requests-mock==1.8.0
 requests-oauthlib==1.3.0
 rsa==4.7
 six==1.15.0
+SQLAlchemy==1.4.18
 starlette==0.13.6
 toml==0.10.2
 tornado==6.1
@@ -89,6 +94,3 @@ wcwidth==0.2.5
 websocket-client==0.57.0
 websockets==8.1
 zipp==3.4.0
-fastapi-utils==0.2.1
-pytest-asyncio==0.14.0
-nest-asyncio==1.5.1
