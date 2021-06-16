@@ -14,7 +14,7 @@ class DefaultLinker(LinkingService):
             name="Consumer Group Monitoring", value="grafana", type=NodeInfoType.LINK
         )
         akhq_consumer_link = NodeInfoListItem(
-            name="AKHQ Consumer Group", value="akhq", type=NodeInfoType.LINK
+            name="Consumer Group Details", value="akhq", type=NodeInfoType.LINK
         )
         self.topic_info = [
             NodeInfoListItem(
