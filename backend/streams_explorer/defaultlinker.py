@@ -61,7 +61,7 @@ class DefaultLinker(LinkingService):
         self, k8s_app: K8sApp, link_type: Optional[str]
     ) -> Optional[str]:
         if link_type == "kibanalogs":
-            return f"{settings.kibanalogs.url}/app/kibana#/discover?_a=(columns:!(_source),query:(language:lucene,query:'kubernetes.labels.app:%20%22{k8s_app.metadata.labels.get('app')}%22'))"
+            return f"{settings.kibanalogs.url}/app/kibana#/discover?_a=(columns:!(_source),query:(language:lucene,query:'kubernetes.labels.app:%20%22{k8s_app.name}%22'))"
         elif consumer_group := k8s_app.get_consumer_group():
             if link_type == "grafana":
                 return f"{settings.grafana.url}/d/{settings.grafana.dashboards.consumergroups}?var-consumergroups={consumer_group}"
