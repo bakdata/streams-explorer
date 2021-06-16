@@ -55,7 +55,7 @@ class LinkingService:
         pass
 
     def get_redirect_streaming_app(
-        self, k8s_application: K8sApp, link_type: Optional[str]
+        self, k8s_app: K8sApp, link_type: Optional[str]
     ) -> Optional[str]:
         pass
 

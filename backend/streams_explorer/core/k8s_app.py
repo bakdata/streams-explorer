@@ -53,6 +53,9 @@ class K8sApp:
     def get_pipeline(self) -> Optional[str]:
         return self.attributes.get(settings.k8s.pipeline.label)  # type: ignore
 
+    def get_consumer_group(self) -> Optional[str]:
+        return self.attributes.get(settings.k8s.consumer_group_annotation)  # type: ignore
+
     def __get_common_configuration(self):
         for env in self.container.env:
             name = env.name
