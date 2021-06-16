@@ -3,6 +3,108 @@ import { graphConfig } from "../graphConfiguration";
 import { updateNodeMetrics } from "./GraphVisualization";
 
 describe("visualize node metrics", () => {
+  it("should update node labels", () => {
+    document.body.innerHTML = '<div id="testGraph"></div>';
+    graphConfig.container = "testGraph";
+    const graph = new G6.Graph(graphConfig);
+
+    graph.data({
+      nodes: [
+        { id: "streaming-app", node_type: "streaming-app" },
+        { id: "topic", node_type: "topic" },
+        { id: "connector", node_type: "connector" },
+        { id: "sink", node_type: "sink/source" },
+      ],
+      edges: [],
+    });
+
+    graph.render();
+
+    updateNodeMetrics(graph, [
+      {
+        node_id: "streaming-app",
+        messages_in: undefined,
+        messages_out: undefined,
+        consumer_lag: 1,
+        consumer_read_rate: undefined,
+        topic_size: undefined,
+        replicas: 1,
+        replicas_available: undefined,
+        connector_tasks: undefined,
+      },
+      {
+        node_id: "topic",
+        messages_in: 1,
+        messages_out: 1,
+        consumer_lag: undefined,
+        consumer_read_rate: undefined,
+        topic_size: undefined,
+        replicas: undefined,
+        replicas_available: undefined,
+        connector_tasks: undefined,
+      },
+      {
+        node_id: "connector",
+        messages_in: undefined,
+        messages_out: undefined,
+        consumer_lag: 1,
+        consumer_read_rate: 1,
+        topic_size: undefined,
+        replicas: undefined,
+        replicas_available: undefined,
+        connector_tasks: 1,
+      },
+    ]);
+
+    expect(graph.findById("streaming-app").getModel().metric).toEqual(
+      "REPLICAS 1  LAG 1"
+    );
+    expect(graph.findById("topic").getModel().metric).toEqual(
+      "IN 1/s  OUT 1/s"
+    );
+    expect(graph.findById("connector").getModel().metric).toEqual(
+      "TASKS 1  LAG 1  READ 1/s"
+    );
+    expect(graph.findById("sink").getModel().metric).toBeUndefined();
+
+    updateNodeMetrics(graph, [
+      {
+        node_id: "streaming-app",
+        messages_in: undefined,
+        messages_out: undefined,
+        consumer_lag: 0,
+        consumer_read_rate: undefined,
+        topic_size: undefined,
+        replicas: 2,
+        replicas_available: 1,
+        connector_tasks: undefined,
+      },
+      {
+        node_id: "topic",
+        messages_in: 80_000,
+        messages_out: 10,
+        consumer_lag: undefined,
+        consumer_read_rate: undefined,
+        topic_size: 1_100_000_000,
+        replicas: undefined,
+        replicas_available: undefined,
+        connector_tasks: undefined,
+      },
+    ]);
+
+    expect(graph.findById("streaming-app").getModel().metric).toEqual(
+      "REPLICAS 1/2  LAG 0"
+    );
+    expect(graph.findById("topic").getModel().metric).toEqual(
+      "SIZE 1.1B  IN 80,000/s  OUT 10/s"
+    );
+    // unchanged
+    expect(graph.findById("connector").getModel().metric).toEqual(
+      "TASKS 1  LAG 1  READ 1/s"
+    );
+    expect(graph.findById("sink").getModel().metric).toBeUndefined();
+  });
+
   it("should animate data processing edges", () => {
     document.body.innerHTML = '<div id="testGraph"></div>';
     graphConfig.container = "testGraph";
@@ -106,6 +208,7 @@ describe("visualize node metrics", () => {
         consumer_read_rate: 1,
         topic_size: undefined,
         replicas: undefined,
+        replicas_available: undefined,
         connector_tasks: 1,
       },
       {
@@ -116,6 +219,7 @@ describe("visualize node metrics", () => {
         consumer_read_rate: undefined,
         topic_size: undefined,
         replicas: undefined,
+        replicas_available: undefined,
         connector_tasks: undefined,
       },
       {
@@ -126,6 +230,7 @@ describe("visualize node metrics", () => {
         consumer_read_rate: undefined,
         topic_size: undefined,
         replicas: undefined,
+        replicas_available: undefined,
         connector_tasks: undefined,
       },
       {
@@ -136,6 +241,7 @@ describe("visualize node metrics", () => {
         consumer_read_rate: 1,
         topic_size: undefined,
         replicas: 0,
+        replicas_available: undefined,
         connector_tasks: undefined,
       },
       {
@@ -146,6 +252,7 @@ describe("visualize node metrics", () => {
         consumer_read_rate: undefined,
         topic_size: 1,
         replicas: undefined,
+        replicas_available: undefined,
         connector_tasks: undefined,
       },
       {
@@ -156,6 +263,7 @@ describe("visualize node metrics", () => {
         consumer_read_rate: undefined,
         topic_size: 1,
         replicas: undefined,
+        replicas_available: undefined,
         connector_tasks: undefined,
       },
       {
@@ -166,6 +274,7 @@ describe("visualize node metrics", () => {
         consumer_read_rate: 0,
         topic_size: undefined,
         replicas: undefined,
+        replicas_available: undefined,
         connector_tasks: undefined,
       },
       {
@@ -176,6 +285,7 @@ describe("visualize node metrics", () => {
         consumer_read_rate: undefined,
         topic_size: 1,
         replicas: undefined,
+        replicas_available: undefined,
         connector_tasks: undefined,
       },
       {
@@ -186,6 +296,7 @@ describe("visualize node metrics", () => {
         consumer_read_rate: undefined,
         topic_size: undefined,
         replicas: undefined,
+        replicas_available: undefined,
         connector_tasks: 0,
       },
       {
@@ -196,6 +307,7 @@ describe("visualize node metrics", () => {
         consumer_read_rate: 1,
         topic_size: undefined,
         replicas: undefined,
+        replicas_available: undefined,
         connector_tasks: 1,
       },
       {
@@ -206,6 +318,7 @@ describe("visualize node metrics", () => {
         consumer_read_rate: undefined,
         topic_size: 0,
         replicas: undefined,
+        replicas_available: undefined,
         connector_tasks: undefined,
       },
       {
@@ -216,6 +329,7 @@ describe("visualize node metrics", () => {
         consumer_read_rate: undefined,
         topic_size: undefined,
         replicas: undefined,
+        replicas_available: undefined,
         connector_tasks: 1,
       },
     ]);
