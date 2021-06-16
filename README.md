@@ -133,7 +133,7 @@ The following configuration options are available:
 - `k8s.containers.ignore` Name of containers that should be ignored/hidden (list of string, default: `['prometheus-jmx-exporter']`)
 - `k8s.displayed_information` Details of pod that should be displayed (list of dict, default: `[{'name': 'Labels', 'key': 'metadata.labels'}]`)
 - `k8s.labels` Labels used to set attributes of nodes (list of string, **required**, default: `['pipeline']`)
-- `k8s.independent_graph.label` Attribute of nodes the pipeline name should be extracted from (string, **required**, default: `pipeline`)
+- `k8s.pipeline.label` Attribute of nodes the pipeline name should be extracted from (string, **required**, default: `pipeline`)
 - `k8s.consumer_group_annotation` Annotation the consumer group name should be extracted from (string, **required**, default: `consumerGroup`)
 
 #### Schema Registry
