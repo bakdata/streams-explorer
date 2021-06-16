@@ -83,6 +83,12 @@ prometheus_data = {
             "value": [1611674899.53, "1"],
         },
     ],
+    "replicas_available": [
+        {
+            "metric": {"deployment": "atm-fraud-transactionavroproducer"},
+            "value": [1611674899.53, "0"],
+        },
+    ],
     "consumer_read_rate": [
         {
             "metric": {

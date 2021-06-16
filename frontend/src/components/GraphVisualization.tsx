@@ -77,7 +77,13 @@ export function updateNodeMetrics(graph: Graph, metrics: Metric[]) {
           : ""
       }`,
       `${
-        typeof metric.replicas === "number" ? `REPLICAS ${metric.replicas}` : ""
+        typeof metric.replicas === "number"
+          ? `REPLICAS ${
+              typeof metric.replicas_available === "number"
+                ? `${metric.replicas_available}/`
+                : ""
+            }${metric.replicas}`
+          : ""
       }`,
       `${
         typeof metric.connector_tasks === "number"

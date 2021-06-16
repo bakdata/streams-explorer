@@ -39,6 +39,10 @@ class PrometheusMetric(Enum):
         "replicas",
         "sum by(deployment) (kube_deployment_status_replicas)",
     )
+    REPLICAS_AVAILABLE = (
+        "replicas_available",
+        "sum by(deployment) (kube_deployment_status_replicas_available)",
+    )
     CONNECTOR_TASKS = (
         "connector_tasks",
         "sum by(connector) (kafka_connect_connector_tasks_state == 1) or clamp_max(sum by(connector) (kafka_connect_connector_tasks_state), 0)",
@@ -76,9 +80,10 @@ class MetricProvider:
                 messages_out=self._data["messages_out"].get(node_id),
                 topic_size=self._data["topic_size"].get(node_id),
                 replicas=self._data["replicas"].get(node_id),
+                replicas_available=self._data["replicas_available"].get(node_id),
                 connector_tasks=self._data["connector_tasks"].get(node_id),
             )
-            for node_id, node in self._nodes
+            for node_id, node in iter(self._nodes)
             if node_id
         ]
 
@@ -110,6 +115,7 @@ class PrometheusMetricProvider(MetricProvider):
         self._data["consumer_read_rate"] = self.__get_consumer_read_rate()
         self._data["topic_size"] = self.__get_topic_size()
         self._data["replicas"] = self.__get_replicas()
+        self._data["replicas_available"] = self.__get_replicas_available()
         self._data["connector_tasks"] = self.__get_connector_tasks()
 
     def __get_messages_in(self) -> Dict[str, float]:
@@ -145,6 +151,15 @@ class PrometheusMetricProvider(MetricProvider):
     def __get_replicas(self) -> Dict[str, int]:
         prom_replicas = self.get_metric(metric=PrometheusMetric.REPLICAS)
         return {d["metric"]["deployment"]: int(d["value"][-1]) for d in prom_replicas}
+
+    def __get_replicas_available(self) -> Dict[str, int]:
+        prom_replicas_available = self.get_metric(
+            metric=PrometheusMetric.REPLICAS_AVAILABLE
+        )
+        return {
+            d["metric"]["deployment"]: int(d["value"][-1])
+            for d in prom_replicas_available
+        }
 
     def __get_connector_tasks(self) -> Dict[str, int]:
         prom_connector_tasks = self.get_metric(metric=PrometheusMetric.CONNECTOR_TASKS)

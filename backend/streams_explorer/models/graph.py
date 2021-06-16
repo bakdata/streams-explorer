@@ -21,13 +21,14 @@ class Node(BaseModel):
 
 class Metric(BaseModel):
     node_id: str
-    messages_in: Optional[float] = None
-    messages_out: Optional[float] = None
-    consumer_lag: Optional[int] = None
-    consumer_read_rate: Optional[float] = None
-    topic_size: Optional[int] = None
-    replicas: Optional[int] = None
-    connector_tasks: Optional[int] = None
+    messages_in: Optional[float]
+    messages_out: Optional[float]
+    consumer_lag: Optional[int]
+    consumer_read_rate: Optional[float]
+    topic_size: Optional[int]
+    replicas: Optional[int]
+    replicas_available: Optional[int]
+    connector_tasks: Optional[int]
 
 
 class Edge(BaseModel):

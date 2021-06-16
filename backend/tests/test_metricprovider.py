@@ -99,6 +99,7 @@ class TestPrometheusMetricProvider:
                 node_id="atm-fraud-transactionavroproducer",
                 consumer_lag=78,
                 replicas=1,
+                replicas_available=0,
                 consumer_read_rate=64.977769,
             ),
             Metric(
