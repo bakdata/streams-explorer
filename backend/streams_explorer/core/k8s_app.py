@@ -169,6 +169,7 @@ class K8sAppCronJob(K8sApp):
         self.container = self.get_app_container(self.spec)
         self.env_prefix = self.get_env_prefix(self.container)
         self.__get_common_configuration()
+        self.__get_attributes()
 
     def get_name(self) -> str:
         name = self.metadata.name
@@ -185,6 +186,23 @@ class K8sAppCronJob(K8sApp):
                 self.output_topic = env.value
             elif name == self._get_env_name("ERROR_TOPIC"):
                 self.error_topic = env.value
+
+    def __get_attributes(self):
+        labels = self.metadata.labels
+        labels_to_use = self.get_labels()
+
+        for key in labels_to_use:
+            value = labels.get(key)
+            if value is not None:
+                self.attributes[key] = value
+            elif self.is_streams_bootstrap_app():
+                logger.warning(
+                    f"{self.get_class_name()} {self.name} does not have a label with the name: {key}"
+                )
+
+        pipeline = self.get_pipeline()
+        if pipeline is not None:
+            self.attributes[ATTR_PIPELINE] = pipeline
 
 
 class K8sAppDeployment(K8sApp):
