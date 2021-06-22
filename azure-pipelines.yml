@@ -67,6 +67,9 @@ stages:
           - script: pre-commit run black --all-files
             displayName: "Formatting (black)"
 
+          - script: pre-commit run mypy --all-files
+            displayName: "Typing (mypy)"
+
           - script: python -m pytest tests
             displayName: "Run Tests"
             workingDirectory: $(backendPath)

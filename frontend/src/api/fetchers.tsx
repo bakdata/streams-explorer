@@ -16,17 +16,16 @@ export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 
 const encodingFn = encodeURIComponent;
 
-const encodingTagFactory = (encodingFn: typeof encodeURIComponent) => (
-  strings: TemplateStringsArray,
-  ...params: (string | number | boolean)[]
-) =>
-  strings.reduce(
-    (accumulatedPath, pathPart, idx) =>
-      `${accumulatedPath}${pathPart}${
-        idx < params.length ? encodingFn(params[idx]) : ""
-      }`,
-    ""
-  );
+const encodingTagFactory =
+  (encodingFn: typeof encodeURIComponent) =>
+  (strings: TemplateStringsArray, ...params: (string | number | boolean)[]) =>
+    strings.reduce(
+      (accumulatedPath, pathPart, idx) =>
+        `${accumulatedPath}${pathPart}${
+          idx < params.length ? encodingFn(params[idx]) : ""
+        }`,
+      ""
+    );
 
 const encode = encodingTagFactory(encodingFn);
 

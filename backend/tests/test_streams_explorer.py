@@ -282,12 +282,31 @@ class TestStreamsExplorer:
 
     def test_get_link(self, streams_explorer):
         streams_explorer.update()
+
+        # topics
         assert type(streams_explorer.get_link("input-topic1", "grafana")) == str
         assert type(streams_explorer.get_link("input-topic1", "akhq")) == str
+
+        # apps
         assert "consumergroups=consumer-group2" in streams_explorer.get_link(
             "streaming-app2", "grafana"
         )
+        assert "/group/consumer-group2" in streams_explorer.get_link(
+            "streaming-app2", "akhq"
+        )
         assert type(streams_explorer.get_link("streaming-app2", "kibanalogs")) == str
+
+        # connectors
+        assert streams_explorer.get_link("es-sink-connector", "grafana") is None
+        assert streams_explorer.get_link("es-sink-connector", "akhq") is None
+        assert "consumergroups=connect-generic-source" in streams_explorer.get_link(
+            "generic-source-connector", "grafana"
+        )
+        assert "/group/connect-generic-source" in streams_explorer.get_link(
+            "generic-source-connector", "akhq"
+        )
+
+        # sinks/sources
         assert "consumergroups=connect-generic-source" in streams_explorer.get_link(
             "generic-source-connector", "grafana"
         )

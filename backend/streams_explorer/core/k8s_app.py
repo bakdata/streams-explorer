@@ -23,7 +23,7 @@ K8sObject = Union[V1Deployment, V1StatefulSet, V1beta1CronJob]
 class K8sApp:
     def __init__(self, k8s_object: K8sObject):
         self.k8s_object = k8s_object
-        self.metadata: Optional[V1ObjectMeta] = k8s_object.metadata
+        self.metadata: V1ObjectMeta = k8s_object.metadata or V1ObjectMeta()
         self.name: str = self.get_name()
         self.input_topics: List[str] = []
         self.output_topic: Optional[str] = None
@@ -52,6 +52,9 @@ class K8sApp:
 
     def get_pipeline(self) -> Optional[str]:
         return self.attributes.get(settings.k8s.pipeline.label)  # type: ignore
+
+    def get_consumer_group(self) -> Optional[str]:
+        return self.attributes.get(settings.k8s.consumer_group_annotation)  # type: ignore
 
     def __get_common_configuration(self):
         for env in self.container.env:
