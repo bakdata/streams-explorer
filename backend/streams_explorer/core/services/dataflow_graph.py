@@ -69,7 +69,7 @@ class DataFlowGraph:
             self._add_topic(self.graph, topic)
             if connector.type == KafkaConnectorTypesEnum.SINK:
                 self.graph.add_edge(topic, connector.name)
-            if connector.type == KafkaConnectorTypesEnum.SOURCE:
+            elif connector.type == KafkaConnectorTypesEnum.SOURCE:
                 self.graph.add_edge(connector.name, topic)
         if connector.error_topic:
             self._add_error_topic(self.graph, connector.name, connector.error_topic)
