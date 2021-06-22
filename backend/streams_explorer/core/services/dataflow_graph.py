@@ -100,7 +100,9 @@ class DataFlowGraph:
         self.graph.update(nodes=[node], edges=[edge])
 
         if pipeline := self.find_associated_pipeline(node[0]):
-            self.pipelines[pipeline].update(nodes=[node], edges=[edge])
+            if not self.pipelines[pipeline].has_node(node[0]):
+                self.pipelines[pipeline].add_node(node)
+            self.pipelines[pipeline].add_edge(*edge)
 
     def get_positioned_pipeline_graph(self, pipeline_name: str) -> dict:
         return self.__get_positioned_json_graph(self.pipelines[pipeline_name])
@@ -121,14 +123,11 @@ class DataFlowGraph:
 
     def find_associated_pipeline(self, node_name: str) -> Optional[str]:
         neighborhood = ego_graph(self.graph, node_name, radius=3, undirected=True)
-        pipeline = None
         for _, node in neighborhood.nodes(data=True):
-            pipeline = node.get(ATTR_PIPELINE)
-            if pipeline is not None:
+            if pipeline := node.get(ATTR_PIPELINE):
                 logger.debug("Pipeline found for {}: {}", node_name, pipeline)
                 return pipeline
-        if pipeline is None:
-            logger.warning("No pipeline found for {}", node_name)
+        logger.warning("No pipeline found for {}", node_name)
 
     @staticmethod
     def _add_topic(graph: nx.DiGraph, name: str):
