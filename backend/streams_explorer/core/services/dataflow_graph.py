@@ -101,8 +101,14 @@ class DataFlowGraph:
         self.graph.update(nodes=[node], edges=[edge])
 
         if pipeline := self.find_associated_pipeline(node_name):
-            if not self.pipelines[pipeline].has_node(node_name):
-                self.pipelines[pipeline].add_node(node_name, **node_data)
+            # verify target exists in pipeline graph
+            target = (set(edge) - {node_name}).pop()
+            if not self.pipelines[pipeline].has_node(target):
+                logger.debug(
+                    f"'{node_name}' doesn't belong to pipeline '{pipeline}', '{target}' is not a member of graph"
+                )
+                return
+            self.pipelines[pipeline].add_node(node_name, **node_data)
             self.pipelines[pipeline].add_edge(*edge)
 
     def get_positioned_pipeline_graph(self, pipeline_name: str) -> dict:
