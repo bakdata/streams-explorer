@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Type
+from typing import Dict, List, Optional, Tuple, Type
 
 import networkx as nx
 from loguru import logger
@@ -77,36 +77,20 @@ class DataFlowGraph:
         self.assign_pipeline(connector.name)
 
     def add_source(self, source: Source):
-        self.graph.add_node(
-            source.name,
-            label=source.name,
-            node_type=source.node_type,
-        )
-        self.graph.add_edge(source.name, source.target)
-
-        if pipeline := self.find_associated_pipeline(source.name):
-            self.pipelines[pipeline].add_node(
-                source.name,
-                label=source.name,
-                node_type=source.node_type,
-            )
-            self.pipelines[pipeline].add_edge(source.name, source.target)
+        node = (source.name, {"label": source.name, "node_type": source.node_type})
+        edge = (source.name, source.target)
+        self.add_to_graph(node, edge)
 
     def add_sink(self, sink: Sink):
-        self.graph.add_node(
-            sink.name,
-            label=sink.name,
-            node_type=sink.node_type,
-        )
-        self.graph.add_edge(sink.source, sink.name)
+        node = (sink.name, {"label": sink.name, "node_type": sink.node_type})
+        edge = (sink.source, sink.name)
+        self.add_to_graph(node, edge)
 
-        if pipeline := self.find_associated_pipeline(sink.name):
-            self.pipelines[pipeline].add_node(
-                sink.name,
-                label=sink.name,
-                node_type=sink.node_type,
-            )
-            self.pipelines[pipeline].add_edge(sink.source, sink.name)
+    def add_to_graph(self, node: Tuple[str, dict], edge: Tuple[str, str]):
+        self.graph.update(nodes=[node], edges=[edge])
+
+        if pipeline := self.find_associated_pipeline(node[0]):
+            self.pipelines[pipeline].update(nodes=[node], edges=[edge])
 
     def get_positioned_pipeline_graph(self, pipeline_name: str) -> dict:
         return self.__get_positioned_json_graph(self.pipelines[pipeline_name])
