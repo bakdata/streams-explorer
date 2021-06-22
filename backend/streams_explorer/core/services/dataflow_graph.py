@@ -97,11 +97,12 @@ class DataFlowGraph:
         self.add_to_graph(node, edge)
 
     def add_to_graph(self, node: Node, edge: Edge):
+        node_name, node_data = node
         self.graph.update(nodes=[node], edges=[edge])
 
-        if pipeline := self.find_associated_pipeline(node[0]):
-            if not self.pipelines[pipeline].has_node(node[0]):
-                self.pipelines[pipeline].add_node(node)
+        if pipeline := self.find_associated_pipeline(node_name):
+            if not self.pipelines[pipeline].has_node(node_name):
+                self.pipelines[pipeline].add_node(node_name, **node_data)
             self.pipelines[pipeline].add_edge(*edge)
 
     def get_positioned_pipeline_graph(self, pipeline_name: str) -> dict:
