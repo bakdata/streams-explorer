@@ -45,7 +45,9 @@ class K8sApp:
         return self.k8s_object.to_dict()
 
     def get_name(self) -> str:
-        name = self.metadata.labels.get("app")
+        name = None
+        if self.metadata.labels:
+            name = self.metadata.labels.get("app")
         if not name:
             raise TypeError(f"Name is required for {self.get_class_name()}")
         return name
@@ -85,7 +87,7 @@ class K8sApp:
         return f"{self.env_prefix}{variable_name}"
 
     def __get_attributes(self):
-        labels = self.metadata.labels
+        labels = self.metadata.labels or {}
         labels_to_use = self.get_labels()
 
         for key in labels_to_use:
@@ -188,7 +190,7 @@ class K8sAppCronJob(K8sApp):
                 self.error_topic = env.value
 
     def __get_attributes(self):
-        labels = self.metadata.labels
+        labels = self.metadata.labels or {}
         labels_to_use = self.get_labels()
 
         for key in labels_to_use:
