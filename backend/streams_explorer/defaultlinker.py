@@ -42,10 +42,11 @@ class DefaultLinker(LinkingService):
         self, config: dict, link_type: Optional[str]
     ) -> Optional[str]:
         if connector_name := config.get("name"):
+            consumer_group = f"connect-{connector_name}"
             if link_type == "grafana":
-                return f"{settings.grafana.url}/d/{settings.grafana.dashboards.consumergroups}?var-consumergroups=connect-{connector_name}"
+                return f"{settings.grafana.url}/d/{settings.grafana.dashboards.consumergroups}?var-consumergroups={consumer_group}"
             elif link_type == "akhq":
-                return f"{settings.akhq.url}/ui/{settings.akhq.cluster}/group/connect-{connector_name}"
+                return f"{settings.akhq.url}/ui/{settings.akhq.cluster}/group/{consumer_group}"
         return None
 
     def get_redirect_topic(
