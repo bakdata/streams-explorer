@@ -22,6 +22,8 @@ async def graph_positioned(
             pipeline_name
         )
         if not pipeline_graph:
-            raise HTTPException(status_code=404, detail="Pipeline not found")
+            raise HTTPException(
+                status_code=404, detail=f"Pipeline '{pipeline_name}' not found"
+            )
         return pipeline_graph
     return streams_explorer.get_positioned_json_graph()
