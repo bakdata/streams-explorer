@@ -1,4 +1,4 @@
-from typing import Dict, List, Type
+from typing import Dict, List, Optional, Set, Tuple, Type
 
 import networkx as nx
 from loguru import logger
@@ -16,6 +16,9 @@ from streams_explorer.models.kafka_connector import (
 from streams_explorer.models.node_types import NodeTypesEnum
 from streams_explorer.models.sink import Sink
 from streams_explorer.models.source import Source
+
+Node = Tuple[str, dict]
+Edge = Tuple[str, str]
 
 
 class NodeNotFound(Exception):
@@ -59,40 +62,60 @@ class DataFlowGraph:
             self._add_topic(graph, extra_output)
             self._add_output_topic(graph, app.name, extra_output)
 
-    def add_connector(self, connector: KafkaConnector):
-        self.graph.add_node(
+    def add_connector(self, connector: KafkaConnector, pipeline: Optional[str] = None):
+        graph = self.graph
+        if pipeline is not None:
+            graph = self.pipelines[pipeline]
+
+        graph.add_node(
             connector.name,
             label=connector.name,
             node_type=NodeTypesEnum.CONNECTOR,
         )
         for topic in connector.topics:
-            self._add_topic(self.graph, topic)
+            self._add_topic(graph, topic)
             if connector.type == KafkaConnectorTypesEnum.SINK:
-                self.graph.add_edge(topic, connector.name)
-            if connector.type == KafkaConnectorTypesEnum.SOURCE:
-                self.graph.add_edge(connector.name, topic)
+                graph.add_edge(topic, connector.name)
+            elif connector.type == KafkaConnectorTypesEnum.SOURCE:
+                graph.add_edge(connector.name, topic)
         if connector.error_topic:
-            self._add_error_topic(self.graph, connector.name, connector.error_topic)
+            self._add_error_topic(graph, connector.name, connector.error_topic)
 
-        self.assign_pipeline(connector.name)
+        # Add to pipeline graph
+        if pipeline is None:
+            if pipelines := self.find_associated_pipelines(
+                connector.name,
+                reverse=connector.type == KafkaConnectorTypesEnum.SINK,
+                radius=2,
+            ):
+                for pipeline in pipelines:
+                    self.add_connector(connector, pipeline=pipeline)
 
     def add_source(self, source: Source):
-        self.graph.add_node(
-            source.name,
-            label=source.name,
-            node_type=source.node_type,
-        )
-        self.graph.add_edge(source.name, source.target)
-        self.assign_pipeline(source.name)
+        node = (source.name, {"label": source.name, "node_type": source.node_type})
+        edge = (source.name, source.target)
+        self.add_to_graph(node, edge)
 
     def add_sink(self, sink: Sink):
-        self.graph.add_node(
-            sink.name,
-            label=sink.name,
-            node_type=sink.node_type,
-        )
-        self.graph.add_edge(sink.source, sink.name)
-        self.assign_pipeline(sink.name)
+        node = (sink.name, {"label": sink.name, "node_type": sink.node_type})
+        edge = (sink.source, sink.name)
+        self.add_to_graph(node, edge, reverse=True)
+
+    def add_to_graph(self, node: Node, edge: Edge, reverse=False):
+        node_name, node_data = node
+        self.graph.update(nodes=[node], edges=[edge])
+
+        if pipelines := self.find_associated_pipelines(node_name, reverse=reverse):
+            for pipeline in pipelines:
+                # verify target exists in pipeline graph
+                target = (set(edge) - {node_name}).pop()
+                if not self.pipelines[pipeline].has_node(target):
+                    logger.debug(
+                        f"'{node_name}' doesn't belong to pipeline '{pipeline}', '{target}' is not a member of graph"
+                    )
+                    continue
+                self.pipelines[pipeline].add_node(node_name, **node_data)
+                self.pipelines[pipeline].add_edge(*edge)
 
     def get_positioned_pipeline_graph(self, pipeline_name: str) -> dict:
         return self.__get_positioned_json_graph(self.pipelines[pipeline_name])
@@ -111,20 +134,23 @@ class DataFlowGraph:
         except KeyError:
             raise NodeNotFound()
 
-    def assign_pipeline(self, node_name: str):
-        neighborhood = ego_graph(self.graph, node_name, radius=3, undirected=True)
-        pipeline = None
+    def find_associated_pipelines(
+        self, node_name: str, reverse: bool = False, radius: int = 3
+    ) -> Set[str]:
+        """
+        Search neighborhood of connected successor nodes for pipeline label (used for sources).
+        With reverse=True the neighborhood of predecessor nodes is searched instead (used for sinks).
+        """
+        graph = self.graph.reverse() if reverse else self.graph
+        neighborhood = ego_graph(graph, node_name, radius=radius, undirected=False)
+        pipelines = set()
         for _, node in neighborhood.nodes(data=True):
-            pipeline = node.get(ATTR_PIPELINE)
-            if pipeline is not None:
+            if pipeline := node.get(ATTR_PIPELINE):
                 logger.debug("Pipeline found for {}: {}", node_name, pipeline)
-                self.pipelines[pipeline].update(
-                    nodes=neighborhood.nodes(data=True),
-                    edges=neighborhood.edges(),
-                )
-                break
-        if pipeline is None:
+                pipelines.add(pipeline)
+        if not pipelines:
             logger.warning("No pipeline found for {}", node_name)
+        return pipelines
 
     @staticmethod
     def _add_topic(graph: nx.DiGraph, name: str):
