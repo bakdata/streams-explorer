@@ -20,10 +20,10 @@ from streams_explorer.core.k8s_app import ATTR_PIPELINE
 
 
 def get_streaming_app_deployment(
-    name,
-    input_topics,
-    output_topic,
-    error_topic,
+    name="test-app",
+    input_topics="input-topic",
+    output_topic="output-topic",
+    error_topic="error-topic",
     multiple_inputs=None,
     multiple_outputs=None,
     env_prefix="APP_",
@@ -47,10 +47,10 @@ def get_streaming_app_deployment(
 
 
 def get_streaming_app_stateful_set(
-    name,
-    input_topics,
-    output_topic,
-    error_topic,
+    name="test-app",
+    input_topics="input-topic",
+    output_topic="output-topic",
+    error_topic="error-topic",
     multiple_inputs=None,
     multiple_outputs=None,
     env_prefix="APP_",
@@ -78,10 +78,10 @@ def get_streaming_app_stateful_set(
 
 
 def get_streaming_app_cronjob(
-    name,
-    input_topics,
-    output_topic,
-    error_topic,
+    name="test-cronjob",
+    input_topics="",
+    output_topic="output-topic",
+    error_topic="error-topic",
     env_prefix="APP_",
     pipeline=None,
 ) -> V1beta1CronJob:

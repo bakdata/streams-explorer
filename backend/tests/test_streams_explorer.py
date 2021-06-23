@@ -1,17 +1,7 @@
 from typing import List
 
 import pytest
-from kubernetes.client import (
-    V1beta1CronJob,
-    V1beta1CronJobSpec,
-    V1beta1JobTemplateSpec,
-    V1Container,
-    V1EnvVar,
-    V1JobSpec,
-    V1ObjectMeta,
-    V1PodSpec,
-    V1PodTemplateSpec,
-)
+from kubernetes.client import V1beta1CronJob
 
 from streams_explorer.core.config import settings
 from streams_explorer.core.extractor.default.elasticsearch_sink import ElasticsearchSink
@@ -30,7 +20,7 @@ from streams_explorer.models.node_information import (
 )
 from streams_explorer.models.source import Source
 from streams_explorer.streams_explorer import StreamsExplorer
-from tests.utils import get_streaming_app_deployment
+from tests.utils import get_streaming_app_cronjob, get_streaming_app_deployment
 
 
 class TestStreamsExplorer:
@@ -79,21 +69,7 @@ class TestStreamsExplorer:
 
     @pytest.fixture()
     def cron_jobs(self):
-        env_prefix = "APP_"
-        envs = [
-            V1EnvVar(name="ENV_PREFIX", value=env_prefix),
-            V1EnvVar(name=env_prefix + "OUTPUT_TOPIC", value="output-topic"),
-        ]
-        container = V1Container(name="test-container", env=envs)
-        pod_spec = V1PodSpec(containers=[container])
-        pod_template_spec = V1PodTemplateSpec(spec=pod_spec)
-        job_spec = V1JobSpec(
-            template=pod_template_spec,
-            selector="",
-        )
-        job_template = V1beta1JobTemplateSpec(spec=job_spec)
-        spec = V1beta1CronJobSpec(job_template=job_template, schedule="* * * * *")
-        return [V1beta1CronJob(metadata=V1ObjectMeta(name="test-cronjob"), spec=spec)]
+        return [get_streaming_app_cronjob()]
 
     @pytest.fixture()
     def fake_linker(self, mocker):
