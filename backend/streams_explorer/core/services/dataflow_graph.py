@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Tuple, Type
+from typing import Dict, List, Optional, Set, Tuple, Type
 
 import networkx as nx
 from loguru import logger
@@ -83,8 +83,9 @@ class DataFlowGraph:
 
         # Add to pipeline graph
         if pipeline is None:
-            if pipeline := self.find_associated_pipeline(connector.name):
-                self.add_connector(connector, pipeline=pipeline)
+            if pipelines := self.find_associated_pipelines(connector.name):
+                for pipeline in pipelines:
+                    self.add_connector(connector, pipeline=pipeline)
 
     def add_source(self, source: Source):
         node = (source.name, {"label": source.name, "node_type": source.node_type})
@@ -100,16 +101,17 @@ class DataFlowGraph:
         node_name, node_data = node
         self.graph.update(nodes=[node], edges=[edge])
 
-        if pipeline := self.find_associated_pipeline(node_name):
-            # verify target exists in pipeline graph
-            target = (set(edge) - {node_name}).pop()
-            if not self.pipelines[pipeline].has_node(target):
-                logger.debug(
-                    f"'{node_name}' doesn't belong to pipeline '{pipeline}', '{target}' is not a member of graph"
-                )
-                return
-            self.pipelines[pipeline].add_node(node_name, **node_data)
-            self.pipelines[pipeline].add_edge(*edge)
+        if pipelines := self.find_associated_pipelines(node_name):
+            for pipeline in pipelines:
+                # verify target exists in pipeline graph
+                target = (set(edge) - {node_name}).pop()
+                if not self.pipelines[pipeline].has_node(target):
+                    logger.debug(
+                        f"'{node_name}' doesn't belong to pipeline '{pipeline}', '{target}' is not a member of graph"
+                    )
+                    return
+                self.pipelines[pipeline].add_node(node_name, **node_data)
+                self.pipelines[pipeline].add_edge(*edge)
 
     def get_positioned_pipeline_graph(self, pipeline_name: str) -> dict:
         return self.__get_positioned_json_graph(self.pipelines[pipeline_name])
@@ -128,13 +130,16 @@ class DataFlowGraph:
         except KeyError:
             raise NodeNotFound()
 
-    def find_associated_pipeline(self, node_name: str) -> Optional[str]:
+    def find_associated_pipelines(self, node_name: str) -> Set[str]:
         neighborhood = ego_graph(self.graph, node_name, radius=3, undirected=True)
+        pipelines = set()
         for _, node in neighborhood.nodes(data=True):
             if pipeline := node.get(ATTR_PIPELINE):
                 logger.debug("Pipeline found for {}: {}", node_name, pipeline)
-                return pipeline
-        logger.warning("No pipeline found for {}", node_name)
+                pipelines.add(pipeline)
+        if not pipelines:
+            logger.warning("No pipeline found for {}", node_name)
+        return pipelines
 
     @staticmethod
     def _add_topic(graph: nx.DiGraph, name: str):
