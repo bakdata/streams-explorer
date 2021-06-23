@@ -7,7 +7,7 @@ import {
 import DetailsCard from "./components/DetailsCard";
 import GraphVisualization from "./components/GraphVisualization";
 import { graphConfig } from "./graphConfiguration";
-import { DownOutlined } from "@ant-design/icons";
+import { DownOutlined, LoadingOutlined } from "@ant-design/icons";
 import {
   Layout,
   Menu,
@@ -96,11 +96,11 @@ const App: React.FC = () => {
   }
 
   useEffect(() => {
-    if (refreshInterval && refreshInterval > 0) {
+    if (refreshInterval && refreshInterval > 0 && !isLoadingMetrics) {
       const interval = setInterval(refetchMetrics, refreshInterval * 1000);
       return () => clearInterval(interval);
     }
-  }, [refetchMetrics, refreshInterval]);
+  }, [refreshInterval]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // find longest node name and multiply string length by char width 8
   // doesn't cause long delays as builtin function
@@ -127,8 +127,8 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (graphError) {
-      if (typeof graphError.errorData === "object") {
-        message.error(graphError.errorData.detail, 5);
+      if ("data" in graphError) {
+        message.error(graphError["data"]["detail"], 5);
       } else {
         message.error("Failed loading graph");
       }
@@ -143,6 +143,12 @@ const App: React.FC = () => {
   }, [graphError]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
+    if (isLoadingMetrics) {
+      message.loading("Refreshing metrics...", () => isLoadingMetrics);
+    }
+  }, [isLoadingMetrics]);
+
+  useEffect(() => {
     if (metricsError) {
       message.warning("Failed fetching metrics");
     }
@@ -150,7 +156,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (pipelineError) {
-      message.error(pipelineError.message);
+      message.error("Failed loading pipeline names");
     }
   }, [pipelineError]);
 
@@ -244,6 +250,10 @@ const App: React.FC = () => {
                     {refreshIntervals[refreshInterval]} <DownOutlined />
                   </a>
                 </Dropdown>
+                <Spin
+                  indicator={<LoadingOutlined spin />}
+                  spinning={isLoadingMetrics}
+                />
               </Menu.Item>
               <Menu.Item
                 style={{ float: "right" }}
