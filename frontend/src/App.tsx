@@ -143,12 +143,6 @@ const App: React.FC = () => {
   }, [graphError]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    if (isLoadingMetrics) {
-      message.loading("Refreshing metrics...", () => isLoadingMetrics);
-    }
-  }, [isLoadingMetrics]);
-
-  useEffect(() => {
     if (metricsError) {
       message.warning("Failed fetching metrics");
     }
