@@ -83,7 +83,11 @@ class DataFlowGraph:
 
         # Add to pipeline graph
         if pipeline is None:
-            if pipelines := self.find_associated_pipelines(connector.name):
+            if pipelines := self.find_associated_pipelines(
+                connector.name,
+                reverse=connector.type == KafkaConnectorTypesEnum.SINK,
+                radius=2,
+            ):
                 for pipeline in pipelines:
                     self.add_connector(connector, pipeline=pipeline)
 
@@ -95,13 +99,13 @@ class DataFlowGraph:
     def add_sink(self, sink: Sink):
         node = (sink.name, {"label": sink.name, "node_type": sink.node_type})
         edge = (sink.source, sink.name)
-        self.add_to_graph(node, edge)
+        self.add_to_graph(node, edge, reverse=True)
 
-    def add_to_graph(self, node: Node, edge: Edge):
+    def add_to_graph(self, node: Node, edge: Edge, reverse=False):
         node_name, node_data = node
         self.graph.update(nodes=[node], edges=[edge])
 
-        if pipelines := self.find_associated_pipelines(node_name):
+        if pipelines := self.find_associated_pipelines(node_name, reverse=reverse):
             for pipeline in pipelines:
                 # verify target exists in pipeline graph
                 target = (set(edge) - {node_name}).pop()
@@ -130,8 +134,11 @@ class DataFlowGraph:
         except KeyError:
             raise NodeNotFound()
 
-    def find_associated_pipelines(self, node_name: str) -> Set[str]:
-        neighborhood = ego_graph(self.graph, node_name, radius=3, undirected=True)
+    def find_associated_pipelines(
+        self, node_name: str, reverse: bool = False, radius: int = 3
+    ) -> Set[str]:
+        graph = self.graph.reverse() if reverse else self.graph
+        neighborhood = ego_graph(graph, node_name, radius=radius, undirected=False)
         pipelines = set()
         for _, node in neighborhood.nodes(data=True):
             if pipeline := node.get(ATTR_PIPELINE):

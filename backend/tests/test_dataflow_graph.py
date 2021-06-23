@@ -239,6 +239,17 @@ class TestDataFlowGraph:
         assert "test-source" in pipeline1.nodes
         assert "test-source" in pipeline2.nodes
 
+        unrelated_sink_connector = KafkaConnector(
+            name="unrelated-sink-connector",
+            type=KafkaConnectorTypesEnum.SINK,
+            topics=["input-topic1"],
+            config={},
+        )
+        df.add_connector(unrelated_sink_connector)
+        assert "unrelated-sink-connector" in df.graph.nodes
+        assert "unrelated-sink-connector" not in pipeline1.nodes
+        assert "unrelated-sink-connector" not in pipeline2.nodes
+
     def test_multiple_pipelines_apps(self, df: DataFlowGraph):
         """Ensures apps have separate pipelines despite them being connected."""
         settings.k8s.pipeline.label = "pipeline"  # type: ignore
