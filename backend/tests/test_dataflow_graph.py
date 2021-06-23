@@ -12,6 +12,8 @@ from streams_explorer.models.sink import Sink
 from streams_explorer.models.source import Source
 from tests.utils import get_streaming_app_cronjob, get_streaming_app_deployment
 
+settings.k8s.pipeline.label = "pipeline"  # type: ignore
+
 
 class TestDataFlowGraph:
     @pytest.fixture()
@@ -137,7 +139,6 @@ class TestDataFlowGraph:
         assert df.graph.nodes["test-app2"].get(ATTR_PIPELINE) is None
 
     def test_pipeline_graph(self, df: DataFlowGraph):
-        settings.k8s.pipeline.label = "pipeline"  # type: ignore
         df.add_streaming_app(
             K8sApp.factory(
                 get_streaming_app_deployment(
@@ -190,7 +191,6 @@ class TestDataFlowGraph:
         assert "source-topic" in pipeline2.nodes
 
     def test_pipeline_cronjob(self, df: DataFlowGraph):
-        settings.k8s.pipeline.label = "pipeline"  # type: ignore
         df.add_streaming_app(
             K8sApp.factory(
                 get_streaming_app_cronjob(
@@ -220,7 +220,6 @@ class TestDataFlowGraph:
         }
 
     def test_multiple_pipelines_sink_source(self, df: DataFlowGraph):
-        settings.k8s.pipeline.label = "pipeline"  # type: ignore
         df.add_streaming_app(
             K8sApp.factory(
                 get_streaming_app_deployment(
@@ -304,9 +303,82 @@ class TestDataFlowGraph:
         assert "unrelated-sink-connector" not in pipeline1.nodes
         assert "unrelated-sink-connector" not in pipeline2.nodes
 
+    def test_verify_connector_exists_in_pipeline(self, df: DataFlowGraph):
+        """Verify that connector exists in specific pipeline before adding it from a sink or source."""
+        df.add_streaming_app(
+            K8sApp.factory(
+                get_streaming_app_deployment(
+                    name="test-app1",
+                    input_topics="input-topic1",
+                    error_topic="",
+                    output_topic="output-topic1",
+                    pipeline="pipeline1",
+                )
+            )
+        )
+        df.add_streaming_app(
+            K8sApp.factory(
+                get_streaming_app_deployment(
+                    name="test-app2",
+                    input_topics="input-topic2",
+                    error_topic="",
+                    output_topic="output-topic2",
+                    pipeline="pipeline2",
+                )
+            )
+        )
+        sink_connector1 = KafkaConnector(
+            name="sink-connector1",
+            type=KafkaConnectorTypesEnum.SINK,
+            topics=["output-topic1"],
+            config={},
+        )
+        df.add_connector(sink_connector1)
+        sink_connector2 = KafkaConnector(
+            name="sink-connector2",
+            type=KafkaConnectorTypesEnum.SINK,
+            topics=["output-topic2"],
+            config={},
+        )
+        df.add_connector(sink_connector2)
+
+        sink = Sink(
+            name="test-sink",
+            node_type="test-type",
+            source="sink-connector1",
+        )
+        df.add_sink(sink)
+        sink.source = "sink-connector2"
+        df.add_sink(sink)
+
+        assert len(df.pipelines) == 2
+        assert "pipeline1" in df.pipelines
+        assert "pipeline2" in df.pipelines
+        pipeline1 = df.pipelines["pipeline1"]
+        pipeline2 = df.pipelines["pipeline2"]
+        assert "sink-connector1" in pipeline1.nodes
+        assert "sink-connector1" not in pipeline2.nodes
+        assert "sink-connector2" in pipeline2.nodes
+        assert "sink-connector2" not in pipeline1.nodes
+        assert "test-sink" in pipeline1.nodes
+        assert "test-sink" in pipeline2.nodes
+        assert set(pipeline1.nodes) == {
+            "test-app1",
+            "input-topic1",
+            "output-topic1",
+            "sink-connector1",
+            "test-sink",
+        }
+        assert set(pipeline2.nodes) == {
+            "test-app2",
+            "input-topic2",
+            "output-topic2",
+            "sink-connector2",
+            "test-sink",
+        }
+
     def test_multiple_pipelines_apps(self, df: DataFlowGraph):
         """Ensures apps have separate pipelines despite them being connected."""
-        settings.k8s.pipeline.label = "pipeline"  # type: ignore
         df.add_streaming_app(
             K8sApp.factory(
                 get_streaming_app_deployment(
