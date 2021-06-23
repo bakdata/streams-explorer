@@ -77,9 +77,12 @@ const App: React.FC = () => {
     error: pipelineError,
   } = usePipelinesApiPipelinesGet({});
 
-  const { data: metrics, refetch: refetchMetrics } = useMetricsApiMetricsGet(
-    {}
-  );
+  const {
+    data: metrics,
+    loading: isLoadingMetrics,
+    refetch: refetchMetrics,
+    error: metricsError,
+  } = useMetricsApiMetricsGet({});
 
   const getParams = useCallback(() => {
     return new URLSearchParams(location.search);
@@ -123,17 +126,24 @@ const App: React.FC = () => {
   }, [getParams, location]);
 
   if (graphError) {
-    message.error(graphError.message);
-    return (
-      <Spin
-        data-testid="graph-error"
-        spinning={false}
-        tip="Failed to load graph"
-      />
-    );
+    if (typeof graphError.data === "object") {
+      message.error(graphError.data.detail, 5);
+    } else {
+      message.error("Failed loading graph");
+    }
+
+    if (graphError.status === 404) {
+      // Redirect to all pipelines
+      if (currentPipeline !== ALL_PIPELINES) {
+        setCurrentPipeline(ALL_PIPELINES);
+      }
+    }
+  }
+  if (metricsError) {
+    message.warning("Failed fetching metrics");
   }
   if (pipelineError) {
-    message.error(pipelineError?.message);
+    message.error(pipelineError.message);
   }
 
   const menuPipeline = (
