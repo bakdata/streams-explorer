@@ -125,26 +125,34 @@ const App: React.FC = () => {
     }
   }, [getParams, location]);
 
-  if (graphError) {
-    if (typeof graphError.data === "object") {
-      message.error(graphError.data.detail, 5);
-    } else {
-      message.error("Failed loading graph");
-    }
+  useEffect(() => {
+    if (graphError) {
+      if (typeof graphError.errorData === "object") {
+        message.error(graphError.errorData.detail, 5);
+      } else {
+        message.error("Failed loading graph");
+      }
 
-    if (graphError.status === 404) {
-      // Redirect to all pipelines
-      if (currentPipeline !== ALL_PIPELINES) {
-        setCurrentPipeline(ALL_PIPELINES);
+      if (graphError.status === 404) {
+        // Redirect to all pipelines
+        if (currentPipeline !== ALL_PIPELINES) {
+          setCurrentPipeline(ALL_PIPELINES);
+        }
       }
     }
-  }
-  if (metricsError) {
-    message.warning("Failed fetching metrics");
-  }
-  if (pipelineError) {
-    message.error(pipelineError.message);
-  }
+  }, [graphError]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (metricsError) {
+      message.warning("Failed fetching metrics");
+    }
+  }, [metricsError]);
+
+  useEffect(() => {
+    if (pipelineError) {
+      message.error(pipelineError.message);
+    }
+  }, [pipelineError]);
 
   const menuPipeline = (
     <Menu
