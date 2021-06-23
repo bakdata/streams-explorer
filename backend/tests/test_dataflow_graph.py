@@ -239,6 +239,43 @@ class TestDataFlowGraph:
         assert "test-source" in pipeline1.nodes
         assert "test-source" in pipeline2.nodes
 
+    def test_multiple_pipelines_apps(self, df: DataFlowGraph):
+        """Ensures apps have separate pipelines despite them being connected."""
+        settings.k8s.pipeline.label = "pipeline"  # type: ignore
+        df.add_streaming_app(
+            self.get_k8s_app(
+                name="test-app1",
+                input_topics="input-topic1",
+                error_topic="",
+                output_topic="output-topic1",
+                pipeline="pipeline1",
+            )
+        )
+        df.add_streaming_app(
+            self.get_k8s_app(
+                name="test-app2",
+                input_topics="output-topic1",
+                error_topic="",
+                output_topic="output-topic2",
+                pipeline="pipeline2",
+            )
+        )
+        assert len(df.pipelines) == 2
+        assert "pipeline1" in df.pipelines
+        assert "pipeline2" in df.pipelines
+        pipeline1 = df.pipelines["pipeline1"]
+        pipeline2 = df.pipelines["pipeline2"]
+        assert set(pipeline1.nodes) == {
+            "test-app1",
+            "input-topic1",
+            "output-topic1",
+        }
+        assert set(pipeline2.nodes) == {
+            "test-app2",
+            "output-topic1",
+            "output-topic2",
+        }
+
     @staticmethod
     def get_k8s_app(
         name="test-app",
