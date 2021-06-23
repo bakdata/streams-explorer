@@ -109,7 +109,7 @@ class DataFlowGraph:
                     logger.debug(
                         f"'{node_name}' doesn't belong to pipeline '{pipeline}', '{target}' is not a member of graph"
                     )
-                    return
+                    continue
                 self.pipelines[pipeline].add_node(node_name, **node_data)
                 self.pipelines[pipeline].add_edge(*edge)
 
