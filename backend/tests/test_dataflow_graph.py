@@ -1,7 +1,7 @@
 import pytest
 
 from streams_explorer.core.config import settings
-from streams_explorer.core.k8s_app import ATTR_PIPELINE, K8sAppDeployment
+from streams_explorer.core.k8s_app import ATTR_PIPELINE, K8sApp
 from streams_explorer.core.services.dataflow_graph import DataFlowGraph
 from streams_explorer.core.services.metric_providers import MetricProvider
 from streams_explorer.models.kafka_connector import (
@@ -10,7 +10,7 @@ from streams_explorer.models.kafka_connector import (
 )
 from streams_explorer.models.sink import Sink
 from streams_explorer.models.source import Source
-from tests.utils import get_streaming_app_deployment
+from tests.utils import get_streaming_app_cronjob, get_streaming_app_deployment
 
 
 class TestDataFlowGraph:
@@ -19,7 +19,7 @@ class TestDataFlowGraph:
         return DataFlowGraph(metric_provider=MetricProvider)
 
     def test_add_streaming_app(self, df: DataFlowGraph):
-        df.add_streaming_app(self.get_k8s_app())
+        df.add_streaming_app(self.get_k8s_streaming_app())
 
         assert len(df.graph.nodes) == 4
         assert df.graph.has_edge("input-topic", "test-app")
@@ -28,7 +28,9 @@ class TestDataFlowGraph:
 
         # should have multiple input topic
         df.reset()
-        df.add_streaming_app(self.get_k8s_app(input_topics="input-topic1,input-topic2"))
+        df.add_streaming_app(
+            self.get_k8s_streaming_app(input_topics="input-topic1,input-topic2")
+        )
 
         assert len(df.graph.nodes) == 5
         assert df.graph.has_edge("input-topic1", "test-app")
@@ -38,7 +40,9 @@ class TestDataFlowGraph:
 
         df.reset()
         df.add_streaming_app(
-            self.get_k8s_app(multiple_outputs="1=extra-output1,2=extra-output2")
+            self.get_k8s_streaming_app(
+                multiple_outputs="1=extra-output1,2=extra-output2"
+            )
         )
 
         assert len(df.graph.nodes) == 6
@@ -62,7 +66,7 @@ class TestDataFlowGraph:
             topics=["input-topic", "input-topic2"],
             config={},
         )
-        df.add_streaming_app(self.get_k8s_app())
+        df.add_streaming_app(self.get_k8s_streaming_app())
         df.add_connector(sink_connector)
         df.add_connector(source_connector)
         assert len(df.graph.nodes) == 8
@@ -78,7 +82,7 @@ class TestDataFlowGraph:
             node_type="test-type",
             target="test-app",
         )
-        df.add_streaming_app(self.get_k8s_app())
+        df.add_streaming_app(self.get_k8s_streaming_app())
         df.add_source(source)
         assert len(df.graph.nodes) == 5
         assert df.graph.has_edge("test-source", "test-app")
@@ -90,14 +94,14 @@ class TestDataFlowGraph:
             node_type="test-type",
             source="test-app",
         )
-        df.add_streaming_app(self.get_k8s_app())
+        df.add_streaming_app(self.get_k8s_streaming_app())
         df.add_sink(sink)
         assert len(df.graph.nodes) == 5
         assert df.graph.has_edge("test-app", "test-sink")
         assert len(df.pipelines) == 0
 
     def test_get_positioned_json_graph(self, df: DataFlowGraph):
-        df.add_streaming_app(self.get_k8s_app())
+        df.add_streaming_app(self.get_k8s_streaming_app())
         df.get_positioned_graph()
         nodes = df.graph.nodes(data=True)
         for _, data in iter(nodes):
@@ -105,19 +109,19 @@ class TestDataFlowGraph:
             assert data.get("y") is not None
 
     def test_get_node_type(self, df: DataFlowGraph):
-        df.add_streaming_app(self.get_k8s_app())
+        df.add_streaming_app(self.get_k8s_streaming_app())
         assert df.get_node_type("test-app") == "streaming-app"
 
     def test_node_attributes(self, df: DataFlowGraph):
         df.add_streaming_app(
-            self.get_k8s_app(
+            self.get_k8s_streaming_app(
                 name="test-app1",
                 pipeline="pipeline1",
             )
         )
         assert df.graph.nodes["test-app1"].get(ATTR_PIPELINE) == "pipeline1"
         df.add_streaming_app(
-            self.get_k8s_app(
+            self.get_k8s_streaming_app(
                 name="test-app2",
                 pipeline=None,
             )
@@ -126,9 +130,9 @@ class TestDataFlowGraph:
 
     def test_pipeline_graph(self, df: DataFlowGraph):
         settings.k8s.pipeline.label = "pipeline"  # type: ignore
-        df.add_streaming_app(self.get_k8s_app(pipeline="pipeline1"))
+        df.add_streaming_app(self.get_k8s_streaming_app(pipeline="pipeline1"))
         df.add_streaming_app(
-            self.get_k8s_app(
+            self.get_k8s_streaming_app(
                 name="test-app2",
                 input_topics="input-topic2",
                 error_topic="error-topic2",
@@ -169,10 +173,37 @@ class TestDataFlowGraph:
         assert "test-source-connector" in pipeline2.nodes
         assert "source-topic" in pipeline2.nodes
 
+    def test_pipeline_cronjob(self, df: DataFlowGraph):
+        settings.k8s.pipeline.label = "pipeline"  # type: ignore
+        df.add_streaming_app(
+            self.get_k8s_cronjob(
+                error_topic="",
+                pipeline="pipeline1",
+            )
+        )
+        df.add_streaming_app(
+            self.get_k8s_streaming_app(
+                input_topics="output-topic",
+                error_topic="",
+                output_topic="output-topic2",
+                pipeline="pipeline1",
+            )
+        )
+        assert len(df.pipelines) == 1
+        assert "pipeline1" in df.pipelines
+        pipeline1 = df.pipelines["pipeline1"]
+        assert set(pipeline1.nodes) == {
+            "test-cronjob",
+            "input-topic",
+            "output-topic",
+            "test-app",
+            "output-topic2",
+        }
+
     def test_multiple_pipelines_sink_source(self, df: DataFlowGraph):
         settings.k8s.pipeline.label = "pipeline"  # type: ignore
         df.add_streaming_app(
-            self.get_k8s_app(
+            self.get_k8s_streaming_app(
                 name="test-app1",
                 input_topics="input-topic1",
                 error_topic="error-topic1",
@@ -181,7 +212,7 @@ class TestDataFlowGraph:
             )
         )
         df.add_streaming_app(
-            self.get_k8s_app(
+            self.get_k8s_streaming_app(
                 name="test-app2",
                 input_topics="input-topic2",
                 error_topic="error-topic2",
@@ -254,7 +285,7 @@ class TestDataFlowGraph:
         """Ensures apps have separate pipelines despite them being connected."""
         settings.k8s.pipeline.label = "pipeline"  # type: ignore
         df.add_streaming_app(
-            self.get_k8s_app(
+            self.get_k8s_streaming_app(
                 name="test-app1",
                 input_topics="input-topic1",
                 error_topic="",
@@ -263,7 +294,7 @@ class TestDataFlowGraph:
             )
         )
         df.add_streaming_app(
-            self.get_k8s_app(
+            self.get_k8s_streaming_app(
                 name="test-app2",
                 input_topics="output-topic1",
                 error_topic="",
@@ -288,7 +319,7 @@ class TestDataFlowGraph:
         }
 
     @staticmethod
-    def get_k8s_app(
+    def get_k8s_streaming_app(
         name="test-app",
         input_topics="input-topic",
         output_topic="output-topic",
@@ -296,8 +327,8 @@ class TestDataFlowGraph:
         multiple_inputs=None,
         multiple_outputs=None,
         pipeline=None,
-    ):
-        return K8sAppDeployment(
+    ) -> K8sApp:
+        return K8sApp.factory(
             get_streaming_app_deployment(
                 name,
                 input_topics,
@@ -305,6 +336,24 @@ class TestDataFlowGraph:
                 error_topic,
                 multiple_inputs,
                 multiple_outputs,
+                pipeline=pipeline,
+            )
+        )
+
+    @staticmethod
+    def get_k8s_cronjob(
+        name="test-cronjob",
+        input_topics="input-topic",
+        output_topic="output-topic",
+        error_topic="error-topic",
+        pipeline=None,
+    ) -> K8sApp:
+        return K8sApp.factory(
+            get_streaming_app_cronjob(
+                name,
+                input_topics,
+                output_topic,
+                error_topic,
                 pipeline=pipeline,
             )
         )
