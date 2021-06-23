@@ -146,14 +146,6 @@ class TestDataFlowGraph:
             )
         )
         df.add_streaming_app(
-            # self.get_k8s_streaming_app(
-            #     name="test-app2",
-            #     input_topics="input-topic2",
-            #     error_topic="error-topic2",
-            #     output_topic="output-topic2",
-            #     pipeline="pipeline2",
-            #     multiple_inputs="0=output-topic",
-            # )
             K8sApp.factory(
                 get_streaming_app_deployment(
                     name="test-app2",
