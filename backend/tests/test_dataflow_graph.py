@@ -303,6 +303,17 @@ class TestDataFlowGraph:
         assert "unrelated-sink-connector" not in pipeline1.nodes
         assert "unrelated-sink-connector" not in pipeline2.nodes
 
+        unrelated_source_connector = KafkaConnector(
+            name="unrelated-source-connector",
+            type=KafkaConnectorTypesEnum.SOURCE,
+            topics=["output-topic1"],
+            config={},
+        )
+        df.add_connector(unrelated_source_connector)
+        assert "unrelated-source-connector" in df.graph.nodes
+        assert "unrelated-source-connector" not in pipeline1.nodes
+        assert "unrelated-source-connector" not in pipeline2.nodes
+
     def test_verify_connector_exists_in_pipeline(self, df: DataFlowGraph):
         """Verify that connector exists in specific pipeline before adding it from a sink or source."""
         df.add_streaming_app(
