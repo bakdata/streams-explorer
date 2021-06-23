@@ -137,6 +137,10 @@ class DataFlowGraph:
     def find_associated_pipelines(
         self, node_name: str, reverse: bool = False, radius: int = 3
     ) -> Set[str]:
+        """
+        Search neighborhood of connected successor nodes for pipeline label (used for sources).
+        With reverse=True the neighborhood of predecessor nodes is searched instead (used for sinks).
+        """
         graph = self.graph.reverse() if reverse else self.graph
         neighborhood = ego_graph(graph, node_name, radius=radius, undirected=False)
         pipelines = set()
