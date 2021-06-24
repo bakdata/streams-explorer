@@ -1,3 +1,4 @@
+from streams_explorer.core.config import settings
 from streams_explorer.core.services.kafkaconnect import KafkaConnect, url
 
 connector_data = {
@@ -45,3 +46,7 @@ class TestKafkaConnect:
                 "connection.password": "[hidden]",
             }
         assert requests_mock.call_count == 1  # Verify caching works
+
+    def test_without_kafka_connect(self):
+        settings.kafkaconnect.url = None
+        assert KafkaConnect.connectors() == []

@@ -46,7 +46,7 @@ Visit our introduction [blogpost](https://medium.com/bakdata/exploring-data-pipe
 
 ### Docker Compose
 
-1. Forward the ports to Kafka Connect, Schema Registry, and Prometheus. (other integrations are optional)
+1. Forward the ports to Prometheus. (Kafka Connect, Schema Registry, or other integrations are optional)
 2. Start the container
 
 ```sh
@@ -79,7 +79,7 @@ helm upgrade --install --values helm-chart/values.yaml streams-explorer
 pip install -r requirements.txt
 ```
 
-2. Forward the ports to Kafka Connect, Schema Registry, and Prometheus. (other integrations are optional)
+2. Forward the ports to Prometheus. (Kafka Connect, Schema Registry, or other integrations are optional)
 3. Configure the backend in [settings.yaml](backend/settings.yaml).
 4. Start the backend server
 
@@ -122,8 +122,8 @@ The following configuration options are available:
 
 #### Kafka Connect
 
-- `kafkaconnect.url` URL of Kafka Connect server (string, **required**, default: `http://localhost:8083`)
-- `kafkaconnect.displayed_information` Configuration options of Kafka connectors displayed in the frontend (list of dict, **required**, default: `[{'name': 'Transformer', 'key': 'transforms.changeTopic.regex'}]`)
+- `kafkaconnect.url` URL of Kafka Connect server (string, default: None)
+- `kafkaconnect.displayed_information` Configuration options of Kafka connectors displayed in the frontend (list of dict)
 
 #### Kubernetes
 
@@ -138,7 +138,7 @@ The following configuration options are available:
 
 #### Schema Registry
 
-- `schemaregistry.url` URL of Schema Registry (string, **required**, default: `http://localhost:8081`)
+- `schemaregistry.url` URL of Schema Registry (string, default: None)
 
 #### Prometheus
 

@@ -1,9 +1,3 @@
-kafkaconnect:
-  url: "http://localhost:8083"
-  displayed_information:
-    - name: "Transformer"
-      key: "transforms.changeTopic.regex"
-
 # update graph (fetch deployments and connectors) every X seconds
 graph_update_every: 300
 graph_layout_arguments: "-Grankdir=LR -Gnodesep=0.8 -Gpad=10"
@@ -30,8 +24,16 @@ k8s:
     # refers to the attribute of nodes the pipeline name should be extracted from
     label: "pipeline"
 
-schemaregistry:
-  url: "http://localhost:8081"
+# optional: configure kafka connect url and displayed information
+#kafkaconnect:
+#  url: "http://localhost:8083"
+#  displayed_information:
+#    - name: "Transformer"
+#      key: "transforms.changeTopic.regex"
+
+# optional: configure schema registry for topic information
+#schemaregistry:
+#  url: "http://localhost:8081"
 
 prometheus:
   url: "http://localhost:9090"
