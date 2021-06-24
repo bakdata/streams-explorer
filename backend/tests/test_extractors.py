@@ -1,5 +1,7 @@
 from pathlib import Path
 
+import pytest
+
 from streams_explorer.core.config import settings
 from streams_explorer.core.services.kafkaconnect import KafkaConnect
 from streams_explorer.extractors import extractor_container, load_extractors
@@ -56,181 +58,181 @@ class TestSinkTwo(Extractor):
 EMPTY_CONNECTOR_INFO = {"config": {}, "type": ""}
 
 
-def test_load_extractors():
-    settings.plugins.extractors.default = True
-    settings.plugins.path = Path.cwd() / "plugins"
-    assert len(extractor_container.extractors) == 3
-    extractor_1_path = settings.plugins.path / "fake_extractor_1.py"
-    extractor_2_path = settings.plugins.path / "fake_extractor_2.py"
-    try:
-        with open(extractor_1_path, "w") as f:
-            f.write(extractor_file_1)
+class TestExtractors:
+    @pytest.fixture(autouse=True)
+    def kafka_connect(self):
+        settings.kafkaconnect.url = "testurl:3000"
 
-        with open(extractor_2_path, "w") as f:
-            f.write(extractor_file_2)
+    def test_load_extractors(self):
+        settings.plugins.extractors.default = True
+        settings.plugins.path = Path.cwd() / "plugins"
+        assert len(extractor_container.extractors) == 3
+        extractor_1_path = settings.plugins.path / "fake_extractor_1.py"
+        extractor_2_path = settings.plugins.path / "fake_extractor_2.py"
+        try:
+            with open(extractor_1_path, "w") as f:
+                f.write(extractor_file_1)
 
+            with open(extractor_2_path, "w") as f:
+                f.write(extractor_file_2)
+
+            load_extractors()
+
+            assert len(extractor_container.extractors) == 7
+
+            extractor_classes = [
+                extractor.__class__.__name__
+                for extractor in extractor_container.extractors
+            ]
+            assert "TestSinkOne" in extractor_classes
+            assert "TestSinkTwo" in extractor_classes
+            assert "ElasticsearchSink" in extractor_classes
+            assert "S3Sink" in extractor_classes
+            assert "JdbcSink" in extractor_classes
+            # Verify Generic extractors are last in list as fallback
+            fallback_extractor_classes = extractor_classes[-2:]
+            assert "GenericSink" in fallback_extractor_classes
+            assert "GenericSource" in fallback_extractor_classes
+        finally:
+            extractor_1_path.unlink()
+            extractor_2_path.unlink()
+
+    def test_load_extractors_without_defaults(self):
+        settings.plugins.extractors.default = False
+        settings.plugins.path = Path.cwd() / "plugins"
+        extractor_container.extractors.clear()
         load_extractors()
 
-        assert len(extractor_container.extractors) == 7
+        assert len(extractor_container.extractors) == 2
 
         extractor_classes = [
             extractor.__class__.__name__ for extractor in extractor_container.extractors
         ]
-        assert "TestSinkOne" in extractor_classes
-        assert "TestSinkTwo" in extractor_classes
-        assert "ElasticsearchSink" in extractor_classes
-        assert "S3Sink" in extractor_classes
-        assert "JdbcSink" in extractor_classes
-        # Verify Generic extractors are last in list as fallback
-        fallback_extractor_classes = extractor_classes[-2:]
-        assert "GenericSink" in fallback_extractor_classes
-        assert "GenericSource" in fallback_extractor_classes
-    finally:
-        extractor_1_path.unlink()
-        extractor_2_path.unlink()
+        assert "GenericSink" in extractor_classes
+        assert "GenericSource" in extractor_classes
 
+    def test_generic_extractors_fallback(self, mocker):
+        settings.plugins.extractors.default = True
 
-def test_load_extractors_without_defaults():
-    settings.plugins.extractors.default = False
-    settings.plugins.path = Path.cwd() / "plugins"
-    extractor_container.extractors.clear()
-    load_extractors()
+        mocker.patch(
+            "streams_explorer.core.services.kafkaconnect.KafkaConnect.get_connectors",
+            lambda: ["custom-sink", "custom-source"],
+        )
 
-    assert len(extractor_container.extractors) == 2
+        def get_connector_info(connector_name: str) -> dict:
+            if connector_name == "custom-sink":
+                return {
+                    "type": "sink",
+                    "config": {
+                        "connector.class": "CustomSinkConnector",
+                        "topics": "my-topic-1, my-topic-2",
+                        "errors.deadletterqueue.topic.name": "dead-letter-topic",
+                    },
+                }
+            if connector_name == "custom-source":
+                return {
+                    "type": "source",
+                    "config": {
+                        "connector.class": "CustomSourceConnector",
+                    },
+                }
+            return {}
 
-    extractor_classes = [
-        extractor.__class__.__name__ for extractor in extractor_container.extractors
-    ]
-    assert "GenericSink" in extractor_classes
-    assert "GenericSource" in extractor_classes
+        mocker.patch(
+            "streams_explorer.core.services.kafkaconnect.KafkaConnect.get_connector_info",
+            get_connector_info,
+        )
 
+        connectors = KafkaConnect.connectors()
+        assert len(connectors) == 2
+        assert connectors[0].type == KafkaConnectorTypesEnum.SINK
+        assert connectors[0].topics == ["my-topic-1", "my-topic-2"]
+        assert connectors[0].error_topic == "dead-letter-topic"
+        assert connectors[1].type == KafkaConnectorTypesEnum.SOURCE
+        assert connectors[1].topics == []
+        assert connectors[1].error_topic is None
 
-def test_generic_extractors_fallback(mocker):
-    settings.plugins.extractors.default = True
+    def test_extractors_topics_none(self, mocker):
+        mocker.patch(
+            "streams_explorer.core.services.kafkaconnect.KafkaConnect.get_connector_info",
+            lambda connector: EMPTY_CONNECTOR_INFO,
+        )
+        mocker.patch(
+            "streams_explorer.core.services.kafkaconnect.KafkaConnect.get_connectors",
+            lambda: ["connector"],
+        )
 
-    mocker.patch(
-        "streams_explorer.core.services.kafkaconnect.KafkaConnect.get_connectors",
-        lambda: ["custom-sink", "custom-source"],
-    )
+        on_connector_info_parsing = mocker.spy(
+            extractor_container, "on_connector_info_parsing"
+        )
+        KafkaConnect.connectors()
+        on_connector_info_parsing.assert_called_once()
 
-    def get_connector_info(connector_name: str) -> dict:
-        if connector_name == "custom-sink":
-            return {
-                "type": "sink",
+    def test_elasticsearch_sink(self):
+        from streams_explorer.core.extractor.default.elasticsearch_sink import (
+            ElasticsearchSink,
+        )
+
+        extractor = ElasticsearchSink()
+        extractor.on_connector_info_parsing(EMPTY_CONNECTOR_INFO, "")
+        assert len(extractor.sinks) == 0
+        extractor.on_connector_info_parsing(
+            {
                 "config": {
-                    "connector.class": "CustomSinkConnector",
+                    "connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector"
+                }
+            },
+            "elasticsearch-test-sink",
+        )
+        assert len(extractor.sinks) == 0
+        connector = extractor.on_connector_info_parsing(
+            {
+                "config": {
+                    "connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
+                    "transforms.changeTopic.replacement": "es-test-index",
                     "topics": "my-topic-1, my-topic-2",
                     "errors.deadletterqueue.topic.name": "dead-letter-topic",
-                },
-            }
-        if connector_name == "custom-source":
-            return {
-                "type": "source",
+                }
+            },
+            "elasticsearch-sink-connector",
+        )
+        assert len(extractor.sinks) == 1
+        assert extractor.sinks[0].name == "es-test-index"
+        assert connector.topics == ["my-topic-1", "my-topic-2"]
+        assert connector.error_topic == "dead-letter-topic"
+
+    def test_s3_sink(self):
+        from streams_explorer.core.extractor.default.s3_sink import S3Sink
+
+        extractor = S3Sink()
+        extractor.on_connector_info_parsing(EMPTY_CONNECTOR_INFO, "")
+        assert len(extractor.sinks) == 0
+        extractor.on_connector_info_parsing(
+            {
                 "config": {
-                    "connector.class": "CustomSourceConnector",
-                },
-            }
-        return {}
+                    "connector.class": "io.confluent.connect.s3.S3SinkConnector",
+                    "s3.bucket.name": "s3-test-bucket",
+                }
+            },
+            "s3-sink-connector",
+        )
+        assert len(extractor.sinks) == 1
+        assert extractor.sinks[0].name == "s3-test-bucket"
 
-    mocker.patch(
-        "streams_explorer.core.services.kafkaconnect.KafkaConnect.get_connector_info",
-        get_connector_info,
-    )
+    def test_jdbc_sink(self):
+        from streams_explorer.core.extractor.default.jdbc_sink import JdbcSink
 
-    connectors = KafkaConnect.connectors()
-    assert len(connectors) == 2
-    assert connectors[0].type == KafkaConnectorTypesEnum.SINK
-    assert connectors[0].topics == ["my-topic-1", "my-topic-2"]
-    assert connectors[0].error_topic == "dead-letter-topic"
-    assert connectors[1].type == KafkaConnectorTypesEnum.SOURCE
-    assert connectors[1].topics == []
-    assert connectors[1].error_topic is None
-
-
-def test_extractors_topics_none(mocker):
-    mocker.patch(
-        "streams_explorer.core.services.kafkaconnect.KafkaConnect.get_connector_info",
-        lambda connector: EMPTY_CONNECTOR_INFO,
-    )
-    mocker.patch(
-        "streams_explorer.core.services.kafkaconnect.KafkaConnect.get_connectors",
-        lambda: ["connector"],
-    )
-
-    on_connector_info_parsing = mocker.spy(
-        extractor_container, "on_connector_info_parsing"
-    )
-    KafkaConnect.connectors()
-    on_connector_info_parsing.assert_called_once()
-
-
-def test_elasticsearch_sink():
-    from streams_explorer.core.extractor.default.elasticsearch_sink import (
-        ElasticsearchSink,
-    )
-
-    extractor = ElasticsearchSink()
-    extractor.on_connector_info_parsing(EMPTY_CONNECTOR_INFO, "")
-    assert len(extractor.sinks) == 0
-    extractor.on_connector_info_parsing(
-        {
-            "config": {
-                "connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector"
-            }
-        },
-        "elasticsearch-test-sink",
-    )
-    assert len(extractor.sinks) == 0
-    connector = extractor.on_connector_info_parsing(
-        {
-            "config": {
-                "connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
-                "transforms.changeTopic.replacement": "es-test-index",
-                "topics": "my-topic-1, my-topic-2",
-                "errors.deadletterqueue.topic.name": "dead-letter-topic",
-            }
-        },
-        "elasticsearch-sink-connector",
-    )
-    assert len(extractor.sinks) == 1
-    assert extractor.sinks[0].name == "es-test-index"
-    assert connector.topics == ["my-topic-1", "my-topic-2"]
-    assert connector.error_topic == "dead-letter-topic"
-
-
-def test_s3_sink():
-    from streams_explorer.core.extractor.default.s3_sink import S3Sink
-
-    extractor = S3Sink()
-    extractor.on_connector_info_parsing(EMPTY_CONNECTOR_INFO, "")
-    assert len(extractor.sinks) == 0
-    extractor.on_connector_info_parsing(
-        {
-            "config": {
-                "connector.class": "io.confluent.connect.s3.S3SinkConnector",
-                "s3.bucket.name": "s3-test-bucket",
-            }
-        },
-        "s3-sink-connector",
-    )
-    assert len(extractor.sinks) == 1
-    assert extractor.sinks[0].name == "s3-test-bucket"
-
-
-def test_jdbc_sink():
-    from streams_explorer.core.extractor.default.jdbc_sink import JdbcSink
-
-    extractor = JdbcSink()
-    extractor.on_connector_info_parsing(EMPTY_CONNECTOR_INFO, "")
-    assert len(extractor.sinks) == 0
-    extractor.on_connector_info_parsing(
-        {
-            "config": {
-                "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
-                "table.name.format": "jdbc-table",
-            }
-        },
-        "jdbc-sink-connector",
-    )
-    assert len(extractor.sinks) == 1
-    assert extractor.sinks[0].name == "jdbc-table"
+        extractor = JdbcSink()
+        extractor.on_connector_info_parsing(EMPTY_CONNECTOR_INFO, "")
+        assert len(extractor.sinks) == 0
+        extractor.on_connector_info_parsing(
+            {
+                "config": {
+                    "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
+                    "table.name.format": "jdbc-table",
+                }
+            },
+            "jdbc-sink-connector",
+        )
+        assert len(extractor.sinks) == 1
+        assert extractor.sinks[0].name == "jdbc-table"

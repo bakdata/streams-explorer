@@ -24,6 +24,10 @@ from tests.utils import get_streaming_app_cronjob, get_streaming_app_deployment
 
 
 class TestStreamsExplorer:
+    @pytest.fixture(autouse=True)
+    def kafka_connect(self):
+        settings.kafkaconnect.url = "testurl:3000"
+
     @staticmethod
     def get_topic_value_schema(topic: str, version: int = 1) -> dict:
         if version == 1:
