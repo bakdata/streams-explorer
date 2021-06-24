@@ -8,7 +8,6 @@ settings = Dynaconf(
     settings_files=["settings.yaml"],
     load_dotenv=True,
     validators=[
-        Validator("kafkaconnect.displayed_information", is_type_of=list),
         Validator("k8s.deployment.cluster", must_exist=True, is_type_of=bool),
         Validator("k8s.deployment.context", is_type_of=str),
         Validator("k8s.deployment.namespaces", must_exist=True, is_type_of=list),
@@ -16,6 +15,7 @@ settings = Dynaconf(
         Validator("k8s.labels", must_exist=True, is_type_of=list),
         Validator("k8s.pipeline.label", must_exist=True, is_type_of=str),
         Validator("kafkaconnect.url", default=None),
+        Validator("kafkaconnect.displayed_information", is_type_of=list, default=[]),
         Validator("schemaregistry.url", default=None),
         Validator("prometheus.url", must_exist=True, is_type_of=str),
         Validator("plugins.path", must_exist=True, is_type_of=str),
