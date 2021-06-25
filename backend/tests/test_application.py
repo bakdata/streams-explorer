@@ -12,6 +12,10 @@ from tests.utils import get_streaming_app_deployment
 
 
 class TestApplication:
+    @pytest.fixture(autouse=True)
+    def kafka_connect(self):
+        settings.kafkaconnect.url = "testurl:3000"
+
     @pytest.fixture()
     def client(self) -> TestClient:
         return TestClient(get_application())

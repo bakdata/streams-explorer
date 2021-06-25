@@ -1,3 +1,5 @@
+import pytest
+
 from streams_explorer.core.config import settings
 from streams_explorer.core.k8s_app import K8sAppDeployment
 from streams_explorer.core.node_info_extractor import (
@@ -13,6 +15,11 @@ from tests.utils import get_streaming_app_deployment
 
 
 class TestNodeInfoExtractor:
+    @pytest.fixture(autouse=True)
+    def kafka_connect(self):
+        settings.kafkaconnect.url = "testurl:3000"
+        settings.kafkaconnect.displayed_information = []
+
     def test_get_displayed_information_connector(self, monkeypatch):
         monkeypatch.setattr(
             settings.kafkaconnect,

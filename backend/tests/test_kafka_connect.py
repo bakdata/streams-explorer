@@ -1,4 +1,6 @@
-from streams_explorer.core.services.kafkaconnect import KafkaConnect, url
+from streams_explorer.core.config import settings
+from streams_explorer.core.services import kafkaconnect
+from streams_explorer.core.services.kafkaconnect import KafkaConnect
 
 connector_data = {
     "configs": [
@@ -31,12 +33,13 @@ class TestKafkaConnect:
         )
 
     def test_sanitize_connector_config(self, requests_mock):
+        kafkaconnect.url = "http://testurl:3000"
         connector_config = {
             "connector.class": "ConnectorClass",
             "connection.password": "supersecret",
         }
         requests_mock.put(
-            f"{url}/connector-plugins/{connector_config['connector.class']}/config/validate",
+            f"{kafkaconnect.url}/connector-plugins/{connector_config['connector.class']}/config/validate",
             json=connector_data,
         )
         for _ in range(2):
@@ -45,3 +48,7 @@ class TestKafkaConnect:
                 "connection.password": "[hidden]",
             }
         assert requests_mock.call_count == 1  # Verify caching works
+
+    def test_without_kafka_connect(self):
+        settings.kafkaconnect.url = None
+        assert KafkaConnect.connectors() == []

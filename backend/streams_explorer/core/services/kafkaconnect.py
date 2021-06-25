@@ -73,6 +73,8 @@ class KafkaConnect:
 
     @staticmethod
     def connectors() -> List[KafkaConnector]:
+        if settings.kafkaconnect.url is None:
+            return []
         protected_keys.clear()
         connectors = KafkaConnect.get_connectors()
         out = []

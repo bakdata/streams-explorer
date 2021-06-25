@@ -8,6 +8,7 @@ from streams_explorer.core.extractor.default.elasticsearch_sink import Elasticse
 from streams_explorer.core.extractor.default.generic import GenericSink, GenericSource
 from streams_explorer.core.extractor.extractor import Extractor
 from streams_explorer.core.k8s_app import K8sAppCronJob
+from streams_explorer.core.services import schemaregistry
 from streams_explorer.core.services.dataflow_graph import NodeTypesEnum
 from streams_explorer.core.services.metric_providers import MetricProvider
 from streams_explorer.defaultlinker import DefaultLinker
@@ -24,6 +25,11 @@ from tests.utils import get_streaming_app_cronjob, get_streaming_app_deployment
 
 
 class TestStreamsExplorer:
+    @pytest.fixture(autouse=True)
+    def kafka_connect(self):
+        settings.kafkaconnect.url = "testurl:3000"
+        schemaregistry.url = "testurl:8000"
+
     @staticmethod
     def get_topic_value_schema(topic: str, version: int = 1) -> dict:
         if version == 1:

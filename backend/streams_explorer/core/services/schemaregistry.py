@@ -31,6 +31,8 @@ class SchemaRegistry:
 
     @staticmethod
     def get_newest_topic_value_schema(topic: str) -> dict:
+        if url is None:
+            return {}
         logger.info(f"Fetch newest schema for topic {topic}")
         versions = SchemaRegistry.get_topic_value_schema_versions(topic)
         if not versions:
