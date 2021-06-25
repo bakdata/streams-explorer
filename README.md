@@ -46,7 +46,7 @@ Visit our introduction [blogpost](https://medium.com/bakdata/exploring-data-pipe
 
 ### Docker Compose
 
-1. Forward the ports to Prometheus. (Kafka Connect, Schema Registry, or other integrations are optional)
+1. Forward the ports to Prometheus. (Kafka Connect, Schema Registry, and other integrations are optional)
 2. Start the container
 
 ```sh
@@ -79,7 +79,7 @@ helm upgrade --install --values helm-chart/values.yaml streams-explorer
 pip install -r requirements.txt
 ```
 
-2. Forward the ports to Prometheus. (Kafka Connect, Schema Registry, or other integrations are optional)
+2. Forward the ports to Prometheus. (Kafka Connect, Schema Registry, and other integrations are optional)
 3. Configure the backend in [settings.yaml](backend/settings.yaml).
 4. Start the backend server
 
