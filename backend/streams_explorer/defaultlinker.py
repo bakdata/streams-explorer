@@ -34,28 +34,10 @@ class DefaultLinker(LinkingService):
         }
 
         if settings.akhq.enable:
-            self.add_topic_info_item(
-                NodeInfoListItem(
-                    name="Message Viewer", value="akhq", type=NodeInfoType.LINK
-                )
-            )
-            akhq_consumer_link = NodeInfoListItem(
-                name="Consumer Group Details", value="akhq", type=NodeInfoType.LINK
-            )
-            self.add_streaming_app_info_item(akhq_consumer_link)
-            self.add_connector_info_item(akhq_consumer_link)
+            self.add_provider("akhq")
 
         if settings.kowl.enable:
-            self.add_topic_info_item(
-                NodeInfoListItem(
-                    name="Message Viewer", value="kowl", type=NodeInfoType.LINK
-                )
-            )
-            kowl_consumer_link = NodeInfoListItem(
-                name="Consumer Group Details", value="kowl", type=NodeInfoType.LINK
-            )
-            self.add_streaming_app_info_item(kowl_consumer_link)
-            self.add_connector_info_item(kowl_consumer_link)
+            self.add_provider("kowl")
 
     def get_redirect_connector(
         self, config: dict, link_type: Optional[str]
@@ -95,3 +77,13 @@ class DefaultLinker(LinkingService):
     def get_sink_source_redirects(self, node_type: str, sink_source_name: str):
         if node_type == "elasticsearch-index":
             return settings.esindex.url
+
+    def add_provider(self, name: str):
+        self.add_topic_info_item(
+            NodeInfoListItem(name="Message Viewer", value=name, type=NodeInfoType.LINK)
+        )
+        consumer_link = NodeInfoListItem(
+            name="Consumer Group Details", value=name, type=NodeInfoType.LINK
+        )
+        self.add_streaming_app_info_item(consumer_link)
+        self.add_connector_info_item(consumer_link)
