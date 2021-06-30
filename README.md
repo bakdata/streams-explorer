@@ -21,6 +21,7 @@
     - [Schema Registry](#schema-registry)
     - [Prometheus](#prometheus)
     - [AKHQ](#akhq)
+    - [Kowl](#kowl)
     - [Grafana](#grafana)
     - [Kibana](#kibana)
     - [Elasticsearch](#elasticsearch)
