@@ -47,10 +47,10 @@ def test_load_plugin_linker():
         )
     finally:
         fake_linker_path.unlink()
+        settings.plugins.path = "./plugins"
 
 
 def test_default_linker_akhq():
-    settings.akhq.enable = True
     settings.kowl.enable = False
     settings.validators.validate()
 
