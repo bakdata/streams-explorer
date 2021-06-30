@@ -62,18 +62,16 @@ class LinkingService:
     def get_sink_source_redirects(self, node_type: str, sink_source_name: str):
         pass
 
-    @staticmethod
-    def add_streaming_app_info_item(info_item: NodeInfoListItem):
-        LinkingService._streaming_app_info.append(info_item)
+    def add_streaming_app_info_item(self, info_item: NodeInfoListItem):
+        self._streaming_app_info.append(info_item)
 
-    @staticmethod
-    def add_connector_info_item(info_item: NodeInfoListItem):
-        LinkingService._connector_info.append(info_item)
+    def add_connector_info_item(self, info_item: NodeInfoListItem):
+        self._connector_info.append(info_item)
 
-    @staticmethod
-    def add_topic_info_item(info_item: NodeInfoListItem):
-        LinkingService._topic_info.append(info_item)
+    def add_topic_info_item(self, info_item: NodeInfoListItem):
+        self._topic_info.append(info_item)
 
-    @staticmethod
-    def add_sink_source_info_item(sink_source_type: str, info_item: NodeInfoListItem):
-        LinkingService._sink_source_info[sink_source_type].append(info_item)
+    def add_sink_source_info_item(
+        self, sink_source_type: str, info_item: NodeInfoListItem
+    ):
+        self._sink_source_info[sink_source_type].append(info_item)
