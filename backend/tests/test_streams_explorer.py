@@ -262,12 +262,13 @@ class TestStreamsExplorer:
         assert "test-cronjob" in streams_explorer.applications
         extractor_container.extractors = []
 
-    def test_get_link(self, streams_explorer):
+    def test_get_link_default(self, streams_explorer):
         streams_explorer.update()
 
         # topics
-        assert type(streams_explorer.get_link("input-topic1", "grafana")) == str
-        assert type(streams_explorer.get_link("input-topic1", "akhq")) == str
+        assert type(streams_explorer.get_link("input-topic1", "grafana")) is str
+        assert type(streams_explorer.get_link("input-topic1", "akhq")) is str
+        assert streams_explorer.get_link("input-topic1", "kowl") is None
 
         # apps
         assert "consumergroups=consumer-group2" in streams_explorer.get_link(
@@ -276,19 +277,64 @@ class TestStreamsExplorer:
         assert "/group/consumer-group2" in streams_explorer.get_link(
             "streaming-app2", "akhq"
         )
+        assert streams_explorer.get_link("streaming-app2", "kowl") is None
         assert type(streams_explorer.get_link("streaming-app2", "kibanalogs")) == str
 
         # connectors
         assert streams_explorer.get_link("es-sink-connector", "grafana") is None
         assert streams_explorer.get_link("es-sink-connector", "akhq") is None
+        assert streams_explorer.get_link("es-sink-connector", "kowl") is None
         assert "consumergroups=connect-generic-source" in streams_explorer.get_link(
             "generic-source-connector", "grafana"
         )
         assert "/group/connect-generic-source" in streams_explorer.get_link(
             "generic-source-connector", "akhq"
         )
+        assert streams_explorer.get_link("generic-source-connector", "kowl") is None
 
         # sinks/sources
         assert "consumergroups=connect-generic-source" in streams_explorer.get_link(
             "generic-source-connector", "grafana"
         )
+
+    def test_get_link_kowl(self, streams_explorer):
+        streams_explorer.update()
+        settings.akhq.enable = False
+        settings.kowl.enable = True
+
+        # topics
+        assert streams_explorer.get_link("input-topic1", "akhq") is None
+        assert type(streams_explorer.get_link("input-topic1", "kowl")) is str
+
+        # apps
+        assert streams_explorer.get_link("streaming-app2", "akhq") is None
+        assert "/groups/consumer-group2" in streams_explorer.get_link(
+            "streaming-app2", "kowl"
+        )
+
+        # connectors
+        assert streams_explorer.get_link("generic-source-connector", "akhq") is None
+        assert "/groups/connect-generic-source" in streams_explorer.get_link(
+            "generic-source-connector", "kowl"
+        )
+
+    def test_get_link_akhq(self, streams_explorer):
+        streams_explorer.update()
+        settings.akhq.enable = True
+        settings.kowl.enable = False
+
+        # topics
+        assert type(streams_explorer.get_link("input-topic1", "akhq")) is str
+        assert streams_explorer.get_link("input-topic1", "kowl") is None
+
+        # apps
+        assert "/group/consumer-group2" in streams_explorer.get_link(
+            "streaming-app2", "akhq"
+        )
+        assert streams_explorer.get_link("streaming-app2", "kowl") is None
+
+        # connectors
+        assert "/group/connect-generic-source" in streams_explorer.get_link(
+            "generic-source-connector", "akhq"
+        )
+        assert streams_explorer.get_link("generic-source-connector", "kowl") is None
