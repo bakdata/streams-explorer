@@ -1,5 +1,8 @@
 from pathlib import Path
 
+import pytest
+from dynaconf.validator import ValidationError
+
 from streams_explorer.core.config import settings
 from streams_explorer.core.services.linking_services import LinkingService
 from streams_explorer.defaultlinker import DefaultLinker
@@ -49,6 +52,7 @@ def test_load_plugin_linker():
 def test_default_linker_akhq():
     settings.akhq.enable = True
     settings.kowl.enable = False
+    settings.validators.validate()
 
     linking_service = DefaultLinker()
 
@@ -73,6 +77,7 @@ def test_default_linker_akhq():
 def test_default_linker_kowl():
     settings.akhq.enable = False
     settings.kowl.enable = True
+    settings.validators.validate()
 
     linking_service = DefaultLinker()
 
@@ -92,3 +97,14 @@ def test_default_linker_kowl():
     connector_info = [info_item.value for info_item in linking_service.connector_info]
     assert "kowl" in connector_info
     assert "akhq" not in connector_info
+
+
+def test_default_linker_akhq_kowl():
+    settings.akhq.enable = True
+    settings.kowl.enable = True
+    with pytest.raises(ValidationError):
+        settings.validators.validate()
+
+    settings.akhq.enable = False
+    settings.kowl.enable = False
+    settings.validators.validate()
