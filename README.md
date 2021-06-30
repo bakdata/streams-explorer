@@ -50,7 +50,7 @@ Visit our introduction [blogpost](https://medium.com/bakdata/exploring-data-pipe
 2. Start the container
 
 ```sh
-docker-compose up
+docker compose up
 ```
 
 Once the container is started visit <http://localhost:3000>
