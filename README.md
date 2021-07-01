@@ -21,6 +21,7 @@
     - [Schema Registry](#schema-registry)
     - [Prometheus](#prometheus)
     - [AKHQ](#akhq)
+    - [Kowl](#kowl)
     - [Grafana](#grafana)
     - [Kibana](#kibana)
     - [Elasticsearch](#elasticsearch)
@@ -50,7 +51,7 @@ Visit our introduction [blogpost](https://medium.com/bakdata/exploring-data-pipe
 2. Start the container
 
 ```sh
-docker-compose up
+docker compose up
 ```
 
 Once the container is started visit <http://localhost:3000>
@@ -152,8 +153,16 @@ The following exporters are required to collect Kafka metrics for Prometheus:
 
 #### AKHQ
 
+- `akhq.enable` Enable AKHQ (bool, **required**, default: `false`)
 - `akhq.url` URL of AKHQ (string, default: `http://localhost:8080`)
 - `akhq.cluster` Name of cluster (string, default: `kubernetes-cluster`)
+
+#### Kowl
+
+Kowl can be used instead of AKHQ. (mutually exclusive)
+
+- `kowl.enable` Enable Kowl (bool, **required**, default: `false`)
+- `kowl.url` URL of Kowl (string, default: `http://localhost:8080`)
 
 #### Grafana
 

@@ -13,30 +13,31 @@ class DefaultLinker(LinkingService):
         grafana_consumer_link = NodeInfoListItem(
             name="Consumer Group Monitoring", value="grafana", type=NodeInfoType.LINK
         )
-        akhq_consumer_link = NodeInfoListItem(
-            name="Consumer Group Details", value="akhq", type=NodeInfoType.LINK
-        )
         self.topic_info = [
             NodeInfoListItem(
                 name="Topic Monitoring", value="grafana", type=NodeInfoType.LINK
             ),
-            NodeInfoListItem(
-                name="Message Viewer", value="akhq", type=NodeInfoType.LINK
-            ),
         ]
         self.streaming_app_info = [
             grafana_consumer_link,
-            akhq_consumer_link,
             NodeInfoListItem(
                 name="Kibana Logs", value="kibanalogs", type=NodeInfoType.LINK
             ),
         ]
-        self.connector_info = [grafana_consumer_link, akhq_consumer_link]
+        self.connector_info = [
+            grafana_consumer_link,
+        ]
         self.sink_source_info = {
             "elasticsearch-index": [
                 NodeInfoListItem(name="Kibana", value="", type=NodeInfoType.LINK)
             ]
         }
+
+        if settings.akhq.enable:
+            self.add_message_provider("akhq")
+
+        if settings.kowl.enable:
+            self.add_message_provider("kowl")
 
     def get_redirect_connector(
         self, config: dict, link_type: Optional[str]
@@ -47,7 +48,8 @@ class DefaultLinker(LinkingService):
                 return f"{settings.grafana.url}/d/{settings.grafana.dashboards.consumergroups}?var-consumergroups={consumer_group}"
             elif link_type == "akhq":
                 return f"{settings.akhq.url}/ui/{settings.akhq.cluster}/group/{consumer_group}"
-        return None
+            elif link_type == "kowl":
+                return f"{settings.kowl.url}/groups/{consumer_group}"
 
     def get_redirect_topic(
         self, topic_name: str, link_type: Optional[str]
@@ -56,7 +58,8 @@ class DefaultLinker(LinkingService):
             return f"{settings.grafana.url}/d/{settings.grafana.dashboards.topics}?var-topics={topic_name}"
         elif link_type == "akhq":
             return f"{settings.akhq.url}/ui/{settings.akhq.cluster}/topic/{topic_name}"
-        return None
+        elif link_type == "kowl":
+            return f"{settings.kowl.url}/topics/{topic_name}"
 
     def get_redirect_streaming_app(
         self, k8s_app: K8sApp, link_type: Optional[str]
@@ -68,8 +71,19 @@ class DefaultLinker(LinkingService):
                 return f"{settings.grafana.url}/d/{settings.grafana.dashboards.consumergroups}?var-consumergroups={consumer_group}"
             elif link_type == "akhq":
                 return f"{settings.akhq.url}/ui/{settings.akhq.cluster}/group/{consumer_group}"
-        return None
+            elif link_type == "kowl":
+                return f"{settings.kowl.url}/groups/{consumer_group}"
 
     def get_sink_source_redirects(self, node_type: str, sink_source_name: str):
         if node_type == "elasticsearch-index":
             return settings.esindex.url
+
+    def add_message_provider(self, name: str):
+        self.add_topic_info_item(
+            NodeInfoListItem(name="Message Viewer", value=name, type=NodeInfoType.LINK)
+        )
+        consumer_link = NodeInfoListItem(
+            name="Consumer Group Details", value=name, type=NodeInfoType.LINK
+        )
+        self.add_streaming_app_info_item(consumer_link)
+        self.add_connector_info_item(consumer_link)

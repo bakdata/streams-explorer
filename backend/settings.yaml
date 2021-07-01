@@ -38,9 +38,16 @@ k8s:
 prometheus:
   url: "http://localhost:9090"
 
+# optional: choose either AKHQ or Kowl to be used as message viewer in the linker
+# enable one of them only
 akhq:
+  enable: false
   url: "http://localhost:8080"
   cluster: "cluster-name"
+
+kowl:
+  enable: false
+  url: "http://localhost:8080"
 
 grafana:
   url: "http://localhost:3000"

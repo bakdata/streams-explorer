@@ -262,12 +262,12 @@ class TestStreamsExplorer:
         assert "test-cronjob" in streams_explorer.applications
         extractor_container.extractors = []
 
-    def test_get_link(self, streams_explorer):
+    def test_get_link_default(self, streams_explorer):
         streams_explorer.update()
 
         # topics
-        assert type(streams_explorer.get_link("input-topic1", "grafana")) == str
-        assert type(streams_explorer.get_link("input-topic1", "akhq")) == str
+        assert type(streams_explorer.get_link("input-topic1", "grafana")) is str
+        assert type(streams_explorer.get_link("input-topic1", "akhq")) is str
 
         # apps
         assert "consumergroups=consumer-group2" in streams_explorer.get_link(
@@ -291,4 +291,42 @@ class TestStreamsExplorer:
         # sinks/sources
         assert "consumergroups=connect-generic-source" in streams_explorer.get_link(
             "generic-source-connector", "grafana"
+        )
+
+    def test_get_link_kowl(self, streams_explorer):
+        streams_explorer.update()
+
+        # topics
+        assert (
+            streams_explorer.get_link("input-topic1", "kowl")
+            == f"{settings.kowl.url}/topics/input-topic1"
+        )
+
+        # apps
+        assert "/groups/consumer-group2" in streams_explorer.get_link(
+            "streaming-app2", "kowl"
+        )
+
+        # connectors
+        assert "/groups/connect-generic-source" in streams_explorer.get_link(
+            "generic-source-connector", "kowl"
+        )
+
+    def test_get_link_akhq(self, streams_explorer):
+        streams_explorer.update()
+
+        # topics
+        assert (
+            streams_explorer.get_link("input-topic1", "akhq")
+            == f"{settings.akhq.url}/ui/cluster-name/topic/input-topic1"
+        )
+
+        # apps
+        assert "/group/consumer-group2" in streams_explorer.get_link(
+            "streaming-app2", "akhq"
+        )
+
+        # connectors
+        assert "/group/connect-generic-source" in streams_explorer.get_link(
+            "generic-source-connector", "akhq"
         )
