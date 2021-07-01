@@ -340,6 +340,6 @@ class TestStreamsExplorer:
     def test_get_link_loki(self, streams_explorer):
         streams_explorer.update()
         assert (
-            '/explore?orgId=1&left=["now-1d","now","loki",{"expr":"{app=\\"streaming-app2\\"}"}]'
+            '/explore?orgId=1&left=["now-1h","now","loki",{"expr":"{app=\\"streaming-app2\\"}"}]'
             in streams_explorer.get_link("streaming-app2", "loki")
         )

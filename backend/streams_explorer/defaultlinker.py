@@ -70,7 +70,7 @@ class DefaultLinker(LinkingService):
         if link_type == "kibanalogs":
             return f"{settings.kibanalogs.url}/app/discover#/?_a=(columns:!(message),query:(language:lucene,query:'kubernetes.labels.app: \"{k8s_app.name}\"'))"
         elif link_type == "loki":
-            return f'{settings.loki.url}/explore?orgId=1&left=["now-1d","now","loki",{{"expr":"{{app=\\"{k8s_app.name}\\"}}"}}]'
+            return f'{settings.loki.url}/explore?orgId=1&left=["now-1h","now","loki",{{"expr":"{{app=\\"{k8s_app.name}\\"}}"}}]'
         elif consumer_group := k8s_app.get_consumer_group():
             if link_type == "grafana":
                 return f"{settings.grafana.url}/d/{settings.grafana.dashboards.consumergroups}?var-consumergroups={consumer_group}"
