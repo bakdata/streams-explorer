@@ -37,10 +37,10 @@ class DefaultLinker(LinkingService):
             self.add_message_provider("kowl")
 
         if settings.kibanalogs.enable:
-            self.add_logging_provider("kibanalogs")
+            self.add_logging_provider("Kibana Logs", "kibanalogs")
 
         if settings.loki.enable:
-            self.add_logging_provider("loki")
+            self.add_logging_provider("Loki Logs", "loki")
 
     def get_redirect_connector(
         self, config: dict, link_type: Optional[str]
@@ -83,19 +83,17 @@ class DefaultLinker(LinkingService):
         if node_type == "elasticsearch-index":
             return settings.esindex.url
 
-    def add_message_provider(self, name: str):
+    def add_message_provider(self, value: str):
         self.add_topic_info_item(
-            NodeInfoListItem(name="Message Viewer", value=name, type=NodeInfoType.LINK)
+            NodeInfoListItem(name="Message Viewer", value=value, type=NodeInfoType.LINK)
         )
         consumer_link = NodeInfoListItem(
-            name="Consumer Group Details", value=name, type=NodeInfoType.LINK
+            name="Consumer Group Details", value=value, type=NodeInfoType.LINK
         )
         self.add_streaming_app_info_item(consumer_link)
         self.add_connector_info_item(consumer_link)
 
-    def add_logging_provider(self, name: str):
+    def add_logging_provider(self, name: str, value: str):
         self.add_streaming_app_info_item(
-            NodeInfoListItem(
-                name=f"{name.title()} Logs", value=name, type=NodeInfoType.LINK
-            ),
+            NodeInfoListItem(name=name, value=value, type=NodeInfoType.LINK),
         )
