@@ -172,7 +172,15 @@ Kowl can be used instead of AKHQ. (mutually exclusive)
 
 #### Kibana
 
+- `kibanalogs.enable` Enable Kibana logs (bool, **required**, default: `false`)
 - `kibanalogs.url` URL of Kibana logs (string, default: `http://localhost:5601`)
+
+#### Loki
+
+Loki can be used instead of Kibana. (mutually exclusive)
+
+- `loki.enable` Enable Loki logs (bool, **required**, default: `false`)
+- `loki.url` URL of Loki logs (string, default: `http://localhost:3000`)
 
 #### Elasticsearch
 

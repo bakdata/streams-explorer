@@ -56,7 +56,12 @@ grafana:
     consumergroups: "path/to/dashboard"
 
 kibanalogs:
+  enable: false
   url: "http://localhost:5601"
+
+loki:
+  enable: false
+  url: "http://localhost:3000"
 
 esindex:
   url: "http://localhost:5601/app/kibana#/dev_tools/console"

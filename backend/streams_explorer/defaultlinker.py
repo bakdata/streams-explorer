@@ -20,9 +20,6 @@ class DefaultLinker(LinkingService):
         ]
         self.streaming_app_info = [
             grafana_consumer_link,
-            NodeInfoListItem(
-                name="Kibana Logs", value="kibanalogs", type=NodeInfoType.LINK
-            ),
         ]
         self.connector_info = [
             grafana_consumer_link,
@@ -38,6 +35,12 @@ class DefaultLinker(LinkingService):
 
         if settings.kowl.enable:
             self.add_message_provider("kowl")
+
+        if settings.kibanalogs.enable:
+            self.add_logging_provider("kibanalogs")
+
+        if settings.loki.enable:
+            self.add_logging_provider("loki")
 
     def get_redirect_connector(
         self, config: dict, link_type: Optional[str]
@@ -66,6 +69,8 @@ class DefaultLinker(LinkingService):
     ) -> Optional[str]:
         if link_type == "kibanalogs":
             return f"{settings.kibanalogs.url}/app/discover#/?_a=(columns:!(message),query:(language:lucene,query:'kubernetes.labels.app: \"{k8s_app.name}\"'))"
+        elif link_type == "loki":
+            return f'{settings.loki.url}/explore?orgId=1&left=["now-1h","now","loki",{{"expr":"{{app=\\"{k8s_app.name}\\"}}"}}]'
         elif consumer_group := k8s_app.get_consumer_group():
             if link_type == "grafana":
                 return f"{settings.grafana.url}/d/{settings.grafana.dashboards.consumergroups}?var-consumergroups={consumer_group}"
@@ -78,12 +83,17 @@ class DefaultLinker(LinkingService):
         if node_type == "elasticsearch-index":
             return settings.esindex.url
 
-    def add_message_provider(self, name: str):
+    def add_message_provider(self, value: str):
         self.add_topic_info_item(
-            NodeInfoListItem(name="Message Viewer", value=name, type=NodeInfoType.LINK)
+            NodeInfoListItem(name="Message Viewer", value=value, type=NodeInfoType.LINK)
         )
         consumer_link = NodeInfoListItem(
-            name="Consumer Group Details", value=name, type=NodeInfoType.LINK
+            name="Consumer Group Details", value=value, type=NodeInfoType.LINK
         )
         self.add_streaming_app_info_item(consumer_link)
         self.add_connector_info_item(consumer_link)
+
+    def add_logging_provider(self, value: str):
+        self.add_streaming_app_info_item(
+            NodeInfoListItem(name="Logs", value=value, type=NodeInfoType.LINK),
+        )
