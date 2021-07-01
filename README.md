@@ -156,6 +156,7 @@ The following exporters are required to collect Kafka metrics for Prometheus:
 - `akhq.enable` Enable AKHQ (bool, **required**, default: `false`)
 - `akhq.url` URL of AKHQ (string, default: `http://localhost:8080`)
 - `akhq.cluster` Name of cluster (string, default: `kubernetes-cluster`)
+- `akhq.connect` Name of connect (string, default: None)
 
 #### Kowl
 

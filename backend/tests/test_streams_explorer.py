@@ -317,7 +317,7 @@ class TestStreamsExplorer:
         # topics
         assert (
             streams_explorer.get_link("input-topic1", "akhq")
-            == f"{settings.akhq.url}/ui/cluster-name/topic/input-topic1"
+            == f"{settings.akhq.url}/ui/kubernetes-cluster/topic/input-topic1"
         )
 
         # apps
@@ -328,6 +328,11 @@ class TestStreamsExplorer:
         # connectors
         assert "/group/connect-generic-source" in streams_explorer.get_link(
             "generic-source-connector", "akhq"
+        )
+        settings.akhq.connect = "kafka-connect"
+        assert (
+            "/kubernetes-cluster/connect/kafka-connect/definition/generic-source/tasks"
+            in streams_explorer.get_link("generic-source-connector", "akhq-connect")
         )
 
     def test_get_link_kibanalogs(self, streams_explorer):

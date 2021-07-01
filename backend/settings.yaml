@@ -24,26 +24,28 @@ k8s:
     # refers to the attribute of nodes the pipeline name should be extracted from
     label: "pipeline"
 
-# optional: configure kafka connect url and displayed information
-#kafkaconnect:
-#  url: "http://localhost:8083"
-#  displayed_information:
-#    - name: "Transformer"
-#      key: "transforms.changeTopic.regex"
+## (optional) configure kafka connect url and displayed information
+# kafkaconnect:
+#   url: "http://localhost:8083"
+#   displayed_information:
+#     - name: "Transformer"
+#       key: "transforms.changeTopic.regex"
 
-# optional: configure schema registry for topic information
-#schemaregistry:
-#  url: "http://localhost:8081"
+## (optional) configure schema registry for topic information
+# schemaregistry:
+#   url: "http://localhost:8081"
 
 prometheus:
   url: "http://localhost:9090"
 
-# optional: choose either AKHQ or Kowl to be used as message viewer in the linker
-# enable one of them only
+## (optional) choose either AKHQ or Kowl to be used as message viewer in the linker
+## enable one of them only
 akhq:
   enable: false
   url: "http://localhost:8080"
-  cluster: "cluster-name"
+  cluster: "kubernetes-cluster"
+  ## (optional) connect name
+  # connect: "kafka-connect"
 
 kowl:
   enable: false
@@ -55,6 +57,8 @@ grafana:
     topics: "path/to/dashboard"
     consumergroups: "path/to/dashboard"
 
+## (optional) choose either Kibana or Loki to be used as logging provider in the linker
+## enable one of them only
 kibanalogs:
   enable: false
   url: "http://localhost:5601"

@@ -72,7 +72,13 @@ def test_default_linker_akhq():
     # connectors
     connector_info = [info_item.value for info_item in linking_service.connector_info]
     assert "akhq" in connector_info
+    assert "akhq-connect" not in connector_info
     assert "kowl" not in connector_info
+
+    settings.akhq.connect = "kafka-connect"
+    linking_service = DefaultLinker()
+    connector_info = [info_item.value for info_item in linking_service.connector_info]
+    assert "akhq-connect" in connector_info
 
 
 def test_default_linker_kowl():
@@ -98,6 +104,7 @@ def test_default_linker_kowl():
     connector_info = [info_item.value for info_item in linking_service.connector_info]
     assert "kowl" in connector_info
     assert "akhq" not in connector_info
+    assert "akhq-connect" not in connector_info
 
 
 def test_default_linker_akhq_kowl():
