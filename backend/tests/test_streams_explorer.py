@@ -329,6 +329,7 @@ class TestStreamsExplorer:
         assert "/group/connect-generic-source" in streams_explorer.get_link(
             "generic-source-connector", "akhq"
         )
+        settings.akhq.connect = "kafka-connect"
         assert (
             "/kubernetes-cluster/connect/kafka-connect/definition/generic-source/tasks"
             in streams_explorer.get_link("generic-source-connector", "akhq-connect")
