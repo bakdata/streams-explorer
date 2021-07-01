@@ -37,10 +37,10 @@ class DefaultLinker(LinkingService):
             self.add_message_provider("kowl")
 
         if settings.kibanalogs.enable:
-            self.add_logging_provider("Kibana Logs", "kibanalogs")
+            self.add_logging_provider("kibanalogs")
 
         if settings.loki.enable:
-            self.add_logging_provider("Loki Logs", "loki")
+            self.add_logging_provider("loki")
 
     def get_redirect_connector(
         self, config: dict, link_type: Optional[str]
@@ -93,7 +93,7 @@ class DefaultLinker(LinkingService):
         self.add_streaming_app_info_item(consumer_link)
         self.add_connector_info_item(consumer_link)
 
-    def add_logging_provider(self, name: str, value: str):
+    def add_logging_provider(self, value: str):
         self.add_streaming_app_info_item(
-            NodeInfoListItem(name=name, value=value, type=NodeInfoType.LINK),
+            NodeInfoListItem(name="Logs", value=value, type=NodeInfoType.LINK),
         )
