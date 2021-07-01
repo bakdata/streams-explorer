@@ -276,7 +276,10 @@ class TestStreamsExplorer:
         assert "/group/consumer-group2" in streams_explorer.get_link(
             "streaming-app2", "akhq"
         )
-        assert type(streams_explorer.get_link("streaming-app2", "kibanalogs")) == str
+        assert (
+            streams_explorer.get_link("streaming-app2", "kibanalogs")
+            == f"{settings.kibanalogs.url}/app/discover#/?_a=(columns:!(message),query:(language:lucene,query:'kubernetes.labels.app: \"streaming-app2\"'))"
+        )
 
         # connectors
         assert streams_explorer.get_link("es-sink-connector", "grafana") is None
