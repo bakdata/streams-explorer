@@ -34,10 +34,10 @@ class DefaultLinker(LinkingService):
         }
 
         if settings.akhq.enable:
-            self.add_provider("akhq")
+            self.add_message_provider("akhq")
 
         if settings.kowl.enable:
-            self.add_provider("kowl")
+            self.add_message_provider("kowl")
 
     def get_redirect_connector(
         self, config: dict, link_type: Optional[str]
@@ -78,7 +78,7 @@ class DefaultLinker(LinkingService):
         if node_type == "elasticsearch-index":
             return settings.esindex.url
 
-    def add_provider(self, name: str):
+    def add_message_provider(self, name: str):
         self.add_topic_info_item(
             NodeInfoListItem(name="Message Viewer", value=name, type=NodeInfoType.LINK)
         )

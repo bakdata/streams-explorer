@@ -51,6 +51,7 @@ def test_load_plugin_linker():
 
 
 def test_default_linker_akhq():
+    settings.akhq.enable = True
     settings.kowl.enable = False
     settings.validators.validate()
 
