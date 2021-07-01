@@ -109,3 +109,42 @@ def test_default_linker_akhq_kowl():
     settings.akhq.enable = False
     settings.kowl.enable = False
     settings.validators.validate()
+
+
+def test_default_linker_kibanalogs():
+    settings.kibanalogs.enable = True
+    settings.loki.enable = False
+    settings.validators.validate()
+
+    linking_service = DefaultLinker()
+
+    streaming_app_info = [
+        info_item.value for info_item in linking_service.streaming_app_info
+    ]
+    assert "kibanalogs" in streaming_app_info
+    assert "loki" not in streaming_app_info
+
+
+def test_default_linker_loki():
+    settings.kibanalogs.enable = False
+    settings.loki.enable = True
+    settings.validators.validate()
+
+    linking_service = DefaultLinker()
+
+    streaming_app_info = [
+        info_item.value for info_item in linking_service.streaming_app_info
+    ]
+    assert "loki" in streaming_app_info
+    assert "kibanalogs" not in streaming_app_info
+
+
+def test_default_linker_kibanalogs_loki():
+    settings.kibanalogs.enable = True
+    settings.loki.enable = True
+    with pytest.raises(ValidationError):
+        settings.validators.validate()
+
+    settings.kibanalogs.enable = False
+    settings.loki.enable = False
+    settings.validators.validate()

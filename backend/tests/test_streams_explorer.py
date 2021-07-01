@@ -276,10 +276,6 @@ class TestStreamsExplorer:
         assert "/group/consumer-group2" in streams_explorer.get_link(
             "streaming-app2", "akhq"
         )
-        assert (
-            streams_explorer.get_link("streaming-app2", "kibanalogs")
-            == f"{settings.kibanalogs.url}/app/discover#/?_a=(columns:!(message),query:(language:lucene,query:'kubernetes.labels.app: \"streaming-app2\"'))"
-        )
 
         # connectors
         assert streams_explorer.get_link("es-sink-connector", "grafana") is None
@@ -332,4 +328,18 @@ class TestStreamsExplorer:
         # connectors
         assert "/group/connect-generic-source" in streams_explorer.get_link(
             "generic-source-connector", "akhq"
+        )
+
+    def test_get_link_kibanalogs(self, streams_explorer):
+        streams_explorer.update()
+        assert (
+            streams_explorer.get_link("streaming-app2", "kibanalogs")
+            == f"{settings.kibanalogs.url}/app/discover#/?_a=(columns:!(message),query:(language:lucene,query:'kubernetes.labels.app: \"streaming-app2\"'))"
+        )
+
+    def test_get_link_loki(self, streams_explorer):
+        streams_explorer.update()
+        assert (
+            streams_explorer.get_link("streaming-app2", "loki")
+            == f'{settings.loki.url}/explore?orgId=1&left=["now-2d","now","loki",{{"expr":"{{app="streaming-app2"}}"}}]'
         )
