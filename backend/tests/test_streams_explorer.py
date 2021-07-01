@@ -317,7 +317,7 @@ class TestStreamsExplorer:
         # topics
         assert (
             streams_explorer.get_link("input-topic1", "akhq")
-            == f"{settings.akhq.url}/ui/cluster-name/topic/input-topic1"
+            == f"{settings.akhq.url}/ui/kubernetes-cluster/topic/input-topic1"
         )
 
         # apps
@@ -330,7 +330,7 @@ class TestStreamsExplorer:
             "generic-source-connector", "akhq"
         )
         assert (
-            "/cluster-name/connect/connect-name/definition/generic-source/tasks"
+            "/kubernetes-cluster/connect/kafka-connect/definition/generic-source/tasks"
             in streams_explorer.get_link("generic-source-connector", "akhq-connect")
         )
 
