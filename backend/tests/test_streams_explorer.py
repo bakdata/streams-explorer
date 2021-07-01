@@ -329,6 +329,10 @@ class TestStreamsExplorer:
         assert "/group/connect-generic-source" in streams_explorer.get_link(
             "generic-source-connector", "akhq"
         )
+        assert (
+            "/cluster-name/connect/connect-name/definition/generic-source/tasks"
+            in streams_explorer.get_link("generic-source-connector", "akhq-connect")
+        )
 
     def test_get_link_kibanalogs(self, streams_explorer):
         streams_explorer.update()

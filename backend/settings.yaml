@@ -44,6 +44,7 @@ akhq:
   enable: false
   url: "http://localhost:8080"
   cluster: "cluster-name"
+  connect: "connect-name"
 
 kowl:
   enable: false

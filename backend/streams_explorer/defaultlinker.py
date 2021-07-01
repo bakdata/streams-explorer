@@ -32,6 +32,13 @@ class DefaultLinker(LinkingService):
 
         if settings.akhq.enable:
             self.add_message_provider("akhq")
+            self.add_connector_info_item(
+                NodeInfoListItem(
+                    name="Connector Tasks",
+                    value="akhq-connect",
+                    type=NodeInfoType.LINK,
+                )
+            )
 
         if settings.kowl.enable:
             self.add_message_provider("kowl")
@@ -51,6 +58,8 @@ class DefaultLinker(LinkingService):
                 return f"{settings.grafana.url}/d/{settings.grafana.dashboards.consumergroups}?var-consumergroups={consumer_group}"
             elif link_type == "akhq":
                 return f"{settings.akhq.url}/ui/{settings.akhq.cluster}/group/{consumer_group}"
+            elif link_type == "akhq-connect":
+                return f"{settings.akhq.url}/ui/{settings.akhq.cluster}/connect/{settings.akhq.connect}/definition/{connector_name}/tasks"
             elif link_type == "kowl":
                 return f"{settings.kowl.url}/groups/{consumer_group}"
 
