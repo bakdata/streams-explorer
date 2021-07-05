@@ -2,8 +2,8 @@ description = "ATM fraud detection with Common Kafka Streams"
 plugins {
     java
     id("io.freefair.lombok") version "5.1.0"
-    id("com.google.cloud.tools.jib") version "1.2.0"
-    id("com.commercehub.gradle.plugin.avro") version "0.19.1"
+    id("com.google.cloud.tools.jib") version "3.1.1"
+    id("com.github.davidmc24.gradle.plugin.avro") version "1.2.0"
 }
 
 group = "com.bakdata.kafka"
@@ -15,7 +15,7 @@ tasks.withType<Test> {
 
 repositories {
     mavenCentral()
-    maven(url = "http://packages.confluent.io/maven/")
+    maven(url = "https://packages.confluent.io/maven/")
 }
 
 
@@ -28,7 +28,7 @@ dependencies {
     implementation(group = "com.bakdata.seq2", name = "seq2", version = "1.0.0")
     val confluentVersion: String by project
     implementation(group = "io.confluent", name = "kafka-streams-avro-serde", version = confluentVersion)
-    implementation(group = "com.bakdata.kafka", name = "streams-bootstrap", version = "1.6.0")
+    implementation(group = "com.bakdata.kafka", name = "streams-bootstrap", version = "1.7.0")
     implementation(group = "com.bakdata.kafka", name = "error-handling", version = "1.0.0")
     implementation(group = "org.elasticsearch", name = "elasticsearch", version = "7.10.0")
     implementation(group = "org.slf4j", name = "slf4j-log4j12", version = "1.7.26")
