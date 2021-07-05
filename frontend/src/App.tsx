@@ -244,10 +244,6 @@ const App: React.FC = () => {
                     {refreshIntervals[refreshInterval]} <DownOutlined />
                   </a>
                 </Dropdown>
-                <Spin
-                  indicator={<LoadingOutlined spin />}
-                  spinning={isLoadingMetrics}
-                />
               </Menu.Item>
               <Menu.Item
                 style={{ float: "right" }}
@@ -262,6 +258,15 @@ const App: React.FC = () => {
                 </Button>
               </Menu.Item>
             </Menu>
+            <Spin
+              style={{
+                position: "fixed",
+                top: "1.5em",
+                right: "1em",
+              }}
+              indicator={<LoadingOutlined spin />}
+              spinning={isLoadingMetrics}
+            />
           </Header>
           <Content
             style={{
