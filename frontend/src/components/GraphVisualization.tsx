@@ -216,6 +216,14 @@ const GraphVisualization = ({
     [graph]
   );
 
+  const touchCallback = useCallback(
+    (e: IG6GraphEvent) => {
+      const node = e.item as INode;
+      onClickNode(node.getID());
+    },
+    [onClickNode]
+  );
+
   const selectCallback = useCallback(
     (e: IG6GraphEvent) => {
       if (e.target && e.target.get("type") === "node") {
@@ -253,6 +261,7 @@ const GraphVisualization = ({
     currentGraph?.on("node:mouseenter", mouseEnterCallback);
     currentGraph?.on("node:mouseleave", mouseLeaveCallback);
     currentGraph?.on("node:click", clickCallback);
+    currentGraph?.on("node:touchstart", touchCallback);
     currentGraph?.on("nodeselectchange", selectCallback);
 
     setGraph(currentGraph);
