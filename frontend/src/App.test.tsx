@@ -4,6 +4,7 @@ import {
   wait,
   waitForElement,
   within,
+  act,
 } from "@testing-library/react";
 import { createMemoryHistory } from "history";
 import nock from "nock";
@@ -202,7 +203,7 @@ describe("Streams Explorer", () => {
 
       await waitForElement(() => getByTestId("graph"));
 
-      wait(() => {
+      await wait(() => {
         const currentPipeline = getByTestId("pipeline-current");
         expect(
           within(currentPipeline).getByText("all pipelines")
@@ -218,7 +219,9 @@ describe("Streams Explorer", () => {
     });
 
     it("should render without url parameters", async () => {
-      history.push({ pathname: "/", search: "" });
+      act(() => {
+        history.push({ pathname: "/", search: "" });
+      });
 
       // render App
       const { getByTestId } = render(
@@ -232,7 +235,7 @@ describe("Streams Explorer", () => {
 
       await waitForElement(() => getByTestId("graph"));
 
-      wait(() => {
+      await wait(() => {
         // check pipeline set to all
         const currentPipeline = getByTestId("pipeline-current");
         expect(
@@ -252,14 +255,15 @@ describe("Streams Explorer", () => {
       history.push({ pathname: "/", search: "?pipeline=test-pipeline" });
 
       // render App
-      const { getByTestId, getAllByTestId, getByText } = render(
-        <RestfulProvider base="http://localhost">
-          <Router history={history}>
-            <LocationDisplay />
-            <App />
-          </Router>
-        </RestfulProvider>
-      );
+      const { getByTestId, getAllByTestId, getByText, findAllByTestId } =
+        render(
+          <RestfulProvider base="http://localhost">
+            <Router history={history}>
+              <LocationDisplay />
+              <App />
+            </Router>
+          </RestfulProvider>
+        );
 
       await waitForElement(() => getByTestId("graph"));
       const nodeSelect = getByTestId("node-select");
@@ -287,26 +291,29 @@ describe("Streams Explorer", () => {
       expect(nockTopicNode.isDone()).toBeFalsy();
 
       // -- set focus-node through UI
-      fireEvent.change(input, { target: { value: "test-app" } });
-      wait(() => {
-        expect(input).toHaveValue("test-app");
-        let options = getAllByTestId("node-option");
-        expect(options).toHaveLength(1);
+      act(() => {
+        fireEvent.change(input, { target: { value: "test-app" } });
+      });
+      expect(input).toHaveValue("test-app");
+      let options = await findAllByTestId("node-option");
+      expect(options).toHaveLength(1);
+      act(() => {
         fireEvent.click(options[0]);
+      });
 
-        // -- check result: pipeline should be present
-        expect(getByTestId("location-search")).toHaveTextContent(
-          "?pipeline=test-pipeline&focus-node=test-app"
-        );
+      // -- check result: pipeline should be present
+      expect(getByTestId("location-search")).toHaveTextContent(
+        "?pipeline=test-pipeline&focus-node=test-app"
+      );
+      await wait(() => {
         expect(nockAppNode.isDone()).toBeTruthy();
       });
 
       // -- update focus-node through UI
       fireEvent.change(input, { target: { value: "test-topic" } });
-      wait(() => {
+      await wait(() => {
         expect(input).toHaveValue("test-topic");
         let options = getAllByTestId("node-option");
-        expect(options).toHaveLength(2);
         fireEvent.click(options[0]);
 
         // -- check focus-node updated, pipeline still present
@@ -318,7 +325,7 @@ describe("Streams Explorer", () => {
 
       // -- (re-)set pipeline through UI
       fireEvent.mouseOver(getByTestId("pipeline-current"));
-      wait(() => {
+      await wait(() => {
         expect(getByTestId("pipeline-select")).toBeInTheDocument();
         const pipeline = getByText("all pipelines");
         expect(pipeline).toBeInTheDocument();
@@ -334,7 +341,9 @@ describe("Streams Explorer", () => {
         .get(`/api/graph?pipeline_name=doesnt-exist`)
         .reply(404);
 
-      history.push({ pathname: "/", search: "?pipeline=doesnt-exist" });
+      act(() => {
+        history.push({ pathname: "/", search: "?pipeline=doesnt-exist" });
+      });
 
       const { getByTestId } = render(
         <RestfulProvider base="http://localhost">
@@ -351,16 +360,14 @@ describe("Streams Explorer", () => {
       );
 
       await waitForElement(() => getByTestId("graph"));
-      // const errorMessage = await waitForElement(() =>
-      //   findByText("Failed loading graph")
-      // );
-      // expect(message.error).toHaveBeenCalledTimes(1);
 
       const currentPipeline = getByTestId("pipeline-current");
       expect(
         within(currentPipeline).getByText("all pipelines")
       ).toBeInTheDocument();
-      expect(nockPipeline.isDone()).toBeTruthy();
+      await wait(() => {
+        expect(nockPipeline.isDone()).toBeTruthy();
+      });
     });
   });
 });
