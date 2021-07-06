@@ -328,6 +328,40 @@ describe("Streams Explorer", () => {
         );
       });
     });
+
+    it("should redirect to all pipelines if pipeline is not found", async () => {
+      const nockPipeline = nock("http://localhost")
+        .get(`/api/graph?pipeline_name=doesnt-exist`)
+        .reply(404);
+
+      history.push({ pathname: "/", search: "?pipeline=doesnt-exist" });
+
+      const { getByTestId } = render(
+        <RestfulProvider base="http://localhost">
+          <Router history={history}>
+            <LocationDisplay />
+            <App />
+          </Router>
+        </RestfulProvider>
+      );
+
+      expect(getByTestId("location-pathname")).toHaveTextContent("/");
+      expect(getByTestId("location-search")).toHaveTextContent(
+        "?pipeline=doesnt-exist"
+      );
+
+      await waitForElement(() => getByTestId("graph"));
+      // const errorMessage = await waitForElement(() =>
+      //   findByText("Failed loading graph")
+      // );
+      // expect(message.error).toHaveBeenCalledTimes(1);
+
+      const currentPipeline = getByTestId("pipeline-current");
+      expect(
+        within(currentPipeline).getByText("all pipelines")
+      ).toBeInTheDocument();
+      expect(nockPipeline.isDone()).toBeTruthy();
+    });
   });
 });
 
