@@ -32,10 +32,6 @@ class TestApplication:
         assert response.headers["content-type"] == "text/plain; charset=utf-8"
         assert response.content.decode() == ""
 
-    def test_pipeline_not_found(self, client: TestClient):
-        response = client.get("/graph", params="pipeline=doesnt-exist")
-        assert response.status_code == status.HTTP_404_NOT_FOUND
-
     @pytest.mark.asyncio
     async def test_update_every_x_seconds(self, mocker, monkeypatch):
         # workaround for exception "This event loop is already running"
@@ -149,3 +145,16 @@ class TestApplication:
             await asyncio.sleep(2)
             response = client.get(f"{API_PREFIX}/graph")
             assert len(response.json().get("nodes")) == 9
+
+    def test_pipeline_not_found(self, monkeypatch):
+        from main import app
+
+        monkeypatch.setattr(StreamsExplorer, "setup", lambda _: None)
+
+        with TestClient(app) as client:
+            response = client.get(
+                f"{API_PREFIX}/graph", params={"pipeline_name": "doesnt-exist"}
+            )
+
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+        assert response.json()["detail"] == "Pipeline 'doesnt-exist' not found"
