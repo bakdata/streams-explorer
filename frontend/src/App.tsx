@@ -134,10 +134,12 @@ const App: React.FC = () => {
   useEffect(() => {
     if (graphError) {
       let errorMessage: string | undefined;
-      if ("data" in graphError && graphError["data"]["detail"]) {
+      if ("data" in graphError) {
+        // specific pipeline was not found
         const data = graphError["data"] as HTTPValidationError;
-        // Couldn't find pipeline xy
-        errorMessage = data.detail?.toString();
+        if (data.detail) {
+          errorMessage = data.detail.toString();
+        }
       }
       message.error(errorMessage || "Failed loading graph", 5);
 
