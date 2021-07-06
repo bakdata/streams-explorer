@@ -3,6 +3,7 @@ import {
   usePipelinesApiPipelinesGet,
   useGraphPositionedApiGraphGet,
   useMetricsApiMetricsGet,
+  HTTPValidationError,
 } from "./api/fetchers";
 import DetailsCard from "./components/DetailsCard";
 import GraphVisualization from "./components/GraphVisualization";
@@ -128,16 +129,15 @@ const App: React.FC = () => {
   useEffect(() => {
     if (graphError) {
       if ("data" in graphError) {
-        message.error(graphError["data"]["detail"], 5);
+        const data = graphError["data"] as HTTPValidationError;
+        message.error(data.detail, 5);
       } else {
         message.error("Failed loading graph");
       }
 
-      if (graphError.status === 404) {
+      if (graphError.status === 404 && currentPipeline !== ALL_PIPELINES) {
         // Redirect to all pipelines
-        if (currentPipeline !== ALL_PIPELINES) {
-          setCurrentPipeline(ALL_PIPELINES);
-        }
+        setCurrentPipeline(ALL_PIPELINES);
       }
     }
   }, [graphError]); // eslint-disable-line react-hooks/exhaustive-deps
