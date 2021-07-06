@@ -75,6 +75,7 @@ const App: React.FC = () => {
   const { refetch: retryPipelineGraph, error: retryPipelineGraphError } =
     useGraphPositionedApiGraphGet({
       queryParams: { pipeline_name: currentPipeline },
+      lazy: true,
     });
 
   const {
@@ -163,17 +164,16 @@ const App: React.FC = () => {
   }, [graphError]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const checkRetryResult = () => {
-    if (retryPipelineGraphError) {
-      if (
-        retryPipelineGraphError.status === 404 &&
-        currentPipeline !== ALL_PIPELINES
-      ) {
-        // Pipeline still not found
-        redirectAllPipelines();
-      } else {
-        message.success("Found pipeline!");
-        window.location.reload();
-      }
+    if (
+      !retryPipelineGraphError ||
+      (retryPipelineGraphError.status === 404 &&
+        currentPipeline !== ALL_PIPELINES)
+    ) {
+      // Pipeline still not found
+      redirectAllPipelines();
+    } else {
+      message.success("Found pipeline!");
+      window.location.reload();
     }
   };
 

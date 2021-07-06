@@ -338,8 +338,15 @@ describe("Streams Explorer", () => {
 
     it("should redirect to all pipelines if pipeline is not found", async () => {
       const nockPipeline = nock("http://localhost")
+        .persist(true)
         .get(`/api/graph?pipeline_name=doesnt-exist`)
         .reply(404);
+
+      const nockUpdate = nock("http://localhost")
+        .post(`/api/update`)
+        .reply(200);
+
+      mockBackendGraph(true);
 
       act(() => {
         history.push({ pathname: "/", search: "?pipeline=doesnt-exist" });
@@ -361,13 +368,21 @@ describe("Streams Explorer", () => {
 
       await waitForElement(() => getByTestId("graph"));
 
-      const currentPipeline = getByTestId("pipeline-current");
-      expect(
-        within(currentPipeline).getByText("all pipelines")
-      ).toBeInTheDocument();
+      await wait(() => {
+        const currentPipeline = getByTestId("pipeline-current");
+        expect(
+          within(currentPipeline).getByText("all pipelines")
+        ).toBeInTheDocument();
+      });
       await wait(() => {
         expect(nockPipeline.isDone()).toBeTruthy();
+        expect(nockUpdate.isDone()).toBeTruthy();
       });
+
+      expect(getByTestId("location-pathname")).toHaveTextContent("/");
+      expect(getByTestId("location-search")).toHaveTextContent(
+        "?pipeline=doesnt-exist"
+      );
     });
   });
 });
