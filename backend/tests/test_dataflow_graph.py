@@ -21,7 +21,7 @@ class TestDataFlowGraph:
         return DataFlowGraph(metric_provider=MetricProvider)
 
     def test_positioned_pipeline_graph_not_found(self, df: DataFlowGraph):
-        assert df.get_positioned_pipeline_graph("doesnt-exist") == {}
+        assert df.get_positioned_pipeline_graph("doesnt-exist") is None
 
     def test_add_streaming_app(self, df: DataFlowGraph):
         df.add_streaming_app(K8sApp.factory(get_streaming_app_deployment()))
