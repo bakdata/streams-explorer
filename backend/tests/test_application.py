@@ -32,6 +32,10 @@ class TestApplication:
         assert response.headers["content-type"] == "text/plain; charset=utf-8"
         assert response.content.decode() == ""
 
+    def test_pipeline_not_found(self, client: TestClient):
+        response = client.get("/graph", params="pipeline=doesnt-exist")
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+
     @pytest.mark.asyncio
     async def test_update_every_x_seconds(self, mocker, monkeypatch):
         # workaround for exception "This event loop is already running"
