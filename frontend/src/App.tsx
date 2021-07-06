@@ -72,6 +72,11 @@ const App: React.FC = () => {
         : undefined,
   });
 
+  const { refetch: retryPipelineGraph, error: retryPipelineGraphError } =
+    useGraphPositionedApiGraphGet({
+      queryParams: { pipeline_name: currentPipeline },
+    });
+
   const {
     data: pipelines,
     loading: isLoadingPipelines,
@@ -128,19 +133,52 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (graphError) {
-      if ("data" in graphError) {
+      let errorMessage: string | undefined;
+      if ("data" in graphError && graphError["data"]["detail"]) {
         const data = graphError["data"] as HTTPValidationError;
-        message.error(data.detail, 5);
-      } else {
-        message.error("Failed loading graph");
+        // Couldn't find pipeline xy
+        errorMessage = data.detail?.toString();
       }
+      message.error(errorMessage || "Failed loading graph", 5);
 
       if (graphError.status === 404 && currentPipeline !== ALL_PIPELINES) {
-        // Redirect to all pipelines
-        setCurrentPipeline(ALL_PIPELINES);
+        // check if a re-scrape solves it
+        const hideMessage = message.warning("Scraping cluster", 0);
+        update({})
+          .then(() => {
+            retryPipelineGraph().then(() => {
+              checkRetryResult();
+            });
+          })
+          .catch(() => {
+            redirectAllPipelines();
+          })
+          .finally(() => {
+            hideMessage();
+          });
       }
     }
   }, [graphError]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const checkRetryResult = () => {
+    if (retryPipelineGraphError) {
+      if (
+        retryPipelineGraphError.status === 404 &&
+        currentPipeline !== ALL_PIPELINES
+      ) {
+        // Pipeline still not found
+        redirectAllPipelines();
+      } else {
+        message.success("Found pipeline!");
+        window.location.reload();
+      }
+    }
+  };
+
+  const redirectAllPipelines = () => {
+    message.info("Redirecting to all pipelines");
+    setCurrentPipeline(ALL_PIPELINES);
+  };
 
   useEffect(() => {
     if (metricsError) {
