@@ -3,11 +3,12 @@ import {
   usePipelinesApiPipelinesGet,
   useGraphPositionedApiGraphGet,
   useMetricsApiMetricsGet,
+  HTTPValidationError,
 } from "./api/fetchers";
 import DetailsCard from "./components/DetailsCard";
 import GraphVisualization from "./components/GraphVisualization";
 import { graphConfig } from "./graphConfiguration";
-import { DownOutlined } from "@ant-design/icons";
+import { DownOutlined, LoadingOutlined } from "@ant-design/icons";
 import {
   Layout,
   Menu,
@@ -17,8 +18,8 @@ import {
   Spin,
   message,
   Alert,
+  AutoComplete,
 } from "antd";
-import { AutoComplete } from "antd";
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import { useMutate } from "restful-react";
@@ -64,6 +65,7 @@ const App: React.FC = () => {
     data: graph,
     loading: isLoadingGraph,
     error: graphError,
+    refetch: graphRefetch,
   } = useGraphPositionedApiGraphGet({
     queryParams:
       currentPipeline !== ALL_PIPELINES
@@ -72,14 +74,26 @@ const App: React.FC = () => {
   });
 
   const {
+    refetch: retryPipelineGraph,
+    error: retryPipelineGraphError,
+    data: retryPipelineGraphData,
+  } = useGraphPositionedApiGraphGet({
+    queryParams: { pipeline_name: currentPipeline },
+    lazy: true,
+  });
+
+  const {
     data: pipelines,
     loading: isLoadingPipelines,
     error: pipelineError,
   } = usePipelinesApiPipelinesGet({});
 
-  const { data: metrics, refetch: refetchMetrics } = useMetricsApiMetricsGet(
-    {}
-  );
+  const {
+    data: metrics,
+    loading: isLoadingMetrics,
+    refetch: refetchMetrics,
+    error: metricsError,
+  } = useMetricsApiMetricsGet({});
 
   const getParams = useCallback(() => {
     return new URLSearchParams(location.search);
@@ -93,11 +107,11 @@ const App: React.FC = () => {
   }
 
   useEffect(() => {
-    if (refreshInterval && refreshInterval > 0) {
+    if (refreshInterval && refreshInterval > 0 && !isLoadingMetrics) {
       const interval = setInterval(refetchMetrics, refreshInterval * 1000);
       return () => clearInterval(interval);
     }
-  }, [refetchMetrics, refreshInterval]);
+  }, [refreshInterval]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // find longest node name and multiply string length by char width 8
   // doesn't cause long delays as builtin function
@@ -122,19 +136,66 @@ const App: React.FC = () => {
     }
   }, [getParams, location]);
 
-  if (graphError) {
-    message.error(graphError.message);
-    return (
-      <Spin
-        data-testid="graph-error"
-        spinning={false}
-        tip="Failed to load graph"
-      />
-    );
-  }
-  if (pipelineError) {
-    message.error(pipelineError?.message);
-  }
+  useEffect(() => {
+    if (graphError) {
+      let errorMessage: string | undefined;
+      if ("data" in graphError) {
+        // specific pipeline was not found
+        const data = graphError["data"] as HTTPValidationError;
+        if (data.detail) {
+          errorMessage = data.detail.toString();
+        }
+      }
+      message.error(errorMessage || "Failed loading graph", 5);
+
+      if (graphError.status === 404 && currentPipeline !== ALL_PIPELINES) {
+        // check if a re-scrape solves it
+        const hideMessage = message.warning("Refreshing pipelines", 0);
+        update({})
+          .then(() => {
+            retryPipelineGraph();
+          })
+          .catch(() => {
+            redirectAllPipelines();
+          })
+          .finally(() => {
+            hideMessage();
+          });
+      }
+    }
+  }, [graphError]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (
+      retryPipelineGraphError &&
+      retryPipelineGraphError.status === 404 &&
+      currentPipeline !== ALL_PIPELINES
+    ) {
+      // pipeline still not found
+      redirectAllPipelines();
+    } else if (retryPipelineGraphData) {
+      message.success("Found pipeline!");
+      graphRefetch();
+    } // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [retryPipelineGraphError, retryPipelineGraphData]);
+
+  const redirectAllPipelines = () => {
+    message.info("Redirecting to all pipelines");
+    setCurrentPipeline(ALL_PIPELINES);
+    history.push("/");
+  };
+
+  useEffect(() => {
+    if (metricsError) {
+      message.warning("Failed fetching metrics");
+    }
+  }, [metricsError]);
+
+  useEffect(() => {
+    if (pipelineError) {
+      message.error("Failed loading pipeline names");
+    }
+  }, [pipelineError]);
 
   const menuPipeline = (
     <Menu
@@ -240,6 +301,15 @@ const App: React.FC = () => {
                 </Button>
               </Menu.Item>
             </Menu>
+            <Spin
+              style={{
+                position: "fixed",
+                top: "1.5em",
+                right: "1em",
+              }}
+              indicator={<LoadingOutlined spin />}
+              spinning={isLoadingMetrics}
+            />
           </Header>
           <Content
             style={{

@@ -117,7 +117,9 @@ class DataFlowGraph:
                 self.pipelines[pipeline].add_node(node_name, **node_data)
                 self.pipelines[pipeline].add_edge(*edge)
 
-    def get_positioned_pipeline_graph(self, pipeline_name: str) -> dict:
+    def get_positioned_pipeline_graph(self, pipeline_name: str) -> Optional[dict]:
+        if pipeline_name not in self.pipelines:
+            return None
         return self.__get_positioned_json_graph(self.pipelines[pipeline_name])
 
     def get_positioned_graph(self) -> dict:

@@ -52,7 +52,7 @@ class StreamsExplorer:
     def get_positioned_json_graph(self) -> dict:
         return self.data_flow.get_positioned_graph()
 
-    def get_positioned_pipeline_json_graph(self, pipeline_name) -> dict:
+    def get_positioned_pipeline_json_graph(self, pipeline_name: str) -> Optional[dict]:
         return self.data_flow.get_positioned_pipeline_graph(pipeline_name)
 
     def get_pipeline_names(self) -> List[str]:

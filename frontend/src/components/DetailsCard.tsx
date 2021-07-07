@@ -17,7 +17,7 @@ const DetailsCard = ({ nodeID }: DetailsCardProps) => {
         title={nodeID ? `${nodeID} - Details` : "Click on Node  to see Details"}
         bodyStyle={{}}
         style={{ width: width }}
-        headStyle={{ backgroundColor: "#4a4e4d", color: "white" }}
+        headStyle={{ backgroundColor: "#383838", color: "white" }}
       >
         {nodeID ? <Details nodeID={nodeID} /> : null}
       </Card>

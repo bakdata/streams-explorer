@@ -12,6 +12,11 @@ body {
   min-height: 100vh;
 }
 
+.ant-menu,
+.ant-layout-header {
+  background: #383838 !important;
+}
+
 .header {
   position: fixed;
   z-index: 1;
