@@ -8,8 +8,9 @@ settings = Dynaconf(
     settings_files=["settings.yaml"],
     load_dotenv=True,
     validators=[
-        Validator("graph_update_every", must_exist=True, is_type_of=int),
-        Validator("graph_layout_arguments", must_exist=True, is_type_of=str),
+        Validator("graph.update_interval", must_exist=True, is_type_of=int),
+        Validator("graph.layout_arguments", must_exist=True, is_type_of=str),
+        Validator("graph.pipeline_distance", must_exist=True, is_type_of=int),
         Validator("k8s.deployment.cluster", must_exist=True, is_type_of=bool),
         Validator("k8s.deployment.context", is_type_of=str),
         Validator("k8s.deployment.namespaces", must_exist=True, is_type_of=list),

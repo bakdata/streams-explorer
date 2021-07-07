@@ -42,7 +42,7 @@ class TestApplication:
         import nest_asyncio
 
         nest_asyncio.apply()
-        settings.graph_update_every = 2
+        settings.graph.update_interval = 2
 
         def mock_get_deployments(*args, **kwargs):
             return [

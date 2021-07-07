@@ -196,10 +196,24 @@ class DataFlowGraph:
         return json_graph
 
     @staticmethod
+    def __extract_independent_graph_components(graph: nx.Graph) -> List[nx.Graph]:
+        independent_graphs = list(nx.connected_components(graph.to_undirected()))
+        subgraphs: List[nx.Graph] = []
+        for pipeline in independent_graphs:
+            subgraph: nx.Graph = graph.subgraph(pipeline)
+            subgraphs.append(subgraph)
+        return subgraphs
+
+    @staticmethod
     def __get_positioned_json_graph(graph: nx.Graph) -> dict:
-        pos = graphviz_layout(graph, prog="dot", args=settings.graph_layout_arguments)
+        subgraphs = DataFlowGraph.__extract_independent_graph_components(graph)
+        pos = graphviz_layout(graph, prog="dot", args=settings.graph.layout_arguments)
         x = {n: p[0] for n, p in pos.items()}
         y = {n: p[1] for n, p in pos.items()}
         nx.set_node_attributes(graph, x, "x")
         nx.set_node_attributes(graph, y, "y")
+        for i, subgraph in enumerate(subgraphs):
+            offset = i * settings.graph.pipeline_distance
+            for node_name in list(subgraph.nodes):
+                graph.nodes[node_name]["y"] += offset
         return DataFlowGraph.__get_json_graph(graph)

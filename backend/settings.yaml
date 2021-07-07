@@ -1,6 +1,8 @@
-# update graph (fetch deployments and connectors) every X seconds
-graph_update_every: 300
-graph_layout_arguments: "-Grankdir=LR -Gnodesep=0.8 -Gpad=10"
+graph:
+  # update graph (fetch deployments and connectors) every X seconds
+  update_interval: 300
+  layout_arguments: "-Grankdir=LR -Gnodesep=0.8 -Gpad=10"
+  pipeline_distance: 500
 
 k8s:
   deployment:
