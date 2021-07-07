@@ -120,6 +120,7 @@ The following configuration options are available:
 
 - `graph.update_interval` Update the graph every X seconds (integer, **required**, default: `300`)
 - `graph.layout_arguments` Arguments passed to graphviz layout (string, **required**, default: `-Grankdir=LR -Gnodesep=0.8 -Gpad=10`)
+- `graph.pipeline_distance` Increase/decrease vertical space between pipeline graphs by X pixels (int, **required**, default: `500`)
 
 #### Kafka Connect
 
