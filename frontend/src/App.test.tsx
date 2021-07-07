@@ -384,6 +384,59 @@ describe("Streams Explorer", () => {
         "?pipeline=doesnt-exist"
       );
     });
+
+    it("should update and retry if pipeline is not found", async () => {
+      let nockPipeline = nock("http://localhost")
+        .get(`/api/graph?pipeline_name=avail-after-scrape`)
+        .reply(404);
+
+      const nockUpdate = nock("http://localhost")
+        .post(`/api/update`)
+        .reply(200);
+
+      mockBackendGraph(true);
+
+      act(() => {
+        history.push({ pathname: "/", search: "?pipeline=avail-after-scrape" });
+      });
+
+      const { getByTestId } = render(
+        <RestfulProvider base="http://localhost">
+          <Router history={history}>
+            <LocationDisplay />
+            <App />
+          </Router>
+        </RestfulProvider>
+      );
+
+      expect(getByTestId("location-pathname")).toHaveTextContent("/");
+      expect(getByTestId("location-search")).toHaveTextContent(
+        "?pipeline=avail-after-scrape"
+      );
+
+      await wait(() => {
+        // wait for the first pipeline request to fail
+        expect(nockPipeline.isDone()).toBeTruthy();
+      });
+      // pipeline becomes available
+      nockPipeline = mockBackendGraph(true, "avail-after-scrape");
+
+      await waitForElement(() => getByTestId("graph"));
+
+      expect(nockUpdate.isDone()).toBeTruthy();
+      expect(nockPipeline.isDone()).toBeTruthy();
+      await wait(() => {
+        const currentPipeline = getByTestId("pipeline-current");
+        expect(
+          within(currentPipeline).getByText("avail-after-scrape")
+        ).toBeInTheDocument();
+      });
+
+      expect(getByTestId("location-pathname")).toHaveTextContent("/");
+      expect(getByTestId("location-search")).toHaveTextContent(
+        "?pipeline=avail-after-scrape"
+      );
+    });
   });
 });
 
