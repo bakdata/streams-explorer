@@ -150,7 +150,7 @@ const App: React.FC = () => {
 
       if (graphError.status === 404 && currentPipeline !== ALL_PIPELINES) {
         // check if a re-scrape solves it
-        const hideMessage = message.warning("Scraping cluster", 0);
+        const hideMessage = message.warning("Refreshing pipelines", 0);
         update({})
           .then(() => {
             retryPipelineGraph();
@@ -182,6 +182,7 @@ const App: React.FC = () => {
   const redirectAllPipelines = () => {
     message.info("Redirecting to all pipelines");
     setCurrentPipeline(ALL_PIPELINES);
+    history.push("/");
   };
 
   useEffect(() => {

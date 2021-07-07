@@ -380,6 +380,10 @@ describe("Streams Explorer", () => {
       });
 
       expect(getByTestId("location-pathname")).toHaveTextContent("/");
+      expect(getByTestId("location-search")).toHaveTextContent("");
+
+      history.goBack();
+      expect(getByTestId("location-pathname")).toHaveTextContent("/");
       expect(getByTestId("location-search")).toHaveTextContent(
         "?pipeline=doesnt-exist"
       );
