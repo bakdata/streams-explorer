@@ -118,8 +118,8 @@ The following configuration options are available:
 
 #### General
 
-- `graph_update_every` Update the graph every X seconds (integer, **required**, default: `300`)
-- `graph_layout_arguments` Arguments passed to graphviz layout (string, **required**, default: `-Grankdir=LR -Gnodesep=0.8 -Gpad=10`)
+- `graph.update_interval` Update the graph every X seconds (integer, **required**, default: `300`)
+- `graph.layout_arguments` Arguments passed to graphviz layout (string, **required**, default: `-Grankdir=LR -Gnodesep=0.8 -Gpad=10`)
 
 #### Kafka Connect
 

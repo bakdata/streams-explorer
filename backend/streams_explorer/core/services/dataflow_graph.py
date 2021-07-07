@@ -207,7 +207,7 @@ class DataFlowGraph:
     @staticmethod
     def __get_positioned_json_graph(graph: nx.Graph) -> dict:
         subgraphs = DataFlowGraph.__extract_independent_graph_components(graph)
-        pos = graphviz_layout(graph, prog="dot", args=settings.graph_layout_arguments)
+        pos = graphviz_layout(graph, prog="dot", args=settings.graph.layout_arguments)
         x = {n: p[0] for n, p in pos.items()}
         y = {n: p[1] for n, p in pos.items()}
         nx.set_node_attributes(graph, x, "x")
