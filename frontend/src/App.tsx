@@ -65,6 +65,7 @@ const App: React.FC = () => {
     data: graph,
     loading: isLoadingGraph,
     error: graphError,
+    refetch: graphRefetch,
   } = useGraphPositionedApiGraphGet({
     queryParams:
       currentPipeline !== ALL_PIPELINES
@@ -72,11 +73,14 @@ const App: React.FC = () => {
         : undefined,
   });
 
-  const { refetch: retryPipelineGraph, error: retryPipelineGraphError } =
-    useGraphPositionedApiGraphGet({
-      queryParams: { pipeline_name: currentPipeline },
-      lazy: true,
-    });
+  const {
+    refetch: retryPipelineGraph,
+    error: retryPipelineGraphError,
+    data: retryPipelineGraphData,
+  } = useGraphPositionedApiGraphGet({
+    queryParams: { pipeline_name: currentPipeline },
+    lazy: true,
+  });
 
   const {
     data: pipelines,
@@ -149,9 +153,7 @@ const App: React.FC = () => {
         const hideMessage = message.warning("Scraping cluster", 0);
         update({})
           .then(() => {
-            retryPipelineGraph().then(() => {
-              checkRetryResult();
-            });
+            retryPipelineGraph();
           })
           .catch(() => {
             redirectAllPipelines();
@@ -163,19 +165,19 @@ const App: React.FC = () => {
     }
   }, [graphError]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const checkRetryResult = () => {
+  useEffect(() => {
     if (
-      !retryPipelineGraphError ||
-      (retryPipelineGraphError.status === 404 &&
-        currentPipeline !== ALL_PIPELINES)
+      retryPipelineGraphError &&
+      retryPipelineGraphError.status === 404 &&
+      currentPipeline !== ALL_PIPELINES
     ) {
-      // Pipeline still not found
+      // pipeline still not found
       redirectAllPipelines();
-    } else {
+    } else if (retryPipelineGraphData) {
       message.success("Found pipeline!");
-      window.location.reload();
-    }
-  };
+      graphRefetch();
+    } // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [retryPipelineGraphError, retryPipelineGraphData]);
 
   const redirectAllPipelines = () => {
     message.info("Redirecting to all pipelines");
