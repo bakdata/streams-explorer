@@ -430,3 +430,34 @@ class TestDataFlowGraph:
             "output-topic1",
             "output-topic2",
         }
+
+    def test_positioned_graph_distance(self, df: DataFlowGraph):
+        settings.graph.pipeline_distance = 0
+        df.graph.add_node("a1")
+        df.graph.add_node("a2")
+        df.graph.add_node("a3")
+        df.graph.add_edge("a1", "a2")
+        df.graph.add_edge("a2", "a3")
+        df.graph.add_node("b1")
+        df.graph.add_node("b2")
+        df.graph.add_node("b3")
+        df.graph.add_edge("b1", "b2")
+        df.graph.add_edge("b2", "b3")
+        assert df.get_positioned_graph()["nodes"] == [
+            {"id": "a1", "x": 27.0, "y": 18.0},
+            {"id": "a2", "x": 117.0, "y": 18.0},
+            {"id": "a3", "x": 207.0, "y": 18.0},
+            {"id": "b1", "x": 27.0, "y": 112.0},
+            {"id": "b2", "x": 117.0, "y": 112.0},
+            {"id": "b3", "x": 207.0, "y": 112.0},
+        ]
+
+        settings.graph.pipeline_distance = 500
+        assert df.get_positioned_graph()["nodes"] == [
+            {"id": "a1", "x": 27.0, "y": 18.0},
+            {"id": "a2", "x": 117.0, "y": 18.0},
+            {"id": "a3", "x": 207.0, "y": 18.0},
+            {"id": "b1", "x": 27.0, "y": 612.0},
+            {"id": "b2", "x": 117.0, "y": 612.0},
+            {"id": "b3", "x": 207.0, "y": 612.0},
+        ]
