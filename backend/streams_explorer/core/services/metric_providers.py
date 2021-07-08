@@ -1,3 +1,4 @@
+import asyncio
 from enum import Enum
 from typing import Callable, Dict, List, Optional
 
@@ -113,6 +114,7 @@ class PrometheusMetricProvider(MetricProvider):
     def __init__(self, nodes: NodeDataView):
         super().__init__(nodes)
         self._client = httpx.AsyncClient()
+        self._api_base = f"{settings.prometheus.url}/api/v1"
 
     async def _pull_metric(self, metric: PrometheusMetric) -> list:
         try:
@@ -122,9 +124,7 @@ class PrometheusMetricProvider(MetricProvider):
         return []
 
     async def _query(self, query: str) -> list:
-        r = await self._client.get(
-            f"{settings.prometheus.url}/api/v1/query", params={"query": query}
-        )
+        r = await self._client.get(f"{self._api_base}/query", params={"query": query})
         if r.status_code == 200:
             data = r.json()
             if data and "data" in data and "result" in data["data"]:
@@ -133,9 +133,15 @@ class PrometheusMetricProvider(MetricProvider):
 
     async def refresh_data(self):
         logger.debug("Pulling metrics from Prometheus")
+        tasks = []
         for metric in PrometheusMetric:
-            self._data[metric.metric] = await self._process_metric(metric)
+            tasks.append(asyncio.ensure_future(self._process_metric(metric)))
+        await asyncio.gather(*tasks)
 
-    async def _process_metric(self, metric: PrometheusMetric) -> dict:
-        result = await self._pull_metric(metric)
-        return metric.transformer(result)
+    async def _process_metric(self, metric: PrometheusMetric):
+        data = await self._pull_metric(metric)
+        self._data[metric.metric] = await self.transform_metric(metric, data)
+
+    @staticmethod
+    async def transform_metric(metric: PrometheusMetric, data: list) -> dict:
+        return metric.transformer(data)
