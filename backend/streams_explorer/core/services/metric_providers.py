@@ -1,9 +1,9 @@
 from enum import Enum
 from typing import Dict, List, Optional
 
+import aiohttp
 from loguru import logger
 from networkx.classes.reportviews import NodeDataView
-from prometheus_api_client import PrometheusApiClientException, PrometheusConnect
 
 from streams_explorer.core.config import settings
 from streams_explorer.models.graph import Metric
@@ -55,7 +55,7 @@ class MetricProvider:
         self.metrics: List[Metric] = []
         self._data: Dict[str, dict] = {}
 
-    def refresh_data(self):
+    async def refresh_data(self):
         pass
 
     @staticmethod
@@ -65,8 +65,8 @@ class MetricProvider:
             return f"connect-{node_id}"
         return node.get(settings.k8s.consumer_group_annotation)
 
-    def update(self):
-        self.refresh_data()
+    async def update(self):
+        await self.refresh_data()
         self.metrics = [
             Metric(
                 node_id=node_id,
@@ -87,82 +87,108 @@ class MetricProvider:
             if node_id
         ]
 
-    def get(self) -> List[Metric]:
-        self.update()
+    async def get(self) -> List[Metric]:
+        await self.update()
         return self.metrics
+
+
+class PrometheusException(Exception):
+    pass
 
 
 class PrometheusMetricProvider(MetricProvider):
     def __init__(self, nodes: NodeDataView):
         super().__init__(nodes)
-        self._prom = PrometheusConnect(url=settings.prometheus.url)
 
-    def get_metric(self, metric: PrometheusMetric) -> List:
+    async def get_metric(
+        self, session: aiohttp.ClientSession, metric: PrometheusMetric
+    ) -> list:
         try:
-            return self.__prom_request(metric.query)
-        except PrometheusApiClientException as e:
+            return await self.__query(session, metric.query)
+        except PrometheusException as e:
             logger.error(f"Error pulling {metric}: {e}")
         return []
 
-    def __prom_request(self, query: str) -> List:
-        return self._prom.custom_query(query)
+    async def __query(self, session: aiohttp.ClientSession, query: str) -> list:
+        async with session.get(
+            f"{settings.prometheus.url}/api/v1/query", params={"query": query}
+        ) as resp:
+            data = await resp.json()
+            if data and "data" in data and "result" in data["data"]:
+                return data["data"]["result"]
+            raise PrometheusException
 
-    def refresh_data(self):
+    async def refresh_data(self):
         logger.debug("Pulling metrics from Prometheus")
-        self._data["messages_in"] = self.__get_messages_in()
-        self._data["messages_out"] = self.__get_messages_out()
-        self._data["consumer_lag"] = self.__get_consumer_lag()
-        self._data["consumer_read_rate"] = self.__get_consumer_read_rate()
-        self._data["topic_size"] = self.__get_topic_size()
-        self._data["replicas"] = self.__get_replicas()
-        self._data["replicas_available"] = self.__get_replicas_available()
-        self._data["connector_tasks"] = self.__get_connector_tasks()
+        async with aiohttp.ClientSession() as session:
+            self._data["messages_in"] = await self.__get_messages_in(session)
+            self._data["messages_out"] = await self.__get_messages_out(session)
+            self._data["consumer_lag"] = await self.__get_consumer_lag(session)
+            self._data["consumer_read_rate"] = await self.__get_consumer_read_rate(
+                session
+            )
+            self._data["topic_size"] = await self.__get_topic_size(session)
+            self._data["replicas"] = await self.__get_replicas(session)
+            self._data["replicas_available"] = await self.__get_replicas_available(
+                session
+            )
+            self._data["connector_tasks"] = await self.__get_connector_tasks(session)
 
-    def __get_messages_in(self) -> Dict[str, float]:
-        prom_messages_in = self.get_metric(metric=PrometheusMetric.MESSAGES_IN)
+    async def __get_messages_in(self, session) -> Dict[str, float]:
+        prom_messages_in = await self.get_metric(
+            session, metric=PrometheusMetric.MESSAGES_IN
+        )
         return {
             d["metric"]["topic"]: round(float(d["value"][-1]), 2)
             for d in prom_messages_in
         }
 
-    def __get_messages_out(self) -> Dict[str, float]:
-        prom_messages_out = self.get_metric(metric=PrometheusMetric.MESSAGES_OUT)
+    async def __get_messages_out(self, session) -> Dict[str, float]:
+        prom_messages_out = await self.get_metric(
+            session, metric=PrometheusMetric.MESSAGES_OUT
+        )
         return {
             d["metric"]["topic"]: round(float(d["value"][-1]), 2)
             for d in prom_messages_out
         }
 
-    def __get_consumer_lag(self) -> Dict[str, int]:
-        prom_consumer_lag = self.get_metric(metric=PrometheusMetric.CONSUMER_LAG)
+    async def __get_consumer_lag(self, session) -> Dict[str, int]:
+        prom_consumer_lag = await self.get_metric(
+            session, metric=PrometheusMetric.CONSUMER_LAG
+        )
         return {d["metric"]["group"]: int(d["value"][-1]) for d in prom_consumer_lag}
 
-    def __get_consumer_read_rate(self) -> Dict[str, float]:
-        prom_consumer_read_rate = self.get_metric(
-            metric=PrometheusMetric.CONSUMER_READ_RATE
+    async def __get_consumer_read_rate(self, session) -> Dict[str, float]:
+        prom_consumer_read_rate = await self.get_metric(
+            session, metric=PrometheusMetric.CONSUMER_READ_RATE
         )
         return {
             d["metric"]["group"]: float(d["value"][-1]) for d in prom_consumer_read_rate
         }
 
-    def __get_topic_size(self) -> Dict[str, int]:
-        prom_topic_size = self.get_metric(metric=PrometheusMetric.TOPIC_SIZE)
+    async def __get_topic_size(self, session) -> Dict[str, int]:
+        prom_topic_size = await self.get_metric(
+            session, metric=PrometheusMetric.TOPIC_SIZE
+        )
         return {d["metric"]["topic"]: int(d["value"][-1]) for d in prom_topic_size}
 
-    def __get_replicas(self) -> Dict[str, int]:
-        prom_replicas = self.get_metric(metric=PrometheusMetric.REPLICAS)
+    async def __get_replicas(self, session) -> Dict[str, int]:
+        prom_replicas = await self.get_metric(session, metric=PrometheusMetric.REPLICAS)
         return {d["metric"]["deployment"]: int(d["value"][-1]) for d in prom_replicas}
 
-    def __get_replicas_available(self) -> Dict[str, int]:
-        prom_replicas_available = self.get_metric(
-            metric=PrometheusMetric.REPLICAS_AVAILABLE
+    async def __get_replicas_available(self, session) -> Dict[str, int]:
+        prom_replicas_available = await self.get_metric(
+            session, metric=PrometheusMetric.REPLICAS_AVAILABLE
         )
         return {
             d["metric"]["deployment"]: int(d["value"][-1])
             for d in prom_replicas_available
         }
 
-    def __get_connector_tasks(self) -> Dict[str, int]:
-        prom_connector_tasks = self.get_metric(metric=PrometheusMetric.CONNECTOR_TASKS)
+    async def __get_connector_tasks(self, session) -> Dict[str, int]:
+        prom_connector_tasks = await self.get_metric(
+            session, metric=PrometheusMetric.CONNECTOR_TASKS
+        )
         return {
             d["metric"]["connector"]: int(d["value"][-1]) for d in prom_connector_tasks
         }
