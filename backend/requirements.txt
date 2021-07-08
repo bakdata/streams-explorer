@@ -54,7 +54,6 @@ pathspec==0.8.1
 Pillow==8.1.2
 pluggy==0.13.1
 pre-commit==2.9.3
-prometheus-api-client==0.4.2
 py==1.10.0
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
