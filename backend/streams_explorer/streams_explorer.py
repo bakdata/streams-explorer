@@ -16,6 +16,7 @@ from streams_explorer.core.services.linking_services import LinkingService
 from streams_explorer.core.services.metric_providers import MetricProvider
 from streams_explorer.core.services.schemaregistry import SchemaRegistry
 from streams_explorer.extractors import extractor_container
+from streams_explorer.models.graph import Metric
 from streams_explorer.models.kafka_connector import KafkaConnector
 from streams_explorer.models.node_information import (
     NodeInfoListItem,
@@ -58,8 +59,8 @@ class StreamsExplorer:
     def get_pipeline_names(self) -> List[str]:
         return list(self.data_flow.pipelines.keys())
 
-    def get_metrics(self) -> List:
-        return self.data_flow.get_metrics()
+    async def get_metrics(self) -> List[Metric]:
+        return await self.data_flow.get_metrics()
 
     def get_node_information(self, node_id: str):
         node_type = self.data_flow.get_node_type(node_id)

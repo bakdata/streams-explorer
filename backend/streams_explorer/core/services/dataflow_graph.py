@@ -125,9 +125,9 @@ class DataFlowGraph:
     def get_positioned_graph(self) -> dict:
         return self.__get_positioned_json_graph(self.graph)
 
-    def get_metrics(self) -> List[Metric]:
+    async def get_metrics(self) -> List[Metric]:
         if self.metric_provider is not None:
-            return self.metric_provider.get()
+            return await self.metric_provider.get()
         return []
 
     def get_node_type(self, id: str) -> str:

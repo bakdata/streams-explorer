@@ -2,11 +2,11 @@ import textwrap
 from pathlib import Path
 
 import pytest
-from prometheus_api_client import PrometheusConnect
 
 from streams_explorer.core.config import settings
 from streams_explorer.core.services.metric_providers import (
     MetricProvider,
+    PrometheusMetric,
     PrometheusMetricProvider,
 )
 from streams_explorer.metric_provider import load_metric_provider
@@ -64,13 +64,14 @@ class TestPrometheusMetricProvider:
         node_id, node = nodes[4]  # connector
         assert MetricProvider.get_consumer_group(node_id, node) == "connect-demo-sink"
 
-    def test_empty_query(self, monkeypatch, metric_provider):
-        def mock_query(*args, **kwargs):
+    @pytest.mark.asyncio
+    async def test_empty_query(self, monkeypatch, metric_provider):
+        async def mock_query(*args, **kwargs):
             return []
 
-        monkeypatch.setattr(PrometheusConnect, "custom_query", mock_query)
+        monkeypatch.setattr(PrometheusMetricProvider, "_query", mock_query)
 
-        result = metric_provider.get()
+        result = await metric_provider.get()
         assert result == [
             Metric(
                 node_id="atm-fraud-transactionavroproducer",
@@ -86,14 +87,14 @@ class TestPrometheusMetricProvider:
             ),
         ]
 
-    def test_update(self, monkeypatch, metric_provider):
-        def mock_get_metric(*args, **kwargs):
-            metric = kwargs.get("metric")
+    @pytest.mark.asyncio
+    async def test_update(self, monkeypatch, metric_provider):
+        async def mock_pull_metric(_, metric: PrometheusMetric):
             return prometheus_data[metric.metric]
 
-        monkeypatch.setattr(PrometheusMetricProvider, "get_metric", mock_get_metric)
+        monkeypatch.setattr(PrometheusMetricProvider, "_pull_metric", mock_pull_metric)
 
-        result = metric_provider.get()
+        result = await metric_provider.get()
         assert result == [
             Metric(
                 node_id="atm-fraud-transactionavroproducer",

@@ -15,4 +15,4 @@ router = APIRouter()
 async def metrics(
     streams_explorer: StreamsExplorer = Depends(get_streams_explorer_from_request),
 ):
-    return streams_explorer.get_metrics()
+    return await streams_explorer.get_metrics()
