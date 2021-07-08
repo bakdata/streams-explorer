@@ -122,14 +122,13 @@ class PrometheusMetricProvider(MetricProvider):
         return []
 
     async def _query(self, query: str) -> list:
-        async with self._client as client:
-            r = await client.get(
-                f"{settings.prometheus.url}/api/v1/query", params={"query": query}
-            )
-            data = r.json()
-            if data and "data" in data and "result" in data["data"]:
-                return data["data"]["result"]
-            raise PrometheusException
+        r = await self._client.get(
+            f"{settings.prometheus.url}/api/v1/query", params={"query": query}
+        )
+        data = r.json()
+        if data and "data" in data and "result" in data["data"]:
+            return data["data"]["result"]
+        raise PrometheusException
 
     async def refresh_data(self):
         logger.debug("Pulling metrics from Prometheus")
