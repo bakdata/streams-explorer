@@ -30,7 +30,7 @@ class DataFlowGraph:
         self.graph = nx.DiGraph()
         self.json_graph: dict = {}
         self.pipelines: Dict[str, nx.DiGraph] = {}
-        self.json_pipelines: dict = {}
+        self.json_pipelines: Dict[str, dict] = {}
         self.metric_provider_class = metric_provider
 
     async def store_json_graph(self):
