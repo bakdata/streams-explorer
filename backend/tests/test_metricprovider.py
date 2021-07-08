@@ -89,7 +89,7 @@ class TestPrometheusMetricProvider:
 
     @pytest.mark.asyncio
     async def test_update(self, monkeypatch, metric_provider):
-        async def mock_pull_metric(_, session, metric: PrometheusMetric):
+        async def mock_pull_metric(_, metric: PrometheusMetric):
             return prometheus_data[metric.metric]
 
         monkeypatch.setattr(PrometheusMetricProvider, "_pull_metric", mock_pull_metric)

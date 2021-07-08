@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Callable, Dict, List, Optional
 
-import aiohttp
+import httpx
 from loguru import logger
 from networkx.classes.reportviews import NodeDataView
 
@@ -112,31 +112,30 @@ class PrometheusException(Exception):
 class PrometheusMetricProvider(MetricProvider):
     def __init__(self, nodes: NodeDataView):
         super().__init__(nodes)
+        self._client = httpx.AsyncClient()
 
-    async def _pull_metric(
-        self, session: aiohttp.ClientSession, metric: PrometheusMetric
-    ) -> list:
+    async def _pull_metric(self, metric: PrometheusMetric) -> list:
         try:
-            return await self._query(session, metric.query)
+            return await self._query(metric.query)
         except PrometheusException as e:
             logger.error(f"Error pulling {metric}: {e}")
         return []
 
-    async def _query(self, session: aiohttp.ClientSession, query: str) -> list:
-        async with session.get(
-            f"{settings.prometheus.url}/api/v1/query", params={"query": query}
-        ) as resp:
-            data = await resp.json()
+    async def _query(self, query: str) -> list:
+        async with self._client as client:
+            r = await client.get(
+                f"{settings.prometheus.url}/api/v1/query", params={"query": query}
+            )
+            data = r.json()
             if data and "data" in data and "result" in data["data"]:
                 return data["data"]["result"]
             raise PrometheusException
 
     async def refresh_data(self):
         logger.debug("Pulling metrics from Prometheus")
-        async with aiohttp.ClientSession() as session:
-            for metric in PrometheusMetric:
-                self._data[metric.metric] = await self._process_metric(session, metric)
+        for metric in PrometheusMetric:
+            self._data[metric.metric] = await self._process_metric(metric)
 
-    async def _process_metric(self, session, metric: PrometheusMetric) -> dict:
-        result = await self._pull_metric(session, metric)
+    async def _process_metric(self, metric: PrometheusMetric) -> dict:
+        result = await self._pull_metric(metric)
         return metric.transformer(result)
