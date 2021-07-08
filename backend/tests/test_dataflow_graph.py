@@ -20,8 +20,9 @@ class TestDataFlowGraph:
     def df(self) -> DataFlowGraph:
         return DataFlowGraph(metric_provider=MetricProvider)
 
-    def test_positioned_pipeline_graph_not_found(self, df: DataFlowGraph):
-        assert df.get_positioned_pipeline_graph("doesnt-exist") is None
+    @pytest.mark.asyncio
+    async def test_positioned_pipeline_graph_not_found(self, df: DataFlowGraph):
+        assert await df.get_positioned_pipeline_graph("doesnt-exist") is None
 
     def test_add_streaming_app(self, df: DataFlowGraph):
         df.add_streaming_app(K8sApp.factory(get_streaming_app_deployment()))
@@ -450,7 +451,7 @@ class TestDataFlowGraph:
             graph = await df.get_positioned_graph()
             return graph["nodes"]
 
-        assert nodes() == [
+        assert await nodes() == [
             {"id": "a1", "x": 27.0, "y": 18.0},
             {"id": "a2", "x": 117.0, "y": 18.0},
             {"id": "a3", "x": 207.0, "y": 18.0},
@@ -460,7 +461,7 @@ class TestDataFlowGraph:
         ]
 
         settings.graph.pipeline_distance = 500
-        assert nodes() == [
+        assert await nodes() == [
             {"id": "a1", "x": 27.0, "y": 18.0},
             {"id": "a2", "x": 117.0, "y": 18.0},
             {"id": "a3", "x": 207.0, "y": 18.0},
@@ -468,3 +469,5 @@ class TestDataFlowGraph:
             {"id": "b2", "x": 117.0, "y": 612.0},
             {"id": "b3", "x": 207.0, "y": 612.0},
         ]
+
+    # TODO: test caching
