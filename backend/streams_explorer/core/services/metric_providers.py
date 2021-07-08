@@ -125,9 +125,10 @@ class PrometheusMetricProvider(MetricProvider):
         r = await self._client.get(
             f"{settings.prometheus.url}/api/v1/query", params={"query": query}
         )
-        data = r.json()
-        if data and "data" in data and "result" in data["data"]:
-            return data["data"]["result"]
+        if r.status_code == 200:
+            data = r.json()
+            if data and "data" in data and "result" in data["data"]:
+                return data["data"]["result"]
         raise PrometheusException
 
     async def refresh_data(self):
