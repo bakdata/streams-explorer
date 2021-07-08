@@ -49,9 +49,10 @@ class StreamsExplorer:
         self.__retrieve_cron_jobs()
         self.__get_connectors()
         self.__create_graph()
+        self.data_flow.store_json_graph()
 
     def get_positioned_json_graph(self) -> dict:
-        return self.data_flow.get_positioned_graph()
+        return self.data_flow.json_graph
 
     def get_positioned_pipeline_json_graph(self, pipeline_name: str) -> Optional[dict]:
         return self.data_flow.get_positioned_pipeline_graph(pipeline_name)

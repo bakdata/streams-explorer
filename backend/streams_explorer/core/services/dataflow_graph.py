@@ -28,8 +28,12 @@ class NodeNotFound(Exception):
 class DataFlowGraph:
     def __init__(self, metric_provider: Type[MetricProvider]):
         self.graph = nx.DiGraph()
+        self.json_graph: dict = {}
         self.pipelines: Dict[str, nx.DiGraph] = {}
         self.metric_provider_class = metric_provider
+
+    def store_json_graph(self):
+        self.json_graph = self.get_positioned_graph()
 
     def add_streaming_app(self, app: K8sApp):
         pipeline = app.attributes.get(ATTR_PIPELINE)
