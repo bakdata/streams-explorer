@@ -28,11 +28,8 @@ def group_selector(d):
     return d["metric"]["group"]
 
 
-def deployment_selector(d):
-    return d["metric"]["deployment"]
-
-
 topic_transformer = Transformer(topic_selector, lambda d: round(float(d), 2))
+deployment_transformer = Transformer(lambda d: d["metric"]["deployment"], int)
 
 
 class PrometheusMetric(Enum):
@@ -69,12 +66,12 @@ class PrometheusMetric(Enum):
     REPLICAS = (
         "replicas",
         "sum by(deployment) (kube_deployment_status_replicas)",
-        Transformer(deployment_selector, int),
+        deployment_transformer,
     )
     REPLICAS_AVAILABLE = (
         "replicas_available",
         "sum by(deployment) (kube_deployment_status_replicas_available)",
-        Transformer(deployment_selector, int),
+        deployment_transformer,
     )
     CONNECTOR_TASKS = (
         "connector_tasks",
