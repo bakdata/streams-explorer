@@ -30,6 +30,7 @@ class DataFlowGraph:
         self.graph = nx.DiGraph()
         self.json_graph: dict = {}
         self.pipelines: Dict[str, nx.DiGraph] = {}
+        self.json_pipelines: dict = {}
         self.metric_provider_class = metric_provider
 
     async def store_json_graph(self):
@@ -124,7 +125,12 @@ class DataFlowGraph:
     async def get_positioned_pipeline_graph(self, pipeline_name: str) -> Optional[dict]:
         if pipeline_name not in self.pipelines:
             return None
-        return await self.__get_positioned_json_graph(self.pipelines[pipeline_name])
+        # caching
+        if pipeline_name not in self.json_pipelines:
+            self.json_pipelines[pipeline_name] = await self.__get_positioned_json_graph(
+                self.pipelines[pipeline_name]
+            )
+        return self.json_pipelines[pipeline_name]
 
     async def get_positioned_graph(self) -> dict:
         return await self.__get_positioned_json_graph(self.graph)
@@ -190,7 +196,9 @@ class DataFlowGraph:
 
     def reset(self):
         self.graph = nx.DiGraph()
-        self.pipelines = {}
+        self.json_graph.clear()
+        self.pipelines.clear()
+        self.json_pipelines.clear()
         self.metric_provider = self.metric_provider_class(self.graph.nodes(data=True))
 
     @staticmethod
