@@ -125,7 +125,7 @@ class PrometheusMetricProvider(MetricProvider):
 
     async def _query(self, query: str) -> list:
         r = await self._client.get(f"{self._api_base}/query", params={"query": query})
-        if r.status_code == 200:
+        if r.status_code == httpx.codes.OK:
             data = r.json()
             if data and "data" in data and "result" in data["data"]:
                 return data["data"]["result"]
@@ -140,8 +140,8 @@ class PrometheusMetricProvider(MetricProvider):
 
     async def _process_metric(self, metric: PrometheusMetric):
         data = await self._pull_metric(metric)
-        self._data[metric.metric] = await self.transform_metric(metric, data)
+        self._data[metric.metric] = self.transform_metric(metric, data)
 
     @staticmethod
-    async def transform_metric(metric: PrometheusMetric, data: list) -> dict:
+    def transform_metric(metric: PrometheusMetric, data: list) -> dict:
         return metric.transformer(data)
