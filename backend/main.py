@@ -14,7 +14,7 @@ app.add_event_handler("startup", setup_default(app))
 @repeat_every(seconds=settings.graph.update_interval)
 async def update():
     logger.info("Update graph")
-    app.state.streams_explorer.update()
+    await app.state.streams_explorer.update()
     logger.info("Update graph completed")
 
 

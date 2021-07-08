@@ -32,8 +32,8 @@ class DataFlowGraph:
         self.pipelines: Dict[str, nx.DiGraph] = {}
         self.metric_provider_class = metric_provider
 
-    def store_json_graph(self):
-        self.json_graph = self.get_positioned_graph()
+    async def store_json_graph(self):
+        self.json_graph = await self.get_positioned_graph()
 
     def add_streaming_app(self, app: K8sApp):
         pipeline = app.attributes.get(ATTR_PIPELINE)
@@ -121,13 +121,13 @@ class DataFlowGraph:
                 self.pipelines[pipeline].add_node(node_name, **node_data)
                 self.pipelines[pipeline].add_edge(*edge)
 
-    def get_positioned_pipeline_graph(self, pipeline_name: str) -> Optional[dict]:
+    async def get_positioned_pipeline_graph(self, pipeline_name: str) -> Optional[dict]:
         if pipeline_name not in self.pipelines:
             return None
-        return self.__get_positioned_json_graph(self.pipelines[pipeline_name])
+        return await self.__get_positioned_json_graph(self.pipelines[pipeline_name])
 
-    def get_positioned_graph(self) -> dict:
-        return self.__get_positioned_json_graph(self.graph)
+    async def get_positioned_graph(self) -> dict:
+        return await self.__get_positioned_json_graph(self.graph)
 
     async def get_metrics(self) -> List[Metric]:
         if self.metric_provider is not None:
@@ -209,7 +209,7 @@ class DataFlowGraph:
         return subgraphs
 
     @staticmethod
-    def __get_positioned_json_graph(graph: nx.Graph) -> dict:
+    async def __get_positioned_json_graph(graph: nx.Graph) -> dict:
         subgraphs = DataFlowGraph.__extract_independent_graph_components(graph)
         pos = graphviz_layout(graph, prog="dot", args=settings.graph.layout_arguments)
         x = {n: p[0] for n, p in pos.items()}

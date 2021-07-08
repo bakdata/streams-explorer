@@ -18,7 +18,7 @@ async def graph_positioned(
     streams_explorer: StreamsExplorer = Depends(get_streams_explorer_from_request),
 ):
     if pipeline_name:
-        pipeline_graph = streams_explorer.get_positioned_pipeline_json_graph(
+        pipeline_graph = await streams_explorer.get_positioned_pipeline_json_graph(
             pipeline_name
         )
         if pipeline_graph is None:
