@@ -31,7 +31,7 @@ const { Header, Content } = Layout;
 
 const App: React.FC = () => {
   const ALL_PIPELINES = "all pipelines";
-  const [currentPipeline, setCurrentPipeline] = useState(ALL_PIPELINES);
+  const [currentPipeline, setCurrentPipeline] = useState<string | null>(null);
   const [detailNode, setDetailNode] = useState<string | null>(null);
   const [focusedNode, setFocusedNode] = useState<string | null>(null);
   const [searchWidth, setSearchWidth] = useState<number>(300);
@@ -61,6 +61,25 @@ const App: React.FC = () => {
     path: "/api/update",
   });
 
+  const getParams = useCallback(() => {
+    return new URLSearchParams(location.search);
+  }, [location.search]);
+
+  useEffect(() => {
+    const params = getParams();
+    const pipeline = params.get("pipeline");
+    if (pipeline) {
+      setCurrentPipeline(pipeline);
+    } else {
+      setCurrentPipeline(ALL_PIPELINES);
+    }
+    const focusNode = params.get("focus-node");
+    if (focusNode) {
+      setFocusedNode(focusNode);
+      setDetailNode(focusNode);
+    }
+  }, [location]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const {
     data: graph,
     loading: isLoadingGraph,
@@ -68,17 +87,24 @@ const App: React.FC = () => {
     refetch: graphRefetch,
   } = useGraphPositionedApiGraphGet({
     queryParams:
-      currentPipeline !== ALL_PIPELINES
+      currentPipeline && currentPipeline !== ALL_PIPELINES
         ? { pipeline_name: currentPipeline }
         : undefined,
+    lazy: true,
   });
+
+  useEffect(() => {
+    if (currentPipeline) {
+      graphRefetch();
+    }
+  }, [currentPipeline]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const {
     refetch: retryPipelineGraph,
     error: retryPipelineGraphError,
     data: retryPipelineGraphData,
   } = useGraphPositionedApiGraphGet({
-    queryParams: { pipeline_name: currentPipeline },
+    queryParams: { pipeline_name: currentPipeline! },
     lazy: true,
   });
 
@@ -94,10 +120,6 @@ const App: React.FC = () => {
     refetch: refetchMetrics,
     error: metricsError,
   } = useMetricsApiMetricsGet({});
-
-  const getParams = useCallback(() => {
-    return new URLSearchParams(location.search);
-  }, [location.search]);
 
   function pushHistoryFocusNode(nodeId: string) {
     const pipeline = getParams().get("pipeline");
@@ -122,19 +144,6 @@ const App: React.FC = () => {
       );
     }
   }, [graph]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
-    const params = getParams();
-    const pipeline = params.get("pipeline");
-    if (pipeline) {
-      setCurrentPipeline(pipeline);
-    }
-    const focusNode = params.get("focus-node");
-    if (focusNode) {
-      setFocusedNode(focusNode);
-      setDetailNode(focusNode);
-    }
-  }, [getParams, location]);
 
   useEffect(() => {
     if (graphError) {
