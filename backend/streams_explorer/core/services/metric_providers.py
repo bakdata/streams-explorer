@@ -11,55 +11,75 @@ from streams_explorer.models.graph import Metric
 from streams_explorer.models.node_types import NodeTypesEnum
 
 
+class Transformer:
+    def __init__(self, key_transformer: Callable, value_transformer: Callable):
+        self._k = key_transformer
+        self._v = value_transformer
+
+    def transform(self, data: list) -> dict:
+        return {self._k(d): self._v(d["value"][-1]) for d in data}
+
+
+def topic_selector(d):
+    return d["metric"]["topic"]
+
+
+def group_selector(d):
+    return d["metric"]["group"]
+
+
+def deployment_selector(d):
+    return d["metric"]["deployment"]
+
+
+topic_transformer = Transformer(topic_selector, lambda d: round(float(d), 2))
+
+
 class PrometheusMetric(Enum):
-    def __init__(self, metric: str, query: str, transformer: Callable):
+    def __init__(self, metric: str, query: str, transformer: Transformer):
         self.metric: str = metric
         self.query: str = query
-        self.transformer: Callable = transformer
+        self.transformer: Transformer = transformer
 
     MESSAGES_IN = (
         "messages_in",
         "sum by(topic) (rate(kafka_topic_partition_current_offset[5m]))",
-        lambda result: {
-            d["metric"]["topic"]: round(float(d["value"][-1]), 2) for d in result
-        },
+        topic_transformer,
     )
     MESSAGES_OUT = (
         "messages_out",
         "sum by(topic) (rate(kafka_consumergroup_group_offset[5m]) >= 0)",
-        lambda result: {
-            d["metric"]["topic"]: round(float(d["value"][-1]), 2) for d in result
-        },
+        topic_transformer,
     )
     CONSUMER_LAG = (
         "consumer_lag",
         'sum by(group) (kafka_consumergroup_group_topic_sum_lag{group=~".+"})',
-        lambda result: {d["metric"]["group"]: int(d["value"][-1]) for d in result},
+        Transformer(group_selector, int),
     )
     CONSUMER_READ_RATE = (
         "consumer_read_rate",
         'sum by(group) (rate(kafka_consumergroup_group_offset{group=~".+"}[5m]) >= 0)',
-        lambda result: {d["metric"]["group"]: float(d["value"][-1]) for d in result},
+        Transformer(group_selector, float),
     )
     TOPIC_SIZE = (
         "topic_size",
         "sum by(topic) (kafka_topic_partition_current_offset - kafka_topic_partition_oldest_offset)",
-        lambda result: {d["metric"]["topic"]: int(d["value"][-1]) for d in result},
+        Transformer(topic_selector, float),
     )
     REPLICAS = (
         "replicas",
         "sum by(deployment) (kube_deployment_status_replicas)",
-        lambda result: {d["metric"]["deployment"]: int(d["value"][-1]) for d in result},
+        Transformer(deployment_selector, int),
     )
     REPLICAS_AVAILABLE = (
         "replicas_available",
         "sum by(deployment) (kube_deployment_status_replicas_available)",
-        lambda result: {d["metric"]["deployment"]: int(d["value"][-1]) for d in result},
+        Transformer(deployment_selector, int),
     )
     CONNECTOR_TASKS = (
         "connector_tasks",
         "sum by(connector) (kafka_connect_connector_tasks_state == 1) or clamp_max(sum by(connector) (kafka_connect_connector_tasks_state), 0)",
-        lambda result: {d["metric"]["connector"]: int(d["value"][-1]) for d in result},
+        Transformer(lambda d: d["metric"]["connector"], int),
     )
 
 
@@ -140,8 +160,4 @@ class PrometheusMetricProvider(MetricProvider):
 
     async def _process_metric(self, metric: PrometheusMetric):
         data = await self._pull_metric(metric)
-        self._data[metric.metric] = self.transform_metric(metric, data)
-
-    @staticmethod
-    def transform_metric(metric: PrometheusMetric, data: list) -> dict:
-        return metric.transformer(data)
+        self._data[metric.metric] = metric.transformer.transform(data)
