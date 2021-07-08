@@ -12,24 +12,16 @@ from streams_explorer.models.node_types import NodeTypesEnum
 
 
 class Transformer:
-    def __init__(self, key_transformer: Callable, value_transformer: Callable):
-        self._k = key_transformer
+    def __init__(self, key: str, value_transformer: Callable):
+        self._k = key
         self._v = value_transformer
 
     def transform(self, data: list) -> dict:
-        return {self._k(d): self._v(d["value"][-1]) for d in data}
+        return {d["metric"][self._k]: self._v(d["value"][-1]) for d in data}
 
 
-def topic_selector(d):
-    return d["metric"]["topic"]
-
-
-def group_selector(d):
-    return d["metric"]["group"]
-
-
-topic_transformer = Transformer(topic_selector, lambda d: round(float(d), 2))
-deployment_transformer = Transformer(lambda d: d["metric"]["deployment"], int)
+topic_transformer = Transformer("topic", lambda d: round(float(d), 2))
+deployment_transformer = Transformer("deployment", int)
 
 
 class PrometheusMetric(Enum):
@@ -51,17 +43,17 @@ class PrometheusMetric(Enum):
     CONSUMER_LAG = (
         "consumer_lag",
         'sum by(group) (kafka_consumergroup_group_topic_sum_lag{group=~".+"})',
-        Transformer(group_selector, int),
+        Transformer("group", int),
     )
     CONSUMER_READ_RATE = (
         "consumer_read_rate",
         'sum by(group) (rate(kafka_consumergroup_group_offset{group=~".+"}[5m]) >= 0)',
-        Transformer(group_selector, float),
+        Transformer("group", float),
     )
     TOPIC_SIZE = (
         "topic_size",
         "sum by(topic) (kafka_topic_partition_current_offset - kafka_topic_partition_oldest_offset)",
-        Transformer(topic_selector, float),
+        Transformer("topic", float),
     )
     REPLICAS = (
         "replicas",
@@ -76,7 +68,7 @@ class PrometheusMetric(Enum):
     CONNECTOR_TASKS = (
         "connector_tasks",
         "sum by(connector) (kafka_connect_connector_tasks_state == 1) or clamp_max(sum by(connector) (kafka_connect_connector_tasks_state), 0)",
-        Transformer(lambda d: d["metric"]["connector"], int),
+        Transformer("connector", int),
     )
 
 
