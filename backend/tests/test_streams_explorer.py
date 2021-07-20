@@ -359,3 +359,39 @@ class TestStreamsExplorer:
             '/explore?orgId=1&left=["now-1h","now","loki",{"expr":"{app=\\"streaming-app2\\"}"}]'
             in streams_explorer.get_link("streaming-app2", "loki")
         )
+
+    @pytest.mark.asyncio
+    async def test_graph_caching(self, streams_explorer: StreamsExplorer):
+        await streams_explorer.update()
+        json_graph = streams_explorer.data_flow.json_graph
+        assert json_graph
+        assert len(json_graph["nodes"]) == 15
+        assert len(json_graph["edges"]) == 12
+
+        streams_explorer.data_flow.reset()
+        assert not streams_explorer.data_flow.json_graph
+
+    @pytest.mark.asyncio
+    async def test_pipeline_graph_caching(
+        self, mocker, streams_explorer: StreamsExplorer
+    ):
+        await streams_explorer.update()
+        assert streams_explorer.data_flow.json_pipelines == {}
+
+        calc_function = mocker.spy(
+            streams_explorer.data_flow, "_DataFlowGraph__get_positioned_json_graph"
+        )
+        pipeline_graph = await streams_explorer.get_positioned_pipeline_json_graph(
+            "pipeline2"
+        )
+        assert pipeline_graph
+        assert len(pipeline_graph["nodes"]) == 4
+        assert len(pipeline_graph["edges"]) == 3
+        pipeline_graph = await streams_explorer.get_positioned_pipeline_json_graph(
+            "pipeline2"
+        )
+        # verify caching works, pipeline graph is only calculated once
+        calc_function.assert_called_once()
+
+        streams_explorer.data_flow.reset()
+        assert not streams_explorer.data_flow.json_pipelines

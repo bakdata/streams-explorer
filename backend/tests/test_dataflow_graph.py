@@ -469,5 +469,3 @@ class TestDataFlowGraph:
             {"id": "b2", "x": 117.0, "y": 612.0},
             {"id": "b3", "x": 207.0, "y": 612.0},
         ]
-
-    # TODO: test caching
