@@ -475,8 +475,6 @@ describe("Streams Explorer", () => {
         // trigger onClick of antd Menu component
         fireEvent.click(getByTestId("metrics-select"));
 
-        const storage = window.localStorage.getItem("metrics-interval");
-        console.log(storage);
         expect(window.localStorage.getItem("metrics-interval")).toBe("0");
       });
 
