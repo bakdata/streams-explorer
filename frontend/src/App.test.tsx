@@ -32,6 +32,14 @@ const LocationDisplay = () => {
   );
 };
 
+const TestApp = () => {
+  return (
+    <HashRouter>
+      <App />
+    </HashRouter>
+  );
+};
+
 function mockBackendGraph(persist?: boolean, pipelineName?: string) {
   return nock("http://localhost")
     .persist(persist)
@@ -94,11 +102,7 @@ describe("Streams Explorer", () => {
   describe("renders", () => {
     mockBackendGraph(false);
     it("without crashing", () => {
-      render(
-        <HashRouter>
-          <App />
-        </HashRouter>
-      );
+      render(<TestApp />);
     });
   });
 
@@ -445,13 +449,7 @@ describe("Streams Explorer", () => {
     it("should persist metrics refresh interval across page reloads", async () => {
       mockBackendGraph(true);
 
-      const { getByTestId, getByText, rerender } = render(
-        <RestfulProvider base="http://localhost">
-          <Router history={history}>
-            <App />
-          </Router>
-        </RestfulProvider>
-      );
+      const { getByTestId, getByText, rerender } = render(<TestApp />);
 
       await waitForElement(() => getByTestId("graph"));
 
@@ -479,13 +477,7 @@ describe("Streams Explorer", () => {
       });
 
       // reload page: window.location.reload() doesn't work in test
-      rerender(
-        <RestfulProvider base="http://localhost">
-          <Router history={history}>
-            <App />
-          </Router>
-        </RestfulProvider>
-      );
+      rerender(<TestApp />);
       await waitForElement(() => getByTestId("graph"));
       await wait(() => {
         expect(anchor).toHaveTextContent("off");
@@ -501,13 +493,7 @@ describe("Streams Explorer", () => {
       // set metrics refresh interval to 'off'
       window.localStorage.setItem("metrics-interval", "0");
 
-      const { getByTestId, getByText } = render(
-        <RestfulProvider base="http://localhost">
-          <Router history={history}>
-            <App />
-          </Router>
-        </RestfulProvider>
-      );
+      const { getByTestId, getByText } = render(<TestApp />);
 
       await waitForElement(() => getByTestId("graph"));
 
