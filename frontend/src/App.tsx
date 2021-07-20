@@ -233,6 +233,7 @@ const App: React.FC = () => {
 
   const menuRefresh = (
     <Menu
+      data-testid="metrics-select"
       onClick={(e) => {
         setRefreshInterval(Number(e.key));
       }}

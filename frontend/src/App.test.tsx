@@ -445,10 +445,9 @@ describe("Streams Explorer", () => {
     it("should persist metrics refresh interval across page reloads", async () => {
       mockBackendGraph(true);
 
-      const { getByTestId, getByText } = render(
+      const { getByTestId, getByText, rerender } = render(
         <RestfulProvider base="http://localhost">
           <Router history={history}>
-            <LocationDisplay />
             <App />
           </Router>
         </RestfulProvider>
@@ -456,11 +455,10 @@ describe("Streams Explorer", () => {
 
       await waitForElement(() => getByTestId("graph"));
 
-      let metricsInterval: HTMLElement;
       let anchor: HTMLAnchorElement;
       await wait(() => {
-        metricsInterval = getByText("Metrics refresh:");
-        anchor = metricsInterval.lastElementChild as HTMLAnchorElement;
+        const metricsSelect = getByText("Metrics refresh:");
+        anchor = metricsSelect.lastElementChild as HTMLAnchorElement;
         expect(anchor).toHaveTextContent("30s");
       });
 
@@ -472,6 +470,26 @@ describe("Streams Explorer", () => {
         const intervalOff = getByText("off");
         expect(intervalOff).toBeInTheDocument();
         fireEvent.click(intervalOff);
+        expect(anchor).toHaveTextContent("off");
+
+        // trigger onClick of antd Menu component
+        fireEvent.click(getByTestId("metrics-select"));
+
+        const storage = window.localStorage.getItem("metrics-interval");
+        console.log(storage);
+        expect(window.localStorage.getItem("metrics-interval")).toBe("0");
+      });
+
+      // reload page: window.location.reload() doesn't work in test
+      rerender(
+        <RestfulProvider base="http://localhost">
+          <Router history={history}>
+            <App />
+          </Router>
+        </RestfulProvider>
+      );
+      await waitForElement(() => getByTestId("graph"));
+      await wait(() => {
         expect(anchor).toHaveTextContent("off");
       });
     });
