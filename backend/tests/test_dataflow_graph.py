@@ -20,8 +20,9 @@ class TestDataFlowGraph:
     def df(self) -> DataFlowGraph:
         return DataFlowGraph(metric_provider=MetricProvider)
 
-    def test_positioned_pipeline_graph_not_found(self, df: DataFlowGraph):
-        assert df.get_positioned_pipeline_graph("doesnt-exist") is None
+    @pytest.mark.asyncio
+    async def test_positioned_pipeline_graph_not_found(self, df: DataFlowGraph):
+        assert await df.get_positioned_pipeline_graph("doesnt-exist") is None
 
     def test_add_streaming_app(self, df: DataFlowGraph):
         df.add_streaming_app(K8sApp.factory(get_streaming_app_deployment()))
@@ -109,9 +110,10 @@ class TestDataFlowGraph:
         assert df.graph.has_edge("test-app", "test-sink")
         assert len(df.pipelines) == 0
 
-    def test_get_positioned_json_graph(self, df: DataFlowGraph):
+    @pytest.mark.asyncio
+    async def test_get_positioned_json_graph(self, df: DataFlowGraph):
         df.add_streaming_app(K8sApp.factory(get_streaming_app_deployment()))
-        df.get_positioned_graph()
+        await df.get_positioned_graph()
         nodes = df.graph.nodes(data=True)
         for _, data in iter(nodes):
             assert data.get("x") is not None
@@ -431,7 +433,8 @@ class TestDataFlowGraph:
             "output-topic2",
         }
 
-    def test_positioned_graph_distance(self, df: DataFlowGraph):
+    @pytest.mark.asyncio
+    async def test_positioned_graph_distance(self, df: DataFlowGraph):
         settings.graph.pipeline_distance = 0
         df.graph.add_node("a1")
         df.graph.add_node("a2")
@@ -443,7 +446,12 @@ class TestDataFlowGraph:
         df.graph.add_node("b3")
         df.graph.add_edge("b1", "b2")
         df.graph.add_edge("b2", "b3")
-        assert df.get_positioned_graph()["nodes"] == [
+
+        async def nodes():
+            graph = await df.get_positioned_graph()
+            return graph["nodes"]
+
+        assert await nodes() == [
             {"id": "a1", "x": 27.0, "y": 18.0},
             {"id": "a2", "x": 117.0, "y": 18.0},
             {"id": "a3", "x": 207.0, "y": 18.0},
@@ -453,7 +461,7 @@ class TestDataFlowGraph:
         ]
 
         settings.graph.pipeline_distance = 500
-        assert df.get_positioned_graph()["nodes"] == [
+        assert await nodes() == [
             {"id": "a1", "x": 27.0, "y": 18.0},
             {"id": "a2", "x": 117.0, "y": 18.0},
             {"id": "a3", "x": 207.0, "y": 18.0},

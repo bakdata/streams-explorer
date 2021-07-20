@@ -40,7 +40,7 @@ class StreamsExplorer:
     def setup(self):
         self.__setup_k8s_environment()
 
-    def update(self):
+    async def update(self):
         self.applications = {}
         self.kafka_connectors = []
         extractor_container.reset()
@@ -49,12 +49,15 @@ class StreamsExplorer:
         self.__retrieve_cron_jobs()
         self.__get_connectors()
         self.__create_graph()
+        await self.data_flow.store_json_graph()
 
     def get_positioned_json_graph(self) -> dict:
-        return self.data_flow.get_positioned_graph()
+        return self.data_flow.json_graph
 
-    def get_positioned_pipeline_json_graph(self, pipeline_name: str) -> Optional[dict]:
-        return self.data_flow.get_positioned_pipeline_graph(pipeline_name)
+    async def get_positioned_pipeline_json_graph(
+        self, pipeline_name: str
+    ) -> Optional[dict]:
+        return await self.data_flow.get_positioned_pipeline_graph(pipeline_name)
 
     def get_pipeline_names(self) -> List[str]:
         return list(self.data_flow.pipelines.keys())

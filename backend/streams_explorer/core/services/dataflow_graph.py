@@ -28,8 +28,13 @@ class NodeNotFound(Exception):
 class DataFlowGraph:
     def __init__(self, metric_provider: Type[MetricProvider]):
         self.graph = nx.DiGraph()
+        self.json_graph: dict = {}
         self.pipelines: Dict[str, nx.DiGraph] = {}
+        self.json_pipelines: Dict[str, dict] = {}
         self.metric_provider_class = metric_provider
+
+    async def store_json_graph(self):
+        self.json_graph = await self.get_positioned_graph()
 
     def add_streaming_app(self, app: K8sApp):
         pipeline = app.attributes.get(ATTR_PIPELINE)
@@ -117,13 +122,18 @@ class DataFlowGraph:
                 self.pipelines[pipeline].add_node(node_name, **node_data)
                 self.pipelines[pipeline].add_edge(*edge)
 
-    def get_positioned_pipeline_graph(self, pipeline_name: str) -> Optional[dict]:
+    async def get_positioned_pipeline_graph(self, pipeline_name: str) -> Optional[dict]:
         if pipeline_name not in self.pipelines:
             return None
-        return self.__get_positioned_json_graph(self.pipelines[pipeline_name])
+        # caching
+        if pipeline_name not in self.json_pipelines:
+            self.json_pipelines[pipeline_name] = await self.__get_positioned_json_graph(
+                self.pipelines[pipeline_name]
+            )
+        return self.json_pipelines[pipeline_name]
 
-    def get_positioned_graph(self) -> dict:
-        return self.__get_positioned_json_graph(self.graph)
+    async def get_positioned_graph(self) -> dict:
+        return await self.__get_positioned_json_graph(self.graph)
 
     async def get_metrics(self) -> List[Metric]:
         if self.metric_provider is not None:
@@ -186,7 +196,9 @@ class DataFlowGraph:
 
     def reset(self):
         self.graph = nx.DiGraph()
-        self.pipelines = {}
+        self.json_graph.clear()
+        self.pipelines.clear()
+        self.json_pipelines.clear()
         self.metric_provider = self.metric_provider_class(self.graph.nodes(data=True))
 
     @staticmethod
@@ -205,7 +217,7 @@ class DataFlowGraph:
         return subgraphs
 
     @staticmethod
-    def __get_positioned_json_graph(graph: nx.Graph) -> dict:
+    async def __get_positioned_json_graph(graph: nx.Graph) -> dict:
         subgraphs = DataFlowGraph.__extract_independent_graph_components(graph)
         pos = graphviz_layout(graph, prog="dot", args=settings.graph.layout_arguments)
         x = {n: p[0] for n, p in pos.items()}

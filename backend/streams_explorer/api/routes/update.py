@@ -14,4 +14,4 @@ async def update(
     streams_explorer: StreamsExplorer = Depends(get_streams_explorer_from_request),
 ):
     logger.info("(Re-)Building graphs")
-    streams_explorer.update()
+    await streams_explorer.update()

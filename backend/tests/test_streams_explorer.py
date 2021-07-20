@@ -167,19 +167,24 @@ class TestStreamsExplorer:
 
         return explorer
 
-    def test_update(self, streams_explorer):
-        streams_explorer.update()
+    @pytest.mark.asyncio
+    async def test_update(self, streams_explorer: StreamsExplorer):
+        await streams_explorer.update()
         assert len(streams_explorer.applications) == 3
         assert len(streams_explorer.kafka_connectors) == 2
 
-    def test_get_pipeline_names(self, streams_explorer):
-        streams_explorer.update()
+    @pytest.mark.asyncio
+    async def test_get_pipeline_names(self, streams_explorer: StreamsExplorer):
+        await streams_explorer.update()
         assert streams_explorer.get_pipeline_names() == [
             "pipeline2",
         ]
 
-    def test_get_node_information(self, streams_explorer, monkeypatch):
-        streams_explorer.update()
+    @pytest.mark.asyncio
+    async def test_get_node_information(
+        self, streams_explorer: StreamsExplorer, monkeypatch
+    ):
+        await streams_explorer.update()
         monkeypatch.setattr(
             settings.kafkaconnect,
             "displayed_information",
@@ -245,7 +250,8 @@ class TestStreamsExplorer:
             info=[],
         )
 
-    def test_cron_job_extractor(self, streams_explorer):
+    @pytest.mark.asyncio
+    async def test_cron_job_extractor(self, streams_explorer: StreamsExplorer):
         class MockCronjobExtractor(Extractor):
             def __init__(self):
                 self.sources: List[Source] = []
@@ -257,13 +263,14 @@ class TestStreamsExplorer:
 
         extractor = MockCronjobExtractor()
         extractor_container.extractors = [extractor]
-        streams_explorer.update()
+        await streams_explorer.update()
         assert extractor.cron_job.metadata.name == "test-cronjob"
         assert "test-cronjob" in streams_explorer.applications
         extractor_container.extractors = []
 
-    def test_get_link_default(self, streams_explorer):
-        streams_explorer.update()
+    @pytest.mark.asyncio
+    async def test_get_link_default(self, streams_explorer: StreamsExplorer):
+        await streams_explorer.update()
 
         # topics
         assert type(streams_explorer.get_link("input-topic1", "grafana")) is str
@@ -292,8 +299,9 @@ class TestStreamsExplorer:
             "generic-source-connector", "grafana"
         )
 
-    def test_get_link_kowl(self, streams_explorer):
-        streams_explorer.update()
+    @pytest.mark.asyncio
+    async def test_get_link_kowl(self, streams_explorer: StreamsExplorer):
+        await streams_explorer.update()
 
         # topics
         assert (
@@ -311,8 +319,9 @@ class TestStreamsExplorer:
             "generic-source-connector", "kowl"
         )
 
-    def test_get_link_akhq(self, streams_explorer):
-        streams_explorer.update()
+    @pytest.mark.asyncio
+    async def test_get_link_akhq(self, streams_explorer: StreamsExplorer):
+        await streams_explorer.update()
 
         # topics
         assert (
@@ -335,16 +344,54 @@ class TestStreamsExplorer:
             in streams_explorer.get_link("generic-source-connector", "akhq-connect")
         )
 
-    def test_get_link_kibanalogs(self, streams_explorer):
-        streams_explorer.update()
+    @pytest.mark.asyncio
+    async def test_get_link_kibanalogs(self, streams_explorer: StreamsExplorer):
+        await streams_explorer.update()
         assert (
             streams_explorer.get_link("streaming-app2", "kibanalogs")
             == f"{settings.kibanalogs.url}/app/discover#/?_a=(columns:!(message),query:(language:lucene,query:'kubernetes.labels.app: \"streaming-app2\"'))"
         )
 
-    def test_get_link_loki(self, streams_explorer):
-        streams_explorer.update()
+    @pytest.mark.asyncio
+    async def test_get_link_loki(self, streams_explorer: StreamsExplorer):
+        await streams_explorer.update()
         assert (
             '/explore?orgId=1&left=["now-1h","now","loki",{"expr":"{app=\\"streaming-app2\\"}"}]'
             in streams_explorer.get_link("streaming-app2", "loki")
         )
+
+    @pytest.mark.asyncio
+    async def test_graph_caching(self, streams_explorer: StreamsExplorer):
+        await streams_explorer.update()
+        json_graph = streams_explorer.data_flow.json_graph
+        assert json_graph
+        assert len(json_graph["nodes"]) == 15
+        assert len(json_graph["edges"]) == 12
+
+        streams_explorer.data_flow.reset()
+        assert not streams_explorer.data_flow.json_graph
+
+    @pytest.mark.asyncio
+    async def test_pipeline_graph_caching(
+        self, mocker, streams_explorer: StreamsExplorer
+    ):
+        await streams_explorer.update()
+        assert streams_explorer.data_flow.json_pipelines == {}
+
+        calc_function = mocker.spy(
+            streams_explorer.data_flow, "_DataFlowGraph__get_positioned_json_graph"
+        )
+        pipeline_graph = await streams_explorer.get_positioned_pipeline_json_graph(
+            "pipeline2"
+        )
+        assert pipeline_graph
+        assert len(pipeline_graph["nodes"]) == 4
+        assert len(pipeline_graph["edges"]) == 3
+        pipeline_graph = await streams_explorer.get_positioned_pipeline_json_graph(
+            "pipeline2"
+        )
+        # verify caching works, pipeline graph is only calculated once
+        calc_function.assert_called_once()
+
+        streams_explorer.data_flow.reset()
+        assert not streams_explorer.data_flow.json_pipelines
