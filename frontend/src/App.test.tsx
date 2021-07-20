@@ -32,6 +32,14 @@ const LocationDisplay = () => {
   );
 };
 
+const TestApp = () => {
+  return (
+    <HashRouter>
+      <App />
+    </HashRouter>
+  );
+};
+
 function mockBackendGraph(persist?: boolean, pipelineName?: string) {
   return nock("http://localhost")
     .persist(persist)
@@ -94,11 +102,7 @@ describe("Streams Explorer", () => {
   describe("renders", () => {
     mockBackendGraph(false);
     it("without crashing", () => {
-      render(
-        <HashRouter>
-          <App />
-        </HashRouter>
-      );
+      render(<TestApp />);
     });
   });
 
@@ -440,6 +444,66 @@ describe("Streams Explorer", () => {
       expect(getByTestId("location-search")).toHaveTextContent(
         "?pipeline=avail-after-scrape"
       );
+    });
+
+    it("should persist metrics refresh interval across page reloads", async () => {
+      mockBackendGraph(true);
+
+      const { getByTestId, getByText, rerender } = render(<TestApp />);
+
+      await waitForElement(() => getByTestId("graph"));
+
+      let anchor: HTMLAnchorElement;
+      await wait(() => {
+        const metricsSelect = getByText("Metrics refresh:");
+        anchor = metricsSelect.lastElementChild as HTMLAnchorElement;
+        expect(anchor).toHaveTextContent("30s");
+      });
+
+      act(() => {
+        fireEvent.mouseOver(anchor);
+      });
+
+      await wait(() => {
+        const intervalOff = getByText("off");
+        expect(intervalOff).toBeInTheDocument();
+        fireEvent.click(intervalOff);
+        expect(anchor).toHaveTextContent("off");
+
+        // trigger onClick of antd Menu component
+        fireEvent.click(getByTestId("metrics-select"));
+
+        expect(window.localStorage.getItem("metrics-interval")).toBe("0");
+      });
+
+      // reload page: window.location.reload() doesn't work in test
+      rerender(<TestApp />);
+      await waitForElement(() => getByTestId("graph"));
+      await wait(() => {
+        expect(anchor).toHaveTextContent("off");
+      });
+    });
+
+    it("should not fetch metrics if interval is set to 'off'", async () => {
+      mockBackendGraph(true);
+      const nockMetrics = nock("http://localhost")
+        .get("/api/metrics")
+        .reply(200, []);
+
+      // set metrics refresh interval to 'off'
+      window.localStorage.setItem("metrics-interval", "0");
+
+      const { getByTestId, getByText } = render(<TestApp />);
+
+      await waitForElement(() => getByTestId("graph"));
+
+      await wait(() => {
+        const metricsSelect = getByText("Metrics refresh:");
+        const anchor = metricsSelect.lastElementChild as HTMLAnchorElement;
+        expect(anchor).toHaveTextContent("off");
+        // verify metrics haven't been refreshed
+        expect(nockMetrics.isDone()).toBeFalsy();
+      });
     });
   });
 });

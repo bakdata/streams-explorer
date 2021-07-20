@@ -52,9 +52,23 @@ const App: React.FC = () => {
     30: "30s",
     10: "10s",
   };
-  const [refreshInterval, setRefreshInterval] = useState(
-    defaultRefreshInterval
-  );
+  const REFRESH_INTERVAL = "metrics-interval";
+  const [refreshInterval, setRefreshInterval] = useState(0);
+
+  // on initial page load
+  useEffect(() => {
+    const storedRefreshInterval = Number(
+      localStorage.getItem(REFRESH_INTERVAL) || defaultRefreshInterval
+    );
+    setRefreshInterval(storedRefreshInterval);
+    if (storedRefreshInterval) {
+      refetchMetrics();
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    localStorage.setItem(REFRESH_INTERVAL, refreshInterval.toString());
+  }, [refreshInterval]);
 
   const { mutate: update, loading: isUpdating } = useMutate({
     verb: "POST",
@@ -93,7 +107,7 @@ const App: React.FC = () => {
     loading: isLoadingMetrics,
     refetch: refetchMetrics,
     error: metricsError,
-  } = useMetricsApiMetricsGet({});
+  } = useMetricsApiMetricsGet({ lazy: true });
 
   const getParams = useCallback(() => {
     return new URLSearchParams(location.search);
@@ -219,6 +233,7 @@ const App: React.FC = () => {
 
   const menuRefresh = (
     <Menu
+      data-testid="metrics-select"
       onClick={(e) => {
         setRefreshInterval(Number(e.key));
       }}
