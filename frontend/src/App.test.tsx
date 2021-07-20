@@ -441,6 +441,40 @@ describe("Streams Explorer", () => {
         "?pipeline=avail-after-scrape"
       );
     });
+
+    it("should persist metrics refresh interval across page reloads", async () => {
+      mockBackendGraph(true);
+
+      const { getByTestId, getByText } = render(
+        <RestfulProvider base="http://localhost">
+          <Router history={history}>
+            <LocationDisplay />
+            <App />
+          </Router>
+        </RestfulProvider>
+      );
+
+      await waitForElement(() => getByTestId("graph"));
+
+      let metricsInterval: HTMLElement;
+      let anchor: HTMLAnchorElement;
+      await wait(() => {
+        metricsInterval = getByText("Metrics refresh:");
+        anchor = metricsInterval.lastElementChild as HTMLAnchorElement;
+        expect(anchor).toHaveTextContent("30s");
+      });
+
+      act(() => {
+        fireEvent.mouseOver(anchor);
+      });
+
+      await wait(() => {
+        const intervalOff = getByText("off");
+        expect(intervalOff).toBeInTheDocument();
+        fireEvent.click(intervalOff);
+        expect(anchor).toHaveTextContent("off");
+      });
+    });
   });
 });
 
