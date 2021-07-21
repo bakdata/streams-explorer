@@ -54,23 +54,24 @@ stages:
 
           - script: |
               sudo apt-get -y install python3-dev graphviz libgraphviz-dev pkg-config python3-wheel
-              python -m pip install -r requirements.txt
+              python -m pip install poetry
+              poetry install --no-interaction
             displayName: "Install dependencies"
             workingDirectory: $(backendPath)
 
-          - script: pre-commit run flake8 --all-files
+          - script: poetry run pre-commit run flake8 --all-files --show-diff-on-failure
             displayName: "Lint (flake8)"
 
-          - script: pre-commit run isort --all-files
+          - script: poetry run pre-commit run isort --all-files
             displayName: "Order of imports (isort)"
 
-          - script: pre-commit run black --all-files
+          - script: poetry run pre-commit run black --all-files --show-diff-on-failure
             displayName: "Formatting (black)"
 
-          - script: pre-commit run mypy --all-files
+          - script: poetry run pre-commit run mypy --all-files
             displayName: "Typing (mypy)"
 
-          - script: python -m pytest tests
+          - script: poetry run pytest tests
             displayName: "Run Tests"
             workingDirectory: $(backendPath)
 
