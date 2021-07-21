@@ -98,6 +98,11 @@ spec:
               value: {{ $value | quote }}
           {{- end }}
           volumeMounts:
+          {{- if .Values.settings }}
+            - name: {{ $fullName }}-settings-volume
+              mountPath: /app/settings.yaml
+              subPath: settings.yaml
+          {{ end }}
           {{- if .Values.plugins }}
             - name: {{ $fullName }}-plugin-volume
               mountPath: /app/plugins
@@ -111,6 +116,11 @@ spec:
           {{ end }}
           {{- if .Values.volumeMounts }}{{ toYaml .Values.volumeMounts | trim | nindent 12 }}{{ end }}
       volumes:
+      {{- if .Values.settings }}
+        - name: {{ $fullName }}-settings-volume
+          configMap:
+            name: {{ $fullName }}-settings
+      {{ end }}
       {{- if .Values.plugins }}
         - name: {{ $fullName }}-plugin-volume
           configMap:
