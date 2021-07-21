@@ -1,6 +1,6 @@
 from typing import Dict, List, Optional, Set
 
-import requests
+import httpx
 from loguru import logger
 
 from streams_explorer.core.config import settings
@@ -14,13 +14,13 @@ protected_keys: Dict[str, Set[str]] = {}
 class KafkaConnect:
     @staticmethod
     def get_connectors() -> list:
-        response = requests.get(f"{url}/connectors")
+        response = httpx.get(f"{url}/connectors")
         return response.json()
 
     @staticmethod
     def get_connector_info(connector_name: str) -> dict:
         logger.info("Get connector information for {}", connector_name)
-        response = requests.get(f"{url}/connectors/{connector_name}")
+        response = httpx.get(f"{url}/connectors/{connector_name}")
         info: dict = response.json()
         return info
 
@@ -39,11 +39,11 @@ class KafkaConnect:
     def retrieve_connector_class_protected_keys(
         connector_class: str, config: dict
     ) -> None:
-        response = requests.put(
+        response = httpx.put(
             f"{url}/connector-plugins/{connector_class}/config/validate",
             json=config,
         )
-        if not response.ok:
+        if response.is_error:
             logger.warning(
                 'Couldn\'t retrieve connector class validation for "{}": {}',
                 connector_class,
