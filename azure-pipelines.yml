@@ -61,15 +61,19 @@ stages:
 
           - script: poetry run pre-commit run flake8 --all-files --show-diff-on-failure
             displayName: "Lint (flake8)"
+            workingDirectory: $(backendPath)
 
           - script: poetry run pre-commit run isort --all-files
             displayName: "Order of imports (isort)"
+            workingDirectory: $(backendPath)
 
           - script: poetry run pre-commit run black --all-files --show-diff-on-failure
             displayName: "Formatting (black)"
+            workingDirectory: $(backendPath)
 
           - script: poetry run pre-commit run mypy --all-files
             displayName: "Typing (mypy)"
+            workingDirectory: $(backendPath)
 
           - script: poetry run pytest tests
             displayName: "Run Tests"
