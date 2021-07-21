@@ -1,49 +1,41 @@
+[tool.poetry]
+name = "streams-explorer"
+version = "1.1.12"
+description = "Explore Data Pipelines in Apache Kafka."
+readme = "../README.md"
+authors = ["bakdata"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+kubernetes = "^17.17.0"
+loguru = "^0.5.3"
+matplotlib = "^3.4.2"
+networkx = "^2.6.1"
+dynaconf = "^3.1.4"
+httpx = "^0.18.2"
+pydantic = "^1.8.2"
+fastapi-utils = "^0.2.1"
+fastapi = "^0.66.1"
+uvicorn = "^0.14.0"
+aiofiles = "^0.7.0"
+pygraphviz = "^1.7"
+requests = "^2.26.0"
+
+[tool.poetry.dev-dependencies]
+mypy = "^0.910"
+flake8 = "^3.9.2"
+black = "^21.7b0"
+isort = "^5.9.2"
+pytest = "^6.2.4"
+pre-commit = "^2.13.0"
+pytest-asyncio = "^0.15.1"
+pytest-clarity = "^1.0.1"
+pytest-cov = "^2.12.1"
+pytest-mock = "^3.6.1"
+nest-asyncio = "^1.5.1"
+requests-mock = "^1.9.3"
+
 [build-system]
-requires = ["flit_core >=2,<4"]
-build-backend = "flit_core.buildapi"
-
-[tool.flit.metadata]
-module = "streams_explorer"
-dist-name = "streams-explorer"
-author = "bakdata"
-home-page = "https://github.com/bakdata/streams-explorer"
-description-file="README.md"
-requires-python = ">=3.6"
-requires = [
-    "aiofiles==0.6.0",
-    "dynaconf==3.1.2",
-    "fastapi==0.63.0",
-    "kubernetes==12.0.1",
-    "loguru==0.5.3",
-    "matplotlib==3.3.3",
-    "networkx==2.5",
-    "numpy==1.19.5",
-    "pandas==1.2.0",
-    "prometheus-api-client==0.4.2",
-    "pygraphviz==1.6",
-    "uvicorn==0.13.3",
-    "fastapi-utils==0.2.1"
-]
-classifiers = [
-    "License :: OSI Approved :: MIT License",
-    "Programming Language :: Python",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.6",
-    "Programming Language :: Python :: 3.7",
-    "Programming Language :: Python :: 3.8",
-    "Topic :: Software Development :: Libraries :: Python Modules",
-    "Topic :: Software Development :: Libraries",
-    "Topic :: Software Development",
-    "Intended Audience :: Developers",
-    "Typing :: Typed",
-]
-
-[tool.flit.metadata.requires-extra]
-test = [
-    "pytest",
-    "pytest-cov",
-    "pytest-mock",
-    "nest-asyncio",
-    "pytest-asyncio"
-]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
