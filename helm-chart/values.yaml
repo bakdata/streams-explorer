@@ -7,14 +7,23 @@ replicaCount: 1
 imagePullPolicy: Always
 serviceHttpPort: 80
 
-# Configure env variables here
+# Configure using env variables
+config:
+  K8S_deployment_cluster: true
+  SCHEMAREGISTRY_url: http://schema-registry:8081
+  KAFKACONNECT_url: http://kafka-connect:8083
+  PROMETHEUS_url: http://prometheus:9090
+
+# Or pass the whole settings.yaml as a configmap
+# settings:
+#   k8s:
+#     deployment:
+#       cluster: true
+#   ...
+
+envPrefix: "SE_"
 env:
-    MAX_WORKERS: '1'  # Max number of FastAPI worker processes inside the pod
-    SE_SCHEMAREGISTRY__url: 'http://schema-registry:8081'
-    SE_KAFKACONNECT__url: 'http://kafka-connect:8083'
-    SE_PROMETHEUS__url: 'http://prometheus:9090'
-    SE_K8S__deployment__cluster: true
-    SE_K8S__deployment__context: 'kubernetes-cluster'
+  MAX_WORKERS: "1" # Max number of FastAPI worker processes inside the pod
 
 # Configure secret env variables here
 secrets: {}
@@ -38,7 +47,6 @@ icons: {}
 # example_icon: |
 #   <svg></svg>
 
-
 deploymentLabels: {}
 
 podLabels: {}
@@ -47,7 +55,7 @@ service:
 
 # Create a role and role binding to scrape only the namespace
 # the Streams Explorer is deployed to.
-# To scrape multiple namespaces create a cluster role and 
+# To scrape multiple namespaces create a cluster role and
 # multiple role bindings.
 rbac:
   create: true
@@ -68,7 +76,6 @@ ingress:
   sslRedirect: true
   # Commonly used to map ingress objects to specific ingress controller installations within your cluster
   #ingressClassName: nginx-web-ingress
-
 
 resources:
   requests:

@@ -1,4 +1,5 @@
 {{- $fullName := include "streams-explorer.fullname" . -}}
+{{- $prefix := .Values.envPrefix -}}
 {{- if .Capabilities.APIVersions.Has "apps/v1" }}
 apiVersion: apps/v1
 {{- else }}
@@ -79,6 +80,10 @@ spec:
           resources:
 {{ toYaml .Values.resources | indent 12 }}
           env:
+          {{- range $key, $value := .Values.config }}
+            - name: "{{ $prefix }}{{ $key | replace "_" "__" }}"
+              value: "{{ $value }}"
+          {{- end }}
           {{- range $key, $value := .Values.secrets }}
             - name: "{{ $key }}"
               valueFrom:
@@ -87,10 +92,10 @@ spec:
                   key: "{{ $key }}"
           {{- end }}
           {{- if .Values.rbac.clusterScope.enabled }}
-            - name: "SE_K8S__deployment__namespaces"
+            - name: "{{ $prefix }}K8S__deployment__namespaces"
               value: {{ .Values.rbac.clusterScope.namespaces | toJson | squote | join "," }}
           {{- else }}
-            - name: "SE_K8S__deployment__namespaces"
+            - name: "{{ $prefix }}K8S__deployment__namespaces"
               value: "['{{ .Release.Namespace }}']"
           {{- end }}
           {{- range $key, $value := .Values.env }}
@@ -98,6 +103,11 @@ spec:
               value: {{ $value | quote }}
           {{- end }}
           volumeMounts:
+          {{- if .Values.settings }}
+            - name: {{ $fullName }}-settings-volume
+              mountPath: /app/settings.yaml
+              subPath: settings.yaml
+          {{ end }}
           {{- if .Values.plugins }}
             - name: {{ $fullName }}-plugin-volume
               mountPath: /app/plugins
@@ -111,6 +121,11 @@ spec:
           {{ end }}
           {{- if .Values.volumeMounts }}{{ toYaml .Values.volumeMounts | trim | nindent 12 }}{{ end }}
       volumes:
+      {{- if .Values.settings }}
+        - name: {{ $fullName }}-settings-volume
+          configMap:
+            name: {{ $fullName }}-settings
+      {{ end }}
       {{- if .Values.plugins }}
         - name: {{ $fullName }}-plugin-volume
           configMap:
