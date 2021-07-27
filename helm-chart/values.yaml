@@ -13,7 +13,6 @@ config:
   SCHEMAREGISTRY_url: http://schema-registry:8081
   KAFKACONNECT_url: http://kafka-connect:8083
   PROMETHEUS_url: http://prometheus:9090
-  K8S_deployment_context: kubernetes-cluster
 
 # Or pass the whole settings.yaml as a configmap
 # settings:
