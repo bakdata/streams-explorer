@@ -7,17 +7,24 @@ replicaCount: 1
 imagePullPolicy: Always
 serviceHttpPort: 80
 
-# TODO
-# settings:
+# Configure using env variables
+config:
+  K8S_deployment_cluster: true
+  SCHEMAREGISTRY_url: "http://schema-registry:8081"
+  KAFKACONNECT_url: "http://kafka-connect:8083"
+  PROMETHEUS_url: "http://prometheus:9090"
+  K8S_deployment_context: "kubernetes-cluster"
 
-# Configure env variables here
+# Or using a configmap (settings.yaml)
+# settings:
+#   k8s:
+#     deployment:
+#       cluster: true
+#   ...
+
+envPrefix: "SE_"
 env:
   MAX_WORKERS: "1" # Max number of FastAPI worker processes inside the pod
-  SE_K8S__deployment__cluster: true
-#   SE_SCHEMAREGISTRY__url: "http://schema-registry:8081"
-#   SE_KAFKACONNECT__url: "http://kafka-connect:8083"
-#   SE_PROMETHEUS__url: "http://prometheus:9090"
-#   SE_K8S__deployment__context: "kubernetes-cluster"
 
 # Configure secret env variables here
 secrets: {}
