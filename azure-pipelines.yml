@@ -62,7 +62,6 @@ stages:
                 python
               path: $(PIP_CACHE_DIR)
             displayName: "Cache pip packages"
-            workingDirectory: $(backendPath)
 
           - script: |
               sudo apt-get -y install python3-dev graphviz libgraphviz-dev pkg-config python3-wheel
