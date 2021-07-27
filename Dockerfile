@@ -8,15 +8,18 @@ RUN apt-get -y update && \
     apt-get --no-install-recommends -y install nodejs python3-dev graphviz libgraphviz-dev pkg-config && \
     rm -rf /var/lib/apt/lists/*
 
-COPY ./backend /app
+COPY ./backend/pyproject.toml ./backend/poetry.lock /app/
 RUN pip install -U pip poetry && \
     poetry config virtualenvs.create false && \
     poetry install --no-dev --no-interaction
+COPY ./backend /app
+
+COPY ./frontend/package.json ./frontend/package-lock.json /frontend/
+RUN npm ci --production --prefix /frontend
 
 COPY ./frontend /frontend
-RUN mkdir -p /app/static && \
-    npm ci --production --prefix /frontend && \
-    npm run build --prefix /frontend && \
+RUN npm run build --prefix /frontend && \
+    mkdir -p /app/static && \
     mv /frontend/build/* /app/static/ && \
     rm -rf /frontend
 
