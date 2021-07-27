@@ -9,9 +9,9 @@ RUN apt-get -y update && \
     rm -rf /var/lib/apt/lists/*
 
 COPY ./backend /app
-RUN pip install -U pip && \
-    sed -E -i.bak '/^(fastapi|uvicorn|click|h11)=/d' requirements.txt && \
-    pip install -r requirements.txt
+RUN pip install -U pip poetry && \
+    poetry config virtualenvs.create false && \
+    poetry install --no-dev --no-interaction
 
 COPY ./frontend /frontend
 RUN mkdir -p /app/static && \
