@@ -56,7 +56,7 @@ stages:
 
           - task: Cache@2
             inputs:
-              key: 'python | "$(Agent.OS)" | poetry.lock'
+              key: 'python | "$(Agent.OS)" | backend/poetry.lock'
               restoreKeys: |
                 python | "$(Agent.OS)"
                 python
