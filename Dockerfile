@@ -11,6 +11,7 @@ RUN apt-get -y update && \
 COPY ./backend/pyproject.toml ./backend/poetry.lock /app/
 RUN pip install -U pip poetry && \
     poetry config virtualenvs.create false && \
+    sed -E -i.bak '/^(fastapi|uvicorn) =/d' pyproject.toml && \
     poetry install --no-dev --no-interaction
 COPY ./backend /app
 
