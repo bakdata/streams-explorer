@@ -112,7 +112,7 @@ Depending on your type of installation set the configuration for the backend ser
 - **Kubernetes**: [helm-chart/values.yaml](helm-chart/values.yaml)
 - **standalone**: [backend/settings.yaml](backend/settings.yaml)
 
-In the [helm-chart/values.yaml](helm-chart/values.yaml) configuration is done either through the `config` section using underscore notation, e.g. `K8S_deployment_cluster=false` or the content of [backend/settings.yaml](backend/settings.yaml) can be pasted under the `settings` section. Alternatively all configuration options can be written as environment variables using double underscore notation and the prefix `SE`, e.g. `SE_K8S__deployment__cluster=false`.
+In the [helm-chart/values.yaml](helm-chart/values.yaml) configuration is done either through the `config` section using underscore notation, e.g. `SCHEMAREGISTRY_url: http://schema-registry:8081` or the content of [backend/settings.yaml](backend/settings.yaml) can be pasted under the `settings` section. Alternatively all configuration options can be written as environment variables using double underscore notation and the prefix `SE`, e.g. `SE_K8S__deployment__cluster=false`.
 
 The following configuration options are available:
 
