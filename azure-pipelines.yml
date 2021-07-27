@@ -47,10 +47,22 @@ stages:
           matrix:
             Python38:
               python.version: $(pythonVersion)
+        variables:
+          PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
         steps:
           - task: UsePythonVersion@0
             inputs:
               versionSpec: "$(python.version)"
+
+          - task: Cache@2
+            inputs:
+              key: 'python | "$(Agent.OS)" | poetry.lock'
+              restoreKeys: |
+                python | "$(Agent.OS)"
+                python
+              path: $(PIP_CACHE_DIR)
+            displayName: "Cache pip packages"
+            workingDirectory: $(backendPath)
 
           - script: |
               sudo apt-get -y install python3-dev graphviz libgraphviz-dev pkg-config python3-wheel
@@ -86,6 +98,8 @@ stages:
           matrix:
             node_14_x:
               node.version: "14.x"
+        variables:
+          PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
         steps:
           - task: NodeTool@0
             inputs:
