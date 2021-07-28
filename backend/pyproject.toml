@@ -6,7 +6,7 @@ readme = "../README.md"
 authors = ["bakdata"]
 repository = "https://github.com/bakdata/streams-explorer"
 license = "MIT"
-keywords = ["kafka", "kubernetes", "stream-processing", "monitoring", "pipelines",]
+keywords = ["kafka", "kubernetes", "stream-processing", "monitoring", "pipelines"]
 classifiers = [
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python",
