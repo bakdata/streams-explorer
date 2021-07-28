@@ -56,7 +56,7 @@ stages:
 
           - task: Cache@2
             inputs:
-              key: 'python | "$(Agent.OS)" | backend/poetry.lock'
+              key: 'python | "$(Agent.OS)" | $(backendPath)/poetry.lock'
               restoreKeys: |
                 python | "$(Agent.OS)"
                 python
@@ -205,38 +205,16 @@ stages:
             inputs:
               versionSpec: "$(python.version)"
 
-          # - script: |
-          #     cp README.md $(backendPath)/
-          #     git add $(backendPath)/README.md
-          #   displayName: "Copy Readme"
+          - script: |
+              cp README.md $(backendPath)/
+              git add $(backendPath)/README.md
+              sed -E -i.bak 's/\.\.\/README/README/' $(backendPath)/pyproject.toml
+            displayName: "Copy Readme"
 
           - script: |
               sudo apt-get -y install python3-dev graphviz libgraphviz-dev pkg-config python3-wheel
             displayName: "Install dependencies"
             workingDirectory: $(backendPath)
-
-          # - script: pip install -U pip
-          #   displayName: "Upgrade pip"
-
-          # - script: pip install flit
-          #   displayName: "Install flit"
-
-          # - script: flit install
-          #   displayName: "Install library"
-          #   workingDirectory: $(backendPath)
-
-          # - script: flit build
-          #   displayName: "Build library"
-          #   workingDirectory: $(backendPath)
-
-          # - script: flit publish
-          #   displayName: "Publish to PyPI"
-          #   workingDirectory: $(backendPath)
-          #   env:
-          #     FLIT_INDEX_URL: $(pypi.url)
-          #     FLIT_USERNAME: $(pypi.username)
-          #     FLIT_PASSWORD: $(pypi.password)
-          #     FLIT_ROOT_INSTALL: 1
 
           - script: pip install poetry
             displayName: "Install poetry"
