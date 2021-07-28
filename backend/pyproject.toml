@@ -6,13 +6,12 @@ readme = "../README.md"
 authors = ["bakdata"]
 repository = "https://github.com/bakdata/streams-explorer"
 license = "MIT"
+keywords = ["kafka", "kubernetes", "stream-processing", "monitoring", "pipelines",]
 classifiers = [
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.6",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Topic :: Software Development :: Libraries :: Python Modules",
@@ -26,7 +25,7 @@ classifiers = [
 "Bug Tracker" = "https://github.com/bakdata/streams-explorer/issues"
 
 [tool.poetry.dependencies]
-python = "^3.6"
+python = "^3.8"
 kubernetes = "^17.17.0"
 loguru = "^0.5.3"
 matplotlib = "^3.4.2"
