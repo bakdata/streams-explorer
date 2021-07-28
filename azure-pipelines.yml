@@ -174,7 +174,7 @@ stages:
 
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: "3.8"
+              versionSpec: "$(python.version)"
 
           - script: pip install -U pip
             displayName: "Upgrade pip"
@@ -203,37 +203,55 @@ stages:
 
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: "3.8"
+              versionSpec: "$(python.version)"
 
-          - script: |
-              cp README.md $(backendPath)/
-              git add $(backendPath)/README.md
-            displayName: "Copy Readme"
+          # - script: |
+          #     cp README.md $(backendPath)/
+          #     git add $(backendPath)/README.md
+          #   displayName: "Copy Readme"
 
           - script: |
               sudo apt-get -y install python3-dev graphviz libgraphviz-dev pkg-config python3-wheel
             displayName: "Install dependencies"
             workingDirectory: $(backendPath)
 
-          - script: pip install -U pip
-            displayName: "Upgrade pip"
+          # - script: pip install -U pip
+          #   displayName: "Upgrade pip"
 
-          - script: pip install flit
-            displayName: "Install flit"
+          # - script: pip install flit
+          #   displayName: "Install flit"
 
-          - script: flit install
-            displayName: "Install library"
+          # - script: flit install
+          #   displayName: "Install library"
+          #   workingDirectory: $(backendPath)
+
+          # - script: flit build
+          #   displayName: "Build library"
+          #   workingDirectory: $(backendPath)
+
+          # - script: flit publish
+          #   displayName: "Publish to PyPI"
+          #   workingDirectory: $(backendPath)
+          #   env:
+          #     FLIT_INDEX_URL: $(pypi.url)
+          #     FLIT_USERNAME: $(pypi.username)
+          #     FLIT_PASSWORD: $(pypi.password)
+          #     FLIT_ROOT_INSTALL: 1
+
+          - script: pip install poetry
+            displayName: "Install poetry"
+
+          - script: poetry install --no-dev --no-interaction
+            displayName: "Install dependencies"
             workingDirectory: $(backendPath)
 
-          - script: flit build
+          - script: poetry build
             displayName: "Build library"
             workingDirectory: $(backendPath)
 
-          - script: flit publish
+          - script: poetry publish
             displayName: "Publish to PyPI"
             workingDirectory: $(backendPath)
             env:
-              FLIT_INDEX_URL: $(pypi.url)
-              FLIT_USERNAME: $(pypi.username)
-              FLIT_PASSWORD: $(pypi.password)
-              FLIT_ROOT_INSTALL: 1
+              POETRY_HTTP_BASIC_PYPI_USERNAME: $(pypi.username)
+              POETRY_HTTP_BASIC_PYPI_PASSWORD: $(pypi.password)
