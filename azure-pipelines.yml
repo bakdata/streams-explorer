@@ -16,6 +16,7 @@ resources:
 
 variables:
   - group: pypi
+  - group: testpypi
   - name: vmImage
     value: ubuntu-20.04
   - name: pythonVersion
@@ -241,7 +242,7 @@ stages:
             displayName: "Install poetry"
 
           - script: poetry install --no-dev --no-interaction
-            displayName: "Install dependencies"
+            displayName: "Install package dependencies"
             workingDirectory: $(backendPath)
 
           - script: poetry build
@@ -281,7 +282,7 @@ stages:
             displayName: "Install poetry"
 
           - script: poetry install --no-dev --no-interaction
-            displayName: "Install dependencies"
+            displayName: "Install package dependencies"
             workingDirectory: $(backendPath)
 
           - script: poetry build
