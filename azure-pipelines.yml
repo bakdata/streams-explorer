@@ -136,6 +136,10 @@ stages:
     jobs:
       - job: Docker
         steps:
+          - script: docker pull $(imageRepository):latest
+            displayName: "Pull previous image for build caching"
+            continueOnError: true
+
           - task: Docker@2
             condition: and(eq(variables['release.version'], ''), eq(variables.isTag, false))
             displayName: "Build & Push image commit"
@@ -144,6 +148,7 @@ stages:
               repository: $(imageRepository)
               Dockerfile: $(dockerfilePath)
               containerRegistry: $(dockerRegistryServiceConnection)
+              arguments: "--cache-from=$(imageRepository):latest"
               tags: |
                 $(dockerDefaultImageTag)
 
@@ -155,6 +160,7 @@ stages:
               repository: $(imageRepository)
               Dockerfile: $(dockerfilePath)
               containerRegistry: $(dockerRegistryServiceConnection)
+              arguments: "--cache-from=$(imageRepository):latest"
               tags: |
                 $(Build.SourceBranchName)
                 latest
