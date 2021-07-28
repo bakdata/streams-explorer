@@ -253,7 +253,7 @@ stages:
             workingDirectory: $(backendPath)
             env:
               POETRY_REPOSITORIES_TESTPYPI_URL: https://test.pypi.org/legacy/
-              POETRY_HTTP_BASIC_TESTPYPI_USERNAME: __token__
+              POETRY_HTTP_BASIC_TESTPYPI_USERNAME: $(testpypi.username)
               POETRY_HTTP_BASIC_TESTPYPI_PASSWORD: $(testpypi.password)
 
       - job: PyPI
