@@ -195,6 +195,46 @@ stages:
           - script: git push --follow-tags origin $(Build.SourceBranchName)
             displayName: "Push Tag to GitHub"
 
+      - job: TestPyPI
+        condition: eq(variables['Build.Reason'], 'Manual')
+        steps:
+          - checkout: self
+            persistCredentials: true
+
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: "$(python.version)"
+
+          - script: |
+              cp README.md $(backendPath)/
+              git add $(backendPath)/README.md
+              sed -E -i.bak 's/\.\.\/README/README/' $(backendPath)/pyproject.toml
+            displayName: "Copy Readme"
+
+          - script: |
+              sudo apt-get -y install python3-dev graphviz libgraphviz-dev pkg-config python3-wheel
+            displayName: "Install dependencies"
+            workingDirectory: $(backendPath)
+
+          - script: pip install poetry
+            displayName: "Install poetry"
+
+          - script: poetry install --no-dev --no-interaction
+            displayName: "Install dependencies"
+            workingDirectory: $(backendPath)
+
+          - script: poetry build
+            displayName: "Build library"
+            workingDirectory: $(backendPath)
+
+          - script: poetry publish -r testpypi
+            displayName: "Publish to TestPyPI"
+            workingDirectory: $(backendPath)
+            env:
+              POETRY_REPOSITORIES_TESTPYPI_URL: https://test.pypi.org/legacy/
+              POETRY_HTTP_BASIC_TESTPYPI_USERNAME: __token__
+              POETRY_HTTP_BASIC_TESTPYPI_PASSWORD: $(testpypi.password)
+
       - job: PyPI
         condition: eq(variables.isTag, true)
         steps:
