@@ -142,9 +142,9 @@ stages:
 
           - task: Docker@2
             condition: and(eq(variables['release.version'], ''), eq(variables.isTag, false))
-            displayName: "Build & Push image commit"
+            displayName: "Build image commit"
             inputs:
-              command: buildAndPush
+              command: build
               repository: $(imageRepository)
               Dockerfile: $(dockerfilePath)
               containerRegistry: $(dockerRegistryServiceConnection)
@@ -153,14 +153,35 @@ stages:
                 $(dockerDefaultImageTag)
 
           - task: Docker@2
-            condition: eq(variables.isTag, true)
-            displayName: "Build & Push image release"
+            condition: and(eq(variables['release.version'], ''), eq(variables.isTag, false))
+            displayName: "Push image commit"
             inputs:
-              command: buildAndPush
+              command: push
+              repository: $(imageRepository)
+              containerRegistry: $(dockerRegistryServiceConnection)
+              tags: |
+                $(dockerDefaultImageTag)
+
+          - task: Docker@2
+            condition: eq(variables.isTag, true)
+            displayName: "Build image release"
+            inputs:
+              command: build
               repository: $(imageRepository)
               Dockerfile: $(dockerfilePath)
               containerRegistry: $(dockerRegistryServiceConnection)
               arguments: "--cache-from=$(imageRepository):latest"
+              tags: |
+                $(Build.SourceBranchName)
+                latest
+
+          - task: Docker@2
+            condition: eq(variables.isTag, true)
+            displayName: "Push image release"
+            inputs:
+              command: push
+              repository: $(imageRepository)
+              containerRegistry: $(dockerRegistryServiceConnection)
               tags: |
                 $(Build.SourceBranchName)
                 latest
