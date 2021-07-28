@@ -52,7 +52,7 @@ stages:
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: "$(python.version)"
+              versionSpec: $(python.version)
 
           - task: Cache@2
             inputs:
@@ -195,7 +195,7 @@ stages:
 
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: "$(python.version)"
+              versionSpec: $(pythonVersion)
 
           - script: pip install -U pip
             displayName: "Upgrade pip"
@@ -224,7 +224,7 @@ stages:
 
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: "$(python.version)"
+              versionSpec: $(pythonVersion)
 
           - script: |
               cp README.md $(backendPath)/
@@ -264,7 +264,7 @@ stages:
 
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: "$(python.version)"
+              versionSpec: $(pythonVersion)
 
           - script: |
               cp README.md $(backendPath)/
