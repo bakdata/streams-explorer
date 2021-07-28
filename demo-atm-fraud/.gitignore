@@ -32,3 +32,6 @@ hs_err_pid*
 
 *.bin
 *.lock
+
+gess/
+deploy-demo-pipeline.sh

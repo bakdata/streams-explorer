@@ -74,10 +74,10 @@ helm upgrade --install --values helm-chart/values.yaml streams-explorer
 
 #### Backend
 
-1. Install dependencies
+1. Install dependencies using [Poetry](https://python-poetry.org)
 
 ```sh
-pip install -r requirements.txt
+poetry install
 ```
 
 2. Forward the ports to Prometheus. (Kafka Connect, Schema Registry, and other integrations are optional)

@@ -2,7 +2,6 @@
 .secrets.*
 *_private*
 
-backend/.env
 backend/static/
 backend/docs/
 demo-atm-fraud/build/
@@ -14,3 +13,11 @@ demo-atm-fraud/build/
 # IDE
 .idea
 .vscode
+
+# Helm
+helm-chart/index-cache.yaml
+
+# local development files
+.env*
+*private*
+mock/

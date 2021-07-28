@@ -46,31 +46,49 @@ stages:
         strategy:
           matrix:
             Python38:
-              python.version: $(pythonVersion)
+              python.version: "3.8"
+            Python39:
+              python.version: "3.9"
+        variables:
+          PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: "$(python.version)"
+              versionSpec: $(python.version)
+
+          - task: Cache@2
+            inputs:
+              key: 'python | "$(Agent.OS)" | $(backendPath)/poetry.lock'
+              restoreKeys: |
+                python | "$(Agent.OS)"
+                python
+              path: $(PIP_CACHE_DIR)
+            displayName: "Cache pip packages"
 
           - script: |
               sudo apt-get -y install python3-dev graphviz libgraphviz-dev pkg-config python3-wheel
-              python -m pip install -r requirements.txt
+              python -m pip install poetry
+              poetry install --no-interaction
             displayName: "Install dependencies"
             workingDirectory: $(backendPath)
 
-          - script: pre-commit run flake8 --all-files
+          - script: poetry run pre-commit run flake8 --all-files --show-diff-on-failure
             displayName: "Lint (flake8)"
+            workingDirectory: $(backendPath)
 
-          - script: pre-commit run isort --all-files
+          - script: poetry run pre-commit run isort --all-files
             displayName: "Order of imports (isort)"
+            workingDirectory: $(backendPath)
 
-          - script: pre-commit run black --all-files
+          - script: poetry run pre-commit run black --all-files --show-diff-on-failure
             displayName: "Formatting (black)"
+            workingDirectory: $(backendPath)
 
-          - script: pre-commit run mypy --all-files
+          - script: poetry run pre-commit run mypy --all-files
             displayName: "Typing (mypy)"
+            workingDirectory: $(backendPath)
 
-          - script: python -m pytest tests
+          - script: poetry run pytest tests
             displayName: "Run Tests"
             workingDirectory: $(backendPath)
 
@@ -81,6 +99,8 @@ stages:
           matrix:
             node_14_x:
               node.version: "14.x"
+        variables:
+          PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
         steps:
           - task: NodeTool@0
             inputs:
@@ -118,24 +138,51 @@ stages:
     jobs:
       - job: Docker
         steps:
+          - script: docker pull $(imageRepository):latest
+            displayName: "Pull previous image for build caching"
+            continueOnError: true
+
           - task: Docker@2
             condition: and(eq(variables['release.version'], ''), eq(variables.isTag, false))
-            displayName: "Build & Push image commit"
+            displayName: "Build image commit"
             inputs:
-              command: buildAndPush
+              command: build
               repository: $(imageRepository)
               Dockerfile: $(dockerfilePath)
+              containerRegistry: $(dockerRegistryServiceConnection)
+              arguments: "--cache-from=$(imageRepository):latest"
+              tags: |
+                $(dockerDefaultImageTag)
+
+          - task: Docker@2
+            condition: and(eq(variables['release.version'], ''), eq(variables.isTag, false))
+            displayName: "Push image commit"
+            inputs:
+              command: push
+              repository: $(imageRepository)
               containerRegistry: $(dockerRegistryServiceConnection)
               tags: |
                 $(dockerDefaultImageTag)
 
           - task: Docker@2
             condition: eq(variables.isTag, true)
-            displayName: "Build & Push image release"
+            displayName: "Build image release"
             inputs:
-              command: buildAndPush
+              command: build
               repository: $(imageRepository)
               Dockerfile: $(dockerfilePath)
+              containerRegistry: $(dockerRegistryServiceConnection)
+              arguments: "--cache-from=$(imageRepository):latest"
+              tags: |
+                $(Build.SourceBranchName)
+                latest
+
+          - task: Docker@2
+            condition: eq(variables.isTag, true)
+            displayName: "Push image release"
+            inputs:
+              command: push
+              repository: $(imageRepository)
               containerRegistry: $(dockerRegistryServiceConnection)
               tags: |
                 $(Build.SourceBranchName)
@@ -150,7 +197,7 @@ stages:
 
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: "3.8"
+              versionSpec: $(pythonVersion)
 
           - script: pip install -U pip
             displayName: "Upgrade pip"
@@ -179,11 +226,12 @@ stages:
 
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: "3.8"
+              versionSpec: $(pythonVersion)
 
           - script: |
               cp README.md $(backendPath)/
               git add $(backendPath)/README.md
+              sed -E -i.bak 's/\.\.\/README/README/' $(backendPath)/pyproject.toml
             displayName: "Copy Readme"
 
           - script: |
@@ -191,25 +239,20 @@ stages:
             displayName: "Install dependencies"
             workingDirectory: $(backendPath)
 
-          - script: pip install -U pip
-            displayName: "Upgrade pip"
+          - script: pip install poetry
+            displayName: "Install poetry"
 
-          - script: pip install flit
-            displayName: "Install flit"
-
-          - script: flit install
-            displayName: "Install library"
+          - script: poetry install --no-dev --no-interaction
+            displayName: "Install package dependencies"
             workingDirectory: $(backendPath)
 
-          - script: flit build
+          - script: poetry build
             displayName: "Build library"
             workingDirectory: $(backendPath)
 
-          - script: flit publish
+          - script: poetry publish
             displayName: "Publish to PyPI"
             workingDirectory: $(backendPath)
             env:
-              FLIT_INDEX_URL: $(pypi.url)
-              FLIT_USERNAME: $(pypi.username)
-              FLIT_PASSWORD: $(pypi.password)
-              FLIT_ROOT_INSTALL: 1
+              POETRY_HTTP_BASIC_PYPI_USERNAME: $(pypi.username)
+              POETRY_HTTP_BASIC_PYPI_PASSWORD: $(pypi.password)
