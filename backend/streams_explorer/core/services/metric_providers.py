@@ -70,9 +70,18 @@ class PrometheusMetric(Enum):
         return {d["metric"][self._k]: self._v(d["value"][-1]) for d in data}
 
 
+def sort_topics_first(nodes: list) -> list:
+    return sorted(nodes, key=is_topic, reverse=True)
+
+
+def is_topic(node) -> bool:
+    node_type: NodeTypesEnum = node[1]["node_type"]
+    return node_type == NodeTypesEnum.TOPIC or node_type == NodeTypesEnum.ERROR_TOPIC
+
+
 class MetricProvider:
     def __init__(self, nodes: list):
-        self._nodes = nodes
+        self._nodes: list = sort_topics_first(nodes)
         self.metrics: List[Metric] = []
         self._data: Dict[str, dict] = {}
 

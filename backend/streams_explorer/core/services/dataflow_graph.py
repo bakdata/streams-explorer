@@ -33,13 +33,13 @@ class DataFlowGraph:
         self.json_pipelines: Dict[str, dict] = {}
         self.metric_provider_class = metric_provider
 
-    def setup_metric_provider(self):
-        # sort topic nodes first
-        nodes = sorted(self.graph.nodes(data=True), key=self.sort_nodes, reverse=True)
-        self.metric_provider = self.metric_provider_class(nodes)
-
     async def store_json_graph(self):
         self.json_graph = await self.get_positioned_graph()
+
+    def setup_metric_provider(self):
+        self.metric_provider = self.metric_provider_class(
+            list(self.graph.nodes(data=True))
+        )
 
     def add_streaming_app(self, app: K8sApp):
         pipeline = app.attributes.get(ATTR_PIPELINE)
@@ -233,10 +233,3 @@ class DataFlowGraph:
             for node_name in list(subgraph.nodes):
                 graph.nodes[node_name]["y"] += offset
         return DataFlowGraph.__get_json_graph(graph)
-
-    @staticmethod
-    def sort_nodes(node: Node) -> bool:
-        node_type: NodeTypesEnum = node[1]["node_type"]
-        return (
-            node_type == NodeTypesEnum.TOPIC or node_type == NodeTypesEnum.ERROR_TOPIC
-        )
