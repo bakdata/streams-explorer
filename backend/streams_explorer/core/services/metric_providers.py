@@ -4,7 +4,6 @@ from typing import Callable, Dict, List, Optional
 
 import httpx
 from loguru import logger
-from networkx.classes.reportviews import NodeDataView
 
 from streams_explorer.core.config import settings
 from streams_explorer.models.graph import Metric
@@ -72,8 +71,8 @@ class PrometheusMetric(Enum):
 
 
 class MetricProvider:
-    def __init__(self, nodes: NodeDataView):
-        self._nodes: NodeDataView = nodes
+    def __init__(self, nodes: list):
+        self._nodes = nodes
         self.metrics: List[Metric] = []
         self._data: Dict[str, dict] = {}
 
@@ -105,7 +104,7 @@ class MetricProvider:
                 replicas_available=self._data["replicas_available"].get(node_id),
                 connector_tasks=self._data["connector_tasks"].get(node_id),
             )
-            for node_id, node in iter(self._nodes)
+            for node_id, node in self._nodes
             if node_id
         ]
 
@@ -119,7 +118,7 @@ class PrometheusException(Exception):
 
 
 class PrometheusMetricProvider(MetricProvider):
-    def __init__(self, nodes: NodeDataView):
+    def __init__(self, nodes: list):
         super().__init__(nodes)
         self._client = httpx.AsyncClient()
         self._api_base = f"{settings.prometheus.url}/api/v1"

@@ -33,6 +33,11 @@ class DataFlowGraph:
         self.json_pipelines: Dict[str, dict] = {}
         self.metric_provider_class = metric_provider
 
+    def setup_metric_provider(self):
+        # sort topic nodes first
+        nodes = sorted(self.graph.nodes(data=True), key=self.sort_nodes, reverse=True)
+        self.metric_provider = self.metric_provider_class(nodes)
+
     async def store_json_graph(self):
         self.json_graph = await self.get_positioned_graph()
 
@@ -199,7 +204,6 @@ class DataFlowGraph:
         self.json_graph.clear()
         self.pipelines.clear()
         self.json_pipelines.clear()
-        self.metric_provider = self.metric_provider_class(self.graph.nodes(data=True))
 
     @staticmethod
     def __get_json_graph(graph: nx.Graph) -> dict:
@@ -229,3 +233,10 @@ class DataFlowGraph:
             for node_name in list(subgraph.nodes):
                 graph.nodes[node_name]["y"] += offset
         return DataFlowGraph.__get_json_graph(graph)
+
+    @staticmethod
+    def sort_nodes(node: Node) -> bool:
+        node_type: NodeTypesEnum = node[1]["node_type"]
+        return (
+            node_type == NodeTypesEnum.TOPIC or node_type == NodeTypesEnum.ERROR_TOPIC
+        )
