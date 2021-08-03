@@ -273,8 +273,8 @@ describe("visualize node metrics", () => {
         consumer_lag: 1,
         consumer_read_rate: 0,
         topic_size: undefined,
-        replicas: undefined,
-        replicas_available: undefined,
+        replicas: 1,
+        replicas_available: 1,
         connector_tasks: undefined,
       },
       {
