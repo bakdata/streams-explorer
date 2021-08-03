@@ -67,6 +67,11 @@ export function updateNodeMetrics(graph: Graph, metrics: Metric[]) {
           : ""
       }`,
       `${
+        typeof metric.topic_partitions === "number"
+          ? `PARTITIONS ${formatNumber(metric.topic_partitions)}`
+          : ""
+      }`,
+      `${
         typeof metric.messages_in === "number"
           ? `IN ${formatNumber(metric.messages_in)}/s`
           : ""

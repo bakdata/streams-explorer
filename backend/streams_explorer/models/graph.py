@@ -26,6 +26,7 @@ class Metric(BaseModel):
     consumer_lag: Optional[int]
     consumer_read_rate: Optional[float]
     topic_size: Optional[int]
+    topic_partitions: Optional[int]
     replicas: Optional[int]
     replicas_available: Optional[int]
     connector_tasks: Optional[int]

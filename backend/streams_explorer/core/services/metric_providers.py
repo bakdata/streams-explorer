@@ -48,6 +48,12 @@ class PrometheusMetric(Enum):
         "topic",
         float,
     )
+    TOPIC_PARTITIONS = (
+        "topic_partitions",
+        "sum by(topic) (kafka_topic_partitions)",
+        "topic",
+        int,
+    )
     REPLICAS = (
         "replicas",
         "sum by(deployment) (kube_deployment_status_replicas)",
@@ -101,6 +107,7 @@ class MetricProvider:
                 messages_in=self._data["messages_in"].get(node_id),
                 messages_out=self._data["messages_out"].get(node_id),
                 topic_size=self._data["topic_size"].get(node_id),
+                topic_partitions=self._data["topic_partitions"].get(node_id),
                 replicas=self._data["replicas"].get(node_id),
                 replicas_available=self._data["replicas_available"].get(node_id),
                 connector_tasks=self._data["connector_tasks"].get(node_id),
