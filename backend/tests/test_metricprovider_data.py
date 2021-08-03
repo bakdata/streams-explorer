@@ -77,6 +77,16 @@ prometheus_data = {
             "value": [1608117280.926, "0"],
         },
     ],
+    "topic_partitions": [
+        {
+            "metric": {"topic": "atm-fraud-raw-input-topic"},
+            "value": [1627979866.000, "5"],
+        },
+        {
+            "metric": {"topic": "atm-fraud-incoming-transactions-topic"},
+            "value": [1627979866.000, "1"],
+        },
+    ],
     "replicas": [
         {
             "metric": {"deployment": "atm-fraud-transactionavroproducer"},
