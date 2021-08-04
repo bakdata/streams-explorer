@@ -140,6 +140,7 @@ class PrometheusMetricProvider(MetricProvider):
         super().__init__(nodes)
         self._api_base = f"{settings.prometheus.url}/api/v1"
         self._client = httpx.AsyncClient(base_url=self._api_base)
+        # min refresh interval (set by the frontend) is 10s, intermediate requests should be cached
         self._cache_ttl = timedelta(seconds=9)
 
     async def _pull_metric(self, metric: PrometheusMetric) -> list:
