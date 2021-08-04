@@ -1,6 +1,9 @@
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Tuple
 
 from pydantic.main import BaseModel
+
+GraphNode = Tuple[str, dict]
+GraphEdge = Tuple[str, str]
 
 
 class Icon(BaseModel):

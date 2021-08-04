@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Set, Tuple, Type
+from typing import Dict, List, Optional, Set, Type
 
 import networkx as nx
 from loguru import logger
@@ -8,7 +8,7 @@ from networkx.generators.ego import ego_graph
 from streams_explorer.core.config import settings
 from streams_explorer.core.k8s_app import ATTR_PIPELINE, K8sApp
 from streams_explorer.core.services.metric_providers import MetricProvider
-from streams_explorer.models.graph import Metric
+from streams_explorer.models.graph import GraphEdge, GraphNode, Metric
 from streams_explorer.models.kafka_connector import (
     KafkaConnector,
     KafkaConnectorTypesEnum,
@@ -16,9 +16,6 @@ from streams_explorer.models.kafka_connector import (
 from streams_explorer.models.node_types import NodeTypesEnum
 from streams_explorer.models.sink import Sink
 from streams_explorer.models.source import Source
-
-Node = Tuple[str, dict]
-Edge = Tuple[str, str]
 
 
 class NodeNotFound(Exception):
@@ -35,6 +32,11 @@ class DataFlowGraph:
 
     async def store_json_graph(self):
         self.json_graph = await self.get_positioned_graph()
+
+    def setup_metric_provider(self):
+        self.metric_provider = self.metric_provider_class(
+            list(self.graph.nodes(data=True))
+        )
 
     def add_streaming_app(self, app: K8sApp):
         pipeline = app.attributes.get(ATTR_PIPELINE)
@@ -106,7 +108,7 @@ class DataFlowGraph:
         edge = (sink.source, sink.name)
         self.add_to_graph(node, edge, reverse=True)
 
-    def add_to_graph(self, node: Node, edge: Edge, reverse=False):
+    def add_to_graph(self, node: GraphNode, edge: GraphEdge, reverse=False):
         node_name, node_data = node
         self.graph.update(nodes=[node], edges=[edge])
 
@@ -199,7 +201,6 @@ class DataFlowGraph:
         self.json_graph.clear()
         self.pipelines.clear()
         self.json_pipelines.clear()
-        self.metric_provider = self.metric_provider_class(self.graph.nodes(data=True))
 
     @staticmethod
     def __get_json_graph(graph: nx.Graph) -> dict:

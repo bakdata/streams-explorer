@@ -49,6 +49,7 @@ class StreamsExplorer:
         self.__retrieve_cron_jobs()
         self.__get_connectors()
         self.__create_graph()
+        self.data_flow.setup_metric_provider()
         await self.data_flow.store_json_graph()
 
     def get_positioned_json_graph(self) -> dict:

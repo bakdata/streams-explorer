@@ -74,13 +74,13 @@ class TestPrometheusMetricProvider:
         result = await metric_provider.get()
         assert result == [
             Metric(
-                node_id="atm-fraud-transactionavroproducer",
-            ),
-            Metric(
                 node_id="atm-fraud-incoming-transactions-topic",
             ),
             Metric(
                 node_id="atm-fraud-raw-input-topic",
+            ),
+            Metric(
+                node_id="atm-fraud-transactionavroproducer",
             ),
             Metric(
                 node_id="demo-sink",
@@ -97,13 +97,6 @@ class TestPrometheusMetricProvider:
         result = await metric_provider.get()
         assert result == [
             Metric(
-                node_id="atm-fraud-transactionavroproducer",
-                consumer_lag=78,
-                replicas=1,
-                replicas_available=0,
-                consumer_read_rate=64.977769,
-            ),
-            Metric(
                 node_id="atm-fraud-incoming-transactions-topic",
                 messages_in=4.8,
                 messages_out=4.8,
@@ -114,6 +107,13 @@ class TestPrometheusMetricProvider:
                 messages_in=0,
                 messages_out=5.13,
                 topic_size=75921,
+            ),
+            Metric(
+                node_id="atm-fraud-transactionavroproducer",
+                consumer_lag=78,
+                replicas=1,
+                replicas_available=0,
+                consumer_read_rate=64.977769,
             ),
             Metric(
                 node_id="demo-sink",
