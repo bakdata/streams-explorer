@@ -140,7 +140,7 @@ class TestPrometheusMetricProvider:
         update_function.reset_mock()
 
         # disable caching
-        metric_provider._cache_time = timedelta(0)
+        metric_provider._cache_ttl = timedelta(0)
         for _ in range(2):
             await metric_provider.get()
         assert update_function.call_count == 2
