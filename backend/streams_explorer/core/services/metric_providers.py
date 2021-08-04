@@ -124,8 +124,8 @@ class MetricProvider:
         now = datetime.utcnow()
         last_refresh_delta = now - self._last_refresh
         if last_refresh_delta > self._cache_ttl:
-            await self.update()
             self._last_refresh = now
+            await self.update()
         else:
             logger.debug("Serving cached metrics (age {}s)", last_refresh_delta.seconds)
         return self._metrics
@@ -140,7 +140,7 @@ class PrometheusMetricProvider(MetricProvider):
         super().__init__(nodes)
         self._client = httpx.AsyncClient()
         self._api_base = f"{settings.prometheus.url}/api/v1"
-        self._cache_ttl = timedelta(seconds=10)
+        self._cache_ttl = timedelta(seconds=9)
 
     async def _pull_metric(self, metric: PrometheusMetric) -> list:
         try:

@@ -137,7 +137,7 @@ class TestPrometheusMetricProvider:
         for _ in range(2):
             await metric_provider.get()
         assert update_function.call_count == 1
-        update_function.reset_mock()
+        update_function.reset_mock()  # reset call_count
 
         # disable caching
         metric_provider._cache_ttl = timedelta(0)
