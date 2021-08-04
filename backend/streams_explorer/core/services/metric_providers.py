@@ -86,7 +86,7 @@ class MetricProvider:
         self._metrics: List[Metric] = []
         self._data: Dict[str, dict] = {}
         self._last_refresh_time: datetime = datetime.min
-        self._cache_time: timedelta = timedelta(seconds=0)
+        self._cache_time: timedelta = timedelta(0)
 
     async def refresh_data(self):
         pass
@@ -123,7 +123,7 @@ class MetricProvider:
     async def get(self) -> List[Metric]:
         now = datetime.utcnow()
         last_refresh_delta = now - self._last_refresh_time
-        if not self._last_refresh_time or last_refresh_delta > self._cache_time:
+        if last_refresh_delta > self._cache_time:
             await self.update()
             self._last_refresh_time = now
         else:

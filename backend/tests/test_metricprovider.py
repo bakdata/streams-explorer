@@ -1,4 +1,5 @@
 import textwrap
+from datetime import timedelta
 from pathlib import Path
 
 import pytest
@@ -121,3 +122,25 @@ class TestPrometheusMetricProvider:
                 connector_tasks=3,
             ),
         ]
+
+    @pytest.mark.asyncio
+    async def test_caching(
+        self, monkeypatch, mocker, metric_provider: PrometheusMetricProvider
+    ):
+        async def mock_pull_metric(_, metric: PrometheusMetric):
+            return prometheus_data[metric.metric]
+
+        monkeypatch.setattr(PrometheusMetricProvider, "_pull_metric", mock_pull_metric)
+
+        update_function = mocker.spy(PrometheusMetricProvider, "update")
+
+        for _ in range(2):
+            await metric_provider.get()
+        assert update_function.call_count == 1
+        update_function.reset_mock()
+
+        # disable caching
+        metric_provider._cache_time = timedelta(0)
+        for _ in range(2):
+            await metric_provider.get()
+        assert update_function.call_count == 2
