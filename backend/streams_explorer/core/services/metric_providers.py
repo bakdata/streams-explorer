@@ -152,11 +152,7 @@ class PrometheusMetricProvider(MetricProvider):
 
     async def _query(self, query: str) -> list:
         try:
-            r = await self._client.get(
-                "/query",
-                params={"query": query},
-                timeout=httpx.Timeout(5.0),
-            )
+            r = await self._client.get("/query", params={"query": query})
             if r.status_code == httpx.codes.OK:
                 data = r.json()
                 if data and "data" in data and "result" in data["data"]:
