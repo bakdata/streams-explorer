@@ -6,7 +6,7 @@ import httpx
 from loguru import logger
 
 from streams_explorer.core.config import settings
-from streams_explorer.models.graph import Metric
+from streams_explorer.models.graph import GraphNode, Metric
 from streams_explorer.models.node_types import NodeTypesEnum
 
 
@@ -70,18 +70,18 @@ class PrometheusMetric(Enum):
         return {d["metric"][self._k]: self._v(d["value"][-1]) for d in data}
 
 
-def sort_topics_first(nodes: list) -> list:
+def sort_topics_first(nodes: List[GraphNode]) -> List[GraphNode]:
     return sorted(nodes, key=is_topic, reverse=True)
 
 
-def is_topic(node) -> bool:
+def is_topic(node: GraphNode) -> bool:
     node_type: NodeTypesEnum = node[1]["node_type"]
     return node_type == NodeTypesEnum.TOPIC or node_type == NodeTypesEnum.ERROR_TOPIC
 
 
 class MetricProvider:
-    def __init__(self, nodes: list):
-        self._nodes: list = sort_topics_first(nodes)
+    def __init__(self, nodes: List[GraphNode]):
+        self._nodes: List[GraphNode] = sort_topics_first(nodes)
         self.metrics: List[Metric] = []
         self._data: Dict[str, dict] = {}
 
@@ -127,7 +127,7 @@ class PrometheusException(Exception):
 
 
 class PrometheusMetricProvider(MetricProvider):
-    def __init__(self, nodes: list):
+    def __init__(self, nodes: List[GraphNode]):
         super().__init__(nodes)
         self._client = httpx.AsyncClient()
         self._api_base = f"{settings.prometheus.url}/api/v1"
