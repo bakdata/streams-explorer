@@ -1,4 +1,5 @@
 import asyncio
+from datetime import datetime, timedelta
 from enum import Enum
 from typing import Callable, Dict, List, Optional
 
@@ -82,8 +83,9 @@ def is_topic(node: GraphNode) -> bool:
 class MetricProvider:
     def __init__(self, nodes: List[GraphNode]):
         self._nodes: List[GraphNode] = sort_topics_first(nodes)
-        self.metrics: List[Metric] = []
+        self._metrics: List[Metric] = []
         self._data: Dict[str, dict] = {}
+        self._last_refresh_time: datetime = datetime.min
 
     async def refresh_data(self):
         pass
@@ -97,7 +99,7 @@ class MetricProvider:
 
     async def update(self):
         await self.refresh_data()
-        self.metrics = [
+        self._metrics = [
             Metric(
                 node_id=node_id,
                 consumer_lag=self._data["consumer_lag"].get(
@@ -118,8 +120,14 @@ class MetricProvider:
         ]
 
     async def get(self) -> List[Metric]:
-        await self.update()
-        return self.metrics
+        now = datetime.utcnow()
+        last_refresh_delta = now - self._last_refresh_time
+        if not self._last_refresh_time or last_refresh_delta > timedelta(seconds=10):
+            await self.update()
+            self._last_refresh_time = now
+        else:
+            logger.debug("Serving cached metrics (age {}s)", last_refresh_delta.seconds)
+        return self._metrics
 
 
 class PrometheusException(Exception):
