@@ -14,14 +14,14 @@ RUN pip install -U pip poetry && \
     poetry install --no-dev --no-interaction
 COPY ./backend /app
 
-COPY ./frontend/package.json ./frontend/package-lock.json /frontend/
-RUN npm ci --production --prefix /frontend
+COPY ./frontend/package.json ./frontend/package-lock.json /frontend_build/
+RUN npm ci --production --prefix /frontend_build
 
-COPY ./frontend /frontend
-RUN npm run build --prefix /frontend && \
+COPY ./frontend /frontend_build
+RUN npm run build --prefix /frontend_build && \
     mkdir -p /app/static && \
-    mv /frontend/build/* /app/static/ && \
-    rm -rf /frontend
+    mv /frontend_build/build/* /app/static/ && \
+    rm -rf /frontend_build
 
 RUN apt-get -y purge --auto-remove -o APT::AutoRemove::RecommendsImportant=false && \
     apt-get -y purge --auto-remove python2-minimal && \
