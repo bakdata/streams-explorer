@@ -122,12 +122,12 @@ class MetricProvider:
 
     async def get(self) -> List[Metric]:
         now = datetime.utcnow()
-        last_refresh_delta = now - self._last_refresh
-        if last_refresh_delta > self._cache_ttl:
+        cache_age = now - self._last_refresh
+        if cache_age > self._cache_ttl:
             self._last_refresh = now
             await self.update()
         else:
-            logger.debug("Serving cached metrics (age {}s)", last_refresh_delta.seconds)
+            logger.debug("Serving cached metrics (age {}s)", cache_age.seconds)
         return self._metrics
 
 
