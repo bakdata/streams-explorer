@@ -96,3 +96,22 @@ health:
   readinessProbeTimeout: 30
   readinessProbeFailureThreshold: 3
   readinessProbeSuccessThreshold: 1
+
+# nodeAffinity:
+#   requiredDuringSchedulingIgnoredDuringExecution:
+#     nodeSelectorTerms:
+#     - matchExpressions:
+#       - key: foo
+#         operator: In
+#         values:
+#         - bar
+#         - baz
+#   preferredDuringSchedulingIgnoredDuringExecution:
+#   - weight: 1
+#     preference:
+#       matchExpressions:
+#       - key: foo
+#         operator: In
+#         values:
+#         - bar
+#         - baz
