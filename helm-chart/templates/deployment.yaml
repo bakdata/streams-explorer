@@ -86,8 +86,8 @@ spec:
 {{ toYaml .Values.resources | indent 12 }}
           env:
           {{- range $key, $value := .Values.config }}
-            - name: "{{ $prefix }}{{ $key | replace "_" "__" }}"
-              value: "{{ $value }}"
+            - name: "{{ $prefix }}{{ $key }}"
+              value: {{ $value | quote }}
           {{- end }}
           {{- range $key, $value := .Values.secrets }}
             - name: "{{ $key }}"
