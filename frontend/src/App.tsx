@@ -121,7 +121,7 @@ const App: React.FC = () => {
   }
 
   useEffect(() => {
-    if (refreshInterval && refreshInterval > 0 && !isLoadingMetrics) {
+    if (refreshInterval && refreshInterval > 0) {
       const interval = setInterval(refetchMetrics, refreshInterval * 1000);
       return () => clearInterval(interval);
     }

@@ -1,4 +1,5 @@
 import asyncio
+from datetime import datetime, timedelta
 from enum import Enum
 from typing import Callable, Dict, List, Optional
 
@@ -82,8 +83,10 @@ def is_topic(node: GraphNode) -> bool:
 class MetricProvider:
     def __init__(self, nodes: List[GraphNode]):
         self._nodes: List[GraphNode] = sort_topics_first(nodes)
-        self.metrics: List[Metric] = []
+        self._metrics: List[Metric] = []
         self._data: Dict[str, dict] = {}
+        self._last_refresh: datetime = datetime.min
+        self._cache_ttl: timedelta = timedelta(0)
 
     async def refresh_data(self):
         pass
@@ -97,7 +100,7 @@ class MetricProvider:
 
     async def update(self):
         await self.refresh_data()
-        self.metrics = [
+        self._metrics = [
             Metric(
                 node_id=node_id,
                 consumer_lag=self._data["consumer_lag"].get(
@@ -118,8 +121,14 @@ class MetricProvider:
         ]
 
     async def get(self) -> List[Metric]:
-        await self.update()
-        return self.metrics
+        now = datetime.utcnow()
+        cache_age = now - self._last_refresh
+        if cache_age > self._cache_ttl:
+            self._last_refresh = now
+            await self.update()
+        else:
+            logger.debug("Serving cached metrics (age {}s)", cache_age.seconds)
+        return self._metrics
 
 
 class PrometheusException(Exception):
@@ -129,8 +138,10 @@ class PrometheusException(Exception):
 class PrometheusMetricProvider(MetricProvider):
     def __init__(self, nodes: List[GraphNode]):
         super().__init__(nodes)
-        self._client = httpx.AsyncClient()
         self._api_base = f"{settings.prometheus.url}/api/v1"
+        self._client = httpx.AsyncClient(base_url=self._api_base)
+        # min refresh interval (set by the frontend) is 10s, intermediate requests should be cached
+        self._cache_ttl = timedelta(seconds=9)
 
     async def _pull_metric(self, metric: PrometheusMetric) -> list:
         try:
@@ -140,11 +151,14 @@ class PrometheusMetricProvider(MetricProvider):
         return []
 
     async def _query(self, query: str) -> list:
-        r = await self._client.get(f"{self._api_base}/query", params={"query": query})
-        if r.status_code == httpx.codes.OK:
-            data = r.json()
-            if data and "data" in data and "result" in data["data"]:
-                return data["data"]["result"]
+        try:
+            r = await self._client.get("/query", params={"query": query})
+            if r.status_code == httpx.codes.OK:
+                data = r.json()
+                if data and "data" in data and "result" in data["data"]:
+                    return data["data"]["result"]
+        except httpx.ReadTimeout:
+            logger.warning("Prometheus query '{}' timed out", query)
         raise PrometheusException
 
     async def refresh_data(self):
