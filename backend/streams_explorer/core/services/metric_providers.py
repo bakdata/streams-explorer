@@ -139,7 +139,6 @@ class PrometheusMetricProvider(MetricProvider):
     def __init__(self, nodes: List[GraphNode]):
         super().__init__(nodes)
         self._api_base = f"{settings.prometheus.url}/api/v1"
-        self._client = httpx.AsyncClient(base_url=self._api_base)
         # min refresh interval (set by the frontend) is 10s, intermediate requests should be cached
         self._cache_ttl = timedelta(seconds=9)
 
@@ -151,14 +150,15 @@ class PrometheusMetricProvider(MetricProvider):
         return []
 
     async def _query(self, query: str) -> list:
-        try:
-            r = await self._client.get("/query", params={"query": query})
-            if r.status_code == httpx.codes.OK:
-                data = r.json()
-                if data and "data" in data and "result" in data["data"]:
-                    return data["data"]["result"]
-        except httpx.ReadTimeout:
-            logger.warning("Prometheus query '{}' timed out", query)
+        async with httpx.AsyncClient(base_url=self._api_base) as client:
+            try:
+                r = await client.get("/query", params={"query": query})
+                if r.status_code == httpx.codes.OK:
+                    data = r.json()
+                    if data and "data" in data and "result" in data["data"]:
+                        return data["data"]["result"]
+            except httpx.ReadTimeout:
+                logger.warning("Prometheus query '{}' timed out", query)
         raise PrometheusException
 
     async def refresh_data(self):
