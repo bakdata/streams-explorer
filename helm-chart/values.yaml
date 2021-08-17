@@ -9,10 +9,10 @@ serviceHttpPort: 80
 
 # Configure using env variables
 config:
-  K8S_deployment_cluster: true
-  SCHEMAREGISTRY_url: http://schema-registry:8081
-  KAFKACONNECT_url: http://kafka-connect:8083
-  PROMETHEUS_url: http://prometheus:9090
+  K8S__deployment__cluster: true
+  SCHEMAREGISTRY__url: http://schema-registry:8081
+  KAFKACONNECT__url: http://kafka-connect:8083
+  PROMETHEUS__url: http://prometheus:9090
 
 # Or pass the whole settings.yaml as a configmap
 # settings:
@@ -96,7 +96,6 @@ health:
   readinessProbeTimeout: 30
   readinessProbeFailureThreshold: 3
   readinessProbeSuccessThreshold: 1
-
 # nodeAffinity:
 #   requiredDuringSchedulingIgnoredDuringExecution:
 #     nodeSelectorTerms:
