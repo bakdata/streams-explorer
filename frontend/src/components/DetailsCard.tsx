@@ -2,6 +2,7 @@ import React, { useRef } from "react";
 import { Card } from "antd";
 import { useResizeDetector } from "react-resize-detector";
 import Details from "./Details";
+import Schema from "./Schema";
 import "./Details.css";
 
 interface DetailsCardProps {
@@ -20,6 +21,7 @@ const DetailsCard = ({ nodeID }: DetailsCardProps) => {
         headStyle={{ backgroundColor: "#383838", color: "white" }}
       >
         {nodeID ? <Details nodeID={nodeID} /> : null}
+        {nodeID ? <Schema nodeID={nodeID} /> : null}
       </Card>
     </div>
   );
