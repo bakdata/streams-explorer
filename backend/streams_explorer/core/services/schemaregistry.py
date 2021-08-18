@@ -1,4 +1,5 @@
 import json
+from typing import List
 
 import httpx
 from loguru import logger
@@ -11,7 +12,7 @@ url = settings.schemaregistry.url
 
 class SchemaRegistry:
     @staticmethod
-    def get_topic_value_schema_versions(topic: str) -> list:
+    def get_topic_value_schema_versions(topic: str) -> List[int]:
         logger.info(f"Fetch schema versions for topic {topic}")
         response = httpx.get(f"{url}/subjects/{topic}-value/versions/")
         data = response.json()

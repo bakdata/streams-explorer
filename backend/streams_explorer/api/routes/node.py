@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from loguru import logger
@@ -28,7 +28,7 @@ async def node_info(
         )
 
 
-@router.get("/{node_id}/schema", response_model=list)
+@router.get("/{node_id}/schema", response_model=List[int])
 async def node_schema_versions(node_id: str):
     return SchemaRegistry.get_topic_value_schema_versions(node_id)
 
