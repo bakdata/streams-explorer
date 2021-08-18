@@ -90,7 +90,7 @@ const Schema = ({ nodeID }: SchemaProps) => {
       {schemaVersion && schema ? (
         <Descriptions.Item className="descItem" label="Schema" key="schema">
           <Space direction="vertical">
-            <Dropdown overlay={menu}>
+            <Dropdown overlay={menu} disabled={versions.length < 2}>
               <Button>
                 v{schemaVersion} <DownOutlined />
               </Button>
