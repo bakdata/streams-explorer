@@ -14,7 +14,6 @@ from streams_explorer.core.services.dataflow_graph import DataFlowGraph, NodeTyp
 from streams_explorer.core.services.kafkaconnect import KafkaConnect
 from streams_explorer.core.services.linking_services import LinkingService
 from streams_explorer.core.services.metric_providers import MetricProvider
-from streams_explorer.core.services.schemaregistry import SchemaRegistry
 from streams_explorer.extractors import extractor_container
 from streams_explorer.models.graph import Metric
 from streams_explorer.models.kafka_connector import KafkaConnector
@@ -77,16 +76,14 @@ class StreamsExplorer:
                 + get_displayed_information_connector(config),
             )
         if node_type == NodeTypesEnum.TOPIC or node_type == NodeTypesEnum.ERROR_TOPIC:
-            schema = SchemaRegistry.get_newest_topic_value_schema(node_id)
             info = self.linking_service.topic_info
-            if schema:
-                info.append(
-                    NodeInfoListItem(
-                        name="Schema",
-                        value=schema,
-                        type=NodeInfoType.JSON,
-                    )
+            info.append(
+                NodeInfoListItem(
+                    name="Schema",
+                    value={},
+                    type=NodeInfoType.JSON,
                 )
+            )
             return NodeInformation(
                 node_id=node_id,
                 node_type=node_type,
