@@ -8,6 +8,7 @@ import { Spin, Alert, Descriptions, Button, Space, message } from "antd";
 import ReactJson from "react-json-view";
 import { CopyOutlined } from "@ant-design/icons";
 import copy from "copy-to-clipboard";
+import Schema from "./Schema";
 
 interface DetailsProps {
   nodeID: string;
@@ -59,9 +60,12 @@ interface NodeInfoDetailProps {
 const NodeInfoDetail = ({ infoListItem, nodeID }: NodeInfoDetailProps) => {
   switch (infoListItem.type) {
     case "json":
-      return (
+      return infoListItem.name === "Schema" ? (
+        <Schema nodeID={nodeID} />
+      ) : (
         <div className="jsonDetail">
           <ReactJson
+            name={false}
             src={infoListItem.value}
             displayDataTypes={false}
             collapsed={false}

@@ -1,8 +1,7 @@
 import React, { useRef } from "react";
-import { Card, Space } from "antd";
+import { Card } from "antd";
 import { useResizeDetector } from "react-resize-detector";
 import Details from "./Details";
-import Schema from "./Schema";
 import "./Details.css";
 
 interface DetailsCardProps {
@@ -20,12 +19,7 @@ const DetailsCard = ({ nodeID }: DetailsCardProps) => {
         style={{ width: width }}
         headStyle={{ backgroundColor: "#383838", color: "white" }}
       >
-        {nodeID ? (
-          <Space className="details" direction="vertical">
-            <Details nodeID={nodeID} />
-            <Schema nodeID={nodeID} />
-          </Space>
-        ) : null}
+        {nodeID ? <Details nodeID={nodeID} /> : null}
       </Card>
     </div>
   );

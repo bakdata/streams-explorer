@@ -3,7 +3,7 @@ import {
   useNodeSchemaVersionsApiNodeNodeIdSchemaGet,
   useNodeSchemaApiNodeNodeIdSchemaVersionGet,
 } from "../api/fetchers";
-import { Spin, Space, Alert, Descriptions, Button, Menu, Dropdown } from "antd";
+import { Spin, Space, Alert, Button, Menu, Dropdown } from "antd";
 import ReactJson from "react-json-view";
 import { DownOutlined } from "@ant-design/icons";
 
@@ -85,28 +85,26 @@ const Schema = ({ nodeID }: SchemaProps) => {
       />
     );
   }
-  return (
-    <Descriptions layout="horizontal" bordered column={1} size="small">
-      {schemaVersion && schema ? (
-        <Descriptions.Item className="descItem" label="Schema" key="schema">
-          <Space direction="vertical">
-            <Dropdown overlay={menu} disabled={versions.length < 2}>
-              <Button>
-                v{schemaVersion} <DownOutlined />
-              </Button>
-            </Dropdown>
-            <div className="jsonDetail">
-              <ReactJson
-                src={schema}
-                displayDataTypes={false}
-                collapsed={false}
-              />
-            </div>
-          </Space>
-        </Descriptions.Item>
-      ) : null}
-    </Descriptions>
-  );
+  if (schemaVersion && schema) {
+    return (
+      <Space direction="vertical">
+        <Dropdown overlay={menu} disabled={versions.length < 2}>
+          <Button>
+            v{schemaVersion} <DownOutlined />
+          </Button>
+        </Dropdown>
+        <div className="jsonDetail">
+          <ReactJson
+            name={false}
+            src={schema}
+            displayDataTypes={false}
+            collapsed={false}
+          />
+        </div>
+      </Space>
+    );
+  }
+  return null;
 };
 
 export default Schema;
