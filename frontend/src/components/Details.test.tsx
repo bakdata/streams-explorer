@@ -161,6 +161,49 @@ describe("display node information", () => {
       });
 
     nock("http://localhost")
+      .get("/api/node/atm-fraud-incoming-transactions-topic/schema")
+      .reply(200, [1]);
+
+    nock("http://localhost")
+      .get("/api/node/atm-fraud-incoming-transactions-topic/schema/1")
+      .reply(200, {
+        type: "record",
+        name: "Transaction",
+        namespace: "com.bakdata.kafka",
+        fields: [
+          {
+            name: "transaction_id",
+            type: { type: "string", "avro.java.string": "String" },
+          },
+          {
+            name: "account_id",
+            type: { type: "string", "avro.java.string": "String" },
+          },
+          { name: "amount", type: "int" },
+          {
+            name: "atm",
+            type: { type: "string", "avro.java.string": "String" },
+            default: "",
+          },
+          {
+            name: "timestamp",
+            type: { type: "long", logicalType: "timestamp-millis" },
+          },
+          {
+            name: "location",
+            type: {
+              type: "record",
+              name: "Location",
+              fields: [
+                { name: "latitude", type: "double" },
+                { name: "longitude", type: "double" },
+              ],
+            },
+          },
+        ],
+      });
+
+    nock("http://localhost")
       .get(
         "/api/node/linking/atm-fraud-incoming-transactions-topic?link_type=grafana"
       )
@@ -174,7 +217,7 @@ describe("display node information", () => {
       </RestfulProvider>
     );
 
-    await waitForElement(() => getByText("topic"));
+    await waitForElement(() => getByText("v1"));
     expect(asFragment()).toMatchSnapshot();
   });
 });

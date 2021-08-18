@@ -20,9 +20,6 @@ const Schema = ({ nodeID }: SchemaProps) => {
   } = useNodeSchemaVersionsApiNodeNodeIdSchemaGet({
     node_id: nodeID,
   });
-  if (versions) {
-    console.log(versions[versions.length - 1]);
-  }
 
   const menu = (
     <Menu
