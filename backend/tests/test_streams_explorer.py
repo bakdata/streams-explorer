@@ -210,11 +210,7 @@ class TestStreamsExplorer:
                 NodeInfoListItem(
                     name="Test Topic Monitoring", value="test", type=NodeInfoType.LINK
                 ),
-                NodeInfoListItem(
-                    name="Schema",
-                    value=self.get_topic_value_schema("", 2),
-                    type=NodeInfoType.JSON,
-                ),
+                NodeInfoListItem(name="Schema", value={}, type=NodeInfoType.JSON),
             ],
         )
         assert streams_explorer.get_node_information(
@@ -237,6 +233,7 @@ class TestStreamsExplorer:
                 NodeInfoListItem(
                     name="Test Topic Monitoring", value="test", type=NodeInfoType.LINK
                 ),
+                NodeInfoListItem(name="Schema", value={}, type=NodeInfoType.JSON),
             ],
         )
 
@@ -247,7 +244,9 @@ class TestStreamsExplorer:
         ) == NodeInformation(
             node_id="es-sink-connector-dead-letter-topic",
             node_type=NodeTypesEnum.ERROR_TOPIC,
-            info=[],
+            info=[
+                NodeInfoListItem(name="Schema", value={}, type=NodeInfoType.JSON),
+            ],
         )
 
     @pytest.mark.asyncio
