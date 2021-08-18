@@ -70,6 +70,7 @@ const Schema = ({ nodeID }: SchemaProps) => {
         data-testid="no-schema-versions"
         message="No schema available"
         type="warning"
+        style={{ width: "14em", textAlign: "center" }}
       />
     );
   }
