@@ -13,6 +13,8 @@ url = settings.schemaregistry.url
 class SchemaRegistry:
     @staticmethod
     def get_topic_value_schema_versions(topic: str) -> List[int]:
+        if url is None:
+            return []
         logger.info(f"Fetch schema versions for topic {topic}")
         response = httpx.get(f"{url}/subjects/{topic}-value/versions/")
         data = response.json()
@@ -23,20 +25,11 @@ class SchemaRegistry:
 
     @staticmethod
     def get_topic_value_schema(topic: str, version: int = 1) -> dict:
+        if url is None:
+            return {}
         try:
             logger.info(f"Fetch schema version {version} for {topic}")
             response = httpx.get(f"{url}/subjects/{topic}-value/versions/{version}")
             return json.loads(response.json().get("schema"))
         except Exception:
             raise NodeNotFound()
-
-    @staticmethod
-    def get_newest_topic_value_schema(topic: str) -> dict:
-        if url is None:
-            return {}
-        logger.info(f"Fetch newest schema for topic {topic}")
-        versions = SchemaRegistry.get_topic_value_schema_versions(topic)
-        if not versions:
-            return {}
-        newest_version = max(versions)
-        return SchemaRegistry.get_topic_value_schema(topic, newest_version)
