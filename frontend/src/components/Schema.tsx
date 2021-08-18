@@ -3,15 +3,7 @@ import {
   useNodeSchemaVersionsApiNodeNodeIdSchemaGet,
   useNodeSchemaApiNodeNodeIdSchemaVersionGet,
 } from "../api/fetchers";
-import {
-  Spin,
-  Alert,
-  Descriptions,
-  Button,
-  message,
-  Menu,
-  Dropdown,
-} from "antd";
+import { Spin, Space, Alert, Descriptions, Button, Menu, Dropdown } from "antd";
 import ReactJson from "react-json-view";
 import { DownOutlined } from "@ant-design/icons";
 
@@ -20,44 +12,54 @@ interface SchemaProps {
 }
 
 const Schema = ({ nodeID }: SchemaProps) => {
-  const [schemaVersion, setSchemaVersion] = useState<number>(0);
+  const [schemaVersion, setSchemaVersion] = useState<number | null>(null);
   const {
-    data: versionsData,
+    data: versions,
     loading: versionsLoading,
     error: versionsError,
   } = useNodeSchemaVersionsApiNodeNodeIdSchemaGet({
     node_id: nodeID,
   });
-  if (versionsData) {
-    console.log(versionsData[versionsData.length - 1]);
-  }
-
-  function handleMenuClick(e: any) {
-    message.info("Click on menu item.");
-    console.log("click", e);
-    setSchemaVersion(e.key);
+  if (versions) {
+    console.log(versions[versions.length - 1]);
   }
 
   const menu = (
-    <Menu onClick={handleMenuClick}>
-      {versionsData?.map((version: number) => (
-        <Menu.Item key={version}>{version}</Menu.Item>
+    <Menu
+      onClick={(e: any) => {
+        setSchemaVersion(e.key);
+      }}
+    >
+      {versions?.map((version: number) => (
+        <Menu.Item key={version}>v{version}</Menu.Item>
       ))}
     </Menu>
   );
 
-  const { data, loading, error } = useNodeSchemaApiNodeNodeIdSchemaVersionGet({
+  const {
+    data: schema,
+    refetch: schemaFetch,
+    loading: schemaLoading,
+    error: schemaError,
+  } = useNodeSchemaApiNodeNodeIdSchemaVersionGet({
     node_id: nodeID,
-    version: schemaVersion,
+    version: schemaVersion!,
+    lazy: true,
   });
 
   useEffect(() => {
-    if (versionsData) {
-      setSchemaVersion(versionsData[versionsData.length - 1]);
+    if (versions) {
+      setSchemaVersion(versions[versions.length - 1]);
     }
-  }, [versionsData]);
+  }, [versions]);
 
-  if (loading) {
+  useEffect(() => {
+    if (schemaVersion) {
+      schemaFetch();
+    }
+  }, [schemaVersion]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (schemaLoading || versionsLoading) {
     return (
       <div className="loadingSpinnerContainer">
         <Spin tip="Loading..." />
@@ -65,42 +67,42 @@ const Schema = ({ nodeID }: SchemaProps) => {
     );
   }
 
-  if (!versionsData || versionsError) {
+  if (!versions || !versions.length || versionsError) {
     return (
       <Alert
-        data-testid="no-node-info"
+        data-testid="no-schema-versions"
         message="No schema available"
         type="warning"
       />
     );
   }
-  // if (!data || error) {
-  //   return (
-  //     <Alert
-  //       data-testid="no-node-info"
-  //       message="Error loading schema"
-  //       type="error"
-  //     />
-  //   );
-  // }
+  if (!schema || schemaError) {
+    return (
+      <Alert
+        data-testid="no-schema"
+        message="Error loading schema"
+        type="error"
+      />
+    );
+  }
   return (
     <Descriptions layout="horizontal" bordered column={1} size="small">
-      <Descriptions.Item
-        className="descItem"
-        label="Schema version"
-        key="schema-version"
-      >
-        <Dropdown overlay={menu}>
-          <Button>
-            {schemaVersion} <DownOutlined />
-          </Button>
-        </Dropdown>
-      </Descriptions.Item>
-      {data ? (
+      {schemaVersion && schema ? (
         <Descriptions.Item className="descItem" label="Schema" key="schema">
-          <div className="jsonDetail">
-            <ReactJson src={data} displayDataTypes={false} collapsed={false} />
-          </div>
+          <Space direction="vertical">
+            <Dropdown overlay={menu}>
+              <Button>
+                v{schemaVersion} <DownOutlined />
+              </Button>
+            </Dropdown>
+            <div className="jsonDetail">
+              <ReactJson
+                src={schema}
+                displayDataTypes={false}
+                collapsed={false}
+              />
+            </div>
+          </Space>
         </Descriptions.Item>
       ) : null}
     </Descriptions>

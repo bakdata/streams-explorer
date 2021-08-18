@@ -1,5 +1,5 @@
 import React, { useRef } from "react";
-import { Card } from "antd";
+import { Card, Space } from "antd";
 import { useResizeDetector } from "react-resize-detector";
 import Details from "./Details";
 import Schema from "./Schema";
@@ -20,8 +20,12 @@ const DetailsCard = ({ nodeID }: DetailsCardProps) => {
         style={{ width: width }}
         headStyle={{ backgroundColor: "#383838", color: "white" }}
       >
-        {nodeID ? <Details nodeID={nodeID} /> : null}
-        {nodeID ? <Schema nodeID={nodeID} /> : null}
+        {nodeID ? (
+          <Space className="details" direction="vertical">
+            <Details nodeID={nodeID} />
+            <Schema nodeID={nodeID} />
+          </Space>
+        ) : null}
       </Card>
     </div>
   );
