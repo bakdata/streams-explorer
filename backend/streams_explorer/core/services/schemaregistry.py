@@ -17,10 +17,10 @@ class SchemaRegistry:
             return []
         logger.info(f"Fetch schema versions for topic {topic}")
         response = httpx.get(f"{url}/subjects/{topic}-value/versions/")
-        data = response.json()
         if response.status_code == 200:
+            data = response.json()
             return data
-        logger.debug(f"Error fetching schema versions for topic {topic}: {data}")
+        logger.debug(f"Error fetching schema versions for topic {topic}: {response}")
         return []
 
     @staticmethod

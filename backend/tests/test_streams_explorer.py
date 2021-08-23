@@ -30,27 +30,6 @@ class TestStreamsExplorer:
         settings.kafkaconnect.url = "testurl:3000"
         schemaregistry.url = "testurl:8000"
 
-    @staticmethod
-    def get_topic_value_schema(topic: str, version: int = 1) -> dict:
-        if version == 1:
-            return {
-                "type": "record",
-                "namespace": "com.test",
-                "name": "Test1",
-                "fields": [
-                    {"name": "first", "type": "string"},
-                ],
-            }
-        else:
-            return {
-                "type": "record",
-                "namespace": "com.test",
-                "name": "Test2",
-                "fields": [
-                    {"name": "first", "type": "string"},
-                ],
-            }
-
     @pytest.fixture()
     def deployments(self):
         return [
