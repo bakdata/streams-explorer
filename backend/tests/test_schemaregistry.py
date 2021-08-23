@@ -15,11 +15,11 @@ def test_schemaregistry_versions(respx_mock: respx):
     mock_route = respx_mock.get(
         f"/subjects/{topic}-value/versions/",
     ).mock(return_value=Response(404))
-    assert SchemaRegistry.get_topic_value_schema_versions(topic) == []
+    assert SchemaRegistry.get_versions(topic) == []
 
     versions = [1, 2, 3]
     mock_route.mock(return_value=Response(200, json=versions))
-    assert SchemaRegistry.get_topic_value_schema_versions(topic) == versions
+    assert SchemaRegistry.get_versions(topic) == versions
 
 
 @respx.mock(base_url=schemaregistry.url)
@@ -36,7 +36,7 @@ def test_schemaregistry_schema(respx_mock: respx):
             },
         )
     )
-    assert SchemaRegistry.get_topic_value_schema(topic, version=version) == {
+    assert SchemaRegistry.get_schema(topic, version=version) == {
         "type": "record",
         "name": "Test",
         "namespace": "com.test",
@@ -48,10 +48,10 @@ def test_schemaregistry_schema(respx_mock: respx):
 
 def test_schemaregistry_exception():
     with pytest.raises(NodeNotFound):
-        SchemaRegistry.get_topic_value_schema(topic)
+        SchemaRegistry.get_schema(topic)
 
 
 def test_support_without_schemaregistry():
     schemaregistry.url = None
-    assert SchemaRegistry.get_topic_value_schema_versions(topic) == []
-    assert SchemaRegistry.get_topic_value_schema(topic) == {}
+    assert SchemaRegistry.get_versions(topic) == []
+    assert SchemaRegistry.get_schema(topic) == {}

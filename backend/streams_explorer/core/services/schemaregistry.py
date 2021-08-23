@@ -12,7 +12,7 @@ url = settings.schemaregistry.url
 
 class SchemaRegistry:
     @staticmethod
-    def get_topic_value_schema_versions(topic: str) -> List[int]:
+    def get_versions(topic: str) -> List[int]:
         if url is None:
             return []
         logger.info(f"Fetch schema versions for topic {topic}")
@@ -24,7 +24,7 @@ class SchemaRegistry:
         return []
 
     @staticmethod
-    def get_topic_value_schema(topic: str, version: int = 1) -> dict:
+    def get_schema(topic: str, version: int = 1) -> dict:
         if url is None:
             return {}
         try:
