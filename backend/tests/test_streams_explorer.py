@@ -117,11 +117,6 @@ class TestStreamsExplorer:
                     "type": KafkaConnectorTypesEnum.SOURCE,
                 }
 
-        def get_topic_value_schema_versions(topic: str) -> list:
-            if topic == "es-sink-connector-dead-letter-topic":
-                return []
-            return [1, 2]
-
         mocker.patch(
             "streams_explorer.core.services.kafkaconnect.KafkaConnect.get_connectors",
             get_connectors,
@@ -133,15 +128,6 @@ class TestStreamsExplorer:
         mocker.patch(
             "streams_explorer.core.services.kafkaconnect.KafkaConnect.sanitize_connector_config",
             lambda config: config,
-        )
-
-        mocker.patch(
-            "streams_explorer.core.services.schemaregistry.SchemaRegistry.get_topic_value_schema_versions",
-            get_topic_value_schema_versions,
-        )
-        mocker.patch(
-            "streams_explorer.core.services.schemaregistry.SchemaRegistry.get_topic_value_schema",
-            self.get_topic_value_schema,
         )
 
         return explorer
