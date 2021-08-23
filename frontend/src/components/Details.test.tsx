@@ -3,7 +3,12 @@ import React from "react";
 import { RestfulProvider } from "restful-react";
 
 import Details from "./Details";
-import { waitForElement, render } from "@testing-library/react";
+import {
+  waitForElement,
+  render,
+  fireEvent,
+  wait,
+} from "@testing-library/react";
 
 describe("display node information", () => {
   beforeAll(() => {
@@ -119,42 +124,7 @@ describe("display node information", () => {
           { name: "Topic Monitoring", value: "grafana", type: "link" },
           {
             name: "Schema",
-            value: {
-              type: "record",
-              name: "Transaction",
-              namespace: "com.bakdata.kafka",
-              fields: [
-                {
-                  name: "transaction_id",
-                  type: { type: "string", "avro.java.string": "String" },
-                },
-                {
-                  name: "account_id",
-                  type: { type: "string", "avro.java.string": "String" },
-                },
-                { name: "amount", type: "int" },
-                {
-                  name: "atm",
-                  type: { type: "string", "avro.java.string": "String" },
-                  default: "",
-                },
-                {
-                  name: "timestamp",
-                  type: { type: "long", logicalType: "timestamp-millis" },
-                },
-                {
-                  name: "location",
-                  type: {
-                    type: "record",
-                    name: "Location",
-                    fields: [
-                      { name: "latitude", type: "double" },
-                      { name: "longitude", type: "double" },
-                    ],
-                  },
-                },
-              ],
-            },
+            value: {},
             type: "json",
           },
         ],
@@ -162,7 +132,7 @@ describe("display node information", () => {
 
     nock("http://localhost")
       .get("/api/node/atm-fraud-incoming-transactions-topic/schema")
-      .reply(200, [1]);
+      .reply(200, [1, 2]);
 
     nock("http://localhost")
       .get("/api/node/atm-fraud-incoming-transactions-topic/schema/1")
@@ -204,6 +174,15 @@ describe("display node information", () => {
       });
 
     nock("http://localhost")
+      .get("/api/node/atm-fraud-incoming-transactions-topic/schema/2")
+      .reply(200, {
+        type: "record",
+        name: "Transaction2",
+        namespace: "com.bakdata.kafka",
+        fields: [],
+      });
+
+    nock("http://localhost")
       .get(
         "/api/node/linking/atm-fraud-incoming-transactions-topic?link_type=grafana"
       )
@@ -211,13 +190,27 @@ describe("display node information", () => {
         200,
         "http://localhost:3000/d/path/to/dashboard?var-topics=atm-fraud-incoming-transactions-topic"
       );
-    const { getByText, asFragment } = render(
+    const { getByText, getByTestId, asFragment, container } = render(
       <RestfulProvider base="http://localhost">
         <Details nodeID="atm-fraud-incoming-transactions-topic" />
       </RestfulProvider>
     );
 
-    await waitForElement(() => getByText("v1"));
+    await waitForElement(() => getByText("v2")); // get dropdown menu for schema version
+    let schemaVersion = getByText("v2");
+    const fragment1 = asFragment();
     expect(asFragment()).toMatchSnapshot();
+
+    fireEvent.mouseOver(getByTestId("schema-version"));
+    await wait(() => {
+      const menu = getByTestId("schema-version-select");
+      fireEvent.mouseOver(menu);
+      const v1 = getByText("v1");
+      fireEvent.click(v1);
+    });
+
+    await wait(() => {
+      expect(schemaVersion).toHaveTextContent("v1");
+    });
   });
 });

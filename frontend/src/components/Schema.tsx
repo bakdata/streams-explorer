@@ -23,6 +23,7 @@ const Schema = ({ nodeID }: SchemaProps) => {
 
   const menu = (
     <Menu
+      data-testid="schema-version-select"
       onClick={(e: any) => {
         setSchemaVersion(e.key);
       }}
@@ -87,7 +88,7 @@ const Schema = ({ nodeID }: SchemaProps) => {
     return (
       <Space direction="vertical">
         <Dropdown overlay={menu} disabled={versions.length < 2}>
-          <Button>
+          <Button data-testid="schema-version">
             v{schemaVersion} <DownOutlined />
           </Button>
         </Dropdown>
