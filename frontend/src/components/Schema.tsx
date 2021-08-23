@@ -60,7 +60,7 @@ const Schema = ({ nodeID }: SchemaProps) => {
   if (schemaLoading || versionsLoading) {
     return (
       <div className="loadingSpinnerContainer">
-        <Spin tip="Loading..." />
+        <Spin tip="Loading schema..." />
       </div>
     );
   }
@@ -92,7 +92,7 @@ const Schema = ({ nodeID }: SchemaProps) => {
             v{schemaVersion} <DownOutlined />
           </Button>
         </Dropdown>
-        <div className="jsonDetail">
+        <div className="jsonDetail" data-testid="schema">
           <ReactJson
             name={false}
             src={schema}

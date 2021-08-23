@@ -131,14 +131,16 @@ describe("display node information", () => {
       });
 
     nock("http://localhost")
+      .persist()
       .get("/api/node/atm-fraud-incoming-transactions-topic/schema")
       .reply(200, [1, 2]);
 
-    nock("http://localhost")
+    const nockSchema1 = nock("http://localhost")
+      .persist()
       .get("/api/node/atm-fraud-incoming-transactions-topic/schema/1")
       .reply(200, {
         type: "record",
-        name: "Transaction",
+        name: "Transaction1",
         namespace: "com.bakdata.kafka",
         fields: [
           {
@@ -173,7 +175,8 @@ describe("display node information", () => {
         ],
       });
 
-    nock("http://localhost")
+    const nockSchema2 = nock("http://localhost")
+      .persist()
       .get("/api/node/atm-fraud-incoming-transactions-topic/schema/2")
       .reply(200, {
         type: "record",
@@ -190,7 +193,7 @@ describe("display node information", () => {
         200,
         "http://localhost:3000/d/path/to/dashboard?var-topics=atm-fraud-incoming-transactions-topic"
       );
-    const { getByText, getByTestId, asFragment, container } = render(
+    const { getByText, getByTestId } = render(
       <RestfulProvider base="http://localhost">
         <Details nodeID="atm-fraud-incoming-transactions-topic" />
       </RestfulProvider>
@@ -198,8 +201,10 @@ describe("display node information", () => {
 
     await waitForElement(() => getByText("v2")); // get dropdown menu for schema version
     let schemaVersion = getByText("v2");
-    const fragment1 = asFragment();
-    expect(asFragment()).toMatchSnapshot();
+    expect(nockSchema2.isDone()).toBeTruthy();
+    expect(nockSchema1.isDone()).toBeFalsy();
+    const schema2 = getByTestId("schema");
+    expect(schema2).toMatchSnapshot();
 
     fireEvent.mouseOver(getByTestId("schema-version"));
     await wait(() => {
@@ -211,6 +216,13 @@ describe("display node information", () => {
 
     await wait(() => {
       expect(schemaVersion).toHaveTextContent("v1");
+      expect(nockSchema1.isDone()).toBeTruthy();
+    });
+
+    await wait(() => {
+      expect(schema2).not.toBeInTheDocument();
+      const schema1 = getByTestId("schema");
+      expect(schema1).toMatchSnapshot();
     });
   });
 });
