@@ -195,6 +195,7 @@ describe("display node information", () => {
         200,
         "http://localhost:3000/d/path/to/dashboard?var-topics=atm-fraud-incoming-transactions-topic"
       );
+
     const { getByText, getByTestId } = render(
       <RestfulProvider base="http://localhost">
         <Details nodeID="atm-fraud-incoming-transactions-topic" />
@@ -225,6 +226,103 @@ describe("display node information", () => {
       expect(schema2).not.toBeInTheDocument();
       const schema1 = getByTestId("schema");
       expect(schema1).toMatchSnapshot();
+    });
+  });
+
+  it("should show error if schema versions are unavailable", async () => {
+    nock("http://localhost")
+      .get("/api/node/atm-fraud-incoming-transactions-topic")
+      .reply(200, {
+        node_id: "atm-fraud-incoming-transactions-topic",
+        node_type: "topic",
+        info: [
+          {
+            name: "Schema",
+            value: {},
+            type: "json",
+          },
+        ],
+      });
+
+    nock("http://localhost")
+      .get("/api/node/atm-fraud-incoming-transactions-topic/schema")
+      .reply(404);
+
+    const { getByTestId } = render(
+      <RestfulProvider base="http://localhost">
+        <Details nodeID="atm-fraud-incoming-transactions-topic" />
+      </RestfulProvider>
+    );
+
+    await wait(() => {
+      const menu = getByTestId("no-schema-versions");
+      expect(menu).toBeInTheDocument();
+    });
+  });
+
+  it("should show error if schema versions is empty", async () => {
+    nock("http://localhost")
+      .get("/api/node/atm-fraud-incoming-transactions-topic")
+      .reply(200, {
+        node_id: "atm-fraud-incoming-transactions-topic",
+        node_type: "topic",
+        info: [
+          {
+            name: "Schema",
+            value: {},
+            type: "json",
+          },
+        ],
+      });
+
+    nock("http://localhost")
+      .get("/api/node/atm-fraud-incoming-transactions-topic/schema")
+      .reply(200, []);
+
+    const { getByTestId } = render(
+      <RestfulProvider base="http://localhost">
+        <Details nodeID="atm-fraud-incoming-transactions-topic" />
+      </RestfulProvider>
+    );
+
+    await wait(() => {
+      const menu = getByTestId("no-schema-versions");
+      expect(menu).toBeInTheDocument();
+    });
+  });
+
+  it("should show error if schema is unavailable", async () => {
+    nock("http://localhost")
+      .get("/api/node/atm-fraud-incoming-transactions-topic")
+      .reply(200, {
+        node_id: "atm-fraud-incoming-transactions-topic",
+        node_type: "topic",
+        info: [
+          {
+            name: "Schema",
+            value: {},
+            type: "json",
+          },
+        ],
+      });
+
+    nock("http://localhost")
+      .get("/api/node/atm-fraud-incoming-transactions-topic/schema")
+      .reply(200, [1]);
+
+    nock("http://localhost")
+      .get("/api/node/atm-fraud-incoming-transactions-topic/schema/1")
+      .reply(404);
+
+    const { getByTestId, getByText } = render(
+      <RestfulProvider base="http://localhost">
+        <Details nodeID="atm-fraud-incoming-transactions-topic" />
+      </RestfulProvider>
+    );
+
+    await wait(() => {
+      const menu = getByTestId("no-schema");
+      expect(menu).toBeInTheDocument();
     });
   });
 });
