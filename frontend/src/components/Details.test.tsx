@@ -131,16 +131,14 @@ describe("display node information", () => {
       });
 
     nock("http://localhost")
-      .persist()
       .get("/api/node/atm-fraud-incoming-transactions-topic/schema")
       .reply(200, [1, 2]);
 
-    const nockSchema1 = nock("http://localhost")
-      .persist()
-      .get("/api/node/atm-fraud-incoming-transactions-topic/schema/1")
+    const nockSchema2 = nock("http://localhost")
+      .get("/api/node/atm-fraud-incoming-transactions-topic/schema/2")
       .reply(200, {
         type: "record",
-        name: "Transaction1",
+        name: "Transaction2",
         namespace: "com.bakdata.kafka",
         fields: [
           {
@@ -175,14 +173,18 @@ describe("display node information", () => {
         ],
       });
 
-    const nockSchema2 = nock("http://localhost")
-      .persist()
-      .get("/api/node/atm-fraud-incoming-transactions-topic/schema/2")
+    const nockSchema1 = nock("http://localhost")
+      .get("/api/node/atm-fraud-incoming-transactions-topic/schema/1")
       .reply(200, {
         type: "record",
-        name: "Transaction2",
+        name: "Transaction1",
         namespace: "com.bakdata.kafka",
-        fields: [],
+        fields: [
+          {
+            name: "transaction_id",
+            type: { type: "string", "avro.java.string": "String" },
+          },
+        ],
       });
 
     nock("http://localhost")
