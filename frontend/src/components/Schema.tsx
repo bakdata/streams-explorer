@@ -36,7 +36,7 @@ const Schema = ({ nodeID }: SchemaProps) => {
 
   const {
     data: schema,
-    refetch: schemaFetch,
+    refetch: fetchSchema,
     loading: schemaLoading,
     error: schemaError,
   } = useNodeSchemaApiNodeNodeIdSchemaVersionGet({
@@ -53,7 +53,7 @@ const Schema = ({ nodeID }: SchemaProps) => {
 
   useEffect(() => {
     if (schemaVersion) {
-      schemaFetch();
+      fetchSchema();
     }
   }, [schemaVersion]); // eslint-disable-line react-hooks/exhaustive-deps
 
