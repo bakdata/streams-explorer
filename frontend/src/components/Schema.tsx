@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import {
-  useNodeSchemaVersionsApiNodeNodeIdSchemaGet,
-  useNodeSchemaApiNodeNodeIdSchemaVersionGet,
+  useGetNodeSchemaVersionsApiNodeNodeIdSchemaGet,
+  useGetNodeSchemaApiNodeNodeIdSchemaVersionGet,
 } from "../api/fetchers";
 import { Spin, Space, Alert, Button, Menu, Dropdown } from "antd";
 import ReactJson from "react-json-view";
@@ -17,7 +17,7 @@ const Schema = ({ nodeID }: SchemaProps) => {
     data: versions,
     loading: versionsLoading,
     error: versionsError,
-  } = useNodeSchemaVersionsApiNodeNodeIdSchemaGet({
+  } = useGetNodeSchemaVersionsApiNodeNodeIdSchemaGet({
     node_id: nodeID,
   });
 
@@ -39,7 +39,7 @@ const Schema = ({ nodeID }: SchemaProps) => {
     refetch: fetchSchema,
     loading: schemaLoading,
     error: schemaError,
-  } = useNodeSchemaApiNodeNodeIdSchemaVersionGet({
+  } = useGetNodeSchemaApiNodeNodeIdSchemaVersionGet({
     node_id: nodeID,
     version: schemaVersion!,
     lazy: true,

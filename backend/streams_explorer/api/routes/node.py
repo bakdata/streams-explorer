@@ -29,12 +29,12 @@ async def node_info(
 
 
 @router.get("/{node_id}/schema", response_model=List[int])
-async def node_schema_versions(node_id: str):
+async def get_node_schema_versions(node_id: str):
     return SchemaRegistry.get_versions(node_id)
 
 
 @router.get("/{node_id}/schema/{version}", response_model=dict)
-async def node_schema(node_id: str, version: int):
+async def get_node_schema(node_id: str, version: int):
     return SchemaRegistry.get_schema(node_id, version=version)
 
 

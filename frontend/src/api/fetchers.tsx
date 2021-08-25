@@ -340,133 +340,133 @@ export const useNodeInfoApiNodeNodeIdGet = ({
     { pathParams: { node_id }, ...props }
   );
 
-export interface NodeSchemaVersionsApiNodeNodeIdSchemaGetPathParams {
+export interface GetNodeSchemaVersionsApiNodeNodeIdSchemaGetPathParams {
   node_id: string;
 }
 
-export type NodeSchemaVersionsApiNodeNodeIdSchemaGetProps = Omit<
+export type GetNodeSchemaVersionsApiNodeNodeIdSchemaGetProps = Omit<
   GetProps<
     number[],
     HTTPValidationError,
     void,
-    NodeSchemaVersionsApiNodeNodeIdSchemaGetPathParams
+    GetNodeSchemaVersionsApiNodeNodeIdSchemaGetPathParams
   >,
   "path"
 > &
-  NodeSchemaVersionsApiNodeNodeIdSchemaGetPathParams;
+  GetNodeSchemaVersionsApiNodeNodeIdSchemaGetPathParams;
 
 /**
- * Node Schema Versions
+ * Get Node Schema Versions
  */
-export const NodeSchemaVersionsApiNodeNodeIdSchemaGet = ({
+export const GetNodeSchemaVersionsApiNodeNodeIdSchemaGet = ({
   node_id,
   ...props
-}: NodeSchemaVersionsApiNodeNodeIdSchemaGetProps) => (
+}: GetNodeSchemaVersionsApiNodeNodeIdSchemaGetProps) => (
   <Get<
     number[],
     HTTPValidationError,
     void,
-    NodeSchemaVersionsApiNodeNodeIdSchemaGetPathParams
+    GetNodeSchemaVersionsApiNodeNodeIdSchemaGetPathParams
   >
     path={encode`/api/node/${node_id}/schema`}
     {...props}
   />
 );
 
-export type UseNodeSchemaVersionsApiNodeNodeIdSchemaGetProps = Omit<
+export type UseGetNodeSchemaVersionsApiNodeNodeIdSchemaGetProps = Omit<
   UseGetProps<
     number[],
     HTTPValidationError,
     void,
-    NodeSchemaVersionsApiNodeNodeIdSchemaGetPathParams
+    GetNodeSchemaVersionsApiNodeNodeIdSchemaGetPathParams
   >,
   "path"
 > &
-  NodeSchemaVersionsApiNodeNodeIdSchemaGetPathParams;
+  GetNodeSchemaVersionsApiNodeNodeIdSchemaGetPathParams;
 
 /**
- * Node Schema Versions
+ * Get Node Schema Versions
  */
-export const useNodeSchemaVersionsApiNodeNodeIdSchemaGet = ({
+export const useGetNodeSchemaVersionsApiNodeNodeIdSchemaGet = ({
   node_id,
   ...props
-}: UseNodeSchemaVersionsApiNodeNodeIdSchemaGetProps) =>
+}: UseGetNodeSchemaVersionsApiNodeNodeIdSchemaGetProps) =>
   useGet<
     number[],
     HTTPValidationError,
     void,
-    NodeSchemaVersionsApiNodeNodeIdSchemaGetPathParams
+    GetNodeSchemaVersionsApiNodeNodeIdSchemaGetPathParams
   >(
-    (paramsInPath: NodeSchemaVersionsApiNodeNodeIdSchemaGetPathParams) =>
+    (paramsInPath: GetNodeSchemaVersionsApiNodeNodeIdSchemaGetPathParams) =>
       encode`/api/node/${paramsInPath.node_id}/schema`,
     { pathParams: { node_id }, ...props }
   );
 
-export interface NodeSchemaApiNodeNodeIdSchemaVersionGetResponse {
+export interface GetNodeSchemaApiNodeNodeIdSchemaVersionGetResponse {
   [key: string]: any;
 }
 
-export interface NodeSchemaApiNodeNodeIdSchemaVersionGetPathParams {
+export interface GetNodeSchemaApiNodeNodeIdSchemaVersionGetPathParams {
   node_id: string;
   version: number;
 }
 
-export type NodeSchemaApiNodeNodeIdSchemaVersionGetProps = Omit<
+export type GetNodeSchemaApiNodeNodeIdSchemaVersionGetProps = Omit<
   GetProps<
-    NodeSchemaApiNodeNodeIdSchemaVersionGetResponse,
+    GetNodeSchemaApiNodeNodeIdSchemaVersionGetResponse,
     HTTPValidationError,
     void,
-    NodeSchemaApiNodeNodeIdSchemaVersionGetPathParams
+    GetNodeSchemaApiNodeNodeIdSchemaVersionGetPathParams
   >,
   "path"
 > &
-  NodeSchemaApiNodeNodeIdSchemaVersionGetPathParams;
+  GetNodeSchemaApiNodeNodeIdSchemaVersionGetPathParams;
 
 /**
- * Node Schema
+ * Get Node Schema
  */
-export const NodeSchemaApiNodeNodeIdSchemaVersionGet = ({
+export const GetNodeSchemaApiNodeNodeIdSchemaVersionGet = ({
   node_id,
   version,
   ...props
-}: NodeSchemaApiNodeNodeIdSchemaVersionGetProps) => (
+}: GetNodeSchemaApiNodeNodeIdSchemaVersionGetProps) => (
   <Get<
-    NodeSchemaApiNodeNodeIdSchemaVersionGetResponse,
+    GetNodeSchemaApiNodeNodeIdSchemaVersionGetResponse,
     HTTPValidationError,
     void,
-    NodeSchemaApiNodeNodeIdSchemaVersionGetPathParams
+    GetNodeSchemaApiNodeNodeIdSchemaVersionGetPathParams
   >
     path={encode`/api/node/${node_id}/schema/${version}`}
     {...props}
   />
 );
 
-export type UseNodeSchemaApiNodeNodeIdSchemaVersionGetProps = Omit<
+export type UseGetNodeSchemaApiNodeNodeIdSchemaVersionGetProps = Omit<
   UseGetProps<
-    NodeSchemaApiNodeNodeIdSchemaVersionGetResponse,
+    GetNodeSchemaApiNodeNodeIdSchemaVersionGetResponse,
     HTTPValidationError,
     void,
-    NodeSchemaApiNodeNodeIdSchemaVersionGetPathParams
+    GetNodeSchemaApiNodeNodeIdSchemaVersionGetPathParams
   >,
   "path"
 > &
-  NodeSchemaApiNodeNodeIdSchemaVersionGetPathParams;
+  GetNodeSchemaApiNodeNodeIdSchemaVersionGetPathParams;
 
 /**
- * Node Schema
+ * Get Node Schema
  */
-export const useNodeSchemaApiNodeNodeIdSchemaVersionGet = ({
+export const useGetNodeSchemaApiNodeNodeIdSchemaVersionGet = ({
   node_id,
   version,
   ...props
-}: UseNodeSchemaApiNodeNodeIdSchemaVersionGetProps) =>
+}: UseGetNodeSchemaApiNodeNodeIdSchemaVersionGetProps) =>
   useGet<
-    NodeSchemaApiNodeNodeIdSchemaVersionGetResponse,
+    GetNodeSchemaApiNodeNodeIdSchemaVersionGetResponse,
     HTTPValidationError,
     void,
-    NodeSchemaApiNodeNodeIdSchemaVersionGetPathParams
+    GetNodeSchemaApiNodeNodeIdSchemaVersionGetPathParams
   >(
-    (paramsInPath: NodeSchemaApiNodeNodeIdSchemaVersionGetPathParams) =>
+    (paramsInPath: GetNodeSchemaApiNodeNodeIdSchemaVersionGetPathParams) =>
       encode`/api/node/${paramsInPath.node_id}/schema/${paramsInPath.version}`,
     { pathParams: { node_id, version }, ...props }
   );
