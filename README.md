@@ -140,7 +140,7 @@ The following configuration options are available:
 
 #### Schema Registry / Karapace
 
-- `schemaregistry.url` URL of Schema Registry or Karapace (string, default: None)
+- `schemaregistry.url` URL of Confluent Schema Registry or Karapace (string, default: None)
 
 #### Prometheus
 
