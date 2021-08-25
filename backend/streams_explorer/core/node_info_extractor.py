@@ -53,8 +53,13 @@ def get_displayed_info(
 
 
 def get_displayed_information_connector(config: dict) -> List[NodeInfoListItem]:
-    connector_settings = settings.kafkaconnect.displayed_information
-    return get_displayed_info(connector_settings, config)
+    node_infos = []
+    for key, value in config.items():
+        value_type = get_type(value)
+        if value_type != NodeInfoType.JSON:
+            value = str(value)
+        node_infos.append(NodeInfoListItem(name=key, value=value, type=value_type))
+    return node_infos
 
 
 def get_displayed_information_deployment(k8s: K8sApp) -> List[NodeInfoListItem]:

@@ -178,17 +178,17 @@ class TestStreamsExplorer:
                 NodeInfoListItem(name="Schema", value={}, type=NodeInfoType.JSON),
             ],
         )
-        assert streams_explorer.get_node_information(
-            "es-sink-connector"
-        ) == NodeInformation(
-            node_id="es-sink-connector",
-            node_type=NodeTypesEnum.CONNECTOR,
-            info=[
-                NodeInfoListItem(
-                    name="test", value="test_value", type=NodeInfoType.BASIC
-                )
-            ],
-        )
+        # assert streams_explorer.get_node_information(
+        #     "es-sink-connector"
+        # ) == NodeInformation(
+        #     node_id="es-sink-connector",
+        #     node_type=NodeTypesEnum.CONNECTOR,
+        #     info=[
+        #         NodeInfoListItem(
+        #             name="test", value="test_value", type=NodeInfoType.BASIC
+        #         )
+        #     ],
+        # )
         assert streams_explorer.get_node_information(
             "es-sink-connector-dead-letter-topic"
         ) == NodeInformation(
