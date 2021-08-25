@@ -18,7 +18,7 @@
   - [Configuration](#configuration)
     - [Kafka Connect](#kafka-connect)
     - [Kubernetes](#kubernetes)
-    - [Schema Registry / Karapace](#schema-registry---karapace)
+    - [Schema Registry / Karapace](#schema-registry--karapace)
     - [Prometheus](#prometheus)
     - [AKHQ](#akhq)
     - [Kowl](#kowl)
