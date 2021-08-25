@@ -18,7 +18,7 @@
   - [Configuration](#configuration)
     - [Kafka Connect](#kafka-connect)
     - [Kubernetes](#kubernetes)
-    - [Schema Registry](#schema-registry)
+    - [Schema Registry / Karapace](#schema-registry--karapace)
     - [Prometheus](#prometheus)
     - [AKHQ](#akhq)
     - [Kowl](#kowl)
@@ -138,9 +138,9 @@ The following configuration options are available:
 - `k8s.pipeline.label` Attribute of nodes the pipeline name should be extracted from (string, **required**, default: `pipeline`)
 - `k8s.consumer_group_annotation` Annotation the consumer group name should be extracted from (string, **required**, default: `consumerGroup`)
 
-#### Schema Registry
+#### Schema Registry / Karapace
 
-- `schemaregistry.url` URL of Schema Registry (string, default: None)
+- `schemaregistry.url` URL of Confluent Schema Registry or Karapace (string, default: None)
 
 #### Prometheus
 
