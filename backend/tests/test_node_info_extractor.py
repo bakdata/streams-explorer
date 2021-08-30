@@ -55,7 +55,6 @@ class TestNodeInfoExtractor:
         )
 
         output = get_displayed_information_connector(connector.config)
-        # assert output == ""
         assert (
             NodeInfoListItem(name="Test1", value="testValue", type=NodeInfoType.BASIC)
             in output
