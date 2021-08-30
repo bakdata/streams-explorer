@@ -340,6 +340,137 @@ export const useNodeInfoApiNodeNodeIdGet = ({
     { pathParams: { node_id }, ...props }
   );
 
+export interface GetNodeSchemaVersionsApiNodeNodeIdSchemaGetPathParams {
+  node_id: string;
+}
+
+export type GetNodeSchemaVersionsApiNodeNodeIdSchemaGetProps = Omit<
+  GetProps<
+    number[],
+    HTTPValidationError,
+    void,
+    GetNodeSchemaVersionsApiNodeNodeIdSchemaGetPathParams
+  >,
+  "path"
+> &
+  GetNodeSchemaVersionsApiNodeNodeIdSchemaGetPathParams;
+
+/**
+ * Get Node Schema Versions
+ */
+export const GetNodeSchemaVersionsApiNodeNodeIdSchemaGet = ({
+  node_id,
+  ...props
+}: GetNodeSchemaVersionsApiNodeNodeIdSchemaGetProps) => (
+  <Get<
+    number[],
+    HTTPValidationError,
+    void,
+    GetNodeSchemaVersionsApiNodeNodeIdSchemaGetPathParams
+  >
+    path={encode`/api/node/${node_id}/schema`}
+    {...props}
+  />
+);
+
+export type UseGetNodeSchemaVersionsApiNodeNodeIdSchemaGetProps = Omit<
+  UseGetProps<
+    number[],
+    HTTPValidationError,
+    void,
+    GetNodeSchemaVersionsApiNodeNodeIdSchemaGetPathParams
+  >,
+  "path"
+> &
+  GetNodeSchemaVersionsApiNodeNodeIdSchemaGetPathParams;
+
+/**
+ * Get Node Schema Versions
+ */
+export const useGetNodeSchemaVersionsApiNodeNodeIdSchemaGet = ({
+  node_id,
+  ...props
+}: UseGetNodeSchemaVersionsApiNodeNodeIdSchemaGetProps) =>
+  useGet<
+    number[],
+    HTTPValidationError,
+    void,
+    GetNodeSchemaVersionsApiNodeNodeIdSchemaGetPathParams
+  >(
+    (paramsInPath: GetNodeSchemaVersionsApiNodeNodeIdSchemaGetPathParams) =>
+      encode`/api/node/${paramsInPath.node_id}/schema`,
+    { pathParams: { node_id }, ...props }
+  );
+
+export interface GetNodeSchemaApiNodeNodeIdSchemaVersionGetResponse {
+  [key: string]: any;
+}
+
+export interface GetNodeSchemaApiNodeNodeIdSchemaVersionGetPathParams {
+  node_id: string;
+  version: number;
+}
+
+export type GetNodeSchemaApiNodeNodeIdSchemaVersionGetProps = Omit<
+  GetProps<
+    GetNodeSchemaApiNodeNodeIdSchemaVersionGetResponse,
+    HTTPValidationError,
+    void,
+    GetNodeSchemaApiNodeNodeIdSchemaVersionGetPathParams
+  >,
+  "path"
+> &
+  GetNodeSchemaApiNodeNodeIdSchemaVersionGetPathParams;
+
+/**
+ * Get Node Schema
+ */
+export const GetNodeSchemaApiNodeNodeIdSchemaVersionGet = ({
+  node_id,
+  version,
+  ...props
+}: GetNodeSchemaApiNodeNodeIdSchemaVersionGetProps) => (
+  <Get<
+    GetNodeSchemaApiNodeNodeIdSchemaVersionGetResponse,
+    HTTPValidationError,
+    void,
+    GetNodeSchemaApiNodeNodeIdSchemaVersionGetPathParams
+  >
+    path={encode`/api/node/${node_id}/schema/${version}`}
+    {...props}
+  />
+);
+
+export type UseGetNodeSchemaApiNodeNodeIdSchemaVersionGetProps = Omit<
+  UseGetProps<
+    GetNodeSchemaApiNodeNodeIdSchemaVersionGetResponse,
+    HTTPValidationError,
+    void,
+    GetNodeSchemaApiNodeNodeIdSchemaVersionGetPathParams
+  >,
+  "path"
+> &
+  GetNodeSchemaApiNodeNodeIdSchemaVersionGetPathParams;
+
+/**
+ * Get Node Schema
+ */
+export const useGetNodeSchemaApiNodeNodeIdSchemaVersionGet = ({
+  node_id,
+  version,
+  ...props
+}: UseGetNodeSchemaApiNodeNodeIdSchemaVersionGetProps) =>
+  useGet<
+    GetNodeSchemaApiNodeNodeIdSchemaVersionGetResponse,
+    HTTPValidationError,
+    void,
+    GetNodeSchemaApiNodeNodeIdSchemaVersionGetPathParams
+  >(
+    (paramsInPath: GetNodeSchemaApiNodeNodeIdSchemaVersionGetPathParams) =>
+      encode`/api/node/${paramsInPath.node_id}/schema/${paramsInPath.version}`,
+    { pathParams: { node_id, version }, ...props }
+  );
+
 export interface LinkingApiNodeLinkingNodeIdGetQueryParams {
   link_type?: string;
 }

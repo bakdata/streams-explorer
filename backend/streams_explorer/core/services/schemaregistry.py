@@ -1,4 +1,5 @@
 import json
+from typing import List
 
 import httpx
 from loguru import logger
@@ -9,33 +10,36 @@ from streams_explorer.core.services.dataflow_graph import NodeNotFound
 url = settings.schemaregistry.url
 
 
+def default_return(default):
+    def decorator(func):
+        def inner(*args, **kw):
+            if url is None:
+                return default
+            return func(*args, **kw)
+
+        return inner
+
+    return decorator
+
+
 class SchemaRegistry:
     @staticmethod
-    def get_topic_value_schema_versions(topic: str) -> list:
+    @default_return([])
+    def get_versions(topic: str) -> List[int]:
         logger.info(f"Fetch schema versions for topic {topic}")
         response = httpx.get(f"{url}/subjects/{topic}-value/versions/")
-        data = response.json()
         if response.status_code == 200:
+            data = response.json()
             return data
-        logger.debug(f"Error fetching schema versions for topic {topic}: {data}")
+        logger.debug(f"Error fetching schema versions for topic {topic}: {response}")
         return []
 
     @staticmethod
-    def get_topic_value_schema(topic: str, version: int = 1) -> dict:
+    @default_return({})
+    def get_schema(topic: str, version: int = 1) -> dict:
         try:
             logger.info(f"Fetch schema version {version} for {topic}")
             response = httpx.get(f"{url}/subjects/{topic}-value/versions/{version}")
             return json.loads(response.json().get("schema"))
         except Exception:
             raise NodeNotFound()
-
-    @staticmethod
-    def get_newest_topic_value_schema(topic: str) -> dict:
-        if url is None:
-            return {}
-        logger.info(f"Fetch newest schema for topic {topic}")
-        versions = SchemaRegistry.get_topic_value_schema_versions(topic)
-        if not versions:
-            return {}
-        newest_version = max(versions)
-        return SchemaRegistry.get_topic_value_schema(topic, newest_version)

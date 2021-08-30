@@ -30,27 +30,6 @@ class TestStreamsExplorer:
         settings.kafkaconnect.url = "testurl:3000"
         schemaregistry.url = "testurl:8000"
 
-    @staticmethod
-    def get_topic_value_schema(topic: str, version: int = 1) -> dict:
-        if version == 1:
-            return {
-                "type": "record",
-                "namespace": "com.test",
-                "name": "Test1",
-                "fields": [
-                    {"name": "first", "type": "string"},
-                ],
-            }
-        else:
-            return {
-                "type": "record",
-                "namespace": "com.test",
-                "name": "Test2",
-                "fields": [
-                    {"name": "first", "type": "string"},
-                ],
-            }
-
     @pytest.fixture()
     def deployments(self):
         return [
@@ -138,11 +117,6 @@ class TestStreamsExplorer:
                     "type": KafkaConnectorTypesEnum.SOURCE,
                 }
 
-        def get_topic_value_schema_versions(topic: str) -> list:
-            if topic == "es-sink-connector-dead-letter-topic":
-                return []
-            return [1, 2]
-
         mocker.patch(
             "streams_explorer.core.services.kafkaconnect.KafkaConnect.get_connectors",
             get_connectors,
@@ -154,15 +128,6 @@ class TestStreamsExplorer:
         mocker.patch(
             "streams_explorer.core.services.kafkaconnect.KafkaConnect.sanitize_connector_config",
             lambda config: config,
-        )
-
-        mocker.patch(
-            "streams_explorer.core.services.schemaregistry.SchemaRegistry.get_topic_value_schema_versions",
-            get_topic_value_schema_versions,
-        )
-        mocker.patch(
-            "streams_explorer.core.services.schemaregistry.SchemaRegistry.get_topic_value_schema",
-            self.get_topic_value_schema,
         )
 
         return explorer
@@ -210,11 +175,7 @@ class TestStreamsExplorer:
                 NodeInfoListItem(
                     name="Test Topic Monitoring", value="test", type=NodeInfoType.LINK
                 ),
-                NodeInfoListItem(
-                    name="Schema",
-                    value=self.get_topic_value_schema("", 2),
-                    type=NodeInfoType.JSON,
-                ),
+                NodeInfoListItem(name="Schema", value={}, type=NodeInfoType.JSON),
             ],
         )
         assert streams_explorer.get_node_information(
@@ -237,6 +198,7 @@ class TestStreamsExplorer:
                 NodeInfoListItem(
                     name="Test Topic Monitoring", value="test", type=NodeInfoType.LINK
                 ),
+                NodeInfoListItem(name="Schema", value={}, type=NodeInfoType.JSON),
             ],
         )
 
@@ -247,7 +209,9 @@ class TestStreamsExplorer:
         ) == NodeInformation(
             node_id="es-sink-connector-dead-letter-topic",
             node_type=NodeTypesEnum.ERROR_TOPIC,
-            info=[],
+            info=[
+                NodeInfoListItem(name="Schema", value={}, type=NodeInfoType.JSON),
+            ],
         )
 
     @pytest.mark.asyncio

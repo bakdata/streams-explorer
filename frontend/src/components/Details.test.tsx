@@ -3,7 +3,12 @@ import React from "react";
 import { RestfulProvider } from "restful-react";
 
 import Details from "./Details";
-import { waitForElement, render } from "@testing-library/react";
+import {
+  waitForElement,
+  render,
+  fireEvent,
+  wait,
+} from "@testing-library/react";
 
 describe("display node information", () => {
   beforeAll(() => {
@@ -119,43 +124,65 @@ describe("display node information", () => {
           { name: "Topic Monitoring", value: "grafana", type: "link" },
           {
             name: "Schema",
-            value: {
+            value: {},
+            type: "json",
+          },
+        ],
+      });
+
+    nock("http://localhost")
+      .get("/api/node/atm-fraud-incoming-transactions-topic/schema")
+      .reply(200, [1, 2]);
+
+    const nockSchema2 = nock("http://localhost")
+      .get("/api/node/atm-fraud-incoming-transactions-topic/schema/2")
+      .reply(200, {
+        type: "record",
+        name: "Transaction2",
+        namespace: "com.bakdata.kafka",
+        fields: [
+          {
+            name: "transaction_id",
+            type: { type: "string", "avro.java.string": "String" },
+          },
+          {
+            name: "account_id",
+            type: { type: "string", "avro.java.string": "String" },
+          },
+          { name: "amount", type: "int" },
+          {
+            name: "atm",
+            type: { type: "string", "avro.java.string": "String" },
+            default: "",
+          },
+          {
+            name: "timestamp",
+            type: { type: "long", logicalType: "timestamp-millis" },
+          },
+          {
+            name: "location",
+            type: {
               type: "record",
-              name: "Transaction",
-              namespace: "com.bakdata.kafka",
+              name: "Location",
               fields: [
-                {
-                  name: "transaction_id",
-                  type: { type: "string", "avro.java.string": "String" },
-                },
-                {
-                  name: "account_id",
-                  type: { type: "string", "avro.java.string": "String" },
-                },
-                { name: "amount", type: "int" },
-                {
-                  name: "atm",
-                  type: { type: "string", "avro.java.string": "String" },
-                  default: "",
-                },
-                {
-                  name: "timestamp",
-                  type: { type: "long", logicalType: "timestamp-millis" },
-                },
-                {
-                  name: "location",
-                  type: {
-                    type: "record",
-                    name: "Location",
-                    fields: [
-                      { name: "latitude", type: "double" },
-                      { name: "longitude", type: "double" },
-                    ],
-                  },
-                },
+                { name: "latitude", type: "double" },
+                { name: "longitude", type: "double" },
               ],
             },
-            type: "json",
+          },
+        ],
+      });
+
+    const nockSchema1 = nock("http://localhost")
+      .get("/api/node/atm-fraud-incoming-transactions-topic/schema/1")
+      .reply(200, {
+        type: "record",
+        name: "Transaction1",
+        namespace: "com.bakdata.kafka",
+        fields: [
+          {
+            name: "transaction_id",
+            type: { type: "string", "avro.java.string": "String" },
           },
         ],
       });
@@ -168,13 +195,134 @@ describe("display node information", () => {
         200,
         "http://localhost:3000/d/path/to/dashboard?var-topics=atm-fraud-incoming-transactions-topic"
       );
-    const { getByText, asFragment } = render(
+
+    const { getByText, getByTestId } = render(
       <RestfulProvider base="http://localhost">
         <Details nodeID="atm-fraud-incoming-transactions-topic" />
       </RestfulProvider>
     );
 
-    await waitForElement(() => getByText("topic"));
-    expect(asFragment()).toMatchSnapshot();
+    await waitForElement(() => getByText("v2")); // get dropdown menu for schema version
+    let schemaVersion = getByText("v2");
+    expect(nockSchema2.isDone()).toBeTruthy();
+    expect(nockSchema1.isDone()).toBeFalsy();
+    const schema2 = getByTestId("schema");
+    expect(schema2).toMatchSnapshot();
+
+    fireEvent.mouseOver(getByTestId("schema-version"));
+    await wait(() => {
+      const menu = getByTestId("schema-version-select");
+      fireEvent.mouseOver(menu);
+      const v1 = getByText("v1");
+      fireEvent.click(v1);
+    });
+
+    await wait(() => {
+      expect(schemaVersion).toHaveTextContent("v1");
+      expect(nockSchema1.isDone()).toBeTruthy();
+    });
+
+    await wait(() => {
+      expect(schema2).not.toBeInTheDocument();
+      const schema1 = getByTestId("schema");
+      expect(schema1).toMatchSnapshot();
+    });
+  });
+
+  it("should show error if schema versions are unavailable", async () => {
+    nock("http://localhost")
+      .get("/api/node/atm-fraud-incoming-transactions-topic")
+      .reply(200, {
+        node_id: "atm-fraud-incoming-transactions-topic",
+        node_type: "topic",
+        info: [
+          {
+            name: "Schema",
+            value: {},
+            type: "json",
+          },
+        ],
+      });
+
+    nock("http://localhost")
+      .get("/api/node/atm-fraud-incoming-transactions-topic/schema")
+      .reply(404);
+
+    const { getByTestId } = render(
+      <RestfulProvider base="http://localhost">
+        <Details nodeID="atm-fraud-incoming-transactions-topic" />
+      </RestfulProvider>
+    );
+
+    await wait(() => {
+      const menu = getByTestId("no-schema-versions");
+      expect(menu).toBeInTheDocument();
+    });
+  });
+
+  it("should show error if schema versions is empty", async () => {
+    nock("http://localhost")
+      .get("/api/node/atm-fraud-incoming-transactions-topic")
+      .reply(200, {
+        node_id: "atm-fraud-incoming-transactions-topic",
+        node_type: "topic",
+        info: [
+          {
+            name: "Schema",
+            value: {},
+            type: "json",
+          },
+        ],
+      });
+
+    nock("http://localhost")
+      .get("/api/node/atm-fraud-incoming-transactions-topic/schema")
+      .reply(200, []);
+
+    const { getByTestId } = render(
+      <RestfulProvider base="http://localhost">
+        <Details nodeID="atm-fraud-incoming-transactions-topic" />
+      </RestfulProvider>
+    );
+
+    await wait(() => {
+      const menu = getByTestId("no-schema-versions");
+      expect(menu).toBeInTheDocument();
+    });
+  });
+
+  it("should show error if schema is unavailable", async () => {
+    nock("http://localhost")
+      .get("/api/node/atm-fraud-incoming-transactions-topic")
+      .reply(200, {
+        node_id: "atm-fraud-incoming-transactions-topic",
+        node_type: "topic",
+        info: [
+          {
+            name: "Schema",
+            value: {},
+            type: "json",
+          },
+        ],
+      });
+
+    nock("http://localhost")
+      .get("/api/node/atm-fraud-incoming-transactions-topic/schema")
+      .reply(200, [1]);
+
+    nock("http://localhost")
+      .get("/api/node/atm-fraud-incoming-transactions-topic/schema/1")
+      .reply(404);
+
+    const { getByTestId, getByText } = render(
+      <RestfulProvider base="http://localhost">
+        <Details nodeID="atm-fraud-incoming-transactions-topic" />
+      </RestfulProvider>
+    );
+
+    await wait(() => {
+      const menu = getByTestId("no-schema");
+      expect(menu).toBeInTheDocument();
+    });
   });
 });
