@@ -19,7 +19,7 @@ settings = Dynaconf(
         Validator("k8s.pipeline.label", must_exist=True, is_type_of=str),
         Validator("k8s.consumer_group_annotation", must_exist=True, is_type_of=str),
         Validator("kafka.displayed_information", is_type_of=list, default=[]),
-        Validator("kafka.url", must_exist=True, is_type_of=str),
+        Validator("kafka.config", must_exist=True, is_type_of=dict),
         Validator("kafkaconnect.url", default=None),
         Validator("kafkaconnect.displayed_information", is_type_of=list, default=[]),
         Validator("schemaregistry.url", default=None),

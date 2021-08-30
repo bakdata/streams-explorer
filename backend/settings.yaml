@@ -27,7 +27,8 @@ k8s:
     label: "pipeline"
 
 kafka:
-  url: "localhost:9092"
+  config:
+    "bootstrap.servers": "localhost:9092"
   displayed_information:
     - name: "Cleanup Policy"
       key: "cleanup.policy"
