@@ -26,6 +26,12 @@ k8s:
     # refers to the attribute of nodes the pipeline name should be extracted from
     label: "pipeline"
 
+kafka:
+  url: "localhost:9092"
+  displayed_information:
+    - name: "Cleanup Policy"
+      key: "cleanup.policy"
+
 ## (optional) configure kafka connect url and displayed information
 # kafkaconnect:
 #   url: "http://localhost:8083"
