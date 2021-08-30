@@ -425,9 +425,9 @@ describe("Streams Explorer", () => {
       await wait(() => {
         // wait for the first pipeline request to fail
         expect(nockPipeline.isDone()).toBeTruthy();
+        // pipeline becomes available
+        nockPipeline = mockBackendGraph(true, "avail-after-scrape");
       });
-      // pipeline becomes available
-      nockPipeline = mockBackendGraph(true, "avail-after-scrape");
 
       await waitForElement(() => getByTestId("graph"));
 
