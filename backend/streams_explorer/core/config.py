@@ -1,3 +1,5 @@
+from typing import Dict, List
+
 from dynaconf import Dynaconf, Validator
 
 APP_NAME = "Streams Explorer"
@@ -33,4 +35,16 @@ settings = Dynaconf(
         Validator("plugins.path", must_exist=True, is_type_of=str),
         Validator("plugins.extractors.default", must_exist=True, is_type_of=bool),
     ],
+)
+
+
+def sort_displayed_information(list: List[Dict[str, str]]) -> List[Dict[str, str]]:
+    return sorted(list, key=lambda k: str.casefold(k["name"]))
+
+
+settings.kafkaconnect.displayed_information = sort_displayed_information(
+    settings.kafkaconnect.displayed_information
+)
+settings.k8s.displayed_information = sort_displayed_information(
+    settings.k8s.displayed_information
 )
