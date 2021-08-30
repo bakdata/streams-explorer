@@ -9,8 +9,10 @@ from streams_explorer.core.k8s_app import K8sApp, K8sObject
 from streams_explorer.core.node_info_extractor import (
     get_displayed_information_connector,
     get_displayed_information_deployment,
+    get_displayed_information_topic,
 )
 from streams_explorer.core.services.dataflow_graph import DataFlowGraph, NodeTypesEnum
+from streams_explorer.core.services.kafka import Kafka
 from streams_explorer.core.services.kafkaconnect import KafkaConnect
 from streams_explorer.core.services.linking_services import LinkingService
 from streams_explorer.core.services.metric_providers import MetricProvider
@@ -35,6 +37,7 @@ class StreamsExplorer:
         self.kafka_connectors: List[KafkaConnector] = []
         self.data_flow = DataFlowGraph(metric_provider=metric_provider)
         self.linking_service = linking_service
+        self.kafka = Kafka()
 
     def setup(self):
         self.__setup_k8s_environment()
@@ -67,6 +70,7 @@ class StreamsExplorer:
 
     def get_node_information(self, node_id: str):
         node_type = self.data_flow.get_node_type(node_id)
+
         if node_type == NodeTypesEnum.CONNECTOR:
             config = KafkaConnect.get_connector_config(node_id)
             return NodeInformation(
@@ -75,8 +79,18 @@ class StreamsExplorer:
                 info=self.linking_service.connector_info
                 + get_displayed_information_connector(config),
             )
-        if node_type == NodeTypesEnum.TOPIC or node_type == NodeTypesEnum.ERROR_TOPIC:
+
+        elif node_type == NodeTypesEnum.TOPIC or node_type == NodeTypesEnum.ERROR_TOPIC:
             info = self.linking_service.topic_info
+            config = self.kafka.get_topic_config(node_id)
+            info.append(  # TODO: remove or filter displayed_information
+                NodeInfoListItem(
+                    name="Kafka Config",
+                    value=config,
+                    type=NodeInfoType.JSON,
+                )
+            )
+            info += get_displayed_information_topic(config)
             info.append(
                 NodeInfoListItem(
                     name="Schema",
@@ -89,7 +103,8 @@ class StreamsExplorer:
                 node_type=node_type,
                 info=info,
             )
-        if node_type == NodeTypesEnum.STREAMING_APP:
+
+        elif node_type == NodeTypesEnum.STREAMING_APP:
             info = get_displayed_information_deployment(self.applications[node_id])
             return NodeInformation(
                 node_id=node_id,
@@ -97,7 +112,7 @@ class StreamsExplorer:
                 info=self.linking_service.streaming_app_info + info,
             )
 
-        if node_type in self.linking_service.sink_source_info:
+        elif node_type in self.linking_service.sink_source_info:
             return NodeInformation(
                 node_id=node_id,
                 node_type=NodeTypesEnum.SINK_SOURCE,
