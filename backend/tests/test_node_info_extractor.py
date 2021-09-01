@@ -1,6 +1,6 @@
 import pytest
 
-from streams_explorer.core.config import settings
+from streams_explorer.core.config import settings, sort_displayed_information
 from streams_explorer.core.k8s_app import K8sAppDeployment
 from streams_explorer.core.node_info_extractor import (
     get_displayed_information_connector,
@@ -19,6 +19,19 @@ class TestNodeInfoExtractor:
     def kafka_connect(self):
         settings.kafkaconnect.url = "testurl:3000"
         settings.kafkaconnect.displayed_information = []
+
+    def test_sort_displayed_information_alphabetic(self):
+        assert sort_displayed_information(
+            [
+                {"name": "Test1", "key": "test"},
+                {"name": "bar", "key": "foo.bar"},
+                {"name": "testlist", "key": "foo.test"},
+            ]
+        ) == [
+            {"name": "bar", "key": "foo.bar"},
+            {"name": "Test1", "key": "test"},
+            {"name": "testlist", "key": "foo.test"},
+        ]
 
     def test_get_displayed_information_connector(self, monkeypatch):
         monkeypatch.setattr(
