@@ -33,14 +33,14 @@ kafka:
     - name: "Cleanup Policy"
       key: "cleanup.policy"
 
-## (optional) configure kafka connect url and displayed information
+## (optional) configure Kafka Connect url and displayed information
 # kafkaconnect:
 #   url: "http://localhost:8083"
 #   displayed_information:
 #     - name: "Transformer"
 #       key: "transforms.changeTopic.regex"
 
-## (optional) configure schema registry for topic information
+## (optional) configure Schema Registry for topic information (supports Karapace and Confluent Schema Registry)
 # schemaregistry:
 #   url: "http://localhost:8081"
 
