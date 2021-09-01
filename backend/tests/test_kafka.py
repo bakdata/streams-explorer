@@ -19,9 +19,7 @@ class TestKafka:
     def kafka(self, monkeypatch) -> Kafka:
         kafka = Kafka()
 
-        def mock_get_resource(
-            resource: ConfigResource, *args, **kw
-        ) -> List[ConfigEntry]:
+        def mock_get_resource(resource: ConfigResource, *args) -> List[ConfigEntry]:
             if resource == ConfigResource(ConfigResource.Type.TOPIC, "test-topic"):
                 return [ConfigEntry(name="cleanup.policy", value="delete")]
             return []

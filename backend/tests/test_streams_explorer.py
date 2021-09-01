@@ -1,4 +1,4 @@
-from typing import List
+from typing import Dict, List
 
 import pytest
 from kubernetes.client import V1beta1CronJob
@@ -117,6 +117,14 @@ class TestStreamsExplorer:
                     "type": KafkaConnectorTypesEnum.SOURCE,
                 }
 
+        def get_topic_config(_, topic) -> Dict[str, str]:
+            print(topic)
+            if topic == "input-topic1":
+                return {
+                    "cleanup.policy": "compact,delete",
+                }
+            return {}
+
         mocker.patch(
             "streams_explorer.core.services.kafkaconnect.KafkaConnect.get_connectors",
             get_connectors,
@@ -128,6 +136,10 @@ class TestStreamsExplorer:
         mocker.patch(
             "streams_explorer.core.services.kafkaconnect.KafkaConnect.sanitize_connector_config",
             lambda config: config,
+        )
+        mocker.patch(
+            "streams_explorer.core.services.kafka.Kafka.get_topic_config",
+            get_topic_config,
         )
 
         return explorer
@@ -174,6 +186,11 @@ class TestStreamsExplorer:
             info=[
                 NodeInfoListItem(
                     name="Test Topic Monitoring", value="test", type=NodeInfoType.LINK
+                ),
+                NodeInfoListItem(
+                    name="Cleanup Policy",
+                    value="compact,delete",
+                    type=NodeInfoType.BASIC,
                 ),
                 NodeInfoListItem(name="Schema", value={}, type=NodeInfoType.JSON),
             ],
