@@ -10,15 +10,14 @@ class Kafka:
     def __init__(self):
         self._client: AdminClient = AdminClient(settings.kafka.config)
 
-    def __describe_config_values(self, resource: ConfigResource) -> list:
-        configs = self._client.describe_configs(resources=[resource])
-        return list(configs.values())
+    def __describe_config(self, resource: ConfigResource) -> dict:
+        return self._client.describe_configs(resources=[resource])
 
     def __get_resource(self, resource: ConfigResource) -> List[ConfigEntry]:
-        for c in concurrent.futures.as_completed(
-            iter(self.__describe_config_values(resource))
-        ):
-            return c.result()
+        fs = self.__describe_config(resource)
+        for f in concurrent.futures.as_completed(iter(fs.values())):
+            configs = f.result()
+            return list(configs.values())
         return []
 
     def get_topic_config(self, topic: str) -> Dict[str, str]:
