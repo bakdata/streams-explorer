@@ -16,6 +16,7 @@
       - [Backend](#backend)
       - [Frontend](#frontend)
   - [Configuration](#configuration)
+    - [Kafka](#kafka)
     - [Kafka Connect](#kafka-connect)
     - [Kubernetes](#kubernetes)
     - [Schema Registry / Karapace](#schema-registry--karapace)
@@ -121,6 +122,11 @@ The following configuration options are available:
 - `graph.update_interval` Update the graph every X seconds (integer, **required**, default: `300`)
 - `graph.layout_arguments` Arguments passed to graphviz layout (string, **required**, default: `-Grankdir=LR -Gnodesep=0.8 -Gpad=10`)
 - `graph.pipeline_distance` Increase/decrease vertical space between pipeline graphs by X pixels (int, **required**, default: `500`)
+
+#### Kafka
+
+- `kafka.config` librdkafka configuration properties ([reference](https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md)) (dict, default: `{"bootstrap.servers": "localhost:9092"}`)
+- `kafka.displayed_information` Configuration options of Kafka topics displayed in the frontend (list of dict)
 
 #### Kafka Connect
 

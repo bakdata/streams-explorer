@@ -27,6 +27,8 @@ k8s:
     label: "pipeline"
 
 kafka:
+  # librdkafka configuration properties
+  # https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md
   config:
     "bootstrap.servers": "localhost:9092"
   displayed_information:
