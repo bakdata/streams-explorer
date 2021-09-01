@@ -50,3 +50,7 @@ settings.kafkaconnect.displayed_information = sort_displayed_information(
 settings.k8s.displayed_information = sort_displayed_information(
     settings.k8s.displayed_information
 )
+
+settings.kafka.displayed_information = sort_displayed_information(
+    settings.kafka.displayed_information
+)
