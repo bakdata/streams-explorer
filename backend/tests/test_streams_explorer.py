@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import List
 
 import pytest
 from kubernetes.client import V1beta1CronJob
@@ -117,8 +117,7 @@ class TestStreamsExplorer:
                     "type": KafkaConnectorTypesEnum.SOURCE,
                 }
 
-        def get_topic_config(_, topic) -> Dict[str, str]:
-            print(topic)
+        def get_topic_config(_, topic) -> dict:
             if topic == "input-topic1":
                 return {
                     "cleanup.policy": "compact,delete",
