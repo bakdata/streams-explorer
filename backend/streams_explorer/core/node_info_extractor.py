@@ -60,3 +60,8 @@ def get_displayed_information_connector(config: dict) -> List[NodeInfoListItem]:
 def get_displayed_information_deployment(k8s: K8sApp) -> List[NodeInfoListItem]:
     k8s_settings = settings.k8s.displayed_information
     return get_displayed_info(k8s_settings, k8s.to_dict())
+
+
+def get_displayed_information_topic(config: dict) -> List[NodeInfoListItem]:
+    kafka_settings = settings.kafka.displayed_information
+    return get_displayed_info(kafka_settings, config)

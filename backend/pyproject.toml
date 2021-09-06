@@ -38,6 +38,7 @@ fastapi = "^0.66.1"
 uvicorn = "^0.14.0"
 aiofiles = "^0.7.0"
 pygraphviz = "^1.7"
+confluent-kafka = "^1.7.0"
 
 [tool.poetry.dev-dependencies]
 mypy = "^0.910"

@@ -26,6 +26,16 @@ k8s:
     # refers to the attribute of nodes the pipeline name should be extracted from
     label: "pipeline"
 
+kafka:
+  enable: false
+  # librdkafka configuration properties
+  # https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md
+  config:
+    bootstrap.servers: "localhost:9092"
+  displayed_information:
+    - name: "Cleanup Policy"
+      key: "cleanup.policy"
+
 ## (optional) configure Kafka Connect url and displayed information
 # kafkaconnect:
 #   url: "http://localhost:8083"

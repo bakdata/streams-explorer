@@ -5,6 +5,7 @@ from streams_explorer.core.k8s_app import K8sAppDeployment
 from streams_explorer.core.node_info_extractor import (
     get_displayed_information_connector,
     get_displayed_information_deployment,
+    get_displayed_information_topic,
 )
 from streams_explorer.models.kafka_connector import (
     KafkaConnector,
@@ -101,3 +102,36 @@ class TestNodeInfoExtractor:
         assert output[1] == NodeInfoListItem(
             name="Pipeline", value="pipeline1", type=NodeInfoType.BASIC
         )
+
+    def test_get_displayed_information_topic(self, monkeypatch):
+        assert get_displayed_information_topic({}) == []
+
+        kafka_topic_config = {
+            "cleanup.policy": "delete",
+            "retention.ms": "-1",
+        }
+        output = get_displayed_information_topic(kafka_topic_config)
+        assert len(output) == 1
+        assert output == [
+            NodeInfoListItem(
+                name="Cleanup Policy", value="delete", type=NodeInfoType.BASIC
+            ),
+        ]
+
+        # Change displayed information
+        monkeypatch.setattr(
+            settings.kafka,
+            "displayed_information",
+            [
+                {"name": "Cleanup Policy", "key": "cleanup.policy"},
+                {"name": "Retention", "key": "retention.ms"},
+            ],
+        )
+        output = get_displayed_information_topic(kafka_topic_config)
+        assert len(output) == 2
+        assert output == [
+            NodeInfoListItem(
+                name="Cleanup Policy", value="delete", type=NodeInfoType.BASIC
+            ),
+            NodeInfoListItem(name="Retention", value="-1", type=NodeInfoType.BASIC),
+        ]

@@ -20,6 +20,14 @@ settings = Dynaconf(
         Validator("k8s.labels", must_exist=True, is_type_of=list),
         Validator("k8s.pipeline.label", must_exist=True, is_type_of=str),
         Validator("k8s.consumer_group_annotation", must_exist=True, is_type_of=str),
+        Validator("kafka.enable", must_exist=True, is_type_of=bool),
+        Validator(
+            "kafka.config",
+            must_exist=True,
+            is_type_of=dict,
+            condition=lambda v: type(v.get("bootstrap.servers")) is str,
+        ),
+        Validator("kafka.displayed_information", is_type_of=list, default=[]),
         Validator("kafkaconnect.url", default=None),
         Validator("kafkaconnect.displayed_information", is_type_of=list, default=[]),
         Validator("schemaregistry.url", default=None),
@@ -47,4 +55,8 @@ settings.kafkaconnect.displayed_information = sort_displayed_information(
 )
 settings.k8s.displayed_information = sort_displayed_information(
     settings.k8s.displayed_information
+)
+
+settings.kafka.displayed_information = sort_displayed_information(
+    settings.kafka.displayed_information
 )

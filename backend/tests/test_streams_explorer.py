@@ -77,6 +77,8 @@ class TestStreamsExplorer:
     def streams_explorer(
         self, mocker, deployments, cron_jobs, monkeypatch, fake_linker
     ):
+        monkeypatch.setattr(settings.kafka, "enable", True)
+
         explorer = StreamsExplorer(
             linking_service=fake_linker, metric_provider=MetricProvider
         )
@@ -117,6 +119,13 @@ class TestStreamsExplorer:
                     "type": KafkaConnectorTypesEnum.SOURCE,
                 }
 
+        def get_topic_config(_, topic) -> dict:
+            if topic == "input-topic1":
+                return {
+                    "cleanup.policy": "compact,delete",
+                }
+            return {}
+
         mocker.patch(
             "streams_explorer.core.services.kafkaconnect.KafkaConnect.get_connectors",
             get_connectors,
@@ -128,6 +137,10 @@ class TestStreamsExplorer:
         mocker.patch(
             "streams_explorer.core.services.kafkaconnect.KafkaConnect.sanitize_connector_config",
             lambda config: config,
+        )
+        mocker.patch(
+            "streams_explorer.core.services.kafka.Kafka.get_topic_config",
+            get_topic_config,
         )
 
         return explorer
@@ -174,6 +187,11 @@ class TestStreamsExplorer:
             info=[
                 NodeInfoListItem(
                     name="Test Topic Monitoring", value="test", type=NodeInfoType.LINK
+                ),
+                NodeInfoListItem(
+                    name="Cleanup Policy",
+                    value="compact,delete",
+                    type=NodeInfoType.BASIC,
                 ),
                 NodeInfoListItem(name="Schema", value={}, type=NodeInfoType.JSON),
             ],
