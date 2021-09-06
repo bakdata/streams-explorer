@@ -125,7 +125,8 @@ The following configuration options are available:
 
 #### Kafka
 
-- `kafka.config` librdkafka configuration properties ([reference](https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md)) (dict, default: `{"bootstrap.servers": "localhost:9092"}`)
+- `kafka.enable` Enable Kafka (bool, **required**, default: `false`)
+- `kafka.config` librdkafka configuration properties ([reference](https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md)) (dict, **required**, default: `{"bootstrap.servers": "localhost:9092"}`)
 - `kafka.displayed_information` Configuration options of Kafka topics displayed in the frontend (list of dict)
 
 #### Kafka Connect
