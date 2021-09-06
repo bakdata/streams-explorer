@@ -36,6 +36,10 @@ kafka:
     - name: "Cleanup Policy"
       key: "cleanup.policy"
 
+node_info:
+  # cache time-to-live in seconds
+  cache_ttl: 3600
+
 ## (optional) configure Kafka Connect url and displayed information
 # kafkaconnect:
 #   url: "http://localhost:8083"

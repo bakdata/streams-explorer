@@ -1,6 +1,7 @@
 from typing import Dict, List, Optional, Type
 
 import kubernetes
+from cachetools.func import ttl_cache
 from kubernetes.client import V1beta1CronJob, V1Deployment, V1StatefulSet
 from loguru import logger
 
@@ -68,6 +69,7 @@ class StreamsExplorer:
     async def get_metrics(self) -> List[Metric]:
         return await self.data_flow.get_metrics()
 
+    @ttl_cache(ttl=settings.node_info.cache_ttl)
     def get_node_information(self, node_id: str):
         node_type = self.data_flow.get_node_type(node_id)
 
