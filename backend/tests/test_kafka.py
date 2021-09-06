@@ -21,12 +21,18 @@ class TestKafka:
 
         def mock_get_resource(resource: ConfigResource, *args) -> List[ConfigEntry]:
             if resource == ConfigResource(ConfigResource.Type.TOPIC, "test-topic"):
-                return [ConfigEntry(name="cleanup.policy", value="delete")]
+                return [
+                    ConfigEntry(name="cleanup.policy", value="delete"),
+                    ConfigEntry(name="retention.ms", value="-1"),
+                ]
             return []
 
         monkeypatch.setattr(kafka, "_Kafka__get_resource", mock_get_resource)
         return kafka
 
     def test_get_topic_config(self, kafka):
-        assert kafka.get_topic_config("test-topic") == {"cleanup.policy": "delete"}
+        assert kafka.get_topic_config("test-topic") == {
+            "cleanup.policy": "delete",
+            "retention.ms": "-1",
+        }
         assert kafka.get_topic_config("doesnt-exist") == {}
