@@ -1,7 +1,7 @@
 import "./App.css";
 import {
   useGetPipelinesApiPipelinesGet,
-  useGetGraphPositionedApiGraphGet,
+  useGetPositionedGraphApiGraphGet,
   useGetMetricsApiMetricsGet,
   HTTPValidationError,
 } from "./api/fetchers";
@@ -80,7 +80,7 @@ const App: React.FC = () => {
     loading: isLoadingGraph,
     error: graphError,
     refetch: graphRefetch,
-  } = useGetGraphPositionedApiGraphGet({
+  } = useGetPositionedGraphApiGraphGet({
     queryParams:
       currentPipeline !== ALL_PIPELINES
         ? { pipeline_name: currentPipeline }
@@ -91,7 +91,7 @@ const App: React.FC = () => {
     refetch: retryPipelineGraph,
     error: retryPipelineGraphError,
     data: retryPipelineGraphData,
-  } = useGetGraphPositionedApiGraphGet({
+  } = useGetPositionedGraphApiGraphGet({
     queryParams: { pipeline_name: currentPipeline },
     lazy: true,
   });

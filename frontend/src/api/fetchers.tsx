@@ -200,30 +200,30 @@ export const useUpdateApiUpdatePost = (props: UseUpdateApiUpdatePostProps) =>
     props
   );
 
-export interface GetGraphPositionedApiGraphGetQueryParams {
+export interface GetPositionedGraphApiGraphGetQueryParams {
   pipeline_name?: string;
 }
 
-export type GetGraphPositionedApiGraphGetProps = Omit<
+export type GetPositionedGraphApiGraphGetProps = Omit<
   GetProps<
     Graph,
     HTTPValidationError,
-    GetGraphPositionedApiGraphGetQueryParams,
+    GetPositionedGraphApiGraphGetQueryParams,
     void
   >,
   "path"
 >;
 
 /**
- * Get Graph Positioned
+ * Get Positioned Graph
  */
-export const GetGraphPositionedApiGraphGet = (
-  props: GetGraphPositionedApiGraphGetProps
+export const GetPositionedGraphApiGraphGet = (
+  props: GetPositionedGraphApiGraphGetProps
 ) => (
   <Get<
     Graph,
     HTTPValidationError,
-    GetGraphPositionedApiGraphGetQueryParams,
+    GetPositionedGraphApiGraphGetQueryParams,
     void
   >
     path={encode`/api/graph`}
@@ -231,26 +231,26 @@ export const GetGraphPositionedApiGraphGet = (
   />
 );
 
-export type UseGetGraphPositionedApiGraphGetProps = Omit<
+export type UseGetPositionedGraphApiGraphGetProps = Omit<
   UseGetProps<
     Graph,
     HTTPValidationError,
-    GetGraphPositionedApiGraphGetQueryParams,
+    GetPositionedGraphApiGraphGetQueryParams,
     void
   >,
   "path"
 >;
 
 /**
- * Get Graph Positioned
+ * Get Positioned Graph
  */
-export const useGetGraphPositionedApiGraphGet = (
-  props: UseGetGraphPositionedApiGraphGetProps
+export const useGetPositionedGraphApiGraphGet = (
+  props: UseGetPositionedGraphApiGraphGetProps
 ) =>
   useGet<
     Graph,
     HTTPValidationError,
-    GetGraphPositionedApiGraphGetQueryParams,
+    GetPositionedGraphApiGraphGetQueryParams,
     void
   >(encode`/api/graph`, props);
 
