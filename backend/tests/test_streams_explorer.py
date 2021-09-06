@@ -222,6 +222,7 @@ class TestStreamsExplorer:
 
         # clear topic_info
         streams_explorer.linking_service.topic_info = []
+        streams_explorer.get_node_information.cache_clear()
         assert streams_explorer.get_node_information(
             "es-sink-connector-dead-letter-topic"
         ) == NodeInformation(
