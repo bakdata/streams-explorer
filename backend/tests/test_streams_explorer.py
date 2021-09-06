@@ -77,6 +77,8 @@ class TestStreamsExplorer:
     def streams_explorer(
         self, mocker, deployments, cron_jobs, monkeypatch, fake_linker
     ):
+        monkeypatch.setattr(settings.kafka, "enable", True)
+
         explorer = StreamsExplorer(
             linking_service=fake_linker, metric_provider=MetricProvider
         )
