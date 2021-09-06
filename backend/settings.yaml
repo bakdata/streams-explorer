@@ -27,6 +27,7 @@ k8s:
     label: "pipeline"
 
 kafka:
+  enable: false
   # librdkafka configuration properties
   # https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md
   config:

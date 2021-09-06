@@ -8,7 +8,17 @@ from streams_explorer.core.config import settings
 
 class Kafka:
     def __init__(self):
-        self._client: AdminClient = AdminClient(settings.kafka.config)
+        self._enabled: bool = settings.kafka.enable
+        self._client: AdminClient
+        self.__connect()
+
+    @property
+    def enabled(self):
+        return self._enabled
+
+    def __connect(self):
+        if self.enabled:
+            self._client = AdminClient(settings.kafka.config)
 
     def __describe_config(self, resource: ConfigResource) -> dict:
         return self._client.describe_configs(resources=[resource])
