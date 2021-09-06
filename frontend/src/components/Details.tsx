@@ -1,8 +1,8 @@
 import React from "react";
 import {
-  useNodeInfoApiNodeNodeIdGet,
+  useGetNodeInfoApiNodeNodeIdGet,
   NodeInfoListItem,
-  useLinkingApiNodeLinkingNodeIdGet,
+  useGetLinkingApiNodeLinkingNodeIdGet,
 } from "../api/fetchers";
 import { Spin, Alert, Descriptions, Button, Space, message } from "antd";
 import ReactJson from "react-json-view";
@@ -15,7 +15,7 @@ interface DetailsProps {
 }
 
 const Details = ({ nodeID }: DetailsProps) => {
-  const { data, loading, error } = useNodeInfoApiNodeNodeIdGet({
+  const { data, loading, error } = useGetNodeInfoApiNodeNodeIdGet({
     node_id: nodeID,
   });
   if (loading) {
@@ -85,10 +85,12 @@ const LinkInfo = ({ infoListItem, nodeID }: NodeInfoDetailProps) => {
     infoListItem.value !== "" && typeof infoListItem.value == "string"
       ? infoListItem.value
       : undefined;
-  const { data: linkToService, loading } = useLinkingApiNodeLinkingNodeIdGet({
-    node_id: nodeID,
-    queryParams: { link_type: linkType },
-  });
+  const { data: linkToService, loading } = useGetLinkingApiNodeLinkingNodeIdGet(
+    {
+      node_id: nodeID,
+      queryParams: { link_type: linkType },
+    }
+  );
 
   if (loading) {
     return <Spin tip="Loading link..." />;

@@ -1,8 +1,8 @@
 import "./App.css";
 import {
-  usePipelinesApiPipelinesGet,
-  useGraphPositionedApiGraphGet,
-  useMetricsApiMetricsGet,
+  useGetPipelinesApiPipelinesGet,
+  useGetGraphPositionedApiGraphGet,
+  useGetMetricsApiMetricsGet,
   HTTPValidationError,
 } from "./api/fetchers";
 import DetailsCard from "./components/DetailsCard";
@@ -80,7 +80,7 @@ const App: React.FC = () => {
     loading: isLoadingGraph,
     error: graphError,
     refetch: graphRefetch,
-  } = useGraphPositionedApiGraphGet({
+  } = useGetGraphPositionedApiGraphGet({
     queryParams:
       currentPipeline !== ALL_PIPELINES
         ? { pipeline_name: currentPipeline }
@@ -91,7 +91,7 @@ const App: React.FC = () => {
     refetch: retryPipelineGraph,
     error: retryPipelineGraphError,
     data: retryPipelineGraphData,
-  } = useGraphPositionedApiGraphGet({
+  } = useGetGraphPositionedApiGraphGet({
     queryParams: { pipeline_name: currentPipeline },
     lazy: true,
   });
@@ -100,14 +100,14 @@ const App: React.FC = () => {
     data: pipelines,
     loading: isLoadingPipelines,
     error: pipelineError,
-  } = usePipelinesApiPipelinesGet({});
+  } = useGetPipelinesApiPipelinesGet({});
 
   const {
     data: metrics,
     loading: isLoadingMetrics,
     refetch: refetchMetrics,
     error: metricsError,
-  } = useMetricsApiMetricsGet({ lazy: true });
+  } = useGetMetricsApiMetricsGet({ lazy: true });
 
   const getParams = useCallback(() => {
     return new URLSearchParams(location.search);

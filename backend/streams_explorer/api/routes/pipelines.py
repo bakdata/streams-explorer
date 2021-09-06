@@ -10,7 +10,7 @@ router = APIRouter()
 
 
 @router.get("", response_model=Pipelines)
-def pipelines(
+def get_pipelines(
     streams_explorer: StreamsExplorer = Depends(get_streams_explorer_from_request),
 ):
     return Pipelines(pipelines=streams_explorer.get_pipeline_names())

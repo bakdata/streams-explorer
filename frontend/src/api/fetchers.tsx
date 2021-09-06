@@ -200,65 +200,70 @@ export const useUpdateApiUpdatePost = (props: UseUpdateApiUpdatePostProps) =>
     props
   );
 
-export interface GraphPositionedApiGraphGetQueryParams {
+export interface GetGraphPositionedApiGraphGetQueryParams {
   pipeline_name?: string;
 }
 
-export type GraphPositionedApiGraphGetProps = Omit<
+export type GetGraphPositionedApiGraphGetProps = Omit<
   GetProps<
     Graph,
     HTTPValidationError,
-    GraphPositionedApiGraphGetQueryParams,
+    GetGraphPositionedApiGraphGetQueryParams,
     void
   >,
   "path"
 >;
 
 /**
- * Graph Positioned
+ * Get Graph Positioned
  */
-export const GraphPositionedApiGraphGet = (
-  props: GraphPositionedApiGraphGetProps
+export const GetGraphPositionedApiGraphGet = (
+  props: GetGraphPositionedApiGraphGetProps
 ) => (
-  <Get<Graph, HTTPValidationError, GraphPositionedApiGraphGetQueryParams, void>
+  <Get<
+    Graph,
+    HTTPValidationError,
+    GetGraphPositionedApiGraphGetQueryParams,
+    void
+  >
     path={encode`/api/graph`}
     {...props}
   />
 );
 
-export type UseGraphPositionedApiGraphGetProps = Omit<
+export type UseGetGraphPositionedApiGraphGetProps = Omit<
   UseGetProps<
     Graph,
     HTTPValidationError,
-    GraphPositionedApiGraphGetQueryParams,
+    GetGraphPositionedApiGraphGetQueryParams,
     void
   >,
   "path"
 >;
 
 /**
- * Graph Positioned
+ * Get Graph Positioned
  */
-export const useGraphPositionedApiGraphGet = (
-  props: UseGraphPositionedApiGraphGetProps
+export const useGetGraphPositionedApiGraphGet = (
+  props: UseGetGraphPositionedApiGraphGetProps
 ) =>
   useGet<
     Graph,
     HTTPValidationError,
-    GraphPositionedApiGraphGetQueryParams,
+    GetGraphPositionedApiGraphGetQueryParams,
     void
   >(encode`/api/graph`, props);
 
-export type PipelinesApiPipelinesGetProps = Omit<
+export type GetPipelinesApiPipelinesGetProps = Omit<
   GetProps<Pipelines, unknown, void, void>,
   "path"
 >;
 
 /**
- * Pipelines
+ * Get Pipelines
  */
-export const PipelinesApiPipelinesGet = (
-  props: PipelinesApiPipelinesGetProps
+export const GetPipelinesApiPipelinesGet = (
+  props: GetPipelinesApiPipelinesGetProps
 ) => (
   <Get<Pipelines, unknown, void, void>
     path={encode`/api/pipelines`}
@@ -266,76 +271,76 @@ export const PipelinesApiPipelinesGet = (
   />
 );
 
-export type UsePipelinesApiPipelinesGetProps = Omit<
+export type UseGetPipelinesApiPipelinesGetProps = Omit<
   UseGetProps<Pipelines, unknown, void, void>,
   "path"
 >;
 
 /**
- * Pipelines
+ * Get Pipelines
  */
-export const usePipelinesApiPipelinesGet = (
-  props: UsePipelinesApiPipelinesGetProps
+export const useGetPipelinesApiPipelinesGet = (
+  props: UseGetPipelinesApiPipelinesGetProps
 ) => useGet<Pipelines, unknown, void, void>(encode`/api/pipelines`, props);
 
-export interface NodeInfoApiNodeNodeIdGetPathParams {
+export interface GetNodeInfoApiNodeNodeIdGetPathParams {
   node_id: string;
 }
 
-export type NodeInfoApiNodeNodeIdGetProps = Omit<
+export type GetNodeInfoApiNodeNodeIdGetProps = Omit<
   GetProps<
     NodeInformation,
     HTTPValidationError,
     void,
-    NodeInfoApiNodeNodeIdGetPathParams
+    GetNodeInfoApiNodeNodeIdGetPathParams
   >,
   "path"
 > &
-  NodeInfoApiNodeNodeIdGetPathParams;
+  GetNodeInfoApiNodeNodeIdGetPathParams;
 
 /**
- * Node Info
+ * Get Node Info
  */
-export const NodeInfoApiNodeNodeIdGet = ({
+export const GetNodeInfoApiNodeNodeIdGet = ({
   node_id,
   ...props
-}: NodeInfoApiNodeNodeIdGetProps) => (
+}: GetNodeInfoApiNodeNodeIdGetProps) => (
   <Get<
     NodeInformation,
     HTTPValidationError,
     void,
-    NodeInfoApiNodeNodeIdGetPathParams
+    GetNodeInfoApiNodeNodeIdGetPathParams
   >
     path={encode`/api/node/${node_id}`}
     {...props}
   />
 );
 
-export type UseNodeInfoApiNodeNodeIdGetProps = Omit<
+export type UseGetNodeInfoApiNodeNodeIdGetProps = Omit<
   UseGetProps<
     NodeInformation,
     HTTPValidationError,
     void,
-    NodeInfoApiNodeNodeIdGetPathParams
+    GetNodeInfoApiNodeNodeIdGetPathParams
   >,
   "path"
 > &
-  NodeInfoApiNodeNodeIdGetPathParams;
+  GetNodeInfoApiNodeNodeIdGetPathParams;
 
 /**
- * Node Info
+ * Get Node Info
  */
-export const useNodeInfoApiNodeNodeIdGet = ({
+export const useGetNodeInfoApiNodeNodeIdGet = ({
   node_id,
   ...props
-}: UseNodeInfoApiNodeNodeIdGetProps) =>
+}: UseGetNodeInfoApiNodeNodeIdGetProps) =>
   useGet<
     NodeInformation,
     HTTPValidationError,
     void,
-    NodeInfoApiNodeNodeIdGetPathParams
+    GetNodeInfoApiNodeNodeIdGetPathParams
   >(
-    (paramsInPath: NodeInfoApiNodeNodeIdGetPathParams) =>
+    (paramsInPath: GetNodeInfoApiNodeNodeIdGetPathParams) =>
       encode`/api/node/${paramsInPath.node_id}`,
     { pathParams: { node_id }, ...props }
   );
@@ -471,91 +476,94 @@ export const useGetNodeSchemaApiNodeNodeIdSchemaVersionGet = ({
     { pathParams: { node_id, version }, ...props }
   );
 
-export interface LinkingApiNodeLinkingNodeIdGetQueryParams {
+export interface GetLinkingApiNodeLinkingNodeIdGetQueryParams {
   link_type?: string;
 }
 
-export interface LinkingApiNodeLinkingNodeIdGetPathParams {
+export interface GetLinkingApiNodeLinkingNodeIdGetPathParams {
   node_id: string;
 }
 
-export type LinkingApiNodeLinkingNodeIdGetProps = Omit<
+export type GetLinkingApiNodeLinkingNodeIdGetProps = Omit<
   GetProps<
     string,
     HTTPValidationError,
-    LinkingApiNodeLinkingNodeIdGetQueryParams,
-    LinkingApiNodeLinkingNodeIdGetPathParams
+    GetLinkingApiNodeLinkingNodeIdGetQueryParams,
+    GetLinkingApiNodeLinkingNodeIdGetPathParams
   >,
   "path"
 > &
-  LinkingApiNodeLinkingNodeIdGetPathParams;
+  GetLinkingApiNodeLinkingNodeIdGetPathParams;
 
 /**
- * Linking
+ * Get Linking
  */
-export const LinkingApiNodeLinkingNodeIdGet = ({
+export const GetLinkingApiNodeLinkingNodeIdGet = ({
   node_id,
   ...props
-}: LinkingApiNodeLinkingNodeIdGetProps) => (
+}: GetLinkingApiNodeLinkingNodeIdGetProps) => (
   <Get<
     string,
     HTTPValidationError,
-    LinkingApiNodeLinkingNodeIdGetQueryParams,
-    LinkingApiNodeLinkingNodeIdGetPathParams
+    GetLinkingApiNodeLinkingNodeIdGetQueryParams,
+    GetLinkingApiNodeLinkingNodeIdGetPathParams
   >
     path={encode`/api/node/linking/${node_id}`}
     {...props}
   />
 );
 
-export type UseLinkingApiNodeLinkingNodeIdGetProps = Omit<
+export type UseGetLinkingApiNodeLinkingNodeIdGetProps = Omit<
   UseGetProps<
     string,
     HTTPValidationError,
-    LinkingApiNodeLinkingNodeIdGetQueryParams,
-    LinkingApiNodeLinkingNodeIdGetPathParams
+    GetLinkingApiNodeLinkingNodeIdGetQueryParams,
+    GetLinkingApiNodeLinkingNodeIdGetPathParams
   >,
   "path"
 > &
-  LinkingApiNodeLinkingNodeIdGetPathParams;
+  GetLinkingApiNodeLinkingNodeIdGetPathParams;
 
 /**
- * Linking
+ * Get Linking
  */
-export const useLinkingApiNodeLinkingNodeIdGet = ({
+export const useGetLinkingApiNodeLinkingNodeIdGet = ({
   node_id,
   ...props
-}: UseLinkingApiNodeLinkingNodeIdGetProps) =>
+}: UseGetLinkingApiNodeLinkingNodeIdGetProps) =>
   useGet<
     string,
     HTTPValidationError,
-    LinkingApiNodeLinkingNodeIdGetQueryParams,
-    LinkingApiNodeLinkingNodeIdGetPathParams
+    GetLinkingApiNodeLinkingNodeIdGetQueryParams,
+    GetLinkingApiNodeLinkingNodeIdGetPathParams
   >(
-    (paramsInPath: LinkingApiNodeLinkingNodeIdGetPathParams) =>
+    (paramsInPath: GetLinkingApiNodeLinkingNodeIdGetPathParams) =>
       encode`/api/node/linking/${paramsInPath.node_id}`,
     { pathParams: { node_id }, ...props }
   );
 
-export type MetricsApiMetricsGetProps = Omit<
+export type GetMetricsApiMetricsGetProps = Omit<
   GetProps<Metric[], unknown, void, void>,
   "path"
 >;
 
 /**
- * Metrics
+ * Get Metrics
  */
-export const MetricsApiMetricsGet = (props: MetricsApiMetricsGetProps) => (
+export const GetMetricsApiMetricsGet = (
+  props: GetMetricsApiMetricsGetProps
+) => (
   <Get<Metric[], unknown, void, void> path={encode`/api/metrics`} {...props} />
 );
 
-export type UseMetricsApiMetricsGetProps = Omit<
+export type UseGetMetricsApiMetricsGetProps = Omit<
   UseGetProps<Metric[], unknown, void, void>,
   "path"
 >;
 
 /**
- * Metrics
+ * Get Metrics
  */
-export const useMetricsApiMetricsGet = (props: UseMetricsApiMetricsGetProps) =>
-  useGet<Metric[], unknown, void, void>(encode`/api/metrics`, props);
+export const useGetMetricsApiMetricsGet = (
+  props: UseGetMetricsApiMetricsGetProps
+) => useGet<Metric[], unknown, void, void>(encode`/api/metrics`, props);
