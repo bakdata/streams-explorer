@@ -25,7 +25,7 @@ settings = Dynaconf(
             "kafka.config",
             must_exist=True,
             is_type_of=dict,
-            condition=lambda v: "bootstrap.servers" in v,
+            condition=lambda v: type(v.get("bootstrap.servers")) is str,
         ),
         Validator("kafka.displayed_information", is_type_of=list, default=[]),
         Validator("kafkaconnect.url", default=None),

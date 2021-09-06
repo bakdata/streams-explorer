@@ -31,7 +31,7 @@ kafka:
   # librdkafka configuration properties
   # https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md
   config:
-    "bootstrap.servers": "localhost:9092"
+    bootstrap.servers: "localhost:9092"
   displayed_information:
     - name: "Cleanup Policy"
       key: "cleanup.policy"
