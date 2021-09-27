@@ -40,7 +40,8 @@ class TestKafka:
         def mock_get_topic(topic: str) -> Optional[MockTopicMetadata]:
             if topic == test_topic:
                 meta = PartitionMetadata()
-                return MockTopicMetadata(test_topic, {0: meta, 1: meta})
+                partitions = {i: meta for i in range(10)}
+                return MockTopicMetadata(test_topic, partitions)
             return None
 
         monkeypatch.setattr(kafka, "_Kafka__get_topic", mock_get_topic)
@@ -55,5 +56,7 @@ class TestKafka:
         assert kafka.get_topic_config("doesnt-exist") == {}
 
     def test_get_topic_partitions(self, kafka: Kafka):
-        assert len(kafka.get_topic_partitions(test_topic)) == 2
-        assert len(kafka.get_topic_partitions("doesnt-exist")) == 0
+        partitions = kafka.get_topic_partitions(test_topic)
+        assert type(partitions) is dict
+        assert len(partitions) == 10
+        assert kafka.get_topic_partitions("doesnt-exist") is None

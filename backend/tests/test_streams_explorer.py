@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 import pytest
 from kubernetes.client import V1beta1CronJob
@@ -126,6 +126,11 @@ class TestStreamsExplorer:
                 }
             return {}
 
+        def get_topic_partitions(_, topic) -> Optional[dict]:
+            if topic == "input-topic1":
+                return {i: _ for i in range(5)}
+            return None
+
         mocker.patch(
             "streams_explorer.core.services.kafkaconnect.KafkaConnect.get_connectors",
             get_connectors,
@@ -141,6 +146,10 @@ class TestStreamsExplorer:
         mocker.patch(
             "streams_explorer.core.services.kafka.Kafka.get_topic_config",
             get_topic_config,
+        )
+        mocker.patch(
+            "streams_explorer.core.services.kafka.Kafka.get_topic_partitions",
+            get_topic_partitions,
         )
 
         return explorer
@@ -187,6 +196,11 @@ class TestStreamsExplorer:
             info=[
                 NodeInfoListItem(
                     name="Test Topic Monitoring", value="test", type=NodeInfoType.LINK
+                ),
+                NodeInfoListItem(
+                    name="Partitions",
+                    value=5,
+                    type=NodeInfoType.BASIC,
                 ),
                 NodeInfoListItem(
                     name="Cleanup Policy",
