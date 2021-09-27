@@ -45,10 +45,12 @@ class Kafka:
         topics = self._client.list_topics(topic).topics
         return topics.get(topic)
 
-    def get_topic_partitions(self, topic: str) -> Dict[int, PartitionMetadata]:
+    def get_topic_partitions(
+        self, topic: str
+    ) -> Optional[Dict[int, PartitionMetadata]]:
         metadata = self.__get_topic(topic)
         if metadata is None:
-            return {}
+            return None
         return metadata.partitions
 
     @staticmethod
