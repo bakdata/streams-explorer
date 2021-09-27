@@ -5,6 +5,7 @@ from loguru import logger
 
 from streams_explorer.core.extractor.default.generic import GenericSink, GenericSource
 from streams_explorer.core.extractor.extractor import Extractor
+from streams_explorer.core.k8s_app import K8sConfig
 from streams_explorer.models.kafka_connector import KafkaConnector
 from streams_explorer.models.sink import Sink
 from streams_explorer.models.source import Source
@@ -27,9 +28,11 @@ class ExtractorContainer:
             extractor.sinks = []
             extractor.sources = []
 
-    def on_streaming_app_env_parsing(self, env, streaming_app_name: str):
+    def on_streaming_app_config_parsing(
+        self, config: K8sConfig, streaming_app_name: str
+    ):
         for extractor in self.extractors:
-            extractor.on_streaming_app_env_parsing(env, streaming_app_name)
+            extractor.on_streaming_app_config_parsing(config, streaming_app_name)
 
     def on_connector_info_parsing(
         self, info: dict, connector_name: str

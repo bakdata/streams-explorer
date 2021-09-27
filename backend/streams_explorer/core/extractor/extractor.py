@@ -2,6 +2,7 @@ from typing import List, Optional
 
 from kubernetes.client import V1beta1CronJob
 
+from streams_explorer.core.k8s_app import K8sConfig
 from streams_explorer.models.kafka_connector import KafkaConnector
 from streams_explorer.models.sink import Sink
 from streams_explorer.models.source import Source
@@ -11,7 +12,9 @@ class Extractor:
     sources: List[Source] = []
     sinks: List[Sink] = []
 
-    def on_streaming_app_env_parsing(self, env, streaming_app_name: str):
+    def on_streaming_app_config_parsing(
+        self, config: K8sConfig, streaming_app_name: str
+    ):
         pass
 
     def on_connector_info_parsing(
