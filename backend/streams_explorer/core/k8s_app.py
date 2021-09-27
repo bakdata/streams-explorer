@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import Dict, List, Optional, Set, Union
+from dataclasses import dataclass
+from typing import Dict, List, Optional, Set, Type, Union
 
 from kubernetes.client import (
     V1beta1CronJob,
@@ -13,11 +14,116 @@ from kubernetes.client import (
 from loguru import logger
 
 from streams_explorer.core.config import settings
-from streams_explorer.extractors import extractor_container
+
+# from streams_explorer.extractors import extractor_container
 
 ATTR_PIPELINE = "pipeline"
 
 K8sObject = Union[V1Deployment, V1StatefulSet, V1beta1CronJob]
+
+
+@dataclass
+class K8sConfig:
+    input_topics: List[str] = []
+    output_topic: Optional[str] = None
+    error_topic: Optional[str] = None
+    extra_input_topics: List[str] = []
+    extra_output_topics: List[str] = []
+
+
+class K8sConfigParser:
+    def __init__(self, k8s_app: K8sApp):
+        self.k8s_app = k8s_app
+
+    def parse(self) -> K8sConfig:
+        return K8sConfig()
+
+    @staticmethod
+    def parse_input_topics(input_topics: str) -> List[str]:
+        return input_topics.split(",")
+
+    @staticmethod
+    def parse_extra_topics(extra_topics: str) -> List[str]:
+        # remove trailing commas
+        extra_topics = extra_topics[:-1] if extra_topics[-1] == "," else extra_topics
+        return list(
+            map(
+                lambda topic: topic.split("=")[1],
+                extra_topics.split(","),
+            )
+        )
+
+
+class K8sConfigParserEnv(K8sConfigParser):
+    def __init__(self, k8s_app: K8sApp):
+        self.k8s_app = k8s_app
+        # self.env_prefix = kwargs.get("env_prefix")
+
+    def parse(self) -> K8sConfig:
+        container = self.k8s_app.container
+
+        if not container:
+            raise ValueError("no container")
+
+        config = K8sConfig()
+        if not container.env:
+            return config
+
+        for env in container.env:
+            name = env.name
+            if name == self._get_env_name("INPUT_TOPICS"):
+                config.input_topics = self.parse_input_topics(env.value)
+            elif name == self._get_env_name("OUTPUT_TOPIC"):
+                config.output_topic = env.value
+            elif name == self._get_env_name("ERROR_TOPIC"):
+                config.error_topic = env.value
+            elif name == self._get_env_name("EXTRA_INPUT_TOPICS"):
+                config.extra_input_topics = self.parse_extra_topics(env.value)
+            elif name == self._get_env_name("EXTRA_OUTPUT_TOPICS"):
+                config.extra_output_topics = self.parse_extra_topics(env.value)
+        return config
+
+    def _get_env_name(self, variable_name: str) -> str:
+        return f"{self.k8s_app.env_prefix}{variable_name}"
+
+
+class K8sConfigParserCli(K8sConfigParser):
+    def __init__(self, k8s_object: K8sObject):
+        self.k8s_object = k8s_object
+        self.container: Optional[V1Container]
+
+    def parse(self) -> K8sConfig:
+        if not self.container:
+            raise ValueError("no container")
+
+        config = K8sConfig()
+        if not self.container.args:
+            return config
+        args: List[str] = self.container.args
+
+        for arg in args:
+            name, value = arg.split("=")
+            if not name or not value:
+                continue
+            if name == self._get_cli_name("INPUT_TOPICS"):
+                config.input_topics = self.parse_input_topics(value)
+            elif name == self._get_cli_name("OUTPUT_TOPIC"):
+                config.output_topic = value
+            elif name == self._get_cli_name("ERROR_TOPIC"):
+                config.error_topic = value
+            elif name == self._get_cli_name("EXTRA_INPUT_TOPICS"):
+                config.extra_input_topics = self.parse_extra_topics(value)
+            elif name == self._get_cli_name("EXTRA_OUTPUT_TOPICS"):
+                config.extra_output_topics = self.parse_extra_topics(value)
+        return config
+
+    # TODO: unnecessary, we can directly use the correct cli names in parse()
+    def _get_cli_name(self, variable_name: str) -> str:
+        return variable_name.lower().replace("_", "-")
+
+
+# TODO: load configextractor from plugin
+config_parser: Type[K8sConfigParser] = K8sConfigParserEnv
 
 
 class K8sApp:
@@ -38,8 +144,12 @@ class K8sApp:
         self._ignore_containers = self.get_ignore_containers()
         self.container = self.get_app_container(self.spec, self._ignore_containers)
         self.env_prefix = self.get_env_prefix(self.container)
+        self.config: K8sConfig = self.extract_config()
         self.__get_common_configuration()
         self.__get_attributes()
+
+    def extract_config(self) -> K8sConfig:
+        return config_parser(self).parse()
 
     def to_dict(self) -> dict:
         return self.k8s_object.to_dict()
@@ -59,21 +169,15 @@ class K8sApp:
         return self.attributes.get(settings.k8s.consumer_group_annotation)  # type: ignore
 
     def __get_common_configuration(self):
-        for env in self.container.env:
-            name = env.name
-            if name == self._get_env_name("INPUT_TOPICS"):
-                self.input_topics = self.parse_input_topics(env.value)
-            elif name == self._get_env_name("OUTPUT_TOPIC"):
-                self.output_topic = env.value
-            elif name == self._get_env_name("ERROR_TOPIC"):
-                self.error_topic = env.value
-            elif name == self._get_env_name("EXTRA_INPUT_TOPICS"):
-                self.extra_input_topics = self.parse_extra_topics(env.value)
-            elif name == self._get_env_name("EXTRA_OUTPUT_TOPICS"):
-                self.extra_output_topics = self.parse_extra_topics(env.value)
+        self.input_topics = self.config.input_topics
+        self.output_topic = self.config.output_topic
+        self.error_topic = self.config.error_topic
+        self.extra_input_topics = self.config.extra_input_topics
+        self.extra_output_topics = self.config.extra_output_topics
 
-            if self.is_streams_bootstrap_app():
-                extractor_container.on_streaming_app_env_parsing(env, self.name)
+        # TODO
+        # if self.is_streams_bootstrap_app():
+        #     extractor_container.on_streaming_app_env_parsing(env, self.name)
 
     def is_streams_bootstrap_app(self) -> bool:
         if not self.input_topics and not self.output_topic:
@@ -82,9 +186,6 @@ class K8sApp:
 
     def get_class_name(self) -> str:
         return self.__class__.__name__
-
-    def _get_env_name(self, variable_name) -> str:
-        return f"{self.env_prefix}{variable_name}"
 
     def __get_attributes(self):
         labels = self.metadata.labels or {}
@@ -146,21 +247,6 @@ class K8sApp:
     def get_labels() -> Set[str]:
         return set(settings.k8s.labels)
 
-    @staticmethod
-    def parse_input_topics(input_topics: str) -> List[str]:
-        return input_topics.split(",")
-
-    @staticmethod
-    def parse_extra_topics(extra_topics: str) -> List[str]:
-        # remove trailing commas
-        extra_topics = extra_topics[:-1] if extra_topics[-1] == "," else extra_topics
-        return list(
-            map(
-                lambda topic: topic.split("=")[1],
-                extra_topics.split(","),
-            )
-        )
-
 
 class K8sAppCronJob(K8sApp):
     def __init__(self, k8s_object: V1beta1CronJob):
@@ -170,6 +256,7 @@ class K8sAppCronJob(K8sApp):
         self.spec = self.k8s_object.spec.job_template.spec.template.spec
         self.container = self.get_app_container(self.spec)
         self.env_prefix = self.get_env_prefix(self.container)
+        self.config: K8sConfig = self.extract_config()
         self.__get_common_configuration()
         self.__get_attributes()
 
@@ -180,14 +267,9 @@ class K8sAppCronJob(K8sApp):
         return name
 
     def __get_common_configuration(self):
-        for env in self.container.env:
-            name = env.name
-            if name == self._get_env_name("INPUT_TOPICS"):
-                self.input_topics = self.parse_input_topics(env.value)
-            elif name == self._get_env_name("OUTPUT_TOPIC"):
-                self.output_topic = env.value
-            elif name == self._get_env_name("ERROR_TOPIC"):
-                self.error_topic = env.value
+        self.input_topics = self.config.input_topics
+        self.output_topic = self.config.output_topic
+        self.error_topic = self.config.error_topic
 
     def __get_attributes(self):
         labels = self.metadata.labels or {}
