@@ -1,4 +1,4 @@
-FROM tiangolo/uvicorn-gunicorn-fastapi:python3.8-slim
+FROM tiangolo/uvicorn-gunicorn-fastapi:python3.9-slim
 
 ENV PIP_NO_CACHE_DIR=1
 
@@ -23,6 +23,4 @@ RUN npm run build --prefix /frontend_build && \
     mv /frontend_build/build/* /app/static/ && \
     rm -rf /frontend_build
 
-RUN apt-get -y purge --auto-remove -o APT::AutoRemove::RecommendsImportant=false && \
-    apt-get -y purge --auto-remove python2-minimal && \
-    rm -rf /usr/lib/python2.7
+RUN apt-get -y purge --auto-remove -o APT::AutoRemove::RecommendsImportant=false
