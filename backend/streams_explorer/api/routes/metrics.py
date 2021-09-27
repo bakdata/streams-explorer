@@ -12,7 +12,7 @@ router = APIRouter()
 
 
 @router.get("", response_model=List[Metric])
-async def metrics(
+async def get_metrics(
     streams_explorer: StreamsExplorer = Depends(get_streams_explorer_from_request),
 ):
     return await streams_explorer.get_metrics()

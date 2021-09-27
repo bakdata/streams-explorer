@@ -13,7 +13,7 @@ router = APIRouter()
 
 
 @router.get("", response_model=Graph)
-async def graph_positioned(
+async def get_positioned_graph(
     pipeline_name: Optional[str] = None,
     streams_explorer: StreamsExplorer = Depends(get_streams_explorer_from_request),
 ):

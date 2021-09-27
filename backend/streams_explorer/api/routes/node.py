@@ -15,7 +15,7 @@ router = APIRouter()
 
 
 @router.get("/{node_id}", response_model=NodeInformation)
-async def node_info(
+async def get_node_info(
     node_id: str,
     streams_explorer: StreamsExplorer = Depends(get_streams_explorer_from_request),
 ):
@@ -39,7 +39,7 @@ async def get_node_schema(node_id: str, version: int):
 
 
 @router.get("/linking/{node_id}", response_model=str)
-def linking(
+def get_linking(
     node_id: str,
     link_type: Optional[str] = None,
     streams_explorer: StreamsExplorer = Depends(get_streams_explorer_from_request),

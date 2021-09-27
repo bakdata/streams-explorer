@@ -314,7 +314,7 @@ describe("display node information", () => {
       .get("/api/node/atm-fraud-incoming-transactions-topic/schema/1")
       .reply(404);
 
-    const { getByTestId, getByText } = render(
+    const { getByTestId } = render(
       <RestfulProvider base="http://localhost">
         <Details nodeID="atm-fraud-incoming-transactions-topic" />
       </RestfulProvider>
