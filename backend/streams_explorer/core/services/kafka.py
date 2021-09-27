@@ -1,7 +1,13 @@
 import concurrent.futures
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
-from confluent_kafka.admin import AdminClient, ConfigEntry, ConfigResource
+from confluent_kafka.admin import (
+    AdminClient,
+    ConfigEntry,
+    ConfigResource,
+    PartitionMetadata,
+    TopicMetadata,
+)
 
 from streams_explorer.core.config import settings
 
@@ -34,6 +40,16 @@ class Kafka:
         topic_resource = ConfigResource(ConfigResource.Type.TOPIC, topic)
         result = self.__get_resource(topic_resource)
         return self.format_values(result)
+
+    def __get_topic(self, topic: str) -> Optional[TopicMetadata]:
+        topics = self._client.list_topics(topic).topics
+        return topics.get(topic)
+
+    def get_topic_partitions(self, topic: str) -> Dict[int, PartitionMetadata]:
+        metadata = self.__get_topic(topic)
+        if metadata is None:
+            return {}
+        return metadata.partitions
 
     @staticmethod
     def format_values(values: List[ConfigEntry]) -> Dict[str, Any]:

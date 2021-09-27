@@ -85,6 +85,14 @@ class StreamsExplorer:
             if self.kafka.enabled:
                 config = self.kafka.get_topic_config(node_id)
                 info += get_displayed_information_topic(config)
+                partitions = self.kafka.get_topic_partitions(node_id)
+                info.append(
+                    NodeInfoListItem(
+                        name="Partitions",
+                        value=len(partitions),
+                        type=NodeInfoType.BASIC,
+                    )
+                )
             info.append(
                 NodeInfoListItem(
                     name="Schema",

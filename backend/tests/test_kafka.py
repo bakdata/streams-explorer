@@ -1,9 +1,12 @@
-from typing import List
+from dataclasses import dataclass
+from typing import Dict, List, Optional
 
 import pytest
-from confluent_kafka.admin import ConfigEntry, ConfigResource
+from confluent_kafka.admin import ConfigEntry, ConfigResource, PartitionMetadata
 
 from streams_explorer.core.services.kafka import Kafka
+
+test_topic = "test-topic"
 
 
 class TestKafka:
@@ -20,7 +23,7 @@ class TestKafka:
         kafka = Kafka()
 
         def mock_get_resource(resource: ConfigResource, *args) -> List[ConfigEntry]:
-            if resource == ConfigResource(ConfigResource.Type.TOPIC, "test-topic"):
+            if resource == ConfigResource(ConfigResource.Type.TOPIC, test_topic):
                 return [
                     ConfigEntry(name="cleanup.policy", value="delete"),
                     ConfigEntry(name="retention.ms", value="-1"),
@@ -28,11 +31,29 @@ class TestKafka:
             return []
 
         monkeypatch.setattr(kafka, "_Kafka__get_resource", mock_get_resource)
+
+        @dataclass
+        class MockTopicMetadata:
+            topic: str
+            partitions: Dict[int, PartitionMetadata]
+
+        def mock_get_topic(topic: str) -> Optional[MockTopicMetadata]:
+            if topic == test_topic:
+                meta = PartitionMetadata()
+                return MockTopicMetadata(test_topic, {0: meta, 1: meta})
+            return None
+
+        monkeypatch.setattr(kafka, "_Kafka__get_topic", mock_get_topic)
+
         return kafka
 
-    def test_get_topic_config(self, kafka):
-        assert kafka.get_topic_config("test-topic") == {
+    def test_get_topic_config(self, kafka: Kafka):
+        assert kafka.get_topic_config(test_topic) == {
             "cleanup.policy": "delete",
             "retention.ms": "-1",
         }
         assert kafka.get_topic_config("doesnt-exist") == {}
+
+    def test_get_topic_partitions(self, kafka: Kafka):
+        assert len(kafka.get_topic_partitions(test_topic)) == 2
+        assert len(kafka.get_topic_partitions("doesnt-exist")) == 0
