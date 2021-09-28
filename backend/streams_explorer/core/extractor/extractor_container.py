@@ -5,7 +5,7 @@ from loguru import logger
 
 from streams_explorer.core.extractor.default.generic import GenericSink, GenericSource
 from streams_explorer.core.extractor.extractor import Extractor
-from streams_explorer.core.k8s_app import K8sConfig
+from streams_explorer.models.k8s_config import K8sConfig
 from streams_explorer.models.kafka_connector import KafkaConnector
 from streams_explorer.models.sink import Sink
 from streams_explorer.models.source import Source
