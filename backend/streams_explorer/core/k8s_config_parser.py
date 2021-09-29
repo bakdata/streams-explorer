@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING
 
 from streams_explorer.models.k8s_config import K8sConfig
 
@@ -16,11 +16,11 @@ class K8sConfigParser:
         ...
 
     @staticmethod
-    def parse_input_topics(input_topics: str) -> List[str]:
+    def parse_input_topics(input_topics: str) -> list[str]:
         return input_topics.split(",")
 
     @staticmethod
-    def parse_extra_topics(extra_topics: str) -> List[str]:
+    def parse_extra_topics(extra_topics: str) -> list[str]:
         # remove trailing commas
         extra_topics = extra_topics[:-1] if extra_topics[-1] == "," else extra_topics
         return list(
@@ -32,15 +32,15 @@ class K8sConfigParser:
 
 
 class K8sConfigParserEnv(K8sConfigParser):
+    # TODO: probably this is not needed
     def __init__(self, k8s_app: K8sApp):
         super().__init__(k8s_app)
-        self.k8s_app = k8s_app
 
     def parse(self) -> K8sConfig:
         container = self.k8s_app.container
 
         if not container:
-            raise ValueError("no container")
+            raise ValueError("no container")  # TODO
 
         config = K8sConfig()
         if not container.env:
@@ -65,10 +65,9 @@ class K8sConfigParserEnv(K8sConfigParser):
         return f"{self.k8s_app.env_prefix}{variable_name}"
 
 
-class K8sConfigParserCli(K8sConfigParser):
+class K8sConfigParserArgs(K8sConfigParser):
     def __init__(self, k8s_app: K8sApp):
         super().__init__(k8s_app)
-        self.k8s_app = k8s_app
 
     def parse(self) -> K8sConfig:
         container = self.k8s_app.container
@@ -78,9 +77,10 @@ class K8sConfigParserCli(K8sConfigParser):
         config = K8sConfig()
         if not container.args:
             return config
-        args: List[str] = container.args
+        args: list[str] = container.args
 
         for arg in args:
+            arg = self.__remove_prefix(arg)
             name, value = arg.split("=")
             if not name or not value:
                 continue
@@ -102,3 +102,7 @@ class K8sConfigParserCli(K8sConfigParser):
     @staticmethod
     def __normalise_name(name: str) -> str:
         return name.upper().replace("-", "_")
+
+    @staticmethod
+    def __remove_prefix(name: str, prefix: str = "-") -> str:
+        return name.lstrip(prefix)

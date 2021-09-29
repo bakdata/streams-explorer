@@ -14,7 +14,7 @@ from kubernetes.client import (
 from loguru import logger
 
 from streams_explorer.core.config import settings
-from streams_explorer.core.k8s_config_parser import K8sConfigParser, K8sConfigParserEnv
+from streams_explorer.core.k8s_config_parser import K8sConfigParser, K8sConfigParserArgs
 from streams_explorer.extractors import extractor_container
 from streams_explorer.models.k8s_config import K8sConfig
 
@@ -23,7 +23,7 @@ ATTR_PIPELINE = "pipeline"
 K8sObject = Union[V1Deployment, V1StatefulSet, V1beta1CronJob]
 
 # TODO: load configextractor from plugin
-config_parser: Type[K8sConfigParser] = K8sConfigParserEnv
+config_parser: Type[K8sConfigParser] = K8sConfigParserArgs
 
 
 class K8sApp:
@@ -58,6 +58,8 @@ class K8sApp:
         if self.metadata.labels:
             name = self.metadata.labels.get("app")
         if not name:
+            name = self.metadata.name
+        if not name:
             raise TypeError(f"Name is required for {self.get_class_name()}")
         return name
 
@@ -68,8 +70,9 @@ class K8sApp:
         return self.attributes.get(settings.k8s.consumer_group_annotation)  # type: ignore
 
     def __get_common_configuration(self):
-        config: K8sConfig = self.extract_config()
+        config = self.extract_config()
         for key, value in dataclasses.asdict(config).items():
+            # if hasattr(self, key): # TODO: probably not needed
             setattr(self, key, value)
         # TODO: decide
         # for field in dataclasses.fields(config):
@@ -170,6 +173,7 @@ class K8sAppCronJob(K8sApp):
             raise TypeError(f"Name is required for {self.get_class_name()}")
         return name
 
+    # TODO: remove
     def __get_common_configuration(self):
         config: K8sConfig = self.extract_config()
         self.input_topics = config.input_topics
