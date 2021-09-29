@@ -74,10 +74,7 @@ class K8sConfigParserEnv(K8sConfigParser):
     def parse(self) -> K8sConfig:
         container = self.k8s_app.container
 
-        if not container:
-            raise ValueError("no container")  # TODO
-
-        if not container.env:
+        if not container or not container.env:
             return self.config
 
         for env in container.env:
@@ -106,11 +103,10 @@ class K8sConfigParserArgs(K8sConfigParser):
 
     def parse(self) -> K8sConfig:
         container = self.k8s_app.container
-        if not container:
-            raise ValueError("no container")
 
-        if not container.args:
+        if not container or not container.args:
             return self.config
+
         args: list[str] = container.args
 
         for arg in args:
