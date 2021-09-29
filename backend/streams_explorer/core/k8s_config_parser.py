@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from kubernetes.client import V1Container
+
 from streams_explorer.models.k8s_config import K8sConfig
 
 if TYPE_CHECKING:
@@ -54,9 +56,9 @@ class K8sConfigParser:
 
 
 class K8sConfigParserEnv(K8sConfigParser):
-    # TODO: probably not needed here
     def __init__(self, k8s_app: K8sApp):
         super().__init__(k8s_app)
+        self.env_prefix = self.get_env_prefix(self.k8s_app.container)
 
     def parse(self) -> K8sConfig:
         container = self.k8s_app.container
@@ -73,12 +75,21 @@ class K8sConfigParserEnv(K8sConfigParser):
         return self.config
 
     def __normalise_name(self, name: str) -> str:
-        if self.k8s_app.env_prefix:
-            return self.remove_prefix(name, self.k8s_app.env_prefix)
+        if self.env_prefix:
+            return self.remove_prefix(name, self.env_prefix)
         return name
+
+    @staticmethod
+    def get_env_prefix(container: V1Container | None) -> str | None:
+        if container and container.env:
+            for env_var in container.env:
+                if env_var.name == "ENV_PREFIX":
+                    return env_var.value
+        return None
 
 
 class K8sConfigParserArgs(K8sConfigParser):
+    # TODO: probably not needed here
     def __init__(self, k8s_app: K8sApp):
         super().__init__(k8s_app)
 
