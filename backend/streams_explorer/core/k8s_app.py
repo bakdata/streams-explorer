@@ -14,16 +14,16 @@ from kubernetes.client import (
 from loguru import logger
 
 from streams_explorer.core.config import settings
-from streams_explorer.core.k8s_config_parser import K8sConfigParser, K8sConfigParserEnv
+from streams_explorer.core.k8s_config_parser import K8sConfigParser
 from streams_explorer.extractors import extractor_container
+from streams_explorer.k8s_config_parser import load_config_parser
 from streams_explorer.models.k8s_config import K8sConfig
 
 ATTR_PIPELINE = "pipeline"
 
 K8sObject = Union[V1Deployment, V1StatefulSet, V1beta1CronJob]
 
-# TODO: load configextractor from plugin
-config_parser: Type[K8sConfigParser] = K8sConfigParserEnv
+config_parser: Type[K8sConfigParser] = load_config_parser()
 
 
 class K8sApp:
