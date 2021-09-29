@@ -11,9 +11,24 @@ if TYPE_CHECKING:
 class K8sConfigParser:
     def __init__(self, k8s_app: K8sApp):
         self.k8s_app = k8s_app
+        self.config = K8sConfig()
 
     def parse(self) -> K8sConfig:
         ...
+
+    def parse_config(self, name: str, value: str):
+        if name == "INPUT_TOPICS":
+            self.config.input_topics = self.parse_input_topics(value)
+        elif name == "OUTPUT_TOPIC":
+            self.config.output_topic = value
+        elif name == "ERROR_TOPIC":
+            self.config.error_topic = value
+        elif name == "EXTRA_INPUT_TOPICS":
+            self.config.extra_input_topics = self.parse_extra_topics(value)
+        elif name == "EXTRA_OUTPUT_TOPICS":
+            self.config.extra_output_topics = self.parse_extra_topics(value)
+        else:
+            self.config.extra[name] = value
 
     @staticmethod
     def parse_input_topics(input_topics: str) -> list[str]:
@@ -30,9 +45,16 @@ class K8sConfigParser:
             )
         )
 
+    @staticmethod
+    def remove_prefix(name: str, prefix: str) -> str:
+        if name.startswith(prefix):
+            initial = len(prefix)
+            return name[initial:]
+        return name
+
 
 class K8sConfigParserEnv(K8sConfigParser):
-    # TODO: probably this is not needed
+    # TODO: probably not needed here
     def __init__(self, k8s_app: K8sApp):
         super().__init__(k8s_app)
 
@@ -42,27 +64,18 @@ class K8sConfigParserEnv(K8sConfigParser):
         if not container:
             raise ValueError("no container")  # TODO
 
-        config = K8sConfig()
         if not container.env:
-            return config
+            return self.config
 
         for env in container.env:
-            if env.name == self._get_env_name("INPUT_TOPICS"):
-                config.input_topics = self.parse_input_topics(env.value)
-            elif env.name == self._get_env_name("OUTPUT_TOPIC"):
-                config.output_topic = env.value
-            elif env.name == self._get_env_name("ERROR_TOPIC"):
-                config.error_topic = env.value
-            elif env.name == self._get_env_name("EXTRA_INPUT_TOPICS"):
-                config.extra_input_topics = self.parse_extra_topics(env.value)
-            elif env.name == self._get_env_name("EXTRA_OUTPUT_TOPICS"):
-                config.extra_output_topics = self.parse_extra_topics(env.value)
-            else:
-                config.extra[env.name] = env.value
-        return config
+            name = self.__normalise_name(env.name)
+            self.parse_config(name, env.value)
+        return self.config
 
-    def _get_env_name(self, variable_name: str) -> str:
-        return f"{self.k8s_app.env_prefix}{variable_name}"
+    def __normalise_name(self, name: str) -> str:
+        if self.k8s_app.env_prefix:
+            return self.remove_prefix(name, self.k8s_app.env_prefix)
+        return name
 
 
 class K8sConfigParserArgs(K8sConfigParser):
@@ -74,35 +87,19 @@ class K8sConfigParserArgs(K8sConfigParser):
         if not container:
             raise ValueError("no container")
 
-        config = K8sConfig()
         if not container.args:
-            return config
+            return self.config
         args: list[str] = container.args
 
         for arg in args:
-            arg = self.__remove_prefix(arg)
+            arg = self.remove_prefix(arg, "--")
             name, value = arg.split("=")
             if not name or not value:
                 continue
-            if name == "input-topics":
-                config.input_topics = self.parse_input_topics(value)
-            elif name == "output-topic":
-                config.output_topic = value
-            elif name == "error-topic":
-                config.error_topic = value
-            elif name == "extra-input-topics":
-                config.extra_input_topics = self.parse_extra_topics(value)
-            elif name == "extra-output-topics":
-                config.extra_output_topics = self.parse_extra_topics(value)
-            else:
-                name = self.__normalise_name(name)
-                config.extra[name] = value
-        return config
+            name = self.__normalise_name(name)
+            self.parse_config(name, value)
+        return self.config
 
     @staticmethod
     def __normalise_name(name: str) -> str:
         return name.upper().replace("-", "_")
-
-    @staticmethod
-    def __remove_prefix(name: str, prefix: str = "-") -> str:
-        return name.lstrip(prefix)
