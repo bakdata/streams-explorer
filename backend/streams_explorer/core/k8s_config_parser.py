@@ -14,6 +14,17 @@ class K8sConfigParser:
     def __init__(self, k8s_app: K8sApp):
         self.k8s_app = k8s_app
         self.config = K8sConfig()
+        self.config.name = self.get_name()
+
+    def get_name(self) -> str:
+        name = None
+        if self.k8s_app.metadata.labels:
+            name = self.k8s_app.metadata.labels.get("app")
+        if not name:
+            name = self.k8s_app.metadata.name
+        if not name:
+            raise TypeError(f"Name is required for {self.k8s_app.get_class_name()}")
+        return name
 
     def parse(self) -> K8sConfig:
         ...

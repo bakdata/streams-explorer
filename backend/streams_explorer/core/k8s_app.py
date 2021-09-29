@@ -30,7 +30,7 @@ class K8sApp:
     def __init__(self, k8s_object: K8sObject):
         self.k8s_object = k8s_object
         self.metadata: V1ObjectMeta = k8s_object.metadata or V1ObjectMeta()
-        self.name: str = self.get_name()
+        self.name: str
         self.input_topics: List[str] = []
         self.output_topic: Optional[str] = None
         self.error_topic: Optional[str] = None
@@ -43,7 +43,7 @@ class K8sApp:
         self.spec = self.k8s_object.spec.template.spec
         self._ignore_containers = self.get_ignore_containers()
         self.container = self.get_app_container(self.spec, self._ignore_containers)
-        self.__get_common_configuration()
+        self.get_common_configuration()
         self.__get_attributes()
 
     def extract_config(self) -> K8sConfig:
@@ -52,26 +52,16 @@ class K8sApp:
     def to_dict(self) -> dict:
         return self.k8s_object.to_dict()
 
-    def get_name(self) -> str:
-        name = None
-        if self.metadata.labels:
-            name = self.metadata.labels.get("app")
-        if not name:
-            name = self.metadata.name
-        if not name:
-            raise TypeError(f"Name is required for {self.get_class_name()}")
-        return name
-
     def get_pipeline(self) -> Optional[str]:
         return self.attributes.get(settings.k8s.pipeline.label)  # type: ignore
 
     def get_consumer_group(self) -> Optional[str]:
         return self.attributes.get(settings.k8s.consumer_group_annotation)  # type: ignore
 
-    def __get_common_configuration(self):
+    def get_common_configuration(self):
         config = self.extract_config()
         for key, value in dataclasses.asdict(config).items():
-            # if hasattr(self, key): # TODO: probably not needed
+            # if hasattr(self, key):  # TODO: probably not needed
             setattr(self, key, value)
         # TODO: decide
         # for field in dataclasses.fields(config):
@@ -154,21 +144,8 @@ class K8sAppCronJob(K8sApp):
     def setup(self):
         self.spec = self.k8s_object.spec.job_template.spec.template.spec
         self.container = self.get_app_container(self.spec)
-        self.__get_common_configuration()
+        self.get_common_configuration()
         self.__get_attributes()
-
-    def get_name(self) -> str:
-        name = self.metadata.name
-        if not name:
-            raise TypeError(f"Name is required for {self.get_class_name()}")
-        return name
-
-    # TODO: remove
-    def __get_common_configuration(self):
-        config: K8sConfig = self.extract_config()
-        self.input_topics = config.input_topics
-        self.output_topic = config.output_topic
-        self.error_topic = config.error_topic
 
     def __get_attributes(self):
         labels = self.metadata.labels or {}
