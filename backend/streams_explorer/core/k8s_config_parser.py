@@ -97,10 +97,6 @@ class K8sConfigParserEnv(K8sConfigParser):
 
 
 class K8sConfigParserArgs(K8sConfigParser):
-    # TODO: probably not needed here
-    def __init__(self, k8s_app: K8sApp):
-        super().__init__(k8s_app)
-
     def parse(self) -> K8sConfig:
         container = self.k8s_app.container
 

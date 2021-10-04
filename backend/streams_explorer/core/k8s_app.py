@@ -61,16 +61,7 @@ class K8sApp:
     def get_common_configuration(self):
         config = self.extract_config()
         for key, value in dataclasses.asdict(config).items():
-            # if hasattr(self, key):  # TODO: probably not needed
             setattr(self, key, value)
-        # TODO: decide
-        # for field in dataclasses.fields(config):
-        #     setattr(self, field.name, getattr(config, field.name))
-        # self.input_topics = config.input_topics
-        # self.output_topic = config.output_topic
-        # self.error_topic = config.error_topic
-        # self.extra_input_topics = config.extra_input_topics
-        # self.extra_output_topics = config.extra_output_topics
 
         if self.is_streams_bootstrap_app():
             extractor_container.on_streaming_app_config_parsing(config, self.name)
