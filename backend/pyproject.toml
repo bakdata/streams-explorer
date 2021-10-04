@@ -39,6 +39,7 @@ uvicorn = "^0.14.0"
 aiofiles = "^0.7.0"
 pygraphviz = "^1.7"
 confluent-kafka = "^1.7.0"
+cachetools = "^4.2.2"
 
 [tool.poetry.dev-dependencies]
 mypy = "^0.910"
