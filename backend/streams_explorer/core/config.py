@@ -20,15 +20,17 @@ settings = Dynaconf(
         Validator("k8s.labels", must_exist=True, is_type_of=list),
         Validator("k8s.pipeline.label", must_exist=True, is_type_of=str),
         Validator("k8s.consumer_group_annotation", must_exist=True, is_type_of=str),
-        Validator("kafka.enable", must_exist=True, eq=False)
-        | Validator("kafka.enable", must_exist=True, eq=True)
-        & Validator(
-            "kafka.config",
-            must_exist=True,
-            is_type_of=dict,
-            condition=lambda v: type(v.get("bootstrap.servers")) is str,
-        )
-        & Validator("kafka.displayed_information", is_type_of=list, default=[]),
+        Validator("kafka.enable", eq=False, default=False)
+        | (
+            Validator("kafka.enable", eq=True)
+            & Validator(
+                "kafka.config",
+                is_type_of=dict,
+                must_exist=True,
+                condition=lambda v: type(v.get("bootstrap.servers")) is str,
+            )
+        ),
+        Validator("kafka.displayed_information", is_type_of=list, default=[]),
         Validator("node_info.cache_ttl", must_exist=True, is_type_of=int),
         Validator("kafkaconnect.url", default=None),
         Validator("kafkaconnect.displayed_information", is_type_of=list, default=[]),
