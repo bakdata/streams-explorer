@@ -11,14 +11,12 @@ class TestK8sApp:
     def test_parse_env(self):
         k8s_objects = [
             get_streaming_app_deployment(
-                config_type=ConfigType.ENV,
                 name="test-app",
                 input_topics="input-topic",
                 output_topic="output-topic",
                 error_topic="error-topic",
             ),
             get_streaming_app_stateful_set(
-                config_type=ConfigType.ENV,
                 name="test-app",
                 input_topics="input-topic",
                 output_topic="output-topic",
@@ -74,7 +72,6 @@ class TestK8sApp:
     def test_is_streams_bootstrap_app(self):
         streams_app = K8sAppDeployment(
             get_streaming_app_deployment(
-                config_type=ConfigType.ENV,
                 name="test-app",
                 input_topics="input-topic",
                 output_topic="output-topic",
@@ -85,7 +82,6 @@ class TestK8sApp:
 
         non_streams_app = K8sAppDeployment(
             get_streaming_app_deployment(
-                config_type=ConfigType.ENV,
                 name="test-app",
                 input_topics=None,
                 output_topic=None,
@@ -97,7 +93,6 @@ class TestK8sApp:
     def test_error_topic_undefined(self):
         k8s_app = K8sAppDeployment(
             get_streaming_app_deployment(
-                config_type=ConfigType.ENV,
                 name="test-app",
                 input_topics="input-topic",
                 output_topic="output-topic",
@@ -112,7 +107,6 @@ class TestK8sApp:
     def test_multiple_inputs(self):
         k8s_app = K8sAppDeployment(
             get_streaming_app_deployment(
-                config_type=ConfigType.ENV,
                 name="test-app",
                 input_topics="input-topic1,input-topics2",
                 output_topic="output-topic",
@@ -124,7 +118,6 @@ class TestK8sApp:
     def test_env_prefix_support(self):
         k8s_app = K8sAppDeployment(
             get_streaming_app_deployment(
-                config_type=ConfigType.ENV,
                 name="test-app",
                 input_topics="input-topic",
                 output_topic="output-topic",
@@ -140,7 +133,6 @@ class TestK8sApp:
     def test_extra_input_topics(self):
         k8s_app = K8sAppDeployment(
             get_streaming_app_deployment(
-                config_type=ConfigType.ENV,
                 name="test-app",
                 input_topics="input-topic",
                 output_topic="output-topic",
@@ -154,7 +146,6 @@ class TestK8sApp:
     def test_extra_output_topics(self):
         k8s_app = K8sAppDeployment(
             get_streaming_app_deployment(
-                config_type=ConfigType.ENV,
                 name="test-app",
                 input_topics="input-topic",
                 output_topic="output-topic",
@@ -168,7 +159,6 @@ class TestK8sApp:
     def test_attributes(self):
         k8s_app = K8sAppDeployment(
             get_streaming_app_deployment(
-                config_type=ConfigType.ENV,
                 name="test-app",
                 input_topics="input-topic",
                 output_topic="output-topic",

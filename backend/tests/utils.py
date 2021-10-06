@@ -26,7 +26,6 @@ class ConfigType(str, Enum):
 
 
 def get_streaming_app_deployment(
-    config_type: ConfigType,
     name="test-app",
     input_topics="input-topic",
     output_topic="output-topic",
@@ -37,9 +36,9 @@ def get_streaming_app_deployment(
     env_prefix="APP_",
     pipeline=None,
     consumer_group=None,
+    config_type: ConfigType = ConfigType.ENV,
 ) -> V1Deployment:
     template = get_template(
-        config_type,
         input_topics,
         output_topic,
         error_topic,
@@ -48,6 +47,7 @@ def get_streaming_app_deployment(
         extra=extra,
         env_prefix=env_prefix,
         consumer_group=consumer_group,
+        config_type=config_type,
     )
     spec = V1DeploymentSpec(
         template=template, selector="app=test-app,release=test-release"
@@ -57,7 +57,6 @@ def get_streaming_app_deployment(
 
 
 def get_streaming_app_stateful_set(
-    config_type: ConfigType,
     name: str = "test-app",
     input_topics: str = "input-topic",
     output_topic: str = "output-topic",
@@ -69,9 +68,9 @@ def get_streaming_app_stateful_set(
     pipeline: Optional[str] = None,
     consumer_group: Optional[str] = None,
     service_name: str = "test-service",
+    config_type: ConfigType = ConfigType.ENV,
 ) -> V1StatefulSet:
     template = get_template(
-        config_type,
         input_topics,
         output_topic,
         error_topic,
@@ -80,6 +79,7 @@ def get_streaming_app_stateful_set(
         extra=extra,
         env_prefix=env_prefix,
         consumer_group=consumer_group,
+        config_type=config_type,
     )
     metadata = get_metadata(name, pipeline=pipeline)
     spec = V1StatefulSetSpec(
@@ -194,7 +194,6 @@ def get_args(
 
 
 def get_template(
-    config_type: ConfigType,
     input_topics: str,
     output_topic: str,
     error_topic: str,
@@ -203,6 +202,7 @@ def get_template(
     extra: Dict[str, str],
     env_prefix: str = "APP_",
     consumer_group: Optional[str] = None,
+    config_type: ConfigType = ConfigType.ENV,
 ) -> V1PodTemplateSpec:
     env = None
     args = None
