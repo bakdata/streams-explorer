@@ -11,6 +11,8 @@ if TYPE_CHECKING:
 
 
 class K8sConfigParser:
+    """Base class for parsing configuration of streaming application deployments."""
+
     def __init__(self, k8s_app: K8sApp):
         self.k8s_app = k8s_app
         self.config = K8sConfig(self.get_name())
@@ -66,6 +68,8 @@ class K8sConfigParser:
 
 
 class K8sConfigParserEnv(K8sConfigParser):
+    """Default parser for deployments configured through environment variables."""
+
     def __init__(self, k8s_app: K8sApp):
         super().__init__(k8s_app)
         self.env_prefix = self.get_env_prefix(self.k8s_app.container)
@@ -96,6 +100,8 @@ class K8sConfigParserEnv(K8sConfigParser):
 
 
 class K8sConfigParserArgs(K8sConfigParser):
+    """Optional parser for deployments configured through CLI arguments."""
+
     def parse(self) -> K8sConfig:
         container = self.k8s_app.container
 
