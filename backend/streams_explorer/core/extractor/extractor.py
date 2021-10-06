@@ -17,9 +17,7 @@ class Extractor:
     sources: List[Source] = []
     sinks: List[Sink] = []
 
-    def on_streaming_app_config_parsing(
-        self, config: K8sConfig, streaming_app_name: str
-    ):
+    def on_streaming_app_config_parsing(self, config: K8sConfig):
         ...
 
     def on_connector_info_parsing(

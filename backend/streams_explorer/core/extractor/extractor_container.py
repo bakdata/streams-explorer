@@ -33,11 +33,9 @@ class ExtractorContainer:
             extractor.sinks = []
             extractor.sources = []
 
-    def on_streaming_app_config_parsing(
-        self, config: K8sConfig, streaming_app_name: str
-    ):
+    def on_streaming_app_config_parsing(self, config: K8sConfig):
         for extractor in self.extractors:
-            extractor.on_streaming_app_config_parsing(config, streaming_app_name)
+            extractor.on_streaming_app_config_parsing(config)
 
     def on_connector_info_parsing(
         self, info: dict, connector_name: str
