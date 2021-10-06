@@ -26,12 +26,12 @@ class TestK8sConfigParser:
         assert config_parser is K8sConfigParserEnv
 
     def test_load_custom(self):
-        config_parser_path = settings.plugins.path / "config_parser.py"
+        path = settings.plugins.path / "config_parser.py"
         try:
-            with open(config_parser_path, "w") as f:
+            with open(path, "w") as f:
                 f.write(config_parser_file)
 
             config_parser = load_config_parser()
             assert config_parser is K8sConfigParserArgs
         finally:
-            config_parser_path.unlink()
+            path.unlink()
