@@ -218,10 +218,31 @@ It is possible to create your own config parser, linker, metric provider, and ex
 - [`GenericSink`/`GenericSource`](https://github.com/bakdata/streams-explorer/blob/main/backend/streams_explorer/core/extractor/default/generic.py)
 
 If your streaming application deployments are configured through environment variables, following the schema of [streams-bootstrap](https://github.com/bakdata/streams-bootstrap) or [faust-bootstrap](https://github.com/bakdata/faust-bootstrap), the Streams Explorer works out-of-the-box with the default deployment parser.
-
-For different setups a custom deployment parser plugin can be created by inheriting from [`K8sConfigParser`](https://github.com/bakdata/streams-explorer/blob/main/backend/streams_explorer/core/k8s_config_parser.py).
-We include an optional config parser for deployments configured through CLI arguments. It can be loaded by creating a Python file (e.g. `config_parser.py`) in the plugins folder with the following import statement:
+For streams-bootstrap deployments configured through CLI arguments a separate parser can be loaded by creating a Python file (e.g. `config_parser.py`) in the plugins folder with the following import statement:
 
 ```python
-from streams_explorer.core.k8s_config_parser import K8sConfigParserArgs
+from streams_explorer.core.k8s_config_parser import StreamsBootstrapArgsParser
+```
+
+For different setups a custom config parser plugin can be created by inheriting from the [`K8sConfigParser`](https://github.com/bakdata/streams-explorer/blob/main/backend/streams_explorer/core/k8s_config_parser.py) class and implementing the `parse` method. In this example we're retrieving the streams app configuration from an external REST API:
+
+```python
+import httpx
+
+from streams_explorer.core.k8s_config_parser import K8sConfigParser
+from streams_explorer.models.k8s_config import K8sConfig
+
+
+class CustomConfigParser(K8sConfigParser):
+    def get_name(self) -> str:
+        name = self.k8s_app.metadata.name
+        if not name:
+            raise TypeError(f"Name is required for {self.k8s_app.get_class_name()}")
+        return name
+
+    def parse(self) -> K8sConfig:
+        """Retrieve app config from REST endpoint."""
+        name = self.get_name()
+        data = httpx.get(f"url/config/{name}").json()
+        return K8sConfig(**data)
 ```
