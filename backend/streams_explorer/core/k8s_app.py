@@ -53,10 +53,10 @@ class K8sApp:
         return self.k8s_object.to_dict()
 
     def get_pipeline(self) -> Optional[str]:
-        return self.attributes.get(settings.k8s.pipeline.label)  # type: ignore
+        return self.attributes.get(settings.k8s.pipeline.label)
 
     def get_consumer_group(self) -> Optional[str]:
-        return self.attributes.get(settings.k8s.consumer_group_annotation)  # type: ignore
+        return self.attributes.get(settings.k8s.consumer_group_annotation)
 
     def get_common_configuration(self):
         config = self.extract_config()
