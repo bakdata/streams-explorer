@@ -3,13 +3,32 @@ from typing import Dict, List, Optional
 
 import pytest
 from confluent_kafka.admin import ConfigEntry, ConfigResource, PartitionMetadata
+from dynaconf.validator import ValidationError
 
+from streams_explorer.core.config import settings
 from streams_explorer.core.services.kafka import Kafka
 
 test_topic = "test-topic"
 
 
 class TestKafka:
+    def test_kafka_settings(self):
+        settings.kafka.enable = True
+        settings.validators.validate()
+
+        settings.kafka.config = {"bootstrap.servers": None}
+        with pytest.raises(ValidationError):
+            settings.validators.validate()
+
+        # should disable when no Kafka settings are given
+        del settings.kafka.enable
+        del settings.kafka.config
+        settings.validators.validate()
+        assert settings.kafka.enable is False
+
+        # reset
+        settings.kafka.config = {"bootstrap.servers": "localhost:9092"}
+
     def test_format_values(self):
         raw = [
             ConfigEntry(name="key", value="value"),
@@ -22,7 +41,7 @@ class TestKafka:
     def kafka(self, monkeypatch) -> Kafka:
         kafka = Kafka()
 
-        def mock_get_resource(resource: ConfigResource, *args) -> List[ConfigEntry]:
+        def mock_get_resource(resource: ConfigResource, *_) -> List[ConfigEntry]:
             if resource == ConfigResource(ConfigResource.Type.TOPIC, test_topic):
                 return [
                     ConfigEntry(name="cleanup.policy", value="delete"),
