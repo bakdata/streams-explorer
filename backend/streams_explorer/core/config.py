@@ -1,11 +1,11 @@
-from typing import Dict, List
+from typing import Any, Dict, List
 
 from dynaconf import Dynaconf, Validator
 
 APP_NAME = "Streams Explorer"
 API_PREFIX = "/api"
 
-settings = Dynaconf(
+settings: Any = Dynaconf(
     envvar_prefix="se",
     settings_files=["settings.yaml"],
     load_dotenv=True,
