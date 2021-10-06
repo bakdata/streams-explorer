@@ -15,10 +15,6 @@ class K8sConfigParser:
 
     def __init__(self, k8s_app: K8sApp):
         self.k8s_app = k8s_app
-        self.config = K8sConfig(self.get_name())
-
-    def get_name(self) -> str:
-        raise NotImplementedError
 
     def parse(self) -> K8sConfig:
         ...
@@ -26,6 +22,10 @@ class K8sConfigParser:
 
 class StreamsBootstrapConfigParser(K8sConfigParser):
     """Config parser for deployments configured through streams-bootstrap."""
+
+    def __init__(self, k8s_app: K8sApp):
+        super().__init__(k8s_app)
+        self.config = K8sConfig(self.get_name())
 
     def get_name(self) -> str:
         name = None
