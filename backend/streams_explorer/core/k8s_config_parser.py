@@ -18,6 +18,16 @@ class K8sConfigParser:
         self.config = K8sConfig(self.get_name())
 
     def get_name(self) -> str:
+        raise NotImplementedError
+
+    def parse(self) -> K8sConfig:
+        ...
+
+
+class StreamsBootstrapConfigParser(K8sConfigParser):
+    """Config parser for deployments configured through streams-bootstrap."""
+
+    def get_name(self) -> str:
         name = None
         if self.k8s_app.metadata.labels:
             name = self.k8s_app.metadata.labels.get("app")
@@ -26,9 +36,6 @@ class K8sConfigParser:
         if not name:
             raise TypeError(f"Name is required for {self.k8s_app.get_class_name()}")
         return name
-
-    def parse(self) -> K8sConfig:
-        ...
 
     def parse_config(self, name: str, value: str):
         if name == "INPUT_TOPICS":
@@ -67,8 +74,8 @@ class K8sConfigParser:
         return name
 
 
-class K8sConfigParserEnv(K8sConfigParser):
-    """Default parser for deployments configured through environment variables."""
+class StreamsBootstrapEnvParser(StreamsBootstrapConfigParser):
+    """Default parser for streams-bootstrap deployments configured through environment variables."""
 
     def __init__(self, k8s_app: K8sApp):
         super().__init__(k8s_app)
@@ -99,8 +106,8 @@ class K8sConfigParserEnv(K8sConfigParser):
         return None
 
 
-class K8sConfigParserArgs(K8sConfigParser):
-    """Optional parser for deployments configured through CLI arguments."""
+class StreamsBootstrapArgsParser(StreamsBootstrapConfigParser):
+    """Optional parser for streams-bootstrap deployments configured through CLI arguments."""
 
     def parse(self) -> K8sConfig:
         container = self.k8s_app.container

@@ -1,5 +1,5 @@
 from streams_explorer.core.k8s_app import K8sApp, K8sAppDeployment, K8sAppStatefulSet
-from streams_explorer.core.k8s_config_parser import K8sConfigParserArgs
+from streams_explorer.core.k8s_config_parser import StreamsBootstrapArgsParser
 from tests.utils import (
     ConfigType,
     get_streaming_app_deployment,
@@ -38,7 +38,7 @@ class TestK8sApp:
 
     def test_parse_args(self, monkeypatch):
         monkeypatch.setattr(
-            "streams_explorer.core.k8s_app.config_parser", K8sConfigParserArgs
+            "streams_explorer.core.k8s_app.config_parser", StreamsBootstrapArgsParser
         )
         k8s_objects = [
             get_streaming_app_deployment(
