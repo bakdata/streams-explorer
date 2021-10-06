@@ -13,8 +13,7 @@ if TYPE_CHECKING:
 class K8sConfigParser:
     def __init__(self, k8s_app: K8sApp):
         self.k8s_app = k8s_app
-        self.config = K8sConfig()
-        self.config.name = self.get_name()
+        self.config = K8sConfig(self.get_name())
 
     def get_name(self) -> str:
         name = None
