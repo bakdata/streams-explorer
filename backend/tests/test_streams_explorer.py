@@ -221,9 +221,7 @@ class TestStreamsExplorer:
                 )
             ],
         )
-        assert streams_explorer.get_node_information(
-            "es-sink-connector-dead-letter-topic"
-        ) == NodeInformation(
+        result = NodeInformation(
             node_id="es-sink-connector-dead-letter-topic",
             node_type=NodeTypesEnum.ERROR_TOPIC,
             info=[
@@ -233,9 +231,20 @@ class TestStreamsExplorer:
                 NodeInfoListItem(name="Schema", value={}, type=NodeInfoType.JSON),
             ],
         )
+        assert (
+            streams_explorer.get_node_information("es-sink-connector-dead-letter-topic")
+            == result
+        )
 
         # clear topic_info
         streams_explorer.linking_service.topic_info = []
+        # verify caching
+        assert (
+            streams_explorer.get_node_information("es-sink-connector-dead-letter-topic")
+            == result
+        )
+
+        streams_explorer.get_node_information.cache_clear()
         assert streams_explorer.get_node_information(
             "es-sink-connector-dead-letter-topic"
         ) == NodeInformation(
