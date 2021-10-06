@@ -1,4 +1,5 @@
-from typing import List
+from enum import Enum
+from typing import Dict, List, Optional
 
 from kubernetes.client import (
     V1beta1CronJob,
@@ -19,23 +20,32 @@ from kubernetes.client import (
 from streams_explorer.core.k8s_app import ATTR_PIPELINE
 
 
+class ConfigType(str, Enum):
+    ENV = "env"
+    ARGS = "args"
+
+
 def get_streaming_app_deployment(
+    config_type: ConfigType,
     name="test-app",
     input_topics="input-topic",
     output_topic="output-topic",
     error_topic="error-topic",
     multiple_inputs=None,
     multiple_outputs=None,
+    extra: Dict[str, str] = {},
     env_prefix="APP_",
     pipeline=None,
     consumer_group=None,
 ) -> V1Deployment:
     template = get_template(
+        config_type,
         input_topics,
         output_topic,
         error_topic,
         multiple_inputs=multiple_inputs,
         multiple_outputs=multiple_outputs,
+        extra=extra,
         env_prefix=env_prefix,
         consumer_group=consumer_group,
     )
@@ -47,23 +57,27 @@ def get_streaming_app_deployment(
 
 
 def get_streaming_app_stateful_set(
-    name="test-app",
-    input_topics="input-topic",
-    output_topic="output-topic",
-    error_topic="error-topic",
-    multiple_inputs=None,
-    multiple_outputs=None,
-    env_prefix="APP_",
-    pipeline=None,
-    consumer_group=None,
-    service_name="test-service",
+    config_type: ConfigType,
+    name: str = "test-app",
+    input_topics: str = "input-topic",
+    output_topic: str = "output-topic",
+    error_topic: str = "error-topic",
+    multiple_inputs: Optional[str] = None,
+    multiple_outputs: Optional[str] = None,
+    extra: Dict[str, str] = {},
+    env_prefix: str = "APP_",
+    pipeline: Optional[str] = None,
+    consumer_group: Optional[str] = None,
+    service_name: str = "test-service",
 ) -> V1StatefulSet:
     template = get_template(
+        config_type,
         input_topics,
         output_topic,
         error_topic,
         multiple_inputs=multiple_inputs,
         multiple_outputs=multiple_outputs,
+        extra=extra,
         env_prefix=env_prefix,
         consumer_group=consumer_group,
     )
@@ -78,12 +92,12 @@ def get_streaming_app_stateful_set(
 
 
 def get_streaming_app_cronjob(
-    name="test-cronjob",
-    input_topics="",
-    output_topic="output-topic",
-    error_topic="error-topic",
-    env_prefix="APP_",
-    pipeline=None,
+    name: str = "test-cronjob",
+    input_topics: str = "",
+    output_topic: str = "output-topic",
+    error_topic: str = "error-topic",
+    env_prefix: str = "APP_",
+    pipeline: Optional[str] = None,
 ) -> V1beta1CronJob:
     env = get_env(
         input_topics,
@@ -122,12 +136,13 @@ def get_metadata(name, pipeline=None) -> V1ObjectMeta:
 
 
 def get_env(
-    input_topics,
-    output_topic,
-    error_topic,
-    multiple_inputs=None,
-    multiple_outputs=None,
-    env_prefix="APP_",
+    input_topics: str,
+    output_topic: str,
+    error_topic: str,
+    multiple_inputs: Optional[str] = None,
+    multiple_outputs: Optional[str] = None,
+    extra: Dict[str, str] = {},
+    env_prefix: str = "APP_",
 ) -> List[V1EnvVar]:
     env = [
         V1EnvVar(name="ENV_PREFIX", value=env_prefix),
@@ -144,27 +159,73 @@ def get_env(
         env.append(
             V1EnvVar(name=env_prefix + "EXTRA_OUTPUT_TOPICS", value=multiple_outputs)
         )
+    if extra:
+        for k, v in extra.items():
+            env.append(V1EnvVar(name=env_prefix + k, value=v))
     return env
 
 
+def _create_arg(name: str, value: str) -> str:
+    return f"--{name}={value}"
+
+
+def get_args(
+    input_topics: str,
+    output_topic: str,
+    error_topic: str,
+    multiple_inputs: Optional[str],
+    multiple_outputs: Optional[str],
+    extra: Dict[str, str],
+) -> List[str]:
+    args = [
+        _create_arg("output-topic", output_topic),
+        _create_arg("error-topic", error_topic),
+    ]
+    if input_topics:
+        args.append(_create_arg("input-topics", input_topics))
+    if multiple_inputs:
+        args.append(_create_arg("extra-input-topics", multiple_inputs))
+    if multiple_outputs:
+        args.append(_create_arg("extra-output-topics", multiple_outputs))
+    if extra:
+        for k, v in extra.items():
+            args.append(_create_arg(k, v))
+    return args
+
+
 def get_template(
-    input_topics,
-    output_topic,
-    error_topic,
-    multiple_inputs=None,
-    multiple_outputs=None,
-    env_prefix="APP_",
-    consumer_group=None,
+    config_type: ConfigType,
+    input_topics: str,
+    output_topic: str,
+    error_topic: str,
+    multiple_inputs: Optional[str],
+    multiple_outputs: Optional[str],
+    extra: Dict[str, str],
+    env_prefix: str = "APP_",
+    consumer_group: Optional[str] = None,
 ) -> V1PodTemplateSpec:
-    env = get_env(
-        input_topics,
-        output_topic,
-        error_topic,
-        multiple_inputs,
-        multiple_outputs,
-        env_prefix,
-    )
-    container = V1Container(name="test-container", env=env)
+    env = None
+    args = None
+    if config_type == ConfigType.ENV:
+        env = get_env(
+            input_topics,
+            output_topic,
+            error_topic,
+            multiple_inputs,
+            multiple_outputs,
+            env_prefix=env_prefix,
+            extra=extra,
+        )
+    elif config_type == ConfigType.ARGS:
+        args = get_args(
+            input_topics,
+            output_topic,
+            error_topic,
+            multiple_inputs,
+            multiple_outputs,
+            extra,
+        )
+    container = V1Container(name="test-container", env=env, args=args)
     pod_spec = V1PodSpec(containers=[container])
     spec_metadata = None
     if consumer_group is not None:
