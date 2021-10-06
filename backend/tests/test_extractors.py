@@ -60,8 +60,12 @@ EMPTY_CONNECTOR_INFO = {"config": {}, "type": ""}
 
 class TestExtractors:
     @pytest.fixture(autouse=True)
-    def kafka_connect(self):
+    def setup_teardown(self):
+        # setup
         settings.kafkaconnect.url = "testurl:3000"
+        yield  # testing
+        # teardown
+        settings.plugins.path = "./plugins"
 
     def test_load_extractors(self):
         settings.plugins.extractors.default = True
