@@ -12,10 +12,12 @@ test_topic = "test-topic"
 
 
 class TestKafka:
-    def test_kafka_settings(self):
+    def test_settings(self):
+        # validate default
         settings.kafka.enable = True
         settings.validators.validate()
 
+        # should fail if no broker is set
         settings.kafka.config = {"bootstrap.servers": None}
         with pytest.raises(ValidationError):
             settings.validators.validate()
