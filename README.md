@@ -125,8 +125,8 @@ The following configuration options are available:
 
 #### Kafka
 
-- `kafka.enable` Enable Kafka (bool, **required**, default: `false`)
-- `kafka.config` librdkafka configuration properties ([reference](https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md)) (dict, **required**, default: `{"bootstrap.servers": "localhost:9092"}`)
+- `kafka.enable` Enable Kafka (bool, default: `false`)
+- `kafka.config` librdkafka configuration properties ([reference](https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md)) (dict, default: `{"bootstrap.servers": "localhost:9092"}`)
 - `kafka.displayed_information` Configuration options of Kafka topics displayed in the frontend (list of dict)
 
 #### Kafka Connect
@@ -161,7 +161,7 @@ The following exporters are required to collect Kafka metrics for Prometheus:
 
 #### AKHQ
 
-- `akhq.enable` Enable AKHQ (bool, **required**, default: `false`)
+- `akhq.enable` Enable AKHQ (bool, default: `false`)
 - `akhq.url` URL of AKHQ (string, default: `http://localhost:8080`)
 - `akhq.cluster` Name of cluster (string, default: `kubernetes-cluster`)
 - `akhq.connect` Name of connect (string, default: None)
@@ -170,7 +170,7 @@ The following exporters are required to collect Kafka metrics for Prometheus:
 
 Kowl can be used instead of AKHQ. (mutually exclusive)
 
-- `kowl.enable` Enable Kowl (bool, **required**, default: `false`)
+- `kowl.enable` Enable Kowl (bool, default: `false`)
 - `kowl.url` URL of Kowl (string, default: `http://localhost:8080`)
 
 #### Grafana
@@ -181,14 +181,14 @@ Kowl can be used instead of AKHQ. (mutually exclusive)
 
 #### Kibana
 
-- `kibanalogs.enable` Enable Kibana logs (bool, **required**, default: `false`)
+- `kibanalogs.enable` Enable Kibana logs (bool, default: `false`)
 - `kibanalogs.url` URL of Kibana logs (string, default: `http://localhost:5601`)
 
 #### Loki
 
 Loki can be used instead of Kibana. (mutually exclusive)
 
-- `loki.enable` Enable Loki logs (bool, **required**, default: `false`)
+- `loki.enable` Enable Loki logs (bool, default: `false`)
 - `loki.url` URL of Loki logs (string, default: `http://localhost:3000`)
 
 #### Elasticsearch
