@@ -64,7 +64,7 @@ class K8sApp:
             setattr(self, key, value)
 
         if self.is_streams_bootstrap_app():
-            extractor_container.on_streaming_app_config_parsing(config, self.name)
+            extractor_container.on_streaming_app_config_parsing(config)
 
     def is_streams_bootstrap_app(self) -> bool:
         if not self.input_topics and not self.output_topic:
