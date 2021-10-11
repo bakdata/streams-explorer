@@ -40,11 +40,15 @@ class K8sApp:
         self.setup()
 
     def setup(self):
-        self.spec = self.k8s_object.spec.template.spec
+        self.spec = self._get_pod_spec()
         self._ignore_containers = self.get_ignore_containers()
         self.container = self.get_app_container(self.spec, self._ignore_containers)
         self.get_common_configuration()
         self.__get_attributes()
+
+    def _get_pod_spec(self) -> V1PodSpec | None:
+        if self.k8s_object.spec and self.k8s_object.spec.template.spec:
+            return self.k8s_object.spec.template.spec
 
     def extract_config(self) -> K8sConfig:
         return config_parser(self).parse()
@@ -92,7 +96,8 @@ class K8sApp:
             self.attributes[ATTR_PIPELINE] = pipeline
 
         if (
-            self.k8s_object.spec.template.metadata
+            self.k8s_object.spec
+            and self.k8s_object.spec.template.metadata
             and self.k8s_object.spec.template.metadata.annotations
         ):
             annotations = self.k8s_object.spec.template.metadata.annotations
@@ -111,9 +116,9 @@ class K8sApp:
 
     @staticmethod
     def get_app_container(
-        spec: V1PodSpec, ignore_containers: Set[str] = set()
+        spec: V1PodSpec | None, ignore_containers: Set[str] = set()
     ) -> Optional[V1Container]:
-        if spec.containers:
+        if spec and spec.containers:
             for container in spec.containers:
                 if container.name not in ignore_containers:
                     return container
@@ -133,10 +138,18 @@ class K8sAppCronJob(K8sApp):
         super().__init__(k8s_object)
 
     def setup(self):
-        self.spec = self.k8s_object.spec.job_template.spec.template.spec
+        self.spec = self._get_pod_spec()
         self.container = self.get_app_container(self.spec)
         self.get_common_configuration()
         self.__get_attributes()
+
+    def _get_pod_spec(self) -> V1PodSpec | None:
+        if (
+            self.k8s_object.spec
+            and self.k8s_object.spec.job_template.spec
+            and self.k8s_object.spec.job_template.spec.template.spec
+        ):
+            return self.k8s_object.spec.job_template.spec.template.spec
 
     def __get_attributes(self):
         labels = self.metadata.labels or {}
@@ -165,5 +178,6 @@ class K8sAppStatefulSet(K8sApp):
     def __init__(self, k8s_object: V1StatefulSet):
         super().__init__(k8s_object)
 
-    def get_service_name(self) -> str:
-        return self.k8s_object.spec.service_name
+    def get_service_name(self) -> str | None:
+        if self.k8s_object.spec:
+            return self.k8s_object.spec.service_name
