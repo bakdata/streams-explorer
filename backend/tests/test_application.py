@@ -44,7 +44,7 @@ class TestApplication:
         nest_asyncio.apply()
         settings.graph.update_interval = 2
 
-        def mock_get_deployments(*args, **kwargs):
+        def mock_get_deployments(*_):
             return [
                 get_streaming_app_deployment(
                     "streaming-app1", "input-topic1", "output-topic1", "error-topic1"
@@ -61,10 +61,10 @@ class TestApplication:
                 ),
             ]
 
-        def mock_get_stateful_sets(*args, **kwargs):
+        def mock_get_stateful_sets(*_):
             return []
 
-        def mock_get_cron_jobs(*args, **kwargs):
+        def mock_get_cron_jobs(*_):
             return [V1beta1CronJob(metadata=V1ObjectMeta(name="test"))]
 
         monkeypatch.setattr(StreamsExplorer, "get_deployments", mock_get_deployments)
@@ -115,7 +115,7 @@ class TestApplication:
 
             assert len(response.json().get("nodes")) == 15
 
-            def mock_get_deployments(*args, **kwargs):
+            def mock_get_deployments_after(*_):
                 return [
                     get_streaming_app_deployment(
                         "streaming-app1",
@@ -132,7 +132,7 @@ class TestApplication:
                 ]
 
             monkeypatch.setattr(
-                StreamsExplorer, "get_deployments", mock_get_deployments
+                StreamsExplorer, "get_deployments", mock_get_deployments_after
             )
             monkeypatch.setattr(
                 StreamsExplorer, "get_stateful_sets", mock_get_stateful_sets

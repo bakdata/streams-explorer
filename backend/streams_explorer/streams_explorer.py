@@ -1,6 +1,7 @@
 from typing import Dict, List, Optional, Type
 
-import kubernetes
+import kubernetes.client
+import kubernetes.config
 from cachetools.func import ttl_cache
 from kubernetes.client import V1beta1CronJob, V1Deployment, V1StatefulSet
 from loguru import logger

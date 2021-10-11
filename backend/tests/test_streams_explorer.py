@@ -269,6 +269,8 @@ class TestStreamsExplorer:
         extractor = MockCronjobExtractor()
         extractor_container.extractors = [extractor]
         await streams_explorer.update()
+        assert extractor.cron_job is not None
+        assert extractor.cron_job.metadata is not None
         assert extractor.cron_job.metadata.name == "test-cronjob"
         assert "test-cronjob" in streams_explorer.applications
         extractor_container.extractors = []
@@ -282,26 +284,27 @@ class TestStreamsExplorer:
         assert type(streams_explorer.get_link("input-topic1", "akhq")) is str
 
         # apps
-        assert "consumergroups=consumer-group2" in streams_explorer.get_link(
-            "streaming-app2", "grafana"
-        )
-        assert "/group/consumer-group2" in streams_explorer.get_link(
-            "streaming-app2", "akhq"
+        assert (
+            streams_explorer.get_link("streaming-app2", "grafana")
+            == f"{settings.grafana.url}/d/{settings.grafana.dashboards.consumergroups}?var-consumergroups=consumer-group2"
         )
 
         # connectors
         assert streams_explorer.get_link("es-sink-connector", "grafana") is None
         assert streams_explorer.get_link("es-sink-connector", "akhq") is None
-        assert "consumergroups=connect-generic-source" in streams_explorer.get_link(
-            "generic-source-connector", "grafana"
+        assert (
+            streams_explorer.get_link("generic-source-connector", "grafana")
+            == f"{settings.grafana.url}/d/{settings.grafana.dashboards.consumergroups}?var-consumergroups=connect-generic-source"
         )
-        assert "/group/connect-generic-source" in streams_explorer.get_link(
-            "generic-source-connector", "akhq"
+        assert (
+            streams_explorer.get_link("generic-source-connector", "akhq")
+            == f"{settings.akhq.url}/ui/{settings.akhq.cluster}/group/connect-generic-source"
         )
 
         # sinks/sources
-        assert "consumergroups=connect-generic-source" in streams_explorer.get_link(
-            "generic-source-connector", "grafana"
+        assert (
+            streams_explorer.get_link("generic-source-connector", "grafana")
+            == f"{settings.grafana.url}/d/{settings.grafana.dashboards.consumergroups}?var-consumergroups=connect-generic-source"
         )
 
     @pytest.mark.asyncio
@@ -315,13 +318,15 @@ class TestStreamsExplorer:
         )
 
         # apps
-        assert "/groups/consumer-group2" in streams_explorer.get_link(
-            "streaming-app2", "kowl"
+        assert (
+            streams_explorer.get_link("streaming-app2", "kowl")
+            == f"{settings.kowl.url}/groups/consumer-group2"
         )
 
         # connectors
-        assert "/groups/connect-generic-source" in streams_explorer.get_link(
-            "generic-source-connector", "kowl"
+        assert (
+            streams_explorer.get_link("generic-source-connector", "kowl")
+            == f"{settings.kowl.url}/groups/connect-generic-source"
         )
 
     @pytest.mark.asyncio
@@ -335,18 +340,20 @@ class TestStreamsExplorer:
         )
 
         # apps
-        assert "/group/consumer-group2" in streams_explorer.get_link(
-            "streaming-app2", "akhq"
+        assert (
+            streams_explorer.get_link("streaming-app2", "akhq")
+            == f"{settings.akhq.url}/ui/kubernetes-cluster/group/consumer-group2"
         )
 
         # connectors
-        assert "/group/connect-generic-source" in streams_explorer.get_link(
-            "generic-source-connector", "akhq"
+        assert (
+            streams_explorer.get_link("generic-source-connector", "akhq")
+            == f"{settings.akhq.url}/ui/kubernetes-cluster/group/connect-generic-source"
         )
         settings.akhq.connect = "kafka-connect"
         assert (
-            "/kubernetes-cluster/connect/kafka-connect/definition/generic-source/tasks"
-            in streams_explorer.get_link("generic-source-connector", "akhq-connect")
+            streams_explorer.get_link("generic-source-connector", "akhq-connect")
+            == f"{settings.akhq.url}/ui/{settings.akhq.cluster}/connect/{settings.akhq.connect}/definition/generic-source/tasks"
         )
 
     @pytest.mark.asyncio
@@ -360,9 +367,11 @@ class TestStreamsExplorer:
     @pytest.mark.asyncio
     async def test_get_link_loki(self, streams_explorer: StreamsExplorer):
         await streams_explorer.update()
+        link = streams_explorer.get_link("streaming-app2", "loki")
+        assert link is not None
         assert (
             '/explore?orgId=1&left=["now-1h","now","loki",{"expr":"{app=\\"streaming-app2\\"}"}]'
-            in streams_explorer.get_link("streaming-app2", "loki")
+            in link
         )
 
     @pytest.mark.asyncio
