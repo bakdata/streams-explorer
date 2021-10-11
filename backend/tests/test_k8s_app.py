@@ -1,9 +1,14 @@
 from streams_explorer.core.k8s_app import K8sApp, K8sAppDeployment, K8sAppStatefulSet
-from tests.utils import get_streaming_app_deployment, get_streaming_app_stateful_set
+from streams_explorer.core.k8s_config_parser import StreamsBootstrapArgsParser
+from tests.utils import (
+    ConfigType,
+    get_streaming_app_deployment,
+    get_streaming_app_stateful_set,
+)
 
 
 class TestK8sApp:
-    def test_init(self):
+    def test_parse_env(self):
         k8s_objects = [
             get_streaming_app_deployment(
                 name="test-app",
@@ -12,6 +17,39 @@ class TestK8sApp:
                 error_topic="error-topic",
             ),
             get_streaming_app_stateful_set(
+                name="test-app",
+                input_topics="input-topic",
+                output_topic="output-topic",
+                error_topic="error-topic",
+            ),
+        ]
+
+        k8s_apps = [K8sApp.factory(k8s_object) for k8s_object in k8s_objects]
+
+        for k8s_app in k8s_apps:
+            assert k8s_app.name == "test-app"
+            assert k8s_app.error_topic == "error-topic"
+            assert k8s_app.output_topic == "output-topic"
+            assert k8s_app.input_topics == ["input-topic"]
+
+        assert isinstance(k8s_apps[0], K8sAppDeployment)
+        assert isinstance(k8s_apps[1], K8sAppStatefulSet)
+        assert k8s_apps[1].get_service_name() == "test-service"
+
+    def test_parse_args(self, monkeypatch):
+        monkeypatch.setattr(
+            "streams_explorer.core.k8s_app.config_parser", StreamsBootstrapArgsParser
+        )
+        k8s_objects = [
+            get_streaming_app_deployment(
+                config_type=ConfigType.ARGS,
+                name="test-app",
+                input_topics="input-topic",
+                output_topic="output-topic",
+                error_topic="error-topic",
+            ),
+            get_streaming_app_stateful_set(
+                config_type=ConfigType.ARGS,
                 name="test-app",
                 input_topics="input-topic",
                 output_topic="output-topic",

@@ -12,7 +12,7 @@ from streams_explorer.models.sink import Sink
 from streams_explorer.models.source import Source
 from tests.utils import get_streaming_app_cronjob, get_streaming_app_deployment
 
-settings.k8s.pipeline.label = "pipeline"  # type: ignore
+settings.k8s.pipeline.label = "pipeline"
 
 
 class TestDataFlowGraph:
