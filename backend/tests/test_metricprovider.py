@@ -67,7 +67,7 @@ class TestPrometheusMetricProvider:
 
     @pytest.mark.asyncio
     async def test_empty_query(self, monkeypatch, metric_provider):
-        async def mock_query(*args, **kwargs):
+        async def mock_query(*_):
             return []
 
         monkeypatch.setattr(PrometheusMetricProvider, "_query", mock_query)
