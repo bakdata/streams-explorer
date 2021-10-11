@@ -37,7 +37,7 @@
 - Inspection of Avro schema from schema registry
 - Integration with [streams-bootstrap](https://github.com/bakdata/streams-bootstrap) and [faust-bootstrap](https://github.com/bakdata/faust-bootstrap), or custom streaming app config parsing from Kubernetes deployments using plugins
 - Real-time metrics from Prometheus (consumer lag & read rate, replicas, topic size, messages in & out per second, connector tasks)
-- Linking to external services for logging and analysis, such as Kibana, Grafana, Loki, AKHQ, Kowl, Elasticsearch
+- Linking to external services for logging and analysis, such as Kibana, Grafana, Loki, AKHQ, Kowl, and Elasticsearch
 - Customizable through Python plugins
 
 ## Overview
@@ -224,7 +224,7 @@ For streams-bootstrap deployments configured through CLI arguments a separate pa
 from streams_explorer.core.k8s_config_parser import StreamsBootstrapArgsParser
 ```
 
-For different setups a custom config parser plugin can be created by inheriting from the [`K8sConfigParser`](https://github.com/bakdata/streams-explorer/blob/main/backend/streams_explorer/core/k8s_config_parser.py) class and implementing the `parse` method. In this example we're retrieving the streaming app configurations from an external REST API. In order for a deployment to be indentified as streaming app, input and output topics are required.
+For other setups a custom config parser plugin can be created by inheriting from the [`K8sConfigParser`](https://github.com/bakdata/streams-explorer/blob/main/backend/streams_explorer/core/k8s_config_parser.py) class and implementing the `parse` method. In this example we're retrieving the streaming app configurations from an external REST API. In order for a deployment to be indentified as streaming app, input and output topics are required.
 
 ```python
 import httpx
