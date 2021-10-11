@@ -159,7 +159,7 @@ class TestExtractors:
     def test_extractors_topics_none(self, mocker):
         mocker.patch(
             "streams_explorer.core.services.kafkaconnect.KafkaConnect.get_connector_info",
-            lambda connector: EMPTY_CONNECTOR_INFO,
+            lambda _: EMPTY_CONNECTOR_INFO,
         )
         mocker.patch(
             "streams_explorer.core.services.kafkaconnect.KafkaConnect.get_connectors",
@@ -202,6 +202,7 @@ class TestExtractors:
         )
         assert len(extractor.sinks) == 1
         assert extractor.sinks[0].name == "es-test-index"
+        assert connector is not None
         assert connector.topics == ["my-topic-1", "my-topic-2"]
         assert connector.error_topic == "dead-letter-topic"
 
