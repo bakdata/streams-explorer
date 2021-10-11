@@ -63,7 +63,7 @@ class TestNodeInfoExtractor:
         assert (
             NodeInfoListItem(
                 name="bar",
-                value=connector.config.get("foo").get("bar"),
+                value=connector.config["foo"]["bar"],
                 type=NodeInfoType.JSON,
             )
             in output
@@ -71,7 +71,7 @@ class TestNodeInfoExtractor:
         assert (
             NodeInfoListItem(
                 name="testlist",
-                value=str(connector.config.get("foo").get("test")),
+                value=str(connector.config["foo"]["test"]),
                 type=NodeInfoType.BASIC,
             )
             in output
