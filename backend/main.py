@@ -21,4 +21,4 @@ async def update():
 if __name__ == "__main__":
     # Run the main for debugging.
     # You can also use uvicorn to start the backend with auto reload on code changes:  uvicorn main:app --reload
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8000)  # type: ignore
