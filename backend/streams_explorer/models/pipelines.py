@@ -1,4 +1,6 @@
-from pydantic.main import BaseModel, List
+from typing import List
+
+from pydantic.main import BaseModel
 
 
 class Pipelines(BaseModel):
