@@ -49,25 +49,25 @@ class DataFlowGraph:
 
     def _add_streaming_app(self, graph: nx.DiGraph, app: K8sApp):
         graph.add_node(
-            app.name,
+            app.id,
             label=app.name,
             node_type=NodeTypesEnum.STREAMING_APP,
             **app.attributes,
         )
         if app.output_topic:
             self._add_topic(graph, app.output_topic)
-            self._add_output_topic(graph, app.name, app.output_topic)
+            self._add_output_topic(graph, app.id, app.output_topic)
         if app.error_topic:
-            self._add_error_topic(graph, app.name, app.error_topic)
+            self._add_error_topic(graph, app.id, app.error_topic)
         for input_topic in app.input_topics:
             self._add_topic(graph, input_topic)
-            self._add_input_topic(graph, app.name, input_topic)
+            self._add_input_topic(graph, app.id, input_topic)
         for extra_input in app.extra_input_topics:
             self._add_topic(graph, extra_input)
-            self._add_input_topic(graph, app.name, extra_input)
+            self._add_input_topic(graph, app.id, extra_input)
         for extra_output in app.extra_output_topics:
             self._add_topic(graph, extra_output)
-            self._add_output_topic(graph, app.name, extra_output)
+            self._add_output_topic(graph, app.id, extra_output)
 
     def add_connector(self, connector: KafkaConnector, pipeline: Optional[str] = None):
         graph = self.graph
