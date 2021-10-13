@@ -22,7 +22,7 @@ const DetailsCard = ({ node }: DetailsCardProps) => {
         style={{ width: width }}
         headStyle={{ backgroundColor: "#383838", color: "white" }}
       >
-        {node ? <Details nodeID={node.id} /> : null}
+        {node ? <Details nodeId={node.id} /> : null}
       </Card>
     </div>
   );
