@@ -1,6 +1,7 @@
 import { Graph as Data, Icon as IIcon, Metric } from "../api/fetchers";
 import "./DashedEdge";
 import "./MetricCustomNode";
+import { Node } from "../api/fetchers";
 import G6, {
   Graph,
   GraphData,
@@ -23,7 +24,7 @@ interface GraphVisualizationProps {
   onClickNode: Function;
   width: number | undefined;
   height: number | undefined;
-  focusedNode: string | null;
+  focusedNode: Node | null;
 }
 
 class Icon implements IIcon {
@@ -141,12 +142,12 @@ export function updateNodeMetrics(graph: Graph, metrics: Metric[]) {
   });
 }
 
-const nodeError = (name: string) => {
-  message.error(`Node "${name}" doesn't exist`, 5);
+const nodeError = (node: Node) => {
+  message.error(`Node "${node.id}" doesn't exist`, 5);
 };
 
-function setFocusedNode(graph: Graph, focusedNode: string) {
-  const node = graph.findById(focusedNode) as INode;
+function setFocusedNode(graph: Graph, focusedNode: Node) {
+  const node = graph.findById(focusedNode.id) as INode;
   if (!node) {
     return nodeError(focusedNode);
   }
