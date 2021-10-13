@@ -4,6 +4,7 @@ from typing import Dict, List, Optional
 
 @dataclass
 class K8sConfig:
+    id: str
     name: str
     input_topics: List[str] = field(default_factory=list)  # required for streaming app
     output_topic: Optional[str] = None  # required for streaming app

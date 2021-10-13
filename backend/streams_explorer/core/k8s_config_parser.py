@@ -25,9 +25,10 @@ class StreamsBootstrapConfigParser(K8sConfigParser):
 
     def __init__(self, k8s_app: K8sApp):
         super().__init__(k8s_app)
-        self.config = K8sConfig(self.get_name())
+        self._id = self.get_id()
+        self.config = K8sConfig(self._id, name=self.get_name())
 
-    def get_name(self) -> str:
+    def get_id(self) -> str:
         name = None
         if self.k8s_app.metadata.labels:
             name = self.k8s_app.metadata.labels.get("app")
@@ -36,6 +37,9 @@ class StreamsBootstrapConfigParser(K8sConfigParser):
         if not name:
             raise TypeError(f"Name is required for {self.k8s_app.get_class_name()}")
         return name
+
+    def get_name(self) -> str:
+        return self._id
 
     def parse_config(self, name: str, value: str):
         if name == "INPUT_TOPICS":
