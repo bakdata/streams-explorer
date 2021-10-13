@@ -44,7 +44,7 @@ class Icon implements IIcon {
 function createNodeFromGraphNode(graphNode: INode): Node {
   return {
     id: graphNode.getID(),
-    label: graphNode.get("label") as string,
+    label: graphNode.getModel().label as string,
   };
 }
 
@@ -234,12 +234,15 @@ const GraphVisualization = ({
   const selectCallback = useCallback(
     (e: IG6GraphEvent) => {
       if (e.target && e.target.get("type") === "node") {
-        // let nodeId: string = e.target.get("id");
-        const node = createNodeFromGraphNode(e.item as INode); // TODO does this work or do we need to retrieve node from graph?
-        onClickNode(node);
+        let nodeId: string = e.target.get("id");
+        const graphNode = graph?.findById(nodeId);
+        if (graphNode) {
+          const node = createNodeFromGraphNode(graphNode as INode);
+          onClickNode(node);
+        }
       }
     },
-    [onClickNode]
+    [graph, onClickNode]
   );
 
   useEffect(() => {
