@@ -4,8 +4,8 @@ import {
   useGetPositionedGraphApiGraphGet,
   useGetMetricsApiMetricsGet,
   HTTPValidationError,
-  Node,
 } from "./api/fetchers";
+import Node from "./components/Node";
 import DetailsCard from "./components/DetailsCard";
 import GraphVisualization from "./components/GraphVisualization";
 import { graphConfig } from "./graphConfiguration";
@@ -33,7 +33,7 @@ const { Header, Content } = Layout;
 const App: React.FC = () => {
   const ALL_PIPELINES = "all pipelines";
   const [currentPipeline, setCurrentPipeline] = useState(ALL_PIPELINES);
-  const [detailNode, setDetailNode] = useState<string | null>(null);
+  const [detailNode, setDetailNode] = useState<Node | null>(null);
   const [focusedNode, setFocusedNode] = useState<Node | null>(null);
   const [searchWidth, setSearchWidth] = useState<number>(300);
   const history = useHistory();
@@ -146,10 +146,10 @@ const App: React.FC = () => {
     }
     const focusNode = params.get("focus-node");
     if (!focusNode) return;
-    setDetailNode(focusNode);
     const node = graph?.nodes.find((node) => node.id === focusNode);
     if (node) {
       setFocusedNode(node);
+      setDetailNode(node);
     }
   }, [getParams, location, graph]);
 
@@ -288,8 +288,8 @@ const App: React.FC = () => {
                     );
                     if (node) {
                       setFocusedNode(node);
+                      setDetailNode(node);
                     }
-                    setDetailNode(nodeId);
                     pushHistoryFocusNode(nodeId);
                   }}
                 >
@@ -350,7 +350,7 @@ const App: React.FC = () => {
                   config={graphConfig}
                   metrics={metrics}
                   refetchMetrics={() => refetchMetrics()}
-                  onClickNode={(nodeId: string) => setDetailNode(nodeId)}
+                  onClickNode={(node: Node) => setDetailNode(node)}
                   width={width}
                   height={height ? height - 64 : 500}
                   focusedNode={focusedNode}
@@ -373,7 +373,7 @@ const App: React.FC = () => {
                 position: "absolute",
               }}
             >
-              <DetailsCard nodeID={detailNode} />
+              <DetailsCard node={detailNode} />
             </Row>
           </Content>
         </Layout>

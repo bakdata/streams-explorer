@@ -1,7 +1,7 @@
 import { Graph as Data, Icon as IIcon, Metric } from "../api/fetchers";
 import "./DashedEdge";
 import "./MetricCustomNode";
-import { Node } from "../api/fetchers";
+import Node from "./Node";
 import G6, {
   Graph,
   GraphData,
@@ -39,6 +39,13 @@ class Icon implements IIcon {
     this.width = width;
     this.height = height;
   }
+}
+
+function createNodeFromGraphNode(graphNode: INode): Node {
+  return {
+    id: graphNode.getID(),
+    label: graphNode.get("label") as string,
+  };
 }
 
 function formatNumber(num: number): string {
@@ -219,8 +226,8 @@ const GraphVisualization = ({
 
   const touchCallback = useCallback(
     (e: IG6GraphEvent) => {
-      const node = e.item as INode;
-      onClickNode(node.getID());
+      const node = createNodeFromGraphNode(e.item as INode);
+      onClickNode(node);
     },
     [onClickNode]
   );
@@ -228,8 +235,9 @@ const GraphVisualization = ({
   const selectCallback = useCallback(
     (e: IG6GraphEvent) => {
       if (e.target && e.target.get("type") === "node") {
-        let nodeId: string = e.target.get("id");
-        onClickNode(nodeId);
+        // let nodeId: string = e.target.get("id");
+        const node = createNodeFromGraphNode(e.item as INode); // TODO does this work or do we need to retrieve node from graph?
+        onClickNode(node);
       }
     },
     [onClickNode]
