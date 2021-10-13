@@ -162,7 +162,7 @@ class StreamsExplorer:
             try:
                 app = K8sApp.factory(item)
                 if app.is_streams_bootstrap_app():
-                    self.applications[app.name] = app
+                    self.applications[app.id] = app
             except Exception as e:
                 logger.debug(e)
 
