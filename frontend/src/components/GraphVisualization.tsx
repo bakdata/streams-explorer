@@ -173,7 +173,6 @@ const GraphVisualization = ({
   data,
   config,
   metrics,
-  refetchMetrics,
   onClickNode,
   width,
   height,
