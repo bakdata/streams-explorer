@@ -162,7 +162,7 @@ class StreamsExplorer:
             try:
                 app = K8sApp.factory(item)
                 if app.is_streams_bootstrap_app():
-                    self.applications[app.name] = app
+                    self.applications[app.id] = app
             except Exception as e:
                 logger.debug(e)
 
@@ -190,7 +190,7 @@ class StreamsExplorer:
         for cron_job in cron_jobs:
             app: Optional[K8sApp] = extractor_container.on_cron_job(cron_job)
             if app:
-                self.applications[app.name] = app
+                self.applications[app.id] = app
 
     def get_cron_jobs(self) -> List[V1beta1CronJob]:
         cron_jobs: List[V1beta1CronJob] = []
