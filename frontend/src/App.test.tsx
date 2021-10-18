@@ -51,7 +51,7 @@ function mockBackendGraph(persist?: boolean, pipelineName?: string) {
       nodes: [
         {
           id: "test-app",
-          label: "test-app",
+          label: "test-app-name",
           node_type: "streaming-app",
           icon: null,
           x: 0,
@@ -217,7 +217,7 @@ describe("Streams Explorer", () => {
         const input = within(nodeSelect).getByRole(
           "combobox"
         ) as HTMLInputElement;
-        expect(input).toHaveValue("test-app");
+        expect(input).toHaveValue("test-app-name"); // shows label
         expect(nockAppNode.isDone()).toBeTruthy();
       });
     });
