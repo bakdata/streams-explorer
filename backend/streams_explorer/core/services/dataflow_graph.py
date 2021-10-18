@@ -171,22 +171,22 @@ class DataFlowGraph:
         graph.add_node(name, label=name, node_type=NodeTypesEnum.TOPIC)
 
     @staticmethod
-    def _add_input_topic(graph: nx.DiGraph, streaming_app: str, topic_name: str):
-        graph.add_edge(topic_name, streaming_app)
+    def _add_input_topic(graph: nx.DiGraph, app_id: str, topic_name: str):
+        graph.add_edge(topic_name, app_id)
 
     def _add_output_topic(
         self,
         graph: nx.DiGraph,
-        streaming_app: str,
+        app_id: str,
         topic_name: str,
     ):
         self._add_topic(graph, topic_name)
-        graph.add_edge(streaming_app, topic_name)
+        graph.add_edge(app_id, topic_name)
 
     @staticmethod
     def _add_error_topic(
         graph: nx.DiGraph,
-        streaming_app: str,
+        app_id: str,
         topic_name: str,
     ):
         graph.add_node(
@@ -194,7 +194,7 @@ class DataFlowGraph:
             label=topic_name,
             node_type=NodeTypesEnum.ERROR_TOPIC,
         )
-        graph.add_edge(streaming_app, topic_name)
+        graph.add_edge(app_id, topic_name)
 
     def reset(self):
         self.graph = nx.DiGraph()
