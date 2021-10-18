@@ -18,7 +18,11 @@ async def update():
     logger.info("Update graph completed")
 
 
-if __name__ == "__main__":
+def start():
     # Run the main for debugging.
     # You can also use uvicorn to start the backend with auto reload on code changes:  uvicorn main:app --reload
-    uvicorn.run(app, host="0.0.0.0", port=8000)  # type: ignore
+    uvicorn.run("main:app", host="0.0.0.0", port=8000)
+
+
+if __name__ == "__main__":
+    start()
