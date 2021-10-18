@@ -88,7 +88,7 @@ exports[`Streams Explorer handles url parameters should set pipeline from url pa
             <div
               class="ant-select ant-select-auto-complete ant-select-single ant-select-allow-clear ant-select-show-search"
               data-testid="node-select"
-              style="width: 80px; max-width: 480px;"
+              style="width: 120px; max-width: 480px;"
             >
               <div
                 class="ant-select-selector"

@@ -59,7 +59,7 @@ function mockBackendGraph(persist?: boolean, pipelineName?: string) {
         },
         {
           id: "test-topic",
-          label: "test-topic",
+          label: "test-topic-name",
           node_type: "topic",
           icon: null,
           x: 10,
@@ -296,9 +296,9 @@ describe("Streams Explorer", () => {
 
       // -- set focus-node through UI
       act(() => {
-        fireEvent.change(input, { target: { value: "test-app" } });
+        fireEvent.change(input, { target: { value: "test-app-name" } });
       });
-      expect(input).toHaveValue("test-app");
+      expect(input).toHaveValue("test-app-name");
       let options = await findAllByTestId("node-option");
       expect(options).toHaveLength(1);
       act(() => {
@@ -314,9 +314,9 @@ describe("Streams Explorer", () => {
       });
 
       // -- update focus-node through UI
-      fireEvent.change(input, { target: { value: "test-topic" } });
+      fireEvent.change(input, { target: { value: "test-topic-name" } });
       await wait(() => {
-        expect(input).toHaveValue("test-topic");
+        expect(input).toHaveValue("test-topic-name");
         let options = getAllByTestId("node-option");
         fireEvent.click(options[0]);
 
