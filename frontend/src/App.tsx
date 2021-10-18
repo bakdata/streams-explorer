@@ -145,11 +145,12 @@ const App: React.FC = () => {
       setCurrentPipeline(pipeline);
     }
     const focusNode = params.get("focus-node");
-    if (!focusNode) return;
-    const node = graph?.nodes.find((node) => node.id === focusNode);
-    if (node) {
-      setFocusedNode(node);
-      setDetailNode(node);
+    if (focusNode) {
+      const node = graph?.nodes.find((node) => node.id === focusNode);
+      if (node) {
+        setFocusedNode(node);
+        setDetailNode(node);
+      }
     }
   }, [getParams, location, graph]);
 
