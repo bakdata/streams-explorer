@@ -86,7 +86,7 @@ poetry install
 4. Start the backend server
 
 ```sh
-uvicorn main:app
+poetry run start
 ```
 
 #### Frontend
