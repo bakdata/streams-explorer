@@ -26,17 +26,16 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = "^3.8"
-kubernetes = "^17.17.0"
+kubernetes = "^18.20.0"
 loguru = "^0.5.3"
-matplotlib = "^3.4.2"
-networkx = "^2.6.1"
-dynaconf = "^3.1.4"
-httpx = "^0.18.2"
+matplotlib = "^3.4.3"
+networkx = "^2.6.3"
+dynaconf = "^3.1.7"
+httpx = "^0.20.0"
 pydantic = "^1.8.2"
 fastapi-utils = "^0.2.1"
-fastapi = "^0.66.1"
-uvicorn = "^0.14.0"
-aiofiles = "^0.7.0"
+fastapi = "^0.70.0"
+uvicorn = "^0.15.0"
 pygraphviz = "^1.7"
 confluent-kafka = "^1.7.0"
 cachetools = "^4.2.2"
@@ -53,7 +52,7 @@ pytest-clarity = "^1.0.1"
 pytest-cov = "^3.0.0"
 pytest-mock = "^3.6.1"
 nest-asyncio = "^1.5.1"
-respx = "^0.17.1"
+respx = "^0.18.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
