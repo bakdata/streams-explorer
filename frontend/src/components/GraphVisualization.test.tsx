@@ -3,7 +3,25 @@ import { graphConfig } from "../graphConfiguration";
 import { updateNodeMetrics } from "./GraphVisualization";
 
 describe("visualize node metrics", () => {
-  it("should update node labels", () => {
+  it("should differentiate node id and label", () => {
+    document.body.innerHTML = '<div id="testGraph"></div>';
+    graphConfig.container = "testGraph";
+    const graph = new G6.Graph(graphConfig);
+
+    graph.data({
+      nodes: [
+        { id: "streaming-app1", label: "app1", node_type: "streaming-app" },
+      ],
+      edges: [],
+    });
+
+    graph.render();
+
+    expect(graph.findById("streaming-app1").getID()).toEqual("streaming-app1");
+    expect(graph.findById("streaming-app1").getModel().label).toEqual("app1");
+  });
+
+  it("should update node metric labels", () => {
     document.body.innerHTML = '<div id="testGraph"></div>';
     graphConfig.container = "testGraph";
     const graph = new G6.Graph(graphConfig);
