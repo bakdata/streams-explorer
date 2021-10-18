@@ -35,7 +35,7 @@ httpx = "^0.20.0"
 pydantic = "^1.8.2"
 fastapi-utils = "^0.2.1"
 fastapi = "^0.70.0"
-uvicorn = "^0.15.0"
+uvicorn = {extras = ["standard"], version = "^0.15.0"}
 pygraphviz = "^1.7"
 confluent-kafka = "^1.7.0"
 cachetools = "^4.2.2"
