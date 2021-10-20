@@ -8,17 +8,17 @@ import ReactJson from "react-json-view";
 import { DownOutlined } from "@ant-design/icons";
 
 interface SchemaProps {
-  nodeID: string;
+  nodeId: string;
 }
 
-const Schema = ({ nodeID }: SchemaProps) => {
+const Schema = ({ nodeId }: SchemaProps) => {
   const [schemaVersion, setSchemaVersion] = useState<number | null>(null);
   const {
     data: versions,
     loading: versionsLoading,
     error: versionsError,
   } = useGetNodeSchemaVersionsApiNodeNodeIdSchemaGet({
-    node_id: nodeID,
+    node_id: nodeId,
   });
 
   const menu = (
@@ -40,7 +40,7 @@ const Schema = ({ nodeID }: SchemaProps) => {
     loading: schemaLoading,
     error: schemaError,
   } = useGetNodeSchemaApiNodeNodeIdSchemaVersionGet({
-    node_id: nodeID,
+    node_id: nodeId,
     version: schemaVersion!,
     lazy: true,
   });

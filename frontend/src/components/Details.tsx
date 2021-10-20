@@ -11,12 +11,12 @@ import copy from "copy-to-clipboard";
 import Schema from "./Schema";
 
 interface DetailsProps {
-  nodeID: string;
+  nodeId: string;
 }
 
-const Details = ({ nodeID }: DetailsProps) => {
+const Details = ({ nodeId }: DetailsProps) => {
   const { data, loading, error } = useGetNodeInfoApiNodeNodeIdGet({
-    node_id: nodeID,
+    node_id: nodeId,
   });
   if (loading) {
     return (
@@ -45,7 +45,7 @@ const Details = ({ nodeID }: DetailsProps) => {
           label={nodeInfoListItem.name}
           key={nodeInfoListItem.name}
         >
-          <NodeInfoDetail infoListItem={nodeInfoListItem} nodeID={nodeID} />
+          <NodeInfoDetail infoListItem={nodeInfoListItem} nodeId={nodeId} />
         </Descriptions.Item>
       ))}
     </Descriptions>
@@ -54,14 +54,14 @@ const Details = ({ nodeID }: DetailsProps) => {
 
 interface NodeInfoDetailProps {
   infoListItem: NodeInfoListItem;
-  nodeID: string;
+  nodeId: string;
 }
 
-const NodeInfoDetail = ({ infoListItem, nodeID }: NodeInfoDetailProps) => {
+const NodeInfoDetail = ({ infoListItem, nodeId }: NodeInfoDetailProps) => {
   switch (infoListItem.type) {
     case "json":
       return infoListItem.name === "Schema" ? (
-        <Schema nodeID={nodeID} />
+        <Schema nodeId={nodeId} />
       ) : (
         <div className="jsonDetail">
           <ReactJson
@@ -74,20 +74,20 @@ const NodeInfoDetail = ({ infoListItem, nodeID }: NodeInfoDetailProps) => {
       );
 
     case "link":
-      return <LinkInfo nodeID={nodeID} infoListItem={infoListItem} />;
+      return <LinkInfo nodeId={nodeId} infoListItem={infoListItem} />;
     default:
       return <React.Fragment>{infoListItem.value}</React.Fragment>;
   }
 };
 
-const LinkInfo = ({ infoListItem, nodeID }: NodeInfoDetailProps) => {
+const LinkInfo = ({ infoListItem, nodeId }: NodeInfoDetailProps) => {
   let linkType =
     infoListItem.value !== "" && typeof infoListItem.value == "string"
       ? infoListItem.value
       : undefined;
   const { data: linkToService, loading } = useGetLinkingApiNodeLinkingNodeIdGet(
     {
-      node_id: nodeID,
+      node_id: nodeId,
       queryParams: { link_type: linkType },
     }
   );

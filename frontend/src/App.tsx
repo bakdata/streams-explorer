@@ -5,6 +5,7 @@ import {
   useGetMetricsApiMetricsGet,
   HTTPValidationError,
 } from "./api/fetchers";
+import Node from "./components/Node";
 import DetailsCard from "./components/DetailsCard";
 import GraphVisualization from "./components/GraphVisualization";
 import { graphConfig } from "./graphConfiguration";
@@ -32,8 +33,8 @@ const { Header, Content } = Layout;
 const App: React.FC = () => {
   const ALL_PIPELINES = "all pipelines";
   const [currentPipeline, setCurrentPipeline] = useState(ALL_PIPELINES);
-  const [detailNode, setDetailNode] = useState<string | null>(null);
-  const [focusedNode, setFocusedNode] = useState<string | null>(null);
+  const [detailNode, setDetailNode] = useState<Node | null>(null);
+  const [focusedNode, setFocusedNode] = useState<Node | null>(null);
   const [searchWidth, setSearchWidth] = useState<number>(300);
   const history = useHistory();
   const location = useLocation();
@@ -145,10 +146,13 @@ const App: React.FC = () => {
     }
     const focusNode = params.get("focus-node");
     if (focusNode) {
-      setFocusedNode(focusNode);
-      setDetailNode(focusNode);
+      const node = graph?.nodes.find((node) => node.id === focusNode);
+      if (node) {
+        setFocusedNode(node);
+        setDetailNode(node);
+      }
     }
-  }, [getParams, location]);
+  }, [getParams, location, graph]);
 
   useEffect(() => {
     if (graphError) {
@@ -277,20 +281,26 @@ const App: React.FC = () => {
                       .toUpperCase()
                       .indexOf(inputValue.toUpperCase()) !== -1
                   }
-                  defaultValue={focusedNode ? focusedNode : undefined}
-                  onSelect={(nodeId: string) => {
-                    setFocusedNode(nodeId);
-                    setDetailNode(nodeId);
+                  defaultValue={focusedNode ? focusedNode.label : undefined}
+                  onSelect={(_, option) => {
+                    const nodeId = option.key as string;
+                    const node = graph?.nodes.find(
+                      (node) => node.id === nodeId
+                    );
+                    if (node) {
+                      setFocusedNode(node);
+                      setDetailNode(node);
+                    }
                     pushHistoryFocusNode(nodeId);
                   }}
                 >
                   {graph?.nodes.map((node) => (
                     <Option
                       data-testid="node-option"
-                      value={node.id}
+                      value={node.label}
                       key={node.id}
                     >
-                      {node.id}
+                      {node.label}
                     </Option>
                   ))}
                 </AutoComplete>
@@ -341,7 +351,7 @@ const App: React.FC = () => {
                   config={graphConfig}
                   metrics={metrics}
                   refetchMetrics={() => refetchMetrics()}
-                  onClickNode={(nodeId: string) => setDetailNode(nodeId)}
+                  onClickNode={(node: Node) => setDetailNode(node)}
                   width={width}
                   height={height ? height - 64 : 500}
                   focusedNode={focusedNode}
@@ -364,7 +374,7 @@ const App: React.FC = () => {
                 position: "absolute",
               }}
             >
-              <DetailsCard nodeID={detailNode} />
+              <DetailsCard node={detailNode} />
             </Row>
           </Content>
         </Layout>

@@ -1,25 +1,28 @@
 import React, { useRef } from "react";
 import { Card } from "antd";
 import { useResizeDetector } from "react-resize-detector";
+import Node from "./Node";
 import Details from "./Details";
 import "./Details.css";
 
 interface DetailsCardProps {
-  nodeID: string | null;
+  node: Node | null;
 }
 
-const DetailsCard = ({ nodeID }: DetailsCardProps) => {
+const DetailsCard = ({ node }: DetailsCardProps) => {
   const ref = useRef<HTMLDivElement>(null!);
   const { width } = useResizeDetector({ targetRef: ref, handleHeight: false });
   return (
     <div ref={ref} className="details">
       <Card
-        title={nodeID ? `${nodeID} - Details` : "Click on Node  to see Details"}
+        title={
+          node ? `${node.label} - Details` : "Click on Node  to see Details"
+        }
         bodyStyle={{}}
         style={{ width: width }}
         headStyle={{ backgroundColor: "#383838", color: "white" }}
       >
-        {nodeID ? <Details nodeID={nodeID} /> : null}
+        {node ? <Details nodeId={node.id} /> : null}
       </Card>
     </div>
   );

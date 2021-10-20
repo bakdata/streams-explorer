@@ -1,6 +1,7 @@
 import { Graph as Data, Icon as IIcon, Metric } from "../api/fetchers";
 import "./DashedEdge";
 import "./MetricCustomNode";
+import Node from "./Node";
 import G6, {
   Graph,
   GraphData,
@@ -23,7 +24,7 @@ interface GraphVisualizationProps {
   onClickNode: Function;
   width: number | undefined;
   height: number | undefined;
-  focusedNode: string | null;
+  focusedNode: Node | null;
 }
 
 class Icon implements IIcon {
@@ -38,6 +39,13 @@ class Icon implements IIcon {
     this.width = width;
     this.height = height;
   }
+}
+
+function createNodeFromGraphNode(graphNode: INode): Node {
+  return {
+    id: graphNode.getID(),
+    label: graphNode.getModel().label as string,
+  };
 }
 
 function formatNumber(num: number): string {
@@ -141,12 +149,12 @@ export function updateNodeMetrics(graph: Graph, metrics: Metric[]) {
   });
 }
 
-const nodeError = (name: string) => {
-  message.error(`Node "${name}" doesn't exist`, 5);
+const nodeError = (node: Node) => {
+  message.error(`Node "${node.id}" doesn't exist`, 5);
 };
 
-function setFocusedNode(graph: Graph, focusedNode: string) {
-  const node = graph.findById(focusedNode) as INode;
+function setFocusedNode(graph: Graph, focusedNode: Node) {
+  const node = graph.findById(focusedNode.id) as INode;
   if (!node) {
     return nodeError(focusedNode);
   }
@@ -165,7 +173,6 @@ const GraphVisualization = ({
   data,
   config,
   metrics,
-  refetchMetrics,
   onClickNode,
   width,
   height,
@@ -218,8 +225,8 @@ const GraphVisualization = ({
 
   const touchCallback = useCallback(
     (e: IG6GraphEvent) => {
-      const node = e.item as INode;
-      onClickNode(node.getID());
+      const node = createNodeFromGraphNode(e.item as INode);
+      onClickNode(node);
     },
     [onClickNode]
   );
@@ -228,10 +235,14 @@ const GraphVisualization = ({
     (e: IG6GraphEvent) => {
       if (e.target && e.target.get("type") === "node") {
         let nodeId: string = e.target.get("id");
-        onClickNode(nodeId);
+        const graphNode = graph?.findById(nodeId);
+        if (graphNode) {
+          const node = createNodeFromGraphNode(graphNode as INode);
+          onClickNode(node);
+        }
       }
     },
-    [onClickNode]
+    [graph, onClickNode]
   );
 
   useEffect(() => {

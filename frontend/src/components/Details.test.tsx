@@ -34,7 +34,7 @@ describe("display node information", () => {
 
     const { getByTestId, asFragment } = render(
       <RestfulProvider base="http://localhost">
-        <Details nodeID="1" />
+        <Details nodeId="1" />
       </RestfulProvider>
     );
 
@@ -51,7 +51,7 @@ describe("display node information", () => {
 
     const { getByText, asFragment } = render(
       <RestfulProvider base="http://localhost">
-        <Details nodeID="2" />
+        <Details nodeId="2" />
       </RestfulProvider>
     );
 
@@ -68,7 +68,7 @@ describe("display node information", () => {
 
     const { getByText, asFragment } = render(
       <RestfulProvider base="http://localhost">
-        <Details nodeID="2" />
+        <Details nodeId="2" />
       </RestfulProvider>
     );
 
@@ -106,7 +106,7 @@ describe("display node information", () => {
       );
     const { getByText, asFragment } = render(
       <RestfulProvider base="http://localhost">
-        <Details nodeID="atm-fraud-transactionavroproducer" />
+        <Details nodeId="atm-fraud-transactionavroproducer" />
       </RestfulProvider>
     );
 
@@ -198,7 +198,7 @@ describe("display node information", () => {
 
     const { getByText, getByTestId } = render(
       <RestfulProvider base="http://localhost">
-        <Details nodeID="atm-fraud-incoming-transactions-topic" />
+        <Details nodeId="atm-fraud-incoming-transactions-topic" />
       </RestfulProvider>
     );
 
@@ -250,7 +250,7 @@ describe("display node information", () => {
 
     const { getByTestId } = render(
       <RestfulProvider base="http://localhost">
-        <Details nodeID="atm-fraud-incoming-transactions-topic" />
+        <Details nodeId="atm-fraud-incoming-transactions-topic" />
       </RestfulProvider>
     );
 
@@ -281,7 +281,7 @@ describe("display node information", () => {
 
     const { getByTestId } = render(
       <RestfulProvider base="http://localhost">
-        <Details nodeID="atm-fraud-incoming-transactions-topic" />
+        <Details nodeId="atm-fraud-incoming-transactions-topic" />
       </RestfulProvider>
     );
 
@@ -316,7 +316,7 @@ describe("display node information", () => {
 
     const { getByTestId } = render(
       <RestfulProvider base="http://localhost">
-        <Details nodeID="atm-fraud-incoming-transactions-topic" />
+        <Details nodeId="atm-fraud-incoming-transactions-topic" />
       </RestfulProvider>
     );
 
