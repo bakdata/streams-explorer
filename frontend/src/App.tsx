@@ -35,7 +35,7 @@ const NodeIcon = ({ nodeType }: { nodeType: string }) => (
   <img
     src={process.env.PUBLIC_URL + nodeType + ".svg"}
     alt="node-icon"
-    width="80%"
+    height="80%"
   />
 );
 
