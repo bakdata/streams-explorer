@@ -303,9 +303,9 @@ describe("Streams Explorer", () => {
 
       // -- open the search dropdown
       const trigger = nodeSelect.lastElementChild;
+      expect(trigger).not.toBeNull();
       fireEvent.mouseDown(trigger!);
 
-      // await waitForElement(() => getByTestId("node-option"));
       let options = await findAllByTestId("node-option");
       expect(options).toHaveLength(2);
       act(() => {
