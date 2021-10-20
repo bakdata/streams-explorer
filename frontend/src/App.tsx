@@ -20,6 +20,7 @@ import {
   message,
   Alert,
   AutoComplete,
+  Space,
 } from "antd";
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useResizeDetector } from "react-resize-detector";
@@ -29,6 +30,14 @@ import { useHistory, useLocation } from "react-router-dom";
 const { Option } = AutoComplete;
 
 const { Header, Content } = Layout;
+
+const NodeIcon = ({ nodeType }: { nodeType: string }) => (
+  <img
+    src={process.env.PUBLIC_URL + nodeType + ".svg"}
+    alt="node-icon"
+    width="80%"
+  />
+);
 
 const App: React.FC = () => {
   const ALL_PIPELINES = "all pipelines";
@@ -300,7 +309,10 @@ const App: React.FC = () => {
                       value={node.label}
                       key={node.id}
                     >
-                      {node.label}
+                      <Space direction="horizontal">
+                        <NodeIcon nodeType={node.node_type} />
+                        {node.label}
+                      </Space>
                     </Option>
                   ))}
                 </AutoComplete>
