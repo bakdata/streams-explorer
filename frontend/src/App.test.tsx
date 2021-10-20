@@ -100,14 +100,13 @@ describe("Streams Explorer", () => {
   });
 
   describe("renders", () => {
+    mockBackendGraph(true);
     it("without crashing", () => {
-      mockBackendGraph(false);
       render(<TestApp />);
     });
 
+    const history = createMemoryHistory();
     it("node icons in search", async () => {
-      mockBackendGraph(true);
-      const history = createMemoryHistory();
       // render App
       const { getByTestId, findAllByTestId } = render(
         <RestfulProvider base="http://localhost">
