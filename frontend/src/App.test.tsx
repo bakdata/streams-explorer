@@ -320,12 +320,17 @@ describe("Streams Explorer", () => {
         expect(nockAppNode.isDone()).toBeTruthy();
       });
 
+      // -- open the search dropdown
+      fireEvent.mouseDown(trigger!);
+
       // -- update focus-node through UI
       fireEvent.change(input, { target: { value: "test-topic-name" } });
+      expect(input).toHaveValue("test-topic-name");
+
+      options = await findAllByTestId("node-option");
+      fireEvent.click(options[1]);
       await wait(() => {
-        expect(input).toHaveValue("test-topic-name");
-        let options = getAllByTestId("node-option");
-        fireEvent.click(options[0]);
+        expect(input).toHaveValue("test-topic");
 
         // -- check focus-node updated, pipeline still present
         expect(getByTestId("location-search")).toHaveTextContent(
