@@ -259,18 +259,16 @@ describe("Streams Explorer", () => {
       history.push({ pathname: "/", search: "?pipeline=test-pipeline" });
 
       // render App
-      const { getByTestId, getAllByTestId, getByText, findAllByTestId } =
-        render(
-          <RestfulProvider base="http://localhost">
-            <Router history={history}>
-              <LocationDisplay />
-              <App />
-            </Router>
-          </RestfulProvider>
-        );
+      const { getByTestId, getByText, findAllByTestId } = render(
+        <RestfulProvider base="http://localhost">
+          <Router history={history}>
+            <LocationDisplay />
+            <App />
+          </Router>
+        </RestfulProvider>
+      );
 
       await waitForElement(() => getByTestId("graph"));
-      await waitForElement(() => getByTestId("node-select"));
       const nodeSelect = getByTestId("node-select");
       const input = within(nodeSelect).getByRole(
         "combobox"
