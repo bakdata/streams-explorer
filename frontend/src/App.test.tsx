@@ -300,8 +300,14 @@ describe("Streams Explorer", () => {
         fireEvent.change(input, { target: { value: "test-app-name" } });
       });
       expect(input).toHaveValue("test-app-name");
+
+      // -- open the search dropdown
+      const trigger = nodeSelect.lastElementChild;
+      fireEvent.mouseDown(trigger!);
+
+      // await waitForElement(() => getByTestId("node-option"));
       let options = await findAllByTestId("node-option");
-      expect(options).toHaveLength(1);
+      expect(options).toHaveLength(2);
       act(() => {
         fireEvent.click(options[0]);
       });
