@@ -291,11 +291,8 @@ const App: React.FC = () => {
                       .indexOf(inputValue.toUpperCase()) !== -1
                   }
                   defaultValue={focusedNode ? focusedNode.label : undefined}
-                  onSelect={(_, option) => {
-                    const nodeId = option.key as string;
-                    const node = graph?.nodes.find(
-                      (node) => node.id === nodeId
-                    );
+                  onSelect={(nodeId, option) => {
+                    const node = option.node as Node;
                     if (node) {
                       setFocusedNode(node);
                       setDetailNode(node);
@@ -306,8 +303,9 @@ const App: React.FC = () => {
                   {graph?.nodes.map((node) => (
                     <Option
                       data-testid="node-option"
-                      value={node.label}
+                      value={node.id}
                       key={node.id}
+                      node={node}
                     >
                       <Space direction="horizontal">
                         <NodeIcon nodeType={node.node_type} />
