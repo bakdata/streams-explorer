@@ -100,9 +100,45 @@ describe("Streams Explorer", () => {
   });
 
   describe("renders", () => {
-    mockBackendGraph(false);
     it("without crashing", () => {
+      mockBackendGraph(false);
       render(<TestApp />);
+    });
+
+    it("node icons in search", async () => {
+      mockBackendGraph(true);
+      const history = createMemoryHistory();
+      // render App
+      const { getByTestId, findAllByTestId } = render(
+        <RestfulProvider base="http://localhost">
+          <Router history={history}>
+            <App />
+          </Router>
+        </RestfulProvider>
+      );
+
+      await waitForElement(() => getByTestId("graph"));
+      const nodeSelect = getByTestId("node-select");
+
+      // -- open the search dropdown
+      const trigger = nodeSelect.lastElementChild;
+      expect(trigger).not.toBeNull();
+      fireEvent.mouseDown(trigger!);
+
+      let options = await findAllByTestId("node-option");
+      expect(options).toHaveLength(2);
+      expect(within(options[0]).getByText("test-app-name")).toBeInTheDocument();
+      expect(within(options[0]).getByAltText("node-icon")).toHaveAttribute(
+        "src",
+        "streaming-app.svg"
+      );
+      expect(
+        within(options[1]).getByText("test-topic-name")
+      ).toBeInTheDocument();
+      expect(within(options[1]).getByAltText("node-icon")).toHaveAttribute(
+        "src",
+        "topic.svg"
+      );
     });
   });
 
@@ -253,42 +289,6 @@ describe("Streams Explorer", () => {
         ) as HTMLInputElement;
         expect(input).toBeEmpty();
       });
-    });
-
-    it("should show node icons in search", async () => {
-      history.push({ pathname: "/" });
-      // render App
-      const { getByTestId, findAllByTestId } = render(
-        <RestfulProvider base="http://localhost">
-          <Router history={history}>
-            <LocationDisplay />
-            <App />
-          </Router>
-        </RestfulProvider>
-      );
-
-      await waitForElement(() => getByTestId("graph"));
-      const nodeSelect = getByTestId("node-select");
-
-      // -- open the search dropdown
-      const trigger = nodeSelect.lastElementChild;
-      expect(trigger).not.toBeNull();
-      fireEvent.mouseDown(trigger!);
-
-      let options = await findAllByTestId("node-option");
-      expect(options).toHaveLength(2);
-      expect(within(options[0]).getByText("test-app-name")).toBeInTheDocument();
-      expect(within(options[0]).getByAltText("node-icon")).toHaveAttribute(
-        "src",
-        "streaming-app.svg"
-      );
-      expect(
-        within(options[1]).getByText("test-topic-name")
-      ).toBeInTheDocument();
-      expect(within(options[1]).getByAltText("node-icon")).toHaveAttribute(
-        "src",
-        "topic.svg"
-      );
     });
 
     it("should update focus-node & pipeline parameters", async () => {
