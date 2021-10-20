@@ -1,16 +1,14 @@
 from __future__ import annotations
 
 import dataclasses
-from typing import Dict, List, Optional, Set, Type, Union
+from typing import Dict, List, Optional, Set, Type, TypedDict, Union
 
-from kubernetes.client import (
-    V1beta1CronJob,
-    V1Container,
-    V1Deployment,
-    V1ObjectMeta,
-    V1PodSpec,
-    V1StatefulSet,
-)
+from kubernetes.client.models.v1_container import V1Container
+from kubernetes.client.models.v1_deployment import V1Deployment
+from kubernetes.client.models.v1_object_meta import V1ObjectMeta
+from kubernetes.client.models.v1_pod_spec import V1PodSpec
+from kubernetes.client.models.v1_stateful_set import V1StatefulSet
+from kubernetes.client.models.v1beta1_cron_job import V1beta1CronJob
 from loguru import logger
 
 from streams_explorer.core.config import settings
@@ -54,7 +52,7 @@ class K8sApp:
     def extract_config(self) -> K8sConfig:
         return config_parser(self).parse()
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> TypedDict:
         return self.k8s_object.to_dict()
 
     def get_pipeline(self) -> Optional[str]:
@@ -136,6 +134,7 @@ class K8sApp:
 
 class K8sAppCronJob(K8sApp):
     def __init__(self, k8s_object: V1beta1CronJob):
+        self.k8s_object: V1beta1CronJob
         super().__init__(k8s_object)
 
     def setup(self):
@@ -172,11 +171,13 @@ class K8sAppCronJob(K8sApp):
 
 class K8sAppDeployment(K8sApp):
     def __init__(self, k8s_object: V1Deployment):
+        self.k8s_object: V1Deployment
         super().__init__(k8s_object)
 
 
 class K8sAppStatefulSet(K8sApp):
     def __init__(self, k8s_object: V1StatefulSet):
+        self.k8s_object: V1StatefulSet
         super().__init__(k8s_object)
 
     def get_service_name(self) -> str | None:
