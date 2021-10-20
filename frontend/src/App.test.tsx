@@ -270,6 +270,7 @@ describe("Streams Explorer", () => {
         );
 
       await waitForElement(() => getByTestId("graph"));
+      await waitForElement(() => getByTestId("node-select"));
       const nodeSelect = getByTestId("node-select");
       const input = within(nodeSelect).getByRole(
         "combobox"
