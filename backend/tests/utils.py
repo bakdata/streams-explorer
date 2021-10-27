@@ -26,16 +26,16 @@ class ConfigType(str, Enum):
 
 
 def get_streaming_app_deployment(
-    name="test-app",
-    input_topics="input-topic",
-    output_topic="output-topic",
-    error_topic="error-topic",
-    multiple_inputs=None,
-    multiple_outputs=None,
+    name: str = "test-app",
+    input_topics: str = "input-topic",
+    output_topic: str = "output-topic",
+    error_topic: str = "error-topic",
+    multiple_inputs: Optional[str] = None,
+    multiple_outputs: Optional[str] = None,
     extra: Dict[str, str] = {},
-    env_prefix="APP_",
-    pipeline=None,
-    consumer_group=None,
+    env_prefix: str = "APP_",
+    pipeline: Optional[str] = None,
+    consumer_group: Optional[str] = None,
     config_type: ConfigType = ConfigType.ENV,
 ) -> V1Deployment:
     template = get_template(
