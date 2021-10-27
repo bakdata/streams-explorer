@@ -34,6 +34,9 @@ class TestStreamsExplorer:
     def deployments(self):
         return [
             get_streaming_app_deployment(
+                "non-streams-app-deployment", input_topics="", output_topic=""
+            ),
+            get_streaming_app_deployment(
                 "streaming-app1", "input-topic1", "output-topic1", "error-topic1"
             ),
             get_streaming_app_deployment(
@@ -163,6 +166,7 @@ class TestStreamsExplorer:
     async def test_update(self, streams_explorer: StreamsExplorer):
         await streams_explorer.update()
         assert len(streams_explorer.applications) == 3
+        assert "non-streams-app-deployment" not in streams_explorer.applications
         assert "non-streams-app-cronjob" not in streams_explorer.applications
         assert len(streams_explorer.kafka_connectors) == 2
 
