@@ -166,6 +166,9 @@ class TestStreamsExplorer:
     async def test_update(self, streams_explorer: StreamsExplorer):
         await streams_explorer.update()
         assert len(streams_explorer.applications) == 3
+        assert "streaming-app1" in streams_explorer.applications
+        assert "streaming-app2" in streams_explorer.applications
+        assert "streaming-app3" in streams_explorer.applications
         assert "non-streams-app-deployment" not in streams_explorer.applications
         assert "non-streams-app-cronjob" not in streams_explorer.applications
         assert len(streams_explorer.kafka_connectors) == 2
