@@ -126,18 +126,14 @@ describe("Streams Explorer", () => {
 
       let options = await findAllByTestId("node-option");
       expect(options).toHaveLength(2);
-      expect(within(options[0]).getByText("test-app-name")).toBeInTheDocument();
-      expect(within(options[0]).getByAltText("node-icon")).toHaveAttribute(
-        "src",
-        "streaming-app.svg"
-      );
-      expect(
-        within(options[1]).getByText("test-topic-name")
-      ).toBeInTheDocument();
-      expect(within(options[1]).getByAltText("node-icon")).toHaveAttribute(
-        "src",
-        "topic.svg"
-      );
+      let iconApp = within(options[0]).getByTestId("node-icon");
+      expect(iconApp).toBeInTheDocument();
+      expect(iconApp).toHaveAttribute("src", "streaming-app.svg");
+      expect(iconApp).toHaveProperty("alt", "streaming-app-icon");
+      let iconTopic = within(options[1]).getByTestId("node-icon");
+      expect(iconTopic).toBeInTheDocument();
+      expect(iconTopic).toHaveAttribute("src", "topic.svg");
+      expect(iconTopic).toHaveProperty("alt", "topic-icon");
     });
   });
 

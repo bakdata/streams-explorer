@@ -36,6 +36,7 @@ const NodeIcon = ({ nodeType }: { nodeType: string }) => (
     src={process.env.PUBLIC_URL + nodeType + ".svg"}
     alt={nodeType + "-icon"}
     height="80%"
+    data-testid="node-icon"
   />
 );
 
