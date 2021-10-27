@@ -54,7 +54,12 @@ class TestStreamsExplorer:
 
     @pytest.fixture()
     def cron_jobs(self):
-        return [get_streaming_app_cronjob()]
+        return [
+            get_streaming_app_cronjob(
+                "non-streams-app-cronjob", input_topics="", output_topic=""
+            ),
+            get_streaming_app_cronjob(),
+        ]
 
     @pytest.fixture()
     def fake_linker(self, mocker):
@@ -158,6 +163,7 @@ class TestStreamsExplorer:
     async def test_update(self, streams_explorer: StreamsExplorer):
         await streams_explorer.update()
         assert len(streams_explorer.applications) == 3
+        assert "non-streams-app-cronjob" not in streams_explorer.applications
         assert len(streams_explorer.kafka_connectors) == 2
 
     @pytest.mark.asyncio
