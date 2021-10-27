@@ -35,7 +35,7 @@ const NodeIcon = ({ nodeType }: { nodeType: string }) => (
   <img
     src={nodeType + ".svg"}
     alt={nodeType + "-icon"}
-    height="80%"
+    height="18px"
     data-testid="node-icon"
   />
 );
