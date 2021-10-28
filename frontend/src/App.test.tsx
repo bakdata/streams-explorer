@@ -100,9 +100,40 @@ describe("Streams Explorer", () => {
   });
 
   describe("renders", () => {
-    mockBackendGraph(false);
+    mockBackendGraph(true);
     it("without crashing", () => {
       render(<TestApp />);
+    });
+
+    const history = createMemoryHistory();
+    it("node icons in search", async () => {
+      // render App
+      const { getByTestId, findAllByTestId } = render(
+        <RestfulProvider base="http://localhost">
+          <Router history={history}>
+            <App />
+          </Router>
+        </RestfulProvider>
+      );
+
+      await waitForElement(() => getByTestId("graph"));
+      const nodeSelect = getByTestId("node-select");
+
+      // -- open the search dropdown
+      const trigger = nodeSelect.lastElementChild;
+      expect(trigger).not.toBeNull();
+      fireEvent.mouseDown(trigger!);
+
+      let options = await findAllByTestId("node-option");
+      expect(options).toHaveLength(2);
+      let iconApp = within(options[0]).getByTestId("node-icon");
+      expect(iconApp).toBeInTheDocument();
+      expect(iconApp).toHaveAttribute("src", "streaming-app.svg");
+      expect(iconApp).toHaveProperty("alt", "streaming-app-icon");
+      let iconTopic = within(options[1]).getByTestId("node-icon");
+      expect(iconTopic).toBeInTheDocument();
+      expect(iconTopic).toHaveAttribute("src", "topic.svg");
+      expect(iconTopic).toHaveProperty("alt", "topic-icon");
     });
   });
 
@@ -259,15 +290,14 @@ describe("Streams Explorer", () => {
       history.push({ pathname: "/", search: "?pipeline=test-pipeline" });
 
       // render App
-      const { getByTestId, getAllByTestId, getByText, findAllByTestId } =
-        render(
-          <RestfulProvider base="http://localhost">
-            <Router history={history}>
-              <LocationDisplay />
-              <App />
-            </Router>
-          </RestfulProvider>
-        );
+      const { getByTestId, getByText, findAllByTestId } = render(
+        <RestfulProvider base="http://localhost">
+          <Router history={history}>
+            <LocationDisplay />
+            <App />
+          </Router>
+        </RestfulProvider>
+      );
 
       await waitForElement(() => getByTestId("graph"));
       const nodeSelect = getByTestId("node-select");
@@ -299,8 +329,14 @@ describe("Streams Explorer", () => {
         fireEvent.change(input, { target: { value: "test-app-name" } });
       });
       expect(input).toHaveValue("test-app-name");
+
+      // -- open the search dropdown
+      const trigger = nodeSelect.lastElementChild;
+      expect(trigger).not.toBeNull();
+      fireEvent.mouseDown(trigger!);
+
       let options = await findAllByTestId("node-option");
-      expect(options).toHaveLength(1);
+      expect(options).toHaveLength(2);
       act(() => {
         fireEvent.click(options[0]);
       });
@@ -313,12 +349,17 @@ describe("Streams Explorer", () => {
         expect(nockAppNode.isDone()).toBeTruthy();
       });
 
+      // -- open the search dropdown
+      fireEvent.mouseDown(trigger!);
+
       // -- update focus-node through UI
       fireEvent.change(input, { target: { value: "test-topic-name" } });
+      expect(input).toHaveValue("test-topic-name");
+
+      options = await findAllByTestId("node-option");
+      fireEvent.click(options[1]);
       await wait(() => {
-        expect(input).toHaveValue("test-topic-name");
-        let options = getAllByTestId("node-option");
-        fireEvent.click(options[0]);
+        expect(input).toHaveValue("test-topic");
 
         // -- check focus-node updated, pipeline still present
         expect(getByTestId("location-search")).toHaveTextContent(

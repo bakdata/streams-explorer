@@ -20,6 +20,7 @@ import {
   message,
   Alert,
   AutoComplete,
+  Space,
 } from "antd";
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useResizeDetector } from "react-resize-detector";
@@ -29,6 +30,15 @@ import { useHistory, useLocation } from "react-router-dom";
 const { Option } = AutoComplete;
 
 const { Header, Content } = Layout;
+
+const NodeIcon = ({ nodeType }: { nodeType: string }) => (
+  <img
+    src={nodeType + ".svg"}
+    alt={nodeType + "-icon"}
+    height="18px"
+    data-testid="node-icon"
+  />
+);
 
 const App: React.FC = () => {
   const ALL_PIPELINES = "all pipelines";
@@ -282,11 +292,8 @@ const App: React.FC = () => {
                       .indexOf(inputValue.toUpperCase()) !== -1
                   }
                   defaultValue={focusedNode ? focusedNode.label : undefined}
-                  onSelect={(_, option) => {
-                    const nodeId = option.key as string;
-                    const node = graph?.nodes.find(
-                      (node) => node.id === nodeId
-                    );
+                  onSelect={(nodeId, option) => {
+                    const node = option.node as Node;
                     if (node) {
                       setFocusedNode(node);
                       setDetailNode(node);
@@ -297,10 +304,14 @@ const App: React.FC = () => {
                   {graph?.nodes.map((node) => (
                     <Option
                       data-testid="node-option"
-                      value={node.label}
+                      value={node.id}
                       key={node.id}
+                      node={node}
                     >
-                      {node.label}
+                      <Space direction="horizontal">
+                        <NodeIcon nodeType={node.node_type} />
+                        {node.label}
+                      </Space>
                     </Option>
                   ))}
                 </AutoComplete>
