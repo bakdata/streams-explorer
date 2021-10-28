@@ -36,6 +36,7 @@ settings: Any = Dynaconf(
         Validator("kafkaconnect.displayed_information", is_type_of=list, default=[]),
         Validator("schemaregistry.url", default=None),
         Validator("prometheus.url", must_exist=True, is_type_of=str),
+        Validator("grafana.enable", is_type_of=bool, default=False),
         Validator("grafana.dashboards.topics", is_type_of=str),
         Validator("grafana.dashboards.consumergroups", is_type_of=str),
         Validator("akhq.enable", is_type_of=bool, default=False),
