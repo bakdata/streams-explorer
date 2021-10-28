@@ -10,6 +10,7 @@ class DefaultLinker(LinkingService):
     sink_source_redirects = {"elasticsearch-index"}
 
     def __init__(self):
+        super().__init__()
         self.sink_source_info = {
             "elasticsearch-index": [
                 NodeInfoListItem(name="Kibana", value="", type=NodeInfoType.LINK)

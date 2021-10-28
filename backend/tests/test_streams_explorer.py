@@ -65,21 +65,21 @@ class TestStreamsExplorer:
         ]
 
     @pytest.fixture()
-    def fake_linker(self, mocker):
+    def fake_linker(self):
         """Creates LinkingService with non-default NodeInfoListItems."""
 
-        def fake_linker_init(self):
-            self.topic_info = [
-                NodeInfoListItem(
-                    name="Test Topic Monitoring", value="test", type=NodeInfoType.LINK
-                ),
-            ]
+        class FakeLinker(DefaultLinker):
+            def __init__(self):
+                super().__init__()
+                self.topic_info = [
+                    NodeInfoListItem(
+                        name="Test Topic Monitoring",
+                        value="test",
+                        type=NodeInfoType.LINK,
+                    ),
+                ]
 
-        mocker.patch(
-            "streams_explorer.defaultlinker.DefaultLinker.__init__",
-            fake_linker_init,
-        )
-        return DefaultLinker()
+        return FakeLinker()
 
     @pytest.fixture()
     def streams_explorer(
