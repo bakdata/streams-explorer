@@ -170,7 +170,6 @@ class TestStreamsExplorer:
         assert "streaming-app2" in streams_explorer.applications
         assert "streaming-app3" in streams_explorer.applications
         assert "non-streams-app-deployment" not in streams_explorer.applications
-        assert "non-streams-app-cronjob" not in streams_explorer.applications
         assert len(streams_explorer.kafka_connectors) == 2
 
     @pytest.mark.asyncio
@@ -286,6 +285,7 @@ class TestStreamsExplorer:
         assert extractor.cron_job.metadata is not None
         assert extractor.cron_job.metadata.name == "test-cronjob"
         assert "test-cronjob" in streams_explorer.applications
+        assert "non-streams-app-cronjob" not in streams_explorer.applications
         extractor_container.extractors = []
 
     @pytest.mark.asyncio
