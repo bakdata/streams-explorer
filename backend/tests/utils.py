@@ -10,6 +10,7 @@ from kubernetes.client import (
     V1DeploymentSpec,
     V1EnvVar,
     V1JobSpec,
+    V1LabelSelector,
     V1ObjectMeta,
     V1PodSpec,
     V1PodTemplateSpec,
@@ -27,9 +28,9 @@ class ConfigType(str, Enum):
 
 def get_streaming_app_deployment(
     name: str = "test-app",
-    input_topics: str = "input-topic",
-    output_topic: str = "output-topic",
-    error_topic: str = "error-topic",
+    input_topics: Optional[str] = "input-topic",
+    output_topic: Optional[str] = "output-topic",
+    error_topic: Optional[str] = "error-topic",
     multiple_inputs: Optional[str] = None,
     multiple_outputs: Optional[str] = None,
     extra: Dict[str, str] = {},
@@ -49,9 +50,7 @@ def get_streaming_app_deployment(
         consumer_group=consumer_group,
         config_type=config_type,
     )
-    spec = V1DeploymentSpec(
-        template=template, selector="app=test-app,release=test-release"
-    )
+    spec = V1DeploymentSpec(template=template, selector=V1LabelSelector())
     metadata = get_metadata(name, pipeline=pipeline)
     return V1Deployment(metadata=metadata, spec=spec)
 
@@ -85,7 +84,7 @@ def get_streaming_app_stateful_set(
     spec = V1StatefulSetSpec(
         service_name=service_name,
         template=template,
-        selector="app=test-app,release=test-release",
+        selector=V1LabelSelector(),
     )
 
     return V1StatefulSet(metadata=metadata, spec=spec)
@@ -93,9 +92,9 @@ def get_streaming_app_stateful_set(
 
 def get_streaming_app_cronjob(
     name: str = "test-cronjob",
-    input_topics: str = "",
-    output_topic: str = "output-topic",
-    error_topic: str = "error-topic",
+    input_topics: Optional[str] = None,
+    output_topic: Optional[str] = "output-topic",
+    error_topic: Optional[str] = "error-topic",
     env_prefix: str = "APP_",
     pipeline: Optional[str] = None,
 ) -> V1beta1CronJob:
@@ -110,7 +109,7 @@ def get_streaming_app_cronjob(
     pod_template_spec = V1PodTemplateSpec(spec=pod_spec)
     job_spec = V1JobSpec(
         template=pod_template_spec,
-        selector="",
+        selector=None,
     )
     job_template = V1beta1JobTemplateSpec(spec=job_spec)
     spec = V1beta1CronJobSpec(job_template=job_template, schedule="* * * * *")
@@ -136,21 +135,21 @@ def get_metadata(name, pipeline=None) -> V1ObjectMeta:
 
 
 def get_env(
-    input_topics: str,
-    output_topic: str,
-    error_topic: str,
+    input_topics: Optional[str],
+    output_topic: Optional[str],
+    error_topic: Optional[str],
     multiple_inputs: Optional[str] = None,
     multiple_outputs: Optional[str] = None,
     extra: Dict[str, str] = {},
     env_prefix: str = "APP_",
 ) -> List[V1EnvVar]:
-    env = [
-        V1EnvVar(name="ENV_PREFIX", value=env_prefix),
-        V1EnvVar(name=env_prefix + "OUTPUT_TOPIC", value=output_topic),
-        V1EnvVar(name=env_prefix + "ERROR_TOPIC", value=error_topic),
-    ]
+    env = [V1EnvVar(name="ENV_PREFIX", value=env_prefix)]
     if input_topics:
         env.append(V1EnvVar(name=env_prefix + "INPUT_TOPICS", value=input_topics))
+    if output_topic:
+        env.append(V1EnvVar(name=env_prefix + "OUTPUT_TOPIC", value=output_topic))
+    if error_topic:
+        env.append(V1EnvVar(name=env_prefix + "ERROR_TOPIC", value=error_topic))
     if multiple_inputs:
         env.append(
             V1EnvVar(name=env_prefix + "EXTRA_INPUT_TOPICS", value=multiple_inputs)
@@ -170,19 +169,20 @@ def _create_arg(name: str, value: str) -> str:
 
 
 def get_args(
-    input_topics: str,
-    output_topic: str,
-    error_topic: str,
+    input_topics: Optional[str],
+    output_topic: Optional[str],
+    error_topic: Optional[str],
     multiple_inputs: Optional[str],
     multiple_outputs: Optional[str],
     extra: Dict[str, str],
 ) -> List[str]:
-    args = [
-        _create_arg("output-topic", output_topic),
-        _create_arg("error-topic", error_topic),
-    ]
+    args = []
     if input_topics:
         args.append(_create_arg("input-topics", input_topics))
+    if output_topic:
+        args.append(_create_arg("output-topic", output_topic))
+    if error_topic:
+        args.append(_create_arg("error-topic", error_topic))
     if multiple_inputs:
         args.append(_create_arg("extra-input-topics", multiple_inputs))
     if multiple_outputs:
@@ -194,9 +194,9 @@ def get_args(
 
 
 def get_template(
-    input_topics: str,
-    output_topic: str,
-    error_topic: str,
+    input_topics: Optional[str],
+    output_topic: Optional[str],
+    error_topic: Optional[str],
     multiple_inputs: Optional[str],
     multiple_outputs: Optional[str],
     extra: Dict[str, str],

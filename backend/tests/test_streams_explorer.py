@@ -34,7 +34,7 @@ class TestStreamsExplorer:
     def deployments(self):
         return [
             get_streaming_app_deployment(
-                "non-streams-app-deployment", input_topics="", output_topic=""
+                "non-streams-app-deployment", input_topics=None, output_topic=None
             ),
             get_streaming_app_deployment(
                 "streaming-app1", "input-topic1", "output-topic1", "error-topic1"
@@ -59,7 +59,7 @@ class TestStreamsExplorer:
     def cron_jobs(self):
         return [
             get_streaming_app_cronjob(
-                "non-streams-app-cronjob", input_topics="", output_topic=""
+                "non-streams-app-cronjob", input_topics=None, output_topic=None
             ),
             get_streaming_app_cronjob(),
         ]

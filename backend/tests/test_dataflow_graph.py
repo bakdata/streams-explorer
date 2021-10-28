@@ -199,7 +199,7 @@ class TestDataFlowGraph:
         df.add_streaming_app(
             K8sApp.factory(
                 get_streaming_app_cronjob(
-                    error_topic="",
+                    error_topic=None,
                     pipeline="pipeline1",
                 )
             )
@@ -208,7 +208,7 @@ class TestDataFlowGraph:
             K8sApp.factory(
                 get_streaming_app_deployment(
                     input_topics="output-topic",
-                    error_topic="",
+                    error_topic=None,
                     output_topic="output-topic2",
                     pipeline="pipeline1",
                 )
@@ -326,7 +326,7 @@ class TestDataFlowGraph:
                 get_streaming_app_deployment(
                     name="test-app1",
                     input_topics="input-topic1",
-                    error_topic="",
+                    error_topic=None,
                     output_topic="output-topic1",
                     pipeline="pipeline1",
                 )
@@ -337,7 +337,7 @@ class TestDataFlowGraph:
                 get_streaming_app_deployment(
                     name="test-app2",
                     input_topics="input-topic2",
-                    error_topic="",
+                    error_topic=None,
                     output_topic="output-topic2",
                     pipeline="pipeline2",
                 )
@@ -400,7 +400,7 @@ class TestDataFlowGraph:
                 get_streaming_app_deployment(
                     name="test-app1",
                     input_topics="input-topic1",
-                    error_topic="",
+                    error_topic=None,
                     output_topic="output-topic1",
                     pipeline="pipeline1",
                 )
@@ -411,7 +411,7 @@ class TestDataFlowGraph:
                 get_streaming_app_deployment(
                     name="test-app2",
                     input_topics="output-topic1",
-                    error_topic="",
+                    error_topic=None,
                     output_topic="output-topic2",
                     pipeline="pipeline2",
                 )
