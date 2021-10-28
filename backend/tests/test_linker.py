@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import List
 
 import pytest
 from dynaconf.validator import ValidationError
@@ -7,6 +8,7 @@ from streams_explorer.core.config import settings
 from streams_explorer.core.services.linking_services import LinkingService
 from streams_explorer.defaultlinker import DefaultLinker
 from streams_explorer.linker import load_linker
+from streams_explorer.models.node_information import NodeInfoListItem
 
 fake_linker = """from typing import Optional
 
@@ -50,6 +52,10 @@ def test_load_plugin_linker():
         settings.plugins.path = "./plugins"
 
 
+def get_info_providers(info_list: List[NodeInfoListItem]):
+    return [info_item.value for info_item in info_list]
+
+
 def test_default_linker_akhq():
     settings.akhq.enable = True
     settings.kowl.enable = False
@@ -57,28 +63,22 @@ def test_default_linker_akhq():
 
     linking_service = DefaultLinker()
 
-    # topics
-    topic_info = [info_item.value for info_item in linking_service.topic_info]
+    topic_info = get_info_providers(linking_service.topic_info)
     assert "akhq" in topic_info
     assert "kowl" not in topic_info
 
-    # apps
-    streaming_app_info = [
-        info_item.value for info_item in linking_service.streaming_app_info
-    ]
+    streaming_app_info = get_info_providers(linking_service.streaming_app_info)
     assert "akhq" in streaming_app_info
     assert "kowl" not in streaming_app_info
 
-    # connectors
-    connector_info = [info_item.value for info_item in linking_service.connector_info]
+    connector_info = get_info_providers(linking_service.connector_info)
     assert "akhq" in connector_info
     assert "akhq-connect" not in connector_info
     assert "kowl" not in connector_info
 
     settings.akhq.connect = "kafka-connect"
     linking_service = DefaultLinker()
-    connector_info = [info_item.value for info_item in linking_service.connector_info]
-    assert "akhq-connect" in connector_info
+    assert "akhq-connect" in get_info_providers(linking_service.connector_info)
 
 
 def test_default_linker_kowl():
@@ -88,20 +88,15 @@ def test_default_linker_kowl():
 
     linking_service = DefaultLinker()
 
-    # topics
-    topic_info = [info_item.value for info_item in linking_service.topic_info]
+    topic_info = get_info_providers(linking_service.topic_info)
     assert "kowl" in topic_info
     assert "akhq" not in topic_info
 
-    # apps
-    streaming_app_info = [
-        info_item.value for info_item in linking_service.streaming_app_info
-    ]
+    streaming_app_info = get_info_providers(linking_service.streaming_app_info)
     assert "kowl" in streaming_app_info
     assert "akhq" not in streaming_app_info
 
-    # connectors
-    connector_info = [info_item.value for info_item in linking_service.connector_info]
+    connector_info = get_info_providers(linking_service.connector_info)
     assert "kowl" in connector_info
     assert "akhq" not in connector_info
     assert "akhq-connect" not in connector_info
@@ -125,9 +120,7 @@ def test_default_linker_kibanalogs():
 
     linking_service = DefaultLinker()
 
-    streaming_app_info = [
-        info_item.value for info_item in linking_service.streaming_app_info
-    ]
+    streaming_app_info = get_info_providers(linking_service.streaming_app_info)
     assert "kibanalogs" in streaming_app_info
     assert "loki" not in streaming_app_info
 
@@ -139,9 +132,7 @@ def test_default_linker_loki():
 
     linking_service = DefaultLinker()
 
-    streaming_app_info = [
-        info_item.value for info_item in linking_service.streaming_app_info
-    ]
+    streaming_app_info = get_info_providers(linking_service.streaming_app_info)
     assert "loki" in streaming_app_info
     assert "kibanalogs" not in streaming_app_info
 
@@ -155,3 +146,25 @@ def test_default_linker_kibanalogs_loki():
     settings.kibanalogs.enable = False
     settings.loki.enable = False
     settings.validators.validate()
+
+
+def test_default_linker_grafana_enabled():
+    settings.grafana.enable = True
+    settings.validators.validate()
+
+    linking_service = DefaultLinker()
+
+    assert "grafana" in get_info_providers(linking_service.topic_info)
+    assert "grafana" in get_info_providers(linking_service.streaming_app_info)
+    assert "grafana" in get_info_providers(linking_service.connector_info)
+
+
+def test_default_linker_grafana_disabled():
+    del settings.grafana.enable
+    settings.validators.validate()
+
+    linking_service = DefaultLinker()
+
+    assert "grafana" not in get_info_providers(linking_service.topic_info)
+    assert "grafana" not in get_info_providers(linking_service.streaming_app_info)
+    assert "grafana" not in get_info_providers(linking_service.connector_info)

@@ -7,28 +7,28 @@ from streams_explorer.models.node_information import NodeInfoListItem, NodeInfoT
 
 
 class DefaultLinker(LinkingService):
-    sink_source_redirects = {"elasticsearch-index"}
-
     def __init__(self):
-        grafana_consumer_link = NodeInfoListItem(
-            name="Consumer Group Monitoring", value="grafana", type=NodeInfoType.LINK
-        )
-        self.topic_info = [
-            NodeInfoListItem(
-                name="Topic Monitoring", value="grafana", type=NodeInfoType.LINK
-            ),
-        ]
-        self.streaming_app_info = [
-            grafana_consumer_link,
-        ]
-        self.connector_info = [
-            grafana_consumer_link,
-        ]
+        super().__init__()
+        self.sink_source_redirects = {"elasticsearch-index"}
         self.sink_source_info = {
             "elasticsearch-index": [
                 NodeInfoListItem(name="Kibana", value="", type=NodeInfoType.LINK)
             ]
         }
+
+        if settings.grafana.enable:
+            self.add_topic_info_item(
+                NodeInfoListItem(
+                    name="Topic Monitoring", value="grafana", type=NodeInfoType.LINK
+                )
+            )
+            grafana_consumer_link = NodeInfoListItem(
+                name="Consumer Group Monitoring",
+                value="grafana",
+                type=NodeInfoType.LINK,
+            )
+            self.add_streaming_app_info_item(grafana_consumer_link)
+            self.add_connector_info_item(grafana_consumer_link)
 
         if settings.akhq.enable:
             self.add_message_provider("akhq")

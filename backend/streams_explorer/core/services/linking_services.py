@@ -1,16 +1,17 @@
 from collections import defaultdict
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Set
 
 from streams_explorer.core.k8s_app import K8sApp
 from streams_explorer.models.node_information import NodeInfoListItem
 
 
 class LinkingService:
-    sink_source_redirects: set = set()
-    _connector_info: List[NodeInfoListItem] = []
-    _streaming_app_info: List[NodeInfoListItem] = []
-    _topic_info: List[NodeInfoListItem] = []
-    _sink_source_info: Dict[str, List[NodeInfoListItem]] = defaultdict(list)
+    def __init__(self):
+        self.sink_source_redirects: Set[str] = set()
+        self._connector_info: List[NodeInfoListItem] = []
+        self._streaming_app_info: List[NodeInfoListItem] = []
+        self._topic_info: List[NodeInfoListItem] = []
+        self._sink_source_info: Dict[str, List[NodeInfoListItem]] = defaultdict(list)
 
     @property
     def connector_info(self):

@@ -68,6 +68,7 @@ kowl:
   url: "http://localhost:8080"
 
 grafana:
+  enable: false
   url: "http://localhost:3000"
   dashboards:
     topics: "path/to/dashboard"
