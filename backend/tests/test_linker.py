@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import List
 
 import pytest
 from dynaconf.validator import ValidationError
@@ -7,6 +8,7 @@ from streams_explorer.core.config import settings
 from streams_explorer.core.services.linking_services import LinkingService
 from streams_explorer.defaultlinker import DefaultLinker
 from streams_explorer.linker import load_linker
+from streams_explorer.models.node_information import NodeInfoListItem
 
 fake_linker = """from typing import Optional
 
@@ -48,6 +50,10 @@ def test_load_plugin_linker():
     finally:
         fake_linker_path.unlink()
         settings.plugins.path = "./plugins"
+
+
+def get_info_providers(info_list: List[NodeInfoListItem]):
+    return [info_item.value for info_item in info_list]
 
 
 def test_default_linker_akhq():
@@ -155,3 +161,25 @@ def test_default_linker_kibanalogs_loki():
     settings.kibanalogs.enable = False
     settings.loki.enable = False
     settings.validators.validate()
+
+
+def test_default_linker_grafana_enabled():
+    settings.grafana.enable = True
+    settings.validators.validate()
+
+    linking_service = DefaultLinker()
+
+    assert "grafana" in get_info_providers(linking_service.topic_info)
+    assert "grafana" in get_info_providers(linking_service.streaming_app_info)
+    assert "grafana" in get_info_providers(linking_service.connector_info)
+
+
+def test_default_linker_grafana_disabled():
+    del settings.grafana.enable
+    settings.validators.validate()
+
+    linking_service = DefaultLinker()
+
+    assert "grafana" not in get_info_providers(linking_service.topic_info)
+    assert "grafana" not in get_info_providers(linking_service.streaming_app_info)
+    assert "grafana" not in get_info_providers(linking_service.connector_info)
