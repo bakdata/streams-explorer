@@ -175,6 +175,7 @@ Kowl can be used instead of AKHQ. (mutually exclusive)
 
 #### Grafana
 
+- `grafana.enable` Enable Grafana (bool, default: `false`)
 - `grafana.url` URL of Grafana (string, default: `http://localhost:3000`)
 - `grafana.dashboards.topics` Path to topics dashboard (string), sample dashboards for topics and consumer groups are included in the [`./grafana`](https://github.com/bakdata/streams-explorer/tree/main/grafana) subfolder
 - `grafana.dashboards.consumergroups` Path to consumer groups dashboard (string)
