@@ -92,8 +92,9 @@ class StreamsBootstrapEnvParser(StreamsBootstrapConfigParser):
             return self.config
 
         for env in container.env:
-            name = self.__normalise_name(env.name)
-            self.parse_config(name, env.value)
+            if env.value is not None:
+                name = self.__normalise_name(env.name)
+                self.parse_config(name, env.value)
         return self.config
 
     def __normalise_name(self, name: str) -> str:
