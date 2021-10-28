@@ -34,6 +34,9 @@ class TestStreamsExplorer:
     def deployments(self):
         return [
             get_streaming_app_deployment(
+                "non-streams-app-deployment", input_topics=None, output_topic=None
+            ),
+            get_streaming_app_deployment(
                 "streaming-app1", "input-topic1", "output-topic1", "error-topic1"
             ),
             get_streaming_app_deployment(
@@ -54,7 +57,12 @@ class TestStreamsExplorer:
 
     @pytest.fixture()
     def cron_jobs(self):
-        return [get_streaming_app_cronjob()]
+        return [
+            get_streaming_app_cronjob(
+                "non-streams-app-cronjob", input_topics=None, output_topic=None
+            ),
+            get_streaming_app_cronjob(),
+        ]
 
     @pytest.fixture()
     def fake_linker(self, mocker):
@@ -158,6 +166,10 @@ class TestStreamsExplorer:
     async def test_update(self, streams_explorer: StreamsExplorer):
         await streams_explorer.update()
         assert len(streams_explorer.applications) == 3
+        assert "streaming-app1" in streams_explorer.applications
+        assert "streaming-app2" in streams_explorer.applications
+        assert "streaming-app3" in streams_explorer.applications
+        assert "non-streams-app-deployment" not in streams_explorer.applications
         assert len(streams_explorer.kafka_connectors) == 2
 
     @pytest.mark.asyncio
@@ -273,6 +285,7 @@ class TestStreamsExplorer:
         assert extractor.cron_job.metadata is not None
         assert extractor.cron_job.metadata.name == "test-cronjob"
         assert "test-cronjob" in streams_explorer.applications
+        assert "non-streams-app-cronjob" not in streams_explorer.applications
         extractor_container.extractors = []
 
     @pytest.mark.asyncio

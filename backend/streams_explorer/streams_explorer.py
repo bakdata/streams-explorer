@@ -161,8 +161,7 @@ class StreamsExplorer:
         for item in items:
             try:
                 app = K8sApp.factory(item)
-                if app.is_streams_bootstrap_app():
-                    self.applications[app.id] = app
+                self.__add_app(app)
             except Exception as e:
                 logger.debug(e)
 
@@ -188,9 +187,8 @@ class StreamsExplorer:
         logger.info("Retrieve cronjob descriptions")
         cron_jobs = self.get_cron_jobs()
         for cron_job in cron_jobs:
-            app: Optional[K8sApp] = extractor_container.on_cron_job(cron_job)
-            if app:
-                self.applications[app.id] = app
+            if app := extractor_container.on_cron_job(cron_job):
+                self.__add_app(app)
 
     def get_cron_jobs(self) -> List[V1beta1CronJob]:
         cron_jobs: List[V1beta1CronJob] = []
@@ -204,6 +202,10 @@ class StreamsExplorer:
     def __get_connectors(self):
         logger.info("Retrieve Kafka connectors")
         self.kafka_connectors = KafkaConnect.connectors()
+
+    def __add_app(self, app: K8sApp):
+        if app.is_streams_bootstrap_app():
+            self.applications[app.id] = app
 
     def __create_graph(self):
         logger.info("Setup pipeline graph")
