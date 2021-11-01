@@ -127,7 +127,7 @@ stages:
           - script: pre-commit run generate-fetchers --all-files
             displayName: "Fetchers"
 
-          - script: CI=true npm test
+          - script: CI=true npm test --runInBand
             displayName: "Run Tests"
             workingDirectory: $(frontendPath)
 
