@@ -203,6 +203,7 @@ exports[`Streams Explorer handles url parameters should set pipeline from url pa
                 <input
                   checked=""
                   class="ant-checkbox-input"
+                  data-testid="animate"
                   type="checkbox"
                   value=""
                 />
