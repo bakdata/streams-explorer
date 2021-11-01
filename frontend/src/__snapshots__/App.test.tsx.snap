@@ -189,6 +189,49 @@ exports[`Streams Explorer handles url parameters should set pipeline from url pa
             </div>
           </li>
           <li
+            class="ant-menu-item"
+            role="menuitem"
+            style="float: right;"
+          >
+            Animate 
+            <label
+              class="ant-checkbox-wrapper ant-checkbox-wrapper-checked"
+            >
+              <span
+                class="ant-checkbox ant-checkbox-checked"
+              >
+                <input
+                  checked=""
+                  class="ant-checkbox-input"
+                  type="checkbox"
+                  value=""
+                />
+                <span
+                  class="ant-checkbox-inner"
+                />
+              </span>
+            </label>
+          </li>
+          <li
+            class="ant-menu-submenu ant-menu-submenu-horizontal ant-menu-overflowed-submenu"
+            role="menuitem"
+            style="display: none;"
+          >
+            <div
+              aria-expanded="false"
+              aria-haspopup="true"
+              class="ant-menu-submenu-title"
+              role="button"
+            >
+              <span>
+                ···
+              </span>
+              <i
+                class="ant-menu-submenu-arrow"
+              />
+            </div>
+          </li>
+          <li
             class="ant-menu-item ant-menu-item-only-child"
             role="menuitem"
             style="float: right;"
