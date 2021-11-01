@@ -21,6 +21,7 @@ import {
   Alert,
   AutoComplete,
   Space,
+  Checkbox,
 } from "antd";
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useResizeDetector } from "react-resize-detector";
@@ -46,6 +47,7 @@ const App: React.FC = () => {
   const [detailNode, setDetailNode] = useState<Node | null>(null);
   const [focusedNode, setFocusedNode] = useState<Node | null>(null);
   const [searchWidth, setSearchWidth] = useState<number>(300);
+  const [animate, setAnimate] = useState<boolean>(true);
   const history = useHistory();
   const location = useLocation();
   const ref = useRef<HTMLDivElement>(null!);
@@ -324,6 +326,10 @@ const App: React.FC = () => {
                   </a>
                 </Dropdown>
               </Menu.Item>
+              <Menu.Item style={{ float: "right" }}>
+                Animate&nbsp;
+                <Checkbox onChange={(e) => setAnimate(e.target.checked)} />
+              </Menu.Item>
               <Menu.Item
                 style={{ float: "right" }}
                 onClick={() => {
@@ -366,6 +372,7 @@ const App: React.FC = () => {
                   width={width}
                   height={height ? height - 64 : 500}
                   focusedNode={focusedNode}
+                  animate={animate}
                 />
               ) : (
                 <Alert
