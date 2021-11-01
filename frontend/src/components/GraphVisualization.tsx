@@ -199,16 +199,16 @@ const GraphVisualization = ({
     }
   }, [graph, focusedNode]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (graph && metrics) {
-    updateNodeMetrics(graph, metrics, animate);
-  }
-
   useEffect(() => {
     if (graph && !animate) {
       // disable all edge animations
       graph.getEdges().forEach((edge) => setEdgeActivity(graph, edge, false));
     }
   }, [animate]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (graph && metrics) {
+    updateNodeMetrics(graph, metrics, animate);
+  }
 
   const mouseEnterCallback = useCallback(
     (e: IG6GraphEvent) => {
