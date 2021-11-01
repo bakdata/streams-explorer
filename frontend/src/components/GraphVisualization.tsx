@@ -197,7 +197,7 @@ const GraphVisualization = ({
     if (graph && focusedNode) {
       setFocusedNode(graph, focusedNode);
     }
-  }, [focusedNode, graph]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [graph, focusedNode]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (graph && metrics) {
     updateNodeMetrics(graph, metrics, animate);
@@ -205,6 +205,7 @@ const GraphVisualization = ({
 
   useEffect(() => {
     if (graph && !animate) {
+      // disable all edge animations
       graph.getEdges().forEach((edge) => setEdgeActivity(graph, edge, false));
     }
   }, [animate]); // eslint-disable-line react-hooks/exhaustive-deps

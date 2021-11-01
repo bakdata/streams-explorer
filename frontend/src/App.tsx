@@ -47,7 +47,6 @@ const App: React.FC = () => {
   const [detailNode, setDetailNode] = useState<Node | null>(null);
   const [focusedNode, setFocusedNode] = useState<Node | null>(null);
   const [searchWidth, setSearchWidth] = useState<number>(300);
-  const [animate, setAnimate] = useState<boolean>(true);
   const history = useHistory();
   const location = useLocation();
   const ref = useRef<HTMLDivElement>(null!);
@@ -67,9 +66,15 @@ const App: React.FC = () => {
   };
   const REFRESH_INTERVAL = "metrics-interval";
   const [refreshInterval, setRefreshInterval] = useState(0);
+  const ANIMATE = "animate";
+  const [animate, setAnimate] = useState<boolean>(true);
 
   // on initial page load
   useEffect(() => {
+    const storedAnimate = localStorage.getItem(ANIMATE);
+    if (storedAnimate) {
+      setAnimate(storedAnimate === "true");
+    }
     const storedRefreshInterval = Number(
       localStorage.getItem(REFRESH_INTERVAL) || defaultRefreshInterval
     );
@@ -78,6 +83,10 @@ const App: React.FC = () => {
       refetchMetrics();
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    localStorage.setItem(ANIMATE, animate.toString());
+  }, [animate]);
 
   useEffect(() => {
     localStorage.setItem(REFRESH_INTERVAL, refreshInterval.toString());
@@ -328,7 +337,10 @@ const App: React.FC = () => {
               </Menu.Item>
               <Menu.Item style={{ float: "right" }}>
                 Animate&nbsp;
-                <Checkbox onChange={(e) => setAnimate(e.target.checked)} />
+                <Checkbox
+                  checked={animate}
+                  onChange={(e) => setAnimate(e.target.checked)}
+                />
               </Menu.Item>
               <Menu.Item
                 style={{ float: "right" }}
