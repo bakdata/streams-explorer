@@ -338,6 +338,7 @@ const App: React.FC = () => {
               <Menu.Item style={{ float: "right" }}>
                 Animate&nbsp;
                 <Checkbox
+                  data-testid="animate"
                   checked={animate}
                   onChange={(e) => setAnimate(e.target.checked)}
                 />

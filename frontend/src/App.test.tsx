@@ -546,6 +546,30 @@ describe("Streams Explorer", () => {
         expect(nockMetrics.isDone()).toBeFalsy();
       });
     });
+
+    it("should restore animation disabled from local storage", async () => {
+      mockBackendGraph(true);
+      // disable animate
+      window.localStorage.setItem("animate", "false");
+
+      const { getByTestId } = render(<TestApp />);
+      await waitForElement(() => getByTestId("graph"));
+
+      const checkbox = getByTestId("animate");
+      expect(checkbox).not.toBeChecked();
+    });
+
+    it("should restore animation enabled from local storage", async () => {
+      mockBackendGraph(true);
+      // enable animate
+      window.localStorage.setItem("animate", "true");
+
+      const { getByTestId } = render(<TestApp />);
+      await waitForElement(() => getByTestId("graph"));
+
+      const checkbox = getByTestId("animate");
+      expect(checkbox).toBeChecked();
+    });
   });
 });
 
