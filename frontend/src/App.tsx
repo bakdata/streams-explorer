@@ -57,7 +57,7 @@ const App: React.FC = () => {
     refreshRate: 100,
     onResize,
   });
-  const defaultRefreshInterval = 30;
+  const DEFAULT_REFRESH_INTERVAL = 30;
   const refreshIntervals: Record<number, string> = {
     0: "off",
     60: "60s",
@@ -76,7 +76,7 @@ const App: React.FC = () => {
       setAnimate(storedAnimate === "true");
     }
     const storedRefreshInterval = Number(
-      localStorage.getItem(REFRESH_INTERVAL) || defaultRefreshInterval
+      localStorage.getItem(REFRESH_INTERVAL) || DEFAULT_REFRESH_INTERVAL
     );
     setRefreshInterval(storedRefreshInterval);
     if (storedRefreshInterval) {
