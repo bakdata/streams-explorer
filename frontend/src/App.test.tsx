@@ -575,7 +575,8 @@ describe("Streams Explorer", () => {
 
       await waitForElement(() => getByTestId("animate"));
       const checkbox = getByTestId("animate");
-      // needed as a workaround until we update react-testing library & react-scripts, because .toBeChecked doesn't work with role 'switch'
+      // HACK: needed as a workaround until we update react-testing library & react-scripts
+      // because .toBeChecked() doesn't work with role 'switch'
       expect(checkbox).toHaveAttribute("aria-checked", "true");
     });
   });
