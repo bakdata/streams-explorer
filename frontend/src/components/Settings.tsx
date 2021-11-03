@@ -23,7 +23,12 @@ const Settings = ({ animate, setAnimate }: SettingsProps) => {
           onClick={() => setVisible(true)}
         />
       </Tooltip>
-      <Modal title="Settings" visible={visible} footer={null}>
+      <Modal
+        title="Settings"
+        visible={visible}
+        footer={null}
+        onCancel={() => setVisible(false)}
+      >
         <Space direction="horizontal">
           Animate:
           <Switch checked={animate} onChange={onChange} />
