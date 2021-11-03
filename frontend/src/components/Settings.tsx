@@ -44,7 +44,7 @@ const Settings = ({ animate, setAnimate }: SettingsProps) => {
       >
         <Row>
           <Col flex="none">
-            <div className="setting">Animate:</div>
+            <div className="setting">Animate graph activity:</div>
           </Col>
           <Col flex="auto">
             <Switch
