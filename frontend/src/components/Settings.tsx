@@ -8,19 +8,7 @@ interface SettingsProps {
 }
 
 const Settings = ({ animate, setAnimate }: SettingsProps) => {
-  const [isModalVisible, setIsModalVisible] = useState(false);
-
-  const showModal = () => {
-    setIsModalVisible(true);
-  };
-
-  const handleOk = () => {
-    setIsModalVisible(false);
-  };
-
-  const handleCancel = () => {
-    setIsModalVisible(false);
-  };
+  const [visible, setVisible] = useState(false);
 
   const onChange = (checked: boolean) => {
     setAnimate(checked);
@@ -32,18 +20,13 @@ const Settings = ({ animate, setAnimate }: SettingsProps) => {
         <Button
           type="text"
           icon={<SettingOutlined style={{ fontSize: "16px", color: "#fff" }} />}
-          onClick={showModal}
+          onClick={() => setVisible(true)}
         />
       </Tooltip>
-      <Modal
-        title="Settings"
-        visible={isModalVisible}
-        onOk={handleOk}
-        onCancel={handleCancel}
-      >
+      <Modal title="Settings" visible={visible} footer={null}>
         <Space direction="horizontal">
+          Animate:
           <Switch checked={animate} onChange={onChange} />
-          animate
         </Space>
       </Modal>
     </>
