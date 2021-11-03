@@ -27,6 +27,7 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import { useMutate } from "restful-react";
 import { useHistory, useLocation } from "react-router-dom";
+import Settings from "./components/Settings";
 
 const { Option } = AutoComplete;
 
@@ -342,6 +343,7 @@ const App: React.FC = () => {
                   checked={animate}
                   onChange={(e) => setAnimate(e.target.checked)}
                 />
+                <Settings />
               </Menu.Item>
               <Menu.Item
                 style={{ float: "right" }}
