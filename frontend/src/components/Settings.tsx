@@ -1,7 +1,9 @@
 import "./Settings.css";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Modal, Button, Tooltip, Switch, Row, Col } from "antd";
 import { SettingOutlined } from "@ant-design/icons";
+
+const ANIMATE = "animate";
 
 interface SettingsProps {
   animate: boolean;
@@ -14,6 +16,19 @@ const Settings = ({ animate, setAnimate }: SettingsProps) => {
   const onChange = (checked: boolean) => {
     setAnimate(checked);
   };
+
+  // on initial page load
+  useEffect(() => {
+    const storedAnimate = localStorage.getItem(ANIMATE);
+    if (storedAnimate) {
+      setAnimate(storedAnimate === "true");
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // save state to local storage
+  useEffect(() => {
+    localStorage.setItem(ANIMATE, animate.toString());
+  }, [animate]);
 
   return (
     <>

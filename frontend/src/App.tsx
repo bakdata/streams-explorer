@@ -66,15 +66,10 @@ const App: React.FC = () => {
   };
   const REFRESH_INTERVAL = "metrics-interval";
   const [refreshInterval, setRefreshInterval] = useState(0);
-  const ANIMATE = "animate";
   const [animate, setAnimate] = useState<boolean>(true);
 
   // on initial page load
   useEffect(() => {
-    const storedAnimate = localStorage.getItem(ANIMATE);
-    if (storedAnimate) {
-      setAnimate(storedAnimate === "true");
-    }
     const storedRefreshInterval = Number(
       localStorage.getItem(REFRESH_INTERVAL) || DEFAULT_REFRESH_INTERVAL
     );
@@ -83,10 +78,6 @@ const App: React.FC = () => {
       refetchMetrics();
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
-    localStorage.setItem(ANIMATE, animate.toString());
-  }, [animate]);
 
   useEffect(() => {
     localStorage.setItem(REFRESH_INTERVAL, refreshInterval.toString());
