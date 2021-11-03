@@ -546,39 +546,6 @@ describe("Streams Explorer", () => {
         expect(nockMetrics.isDone()).toBeFalsy();
       });
     });
-
-    it("should restore animation disabled from local storage", async () => {
-      mockBackendGraph(true);
-      // disable animate
-      window.localStorage.setItem("animate", "false");
-
-      const { getByTestId, findByTestId } = render(<TestApp />);
-      await findByTestId("settings-button");
-      const button = getByTestId("settings-button");
-      fireEvent.click(button);
-
-      await waitForElement(() => getByTestId("animate"));
-
-      const checkbox = getByTestId("animate");
-      expect(checkbox).not.toBeChecked();
-    });
-
-    it("should restore animation enabled from local storage", async () => {
-      mockBackendGraph(true);
-      // enable animate
-      window.localStorage.setItem("animate", "true");
-
-      const { getByTestId, findByTestId } = render(<TestApp />);
-      await findByTestId("settings-button");
-      const button = getByTestId("settings-button");
-      fireEvent.click(button);
-
-      await waitForElement(() => getByTestId("animate"));
-      const checkbox = getByTestId("animate");
-      // HACK: needed as a workaround until we update react-testing library & react-scripts
-      // because .toBeChecked() doesn't work with role 'switch'
-      expect(checkbox).toHaveAttribute("aria-checked", "true");
-    });
   });
 });
 
