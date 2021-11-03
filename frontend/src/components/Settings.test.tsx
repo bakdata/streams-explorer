@@ -10,10 +10,7 @@ const TestSettings = () => {
   const [animate, setAnimate] = useState<boolean>(true);
   return (
     <>
-      <Settings
-        animate={animate}
-        setAnimate={(checked: boolean) => setAnimate(checked)}
-      />
+      <Settings animate={animate} setAnimate={setAnimate} />
       <StateDisplay id="animate-state" state={animate} />
     </>
   );
