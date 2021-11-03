@@ -98,7 +98,7 @@ describe("display node information", () => {
         ],
       });
 
-    nock("http://localhost")
+    const nockLinking = nock("http://localhost")
       .get("/api/node/linking/atm-fraud-transactionavroproducer?")
       .reply(
         200,
@@ -111,6 +111,7 @@ describe("display node information", () => {
     );
 
     await waitForElement(() => getByText("streaming-app"));
+    await wait(() => expect(nockLinking.isDone()).toBeTruthy());
     expect(asFragment()).toMatchSnapshot();
   });
 
