@@ -121,8 +121,11 @@ stages:
             displayName: "Lint"
             workingDirectory: $(frontendPath)
 
-          - script: pre-commit run prettier --all-files
-            displayName: "Formatting (prettier)"
+          - script: curl -fsSL https://dprint.dev/install.sh | sh
+            displayName: "Install dprint"
+
+          - script: pre-commit run dprint --all-files
+            displayName: "Formatting (dprint)"
 
           - script: pre-commit run generate-fetchers --all-files
             displayName: "Fetchers"
