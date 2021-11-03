@@ -327,10 +327,7 @@ const App: React.FC = () => {
                 </Dropdown>
               </Menu.Item>
               <Menu.Item style={{ float: "right" }}>
-                <Settings
-                  animate={animate}
-                  setAnimate={(checked: boolean) => setAnimate(checked)}
-                />
+                <Settings animate={animate} setAnimate={setAnimate} />
               </Menu.Item>
               <Menu.Item
                 style={{ float: "right" }}
