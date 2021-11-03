@@ -63,7 +63,7 @@ describe("Settings", () => {
       await waitForElement(() => getByTestId("animate"));
 
       const checkbox = getByTestId("animate");
-      expect(checkbox).not.toBeChecked();
+      expect(checkbox).toHaveAttribute("aria-checked", "false"); // HACK
     });
 
     it("animate enabled", async () => {
