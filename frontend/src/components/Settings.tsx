@@ -1,5 +1,6 @@
+import "./Settings.css";
 import React, { useState } from "react";
-import { Modal, Button, Tooltip, Switch, Space } from "antd";
+import { Modal, Button, Tooltip, Switch, Row, Col } from "antd";
 import { SettingOutlined } from "@ant-design/icons";
 
 interface SettingsProps {
@@ -29,10 +30,14 @@ const Settings = ({ animate, setAnimate }: SettingsProps) => {
         footer={null}
         onCancel={() => setVisible(false)}
       >
-        <Space direction="horizontal">
-          Animate:
-          <Switch checked={animate} onChange={onChange} />
-        </Space>
+        <Row>
+          <Col flex="none">
+            <div className="setting">Animate:</div>
+          </Col>
+          <Col flex="auto">
+            <Switch checked={animate} onChange={onChange} />
+          </Col>
+        </Row>
       </Modal>
     </>
   );
