@@ -343,7 +343,10 @@ const App: React.FC = () => {
                   checked={animate}
                   onChange={(e) => setAnimate(e.target.checked)}
                 />
-                <Settings />
+                <Settings
+                  animate={animate}
+                  setAnimate={(checked: boolean) => setAnimate(checked)}
+                />
               </Menu.Item>
               <Menu.Item
                 style={{ float: "right" }}
