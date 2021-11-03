@@ -3,6 +3,7 @@ import { RestfulProvider } from "restful-react";
 import { render } from "@testing-library/react";
 import DetailsCard from "./DetailsCard";
 import Node from "./Node";
+import nock from "nock";
 
 describe("display card for node details", () => {
   beforeAll(() => {
@@ -30,6 +31,12 @@ describe("display card for node details", () => {
 
   it("should show node label", async () => {
     const node: Node = { id: "test-app", label: "test-app-name" };
+    nock("http://localhost").get("/api/node/test-app").reply(200, {
+      node_id: "test-app",
+      node_type: "streaming-app",
+      info: [],
+    });
+
     const { queryByText } = render(
       <RestfulProvider base="http://localhost">
         <DetailsCard node={node} />
