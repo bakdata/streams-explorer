@@ -552,8 +552,12 @@ describe("Streams Explorer", () => {
       // disable animate
       window.localStorage.setItem("animate", "false");
 
-      const { getByTestId } = render(<TestApp />);
-      await waitForElement(() => getByTestId("graph"));
+      const { getByTestId, findByTestId } = render(<TestApp />);
+      await findByTestId("settings-button");
+      const button = getByTestId("settings-button");
+      fireEvent.click(button);
+
+      await waitForElement(() => getByTestId("animate"));
 
       const checkbox = getByTestId("animate");
       expect(checkbox).not.toBeChecked();
@@ -564,11 +568,15 @@ describe("Streams Explorer", () => {
       // enable animate
       window.localStorage.setItem("animate", "true");
 
-      const { getByTestId } = render(<TestApp />);
-      await waitForElement(() => getByTestId("graph"));
+      const { getByTestId, findByTestId } = render(<TestApp />);
+      await findByTestId("settings-button");
+      const button = getByTestId("settings-button");
+      fireEvent.click(button);
 
+      await waitForElement(() => getByTestId("animate"));
       const checkbox = getByTestId("animate");
-      expect(checkbox).toBeChecked();
+      // needed as a workaround until we update react-testing library & react-scripts, because .toBeChecked doesn't work with role 'switch'
+      expect(checkbox).toHaveAttribute("aria-checked", "true");
     });
   });
 });

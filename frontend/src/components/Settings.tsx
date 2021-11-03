@@ -19,6 +19,7 @@ const Settings = ({ animate, setAnimate }: SettingsProps) => {
     <>
       <Tooltip title="Settings">
         <Button
+          data-testid="settings-button"
           type="text"
           icon={<SettingOutlined style={{ fontSize: "16px", color: "#fff" }} />}
           onClick={() => setVisible(true)}
@@ -35,7 +36,11 @@ const Settings = ({ animate, setAnimate }: SettingsProps) => {
             <div className="setting">Animate:</div>
           </Col>
           <Col flex="auto">
-            <Switch checked={animate} onChange={onChange} />
+            <Switch
+              data-testid="animate"
+              checked={animate}
+              onChange={onChange}
+            />
           </Col>
         </Row>
       </Modal>
