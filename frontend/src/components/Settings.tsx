@@ -13,22 +13,18 @@ interface SettingsProps {
 const Settings = ({ animate, setAnimate }: SettingsProps) => {
   const [visible, setVisible] = useState(false);
 
-  const onChange = (checked: boolean) => {
-    setAnimate(checked);
-  };
-
   // on initial page load
   useEffect(() => {
     const storedAnimate = localStorage.getItem(ANIMATE);
-    if (storedAnimate) {
-      setAnimate(storedAnimate === "true");
-    }
+    if (storedAnimate) setAnimate(storedAnimate === "true");
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // save state to local storage
   useEffect(() => {
     localStorage.setItem(ANIMATE, animate.toString());
   }, [animate]);
+
+  const onChange = (checked: boolean) => setAnimate(checked);
 
   return (
     <>
