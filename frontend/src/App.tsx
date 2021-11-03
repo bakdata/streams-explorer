@@ -21,7 +21,6 @@ import {
   Alert,
   AutoComplete,
   Space,
-  Checkbox,
 } from "antd";
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useResizeDetector } from "react-resize-detector";
@@ -337,12 +336,6 @@ const App: React.FC = () => {
                 </Dropdown>
               </Menu.Item>
               <Menu.Item style={{ float: "right" }}>
-                Animate&nbsp;
-                <Checkbox
-                  data-testid="animate"
-                  checked={animate}
-                  onChange={(e) => setAnimate(e.target.checked)}
-                />
                 <Settings
                   animate={animate}
                   setAnimate={(checked: boolean) => setAnimate(checked)}
