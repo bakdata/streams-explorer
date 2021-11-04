@@ -117,7 +117,7 @@ const App: React.FC = () => {
 
   const getParams = useCallback(() => {
     return new URLSearchParams(location.search);
-  }, [location.search]);
+  }, []);
 
   function pushHistoryFocusNode(nodeId: string) {
     const pipeline = getParams().get("pipeline");

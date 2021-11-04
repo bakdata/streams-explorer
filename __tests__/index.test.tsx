@@ -1,7 +1,3 @@
-/**
- * @jest-environment jsdom
- */
-
 import { render } from "@testing-library/react";
 import nock from "nock";
 import React from "react";
