@@ -10,7 +10,6 @@ import G6, {
 import { message } from "antd";
 import { millify } from "millify";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import ReactDOM from "react-dom";
 import { Graph as Data, Icon as IIcon, Metric } from "../api/fetchers";
 import "./DashedEdge";
 import "./MetricCustomNode";
@@ -246,7 +245,7 @@ const GraphVisualization = ({
   );
 
   useEffect(() => {
-    config.container = ReactDOM.findDOMNode(ref.current) as HTMLElement;
+    config.container = ref.current;
     let currentGraph: Graph | null = graph;
     if (!currentGraph && ref) {
       currentGraph = new G6.Graph(config);
