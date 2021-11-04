@@ -48,7 +48,8 @@ const Graph = () => {
     <div
       ref={ref}
       style={{ width: 1000, height: 1000, border: "1px solid #ccc" }}
-    ></div>
+    >
+    </div>
   );
 };
 

@@ -92,10 +92,9 @@ const App: React.FC = () => {
     error: graphError,
     refetch: graphRefetch,
   } = useGetPositionedGraphApiGraphGet({
-    queryParams:
-      currentPipeline !== ALL_PIPELINES
-        ? { pipeline_name: currentPipeline }
-        : undefined,
+    queryParams: currentPipeline !== ALL_PIPELINES
+      ? { pipeline_name: currentPipeline }
+      : undefined,
   });
 
   const {
@@ -195,9 +194,9 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (
-      retryPipelineGraphError &&
-      retryPipelineGraphError.status === 404 &&
-      currentPipeline !== ALL_PIPELINES
+      retryPipelineGraphError
+      && retryPipelineGraphError.status === 404
+      && currentPipeline !== ALL_PIPELINES
     ) {
       // pipeline still not found
       redirectAllPipelines();
@@ -289,8 +288,7 @@ const App: React.FC = () => {
                   filterOption={(inputValue, option) =>
                     option?.value
                       .toUpperCase()
-                      .indexOf(inputValue.toUpperCase()) !== -1
-                  }
+                      .indexOf(inputValue.toUpperCase()) !== -1}
                   defaultValue={focusedNode ? focusedNode.label : undefined}
                   onSelect={(nodeId, option) => {
                     const node = option.node as Node;
@@ -355,26 +353,28 @@ const App: React.FC = () => {
             }}
           >
             <Row style={{ position: "fixed" }}>
-              {graph ? (
-                <GraphVisualization
-                  data-testid="graph"
-                  data={graph}
-                  config={graphConfig}
-                  metrics={metrics}
-                  refetchMetrics={() => refetchMetrics()}
-                  onClickNode={(node: Node) => setDetailNode(node)}
-                  width={width}
-                  height={height ? height - 64 : 500}
-                  focusedNode={focusedNode}
-                />
-              ) : (
-                <Alert
-                  message="Error"
-                  description="Could not load graph"
-                  type="error"
-                  showIcon
-                />
-              )}
+              {graph
+                ? (
+                  <GraphVisualization
+                    data-testid="graph"
+                    data={graph}
+                    config={graphConfig}
+                    metrics={metrics}
+                    refetchMetrics={() => refetchMetrics()}
+                    onClickNode={(node: Node) => setDetailNode(node)}
+                    width={width}
+                    height={height ? height - 64 : 500}
+                    focusedNode={focusedNode}
+                  />
+                )
+                : (
+                  <Alert
+                    message="Error"
+                    description="Could not load graph"
+                    type="error"
+                    showIcon
+                  />
+                )}
             </Row>
             <Row
               style={{
