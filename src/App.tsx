@@ -13,7 +13,6 @@ import {
 } from "antd";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
-import { useHistory, useLocation } from "react-router-dom";
 import { useMutate } from "restful-react";
 import {
   HTTPValidationError,
@@ -46,7 +45,7 @@ const App: React.FC = () => {
   const [detailNode, setDetailNode] = useState<Node | null>(null);
   const [focusedNode, setFocusedNode] = useState<Node | null>(null);
   const [searchWidth, setSearchWidth] = useState<number>(300);
-  const history = useHistory();
+  // const history = useHistory();
   // const location = useLocation();
   const ref = useRef<HTMLDivElement>(null!);
   const onResize = useCallback(() => {}, []);
@@ -209,7 +208,7 @@ const App: React.FC = () => {
   const redirectAllPipelines = () => {
     message.info("Redirecting to all pipelines");
     setCurrentPipeline(ALL_PIPELINES);
-    history.push("/");
+    // history.push("/");
   };
 
   useEffect(() => {
@@ -228,7 +227,7 @@ const App: React.FC = () => {
     <Menu
       data-testid="pipeline-select"
       onClick={(e) => {
-        history.push(`/?pipeline=${e.key.toString()}`);
+        // history.push(`/?pipeline=${e.key.toString()}`);
         setCurrentPipeline(e.key.toString());
         setFocusedNode(null);
       }}
