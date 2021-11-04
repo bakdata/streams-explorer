@@ -10,7 +10,7 @@ import G6, {
 import { message } from "antd";
 import { millify } from "millify";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Graph as Data, Icon as IIcon, Metric } from "../api/fetchers";
+import { Graph as Data, Icon as IIcon, Metric } from "./api/fetchers";
 import "./DashedEdge";
 import "./MetricCustomNode";
 import Node from "./Node";

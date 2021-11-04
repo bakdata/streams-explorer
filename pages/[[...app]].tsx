@@ -3,7 +3,7 @@ import "antd/dist/antd.css";
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 
-const App = dynamic(() => import("../src/App"), { ssr: false });
+const App = dynamic(() => import("../components/App"), { ssr: false });
 
 function Home() {
   const [isMounted, setIsMounted] = useState(false);

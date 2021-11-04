@@ -7,7 +7,7 @@ import {
   NodeInfoListItem,
   useGetLinkingApiNodeLinkingNodeIdGet,
   useGetNodeInfoApiNodeNodeIdGet,
-} from "../api/fetchers";
+} from "./api/fetchers";
 import Schema from "./Schema";
 
 interface DetailsProps {

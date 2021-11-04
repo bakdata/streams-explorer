@@ -15,16 +15,16 @@ import { useRouter } from "next/router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import { useMutate } from "restful-react";
+import Node from "../components/Node";
 import {
   HTTPValidationError,
   useGetMetricsApiMetricsGet,
   useGetPipelinesApiPipelinesGet,
   useGetPositionedGraphApiGraphGet,
 } from "./api/fetchers";
-import DetailsCard from "./components/DetailsCard";
-import GraphVisualization from "./components/GraphVisualization";
-import Node from "./components/Node";
+import DetailsCard from "./DetailsCard";
 import { graphConfig } from "./graphConfiguration";
+import GraphVisualization from "./GraphVisualization";
 
 const { Header, Content } = Layout;
 
