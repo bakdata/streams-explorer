@@ -1,9 +1,9 @@
 import G6 from "@antv/g6";
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import ReactDOM from "react-dom";
 
-const G6component = () => {
-  const ref = React.useRef(null);
+const Graph = () => {
+  const ref = useRef(null);
   let graph = null;
 
   useEffect(() => {
@@ -52,4 +52,4 @@ const G6component = () => {
   );
 };
 
-export default G6component;
+export default Graph;
