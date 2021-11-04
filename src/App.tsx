@@ -144,6 +144,7 @@ const App: React.FC = () => {
   }, [graph]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
+    if (!graph) return;
     const params = getParams();
     const pipeline = params.get("pipeline");
     if (pipeline) {
@@ -153,11 +154,11 @@ const App: React.FC = () => {
     if (focusNode) {
       const node = graph?.nodes.find((node) => node.id === focusNode);
       if (node) {
-        setFocusedNode(node);
         setDetailNode(node);
+        setFocusedNode(node);
       }
     }
-  }, [getParams]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [graph, location]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (graphError) {
@@ -290,7 +291,7 @@ const App: React.FC = () => {
                     option?.value
                       .toUpperCase()
                       .indexOf(inputValue.toUpperCase()) !== -1}
-                  defaultValue={focusedNode ? focusedNode.label : undefined}
+                  defaultValue={focusedNode?.label}
                   onSelect={(nodeId, option) => {
                     const node = option.node as Node;
                     if (node) {
@@ -364,8 +365,8 @@ const App: React.FC = () => {
                     metrics={metrics}
                     refetchMetrics={() => refetchMetrics()}
                     onClickNode={(node: Node) => setDetailNode(node)}
-                    width={width}
-                    height={height ? height - 64 : 500}
+                    width={width ? width : window.innerWidth}
+                    height={height ? height - 64 : window.innerHeight - 64}
                     focusedNode={focusedNode}
                   />
                 )

@@ -22,8 +22,8 @@ interface GraphVisualizationProps {
   metrics: Metric[] | null;
   refetchMetrics: Function;
   onClickNode: Function;
-  width: number | undefined;
-  height: number | undefined;
+  width: number;
+  height: number;
   focusedNode: Node | null;
 }
 
@@ -181,7 +181,7 @@ const GraphVisualization = ({
   const ref = useRef<HTMLDivElement>(null);
 
   const [graph, setGraph] = useState<Graph | null>(null);
-  if (graph && width && height) {
+  if (graph) {
     graph.changeSize(width, height);
   }
 
@@ -189,7 +189,7 @@ const GraphVisualization = ({
     if (graph && focusedNode) {
       setFocusedNode(graph, focusedNode);
     }
-  }, [focusedNode, graph]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [graph, focusedNode]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (graph && metrics) {
     updateNodeMetrics(graph, metrics);
