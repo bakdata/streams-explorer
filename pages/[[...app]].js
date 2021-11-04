@@ -1,5 +1,6 @@
 // catch-all
-import { useState, useEffect } from "react";
+import "antd/dist/antd.css";
+import { useEffect, useState } from "react";
 // import App from "../src/App";
 import dynamic from "next/dynamic";
 
