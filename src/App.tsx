@@ -11,6 +11,7 @@ import {
   Space,
   Spin,
 } from "antd";
+import { useRouter } from "next/router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import { useMutate } from "restful-react";
@@ -44,8 +45,7 @@ const App: React.FC = () => {
   const [detailNode, setDetailNode] = useState<Node | null>(null);
   const [focusedNode, setFocusedNode] = useState<Node | null>(null);
   const [searchWidth, setSearchWidth] = useState<number>(300);
-  // const history = useHistory();
-  // const location = useLocation();
+  const router = useRouter();
   const ref = useRef<HTMLDivElement>(null!);
   const onResize = useCallback(() => {}, []);
   const { width, height } = useResizeDetector({
@@ -117,16 +117,16 @@ const App: React.FC = () => {
     error: metricsError,
   } = useGetMetricsApiMetricsGet({ lazy: true });
 
-  // const getParams = useCallback(() => {
-  //   return new URLSearchParams(location.search);
-  // }, [location.search]);
+  const getParams = useCallback(() => {
+    return new URLSearchParams(location.search);
+  }, [location.search]);
 
-  // function pushHistoryFocusNode(nodeId: string) {
-  //   const pipeline = getParams().get("pipeline");
-  //   history.push(
-  //     `/?${pipeline ? `pipeline=${pipeline}&` : ""}focus-node=${nodeId}`
-  //   );
-  // }
+  function pushHistoryFocusNode(nodeId: string) {
+    const pipeline = getParams().get("pipeline");
+    router.push(
+      `/?${pipeline ? `pipeline=${pipeline}&` : ""}focus-node=${nodeId}`
+    );
+  }
 
   useEffect(() => {
     if (refreshInterval && refreshInterval > 0) {
@@ -145,21 +145,21 @@ const App: React.FC = () => {
     }
   }, [graph]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // useEffect(() => {
-  //   const params = getParams();
-  //   const pipeline = params.get("pipeline");
-  //   if (pipeline) {
-  //     setCurrentPipeline(pipeline);
-  //   }
-  //   const focusNode = params.get("focus-node");
-  //   if (focusNode) {
-  //     const node = graph?.nodes.find((node) => node.id === focusNode);
-  //     if (node) {
-  //       setFocusedNode(node);
-  //       setDetailNode(node);
-  //     }
-  //   }
-  // }, [getParams, location, graph]);
+  useEffect(() => {
+    const params = getParams();
+    const pipeline = params.get("pipeline");
+    if (pipeline) {
+      setCurrentPipeline(pipeline);
+    }
+    const focusNode = params.get("focus-node");
+    if (focusNode) {
+      const node = graph?.nodes.find((node) => node.id === focusNode);
+      if (node) {
+        setFocusedNode(node);
+        setDetailNode(node);
+      }
+    }
+  }, [getParams, location, graph]);
 
   useEffect(() => {
     if (graphError) {
@@ -207,7 +207,7 @@ const App: React.FC = () => {
   const redirectAllPipelines = () => {
     message.info("Redirecting to all pipelines");
     setCurrentPipeline(ALL_PIPELINES);
-    // history.push("/");
+    router.push("/");
   };
 
   useEffect(() => {
@@ -226,7 +226,12 @@ const App: React.FC = () => {
     <Menu
       data-testid="pipeline-select"
       onClick={(e) => {
-        // history.push(`/?pipeline=${e.key.toString()}`);
+        let pipeline = e.key.toString();
+        if (pipeline === ALL_PIPELINES) {
+          router.push("/");
+        } else {
+          router.push(`/?pipeline=${e.key.toString()}`);
+        }
         setCurrentPipeline(e.key.toString());
         setFocusedNode(null);
       }}
@@ -294,7 +299,7 @@ const App: React.FC = () => {
                       setFocusedNode(node);
                       setDetailNode(node);
                     }
-                    // pushHistoryFocusNode(nodeId);
+                    pushHistoryFocusNode(nodeId);
                   }}
                 >
                   {graph?.nodes.map((node) => (
