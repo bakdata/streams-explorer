@@ -1,0 +1,25 @@
+.Info {
+  padding-left: 14px;
+}
+
+.descItem {
+  vertical-align: top;
+}
+
+.descItem.ant-descriptions-item-label {
+  width: 16em;
+}
+
+.details {
+  width: 100%;
+  text-align: start;
+}
+
+.loadingSpinnerContainer {
+  width: 100%;
+  text-align: center;
+}
+
+.jsonDetail {
+  font-size: 11px;
+}
