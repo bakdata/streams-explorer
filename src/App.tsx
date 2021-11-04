@@ -20,7 +20,6 @@ import {
   useGetPipelinesApiPipelinesGet,
   useGetPositionedGraphApiGraphGet,
 } from "./api/fetchers";
-// import "./App.css";
 import DetailsCard from "./components/DetailsCard";
 import GraphVisualization from "./components/GraphVisualization";
 import Node from "./components/Node";
