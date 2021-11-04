@@ -1,8 +1,7 @@
-// catch-all
+// catch-all entry
 import "antd/dist/antd.css";
-import { useEffect, useState } from "react";
-// import App from "../src/App";
 import dynamic from "next/dynamic";
+import { useEffect, useState } from "react";
 
 const App = dynamic(() => import("../src/App"), { ssr: false });
 
