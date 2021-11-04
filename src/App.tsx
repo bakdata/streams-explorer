@@ -26,8 +26,6 @@ import GraphVisualization from "./components/GraphVisualization";
 import Node from "./components/Node";
 import { graphConfig } from "./graphConfiguration";
 
-const { Option } = AutoComplete;
-
 const { Header, Content } = Layout;
 
 const NodeIcon = ({ nodeType }: { nodeType: string }) => (
@@ -159,7 +157,7 @@ const App: React.FC = () => {
         setDetailNode(node);
       }
     }
-  }, [getParams, location, graph]);
+  }, [getParams]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (graphError) {
@@ -274,7 +272,7 @@ const App: React.FC = () => {
                   </Button>
                 </Dropdown>
               </Menu.Item>
-              <Menu.Item>
+              <Menu.Item key="2">
                 <AutoComplete
                   data-testid="node-select"
                   style={{
@@ -303,7 +301,7 @@ const App: React.FC = () => {
                   }}
                 >
                   {graph?.nodes.map((node) => (
-                    <Option
+                    <AutoComplete.Option
                       data-testid="node-option"
                       value={node.id}
                       key={node.id}
@@ -313,11 +311,11 @@ const App: React.FC = () => {
                         <NodeIcon nodeType={node.node_type} />
                         {node.label}
                       </Space>
-                    </Option>
+                    </AutoComplete.Option>
                   ))}
                 </AutoComplete>
               </Menu.Item>
-              <Menu.Item style={{ float: "right" }}>
+              <Menu.Item key="3" style={{ float: "right" }}>
                 Metrics refresh:&nbsp;
                 <Dropdown overlay={menuRefresh}>
                   <a href={"/#"}>
@@ -326,6 +324,7 @@ const App: React.FC = () => {
                 </Dropdown>
               </Menu.Item>
               <Menu.Item
+                key="4"
                 style={{ float: "right" }}
                 onClick={() => {
                   update({})
