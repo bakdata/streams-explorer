@@ -259,7 +259,10 @@ const App: React.FC = () => {
     </Menu>
   );
 
-  if (!isLoadingGraph && !isLoadingPipelines && !isUpdating) {
+  if (
+    typeof window !== undefined && !isLoadingGraph && !isLoadingPipelines
+    && !isUpdating
+  ) {
     return (
       <div ref={ref} className="application">
         <Layout className="layout">
@@ -291,7 +294,7 @@ const App: React.FC = () => {
                     option?.value
                       .toUpperCase()
                       .indexOf(inputValue.toUpperCase()) !== -1}
-                  defaultValue={focusedNode?.label}
+                  defaultValue={focusedNode ? focusedNode.label : undefined}
                   onSelect={(nodeId, option) => {
                     const node = option.node as Node;
                     if (node) {
