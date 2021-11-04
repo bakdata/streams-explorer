@@ -11,8 +11,9 @@ repos:
     hooks:
       - id: dprint
         name: dprint
-        entry: dprint
-        args: ["fmt", "--config", "dprint.json"]
+        entry: npx
+        args:
+          ["--prefix", "frontend", "dprint", "fmt", "--config", "dprint.json"]
         language: system
         pass_filenames: false
   - repo: https://github.com/pycqa/isort
