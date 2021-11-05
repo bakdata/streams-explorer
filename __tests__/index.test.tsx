@@ -1,4 +1,4 @@
-import { render } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import nock from "nock";
 import React from "react";
 import App from "../components/App";
@@ -70,7 +70,23 @@ describe("Streams Explorer", () => {
   });
 
   mockBackendGraph(true);
-  it("renders without crashing", () => {
-    render(<App />);
+
+  nock("http://localhost")
+    .persist()
+    .get("/api/metrics")
+    .reply(200, []);
+
+  nock("http://localhost")
+    .persist()
+    .get("/api/pipelines")
+    .reply(200, {
+      pipelines: [],
+    });
+
+  it("renders without crashing", async () => {
+    const { findByTestId } = render(
+      <App />
+    );
+    await findByTestId("graph");
   });
 });
