@@ -29,6 +29,7 @@ import Node from "./Node";
 const { Header, Content } = Layout;
 
 const NodeIcon = ({ nodeType }: { nodeType: string }) => (
+  // TODO: switch to Image component
   <img
     src={nodeType + ".svg"}
     alt={nodeType + "-icon"}
