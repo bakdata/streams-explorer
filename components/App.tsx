@@ -15,7 +15,6 @@ import { useRouter } from "next/router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import { useMutate } from "restful-react";
-import Node from "../components/Node";
 import {
   HTTPValidationError,
   useGetMetricsApiMetricsGet,
@@ -25,6 +24,7 @@ import {
 import DetailsCard from "./DetailsCard";
 import { graphConfig } from "./graphConfiguration";
 import GraphVisualization from "./GraphVisualization";
+import Node from "./Node";
 
 const { Header, Content } = Layout;
 

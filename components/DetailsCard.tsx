@@ -2,8 +2,8 @@ import { Card } from "antd";
 import React, { useRef } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import Details from "./Details";
-// import "./Details.css";
-import Node from "../../components/Node";
+import style from "./Details.module.css";
+import Node from "./Node";
 
 interface DetailsCardProps {
   node: Node | null;
@@ -13,7 +13,7 @@ const DetailsCard = ({ node }: DetailsCardProps) => {
   const ref = useRef<HTMLDivElement>(null!);
   const { width } = useResizeDetector({ targetRef: ref, handleHeight: false });
   return (
-    <div ref={ref} className="details">
+    <div ref={ref} className={style.details}>
       <Card
         title={node
           ? `${node.label} - Details`
