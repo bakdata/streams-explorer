@@ -1,10 +1,10 @@
 import { render } from "@testing-library/react";
 import nock from "nock";
 import React from "react";
-import App from "../src/App";
+import App from "../components/App";
 
 // -- Mock GraphVisualization
-jest.mock("../src/components/GraphVisualization", () => {
+jest.mock("../components/GraphVisualization", () => {
   return function DummyGraphVisualization() {
     return <div data-testid="graph"></div>;
   };

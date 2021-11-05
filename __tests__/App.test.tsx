@@ -12,10 +12,10 @@ import React from "react";
 import { Router } from "react-router";
 import { HashRouter, useLocation } from "react-router-dom";
 import { RestfulProvider } from "restful-react";
-import App from "./App";
+import App from "../components/App";
 
 // -- Mock GraphVisualization
-jest.mock("./components/GraphVisualization", () => {
+jest.mock("../components/GraphVisualization", () => {
   return function DummyGraphVisualization() {
     return <div data-testid="graph"></div>;
   };
