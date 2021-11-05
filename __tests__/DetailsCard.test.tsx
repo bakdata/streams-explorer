@@ -2,8 +2,8 @@ import { render } from "@testing-library/react";
 import nock from "nock";
 import React from "react";
 import { RestfulProvider } from "restful-react";
-import DetailsCard from "./DetailsCard";
-import Node from "./Node";
+import DetailsCard from "../components/DetailsCard";
+import Node from "../components/Node";
 
 describe("display card for node details", () => {
   beforeAll(() => {

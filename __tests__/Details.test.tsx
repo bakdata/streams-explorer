@@ -8,7 +8,7 @@ import {
   wait,
   waitForElement,
 } from "@testing-library/react";
-import Details from "./Details";
+import Details from "../components/Details";
 
 describe("display node information", () => {
   beforeAll(() => {
