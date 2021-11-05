@@ -319,17 +319,9 @@ const App: React.FC = () => {
                   ))}
                 </AutoComplete>
               </Menu.Item>
-              <Menu.Item key="3" style={{ float: "right" }}>
-                Metrics refresh:&nbsp;
-                <Dropdown overlay={menuRefresh}>
-                  <a href={"/#"}>
-                    {refreshIntervals[refreshInterval]} <DownOutlined />
-                  </a>
-                </Dropdown>
-              </Menu.Item>
               <Menu.Item
-                key="4"
-                style={{ float: "right" }}
+                key="3"
+                style={{ float: "right", marginLeft: "auto" }}
                 onClick={() => {
                   update({})
                     .then(() => window.location.reload())
@@ -339,6 +331,14 @@ const App: React.FC = () => {
                 <Button type="dashed" ghost={true}>
                   Update Graphs
                 </Button>
+              </Menu.Item>
+              <Menu.Item key="4" style={{ float: "right", marginLeft: "auto" }}>
+                Metrics refresh:&nbsp;
+                <Dropdown overlay={menuRefresh}>
+                  <a href={"/#"}>
+                    {refreshIntervals[refreshInterval]} <DownOutlined />
+                  </a>
+                </Dropdown>
               </Menu.Item>
             </Menu>
             <Spin
