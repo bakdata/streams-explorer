@@ -1,22 +1,8 @@
-import "@testing-library/jest-dom/extend-expect";
-import {
-  act,
-  findByTestId,
-  fireEvent,
-  render,
-  waitFor,
-  within,
-} from "@testing-library/react";
-// import { createMemoryHistory } from "history";
-// import { MemoryRouterProvider } from "next-router-mock/MemoryRouterProvider";
+import { fireEvent, render, within } from "@testing-library/react";
+import mockRouter from "next-router-mock";
 import singletonRouter, { useRouter } from "next/router";
-import Router from "next/router";
 import nock from "nock";
 import React from "react";
-// import { Router } from "react-router";
-// import { HashRouter, useLocation } from "react-router-dom";
-import mockRouter from "next-router-mock";
-import { RestfulProvider } from "restful-react";
 import App from "../components/App";
 
 jest.mock("next/router", () => require("next-router-mock"));
@@ -31,23 +17,11 @@ jest.mock("../components/GraphVisualization", () => {
 // -- Mock component to display url location & search paramters
 const LocationDisplay = () => {
   const router = useRouter();
-  return (
-    <div>
-      <div data-testid="location-pathname">{router.asPath}</div>
-      {/* <div data-testid="location-search">{router.query}</div> */}
-    </div>
-  );
-};
-
-const TestApp = () => {
-  return <App />;
-  {/* <HashRouter> */}
-  {/*   <App /> */}
-  {/* </HashRouter> */}
+  return <div data-testid="location-pathname">{router.asPath}</div>;
 };
 
 function mockBackendGraph(persist?: boolean, pipelineName?: string) {
-  return nock("http://localhost:8000")
+  return nock("http://localhost")
     .persist(persist)
     .get(`/api/graph${pipelineName ? "?pipeline_name=" + pipelineName : ""}`)
     .reply(200, {
@@ -107,18 +81,18 @@ describe("Streams Explorer", () => {
 
   describe("renders", () => {
     mockBackendGraph(true);
-    it("without crashing", () => {
-      render(<TestApp />);
+    it("without crashing", async () => {
+      const { findByTestId } = render(<App />);
+      await findByTestId("graph");
     });
 
-    // const history = createMemoryHistory();
     it("node icons in search", async () => {
       // render App
-      const { getByTestId, findAllByTestId } = render(
-        <TestApp />
+      const { getByTestId, findByTestId, findAllByTestId } = render(
+        <App />
       );
 
-      // await waitFor(() => getByTestId("graph"));
+      await findByTestId("graph");
       const nodeSelect = getByTestId("node-select");
 
       // -- open the search dropdown
@@ -144,14 +118,14 @@ describe("Streams Explorer", () => {
     const nockGraph = mockBackendGraph(true);
     const nockPipelineGraph = mockBackendGraph(true, "test-pipeline");
 
-    nock("http://localhost:8000")
+    nock("http://localhost")
       .persist()
       .get("/api/pipelines")
       .reply(200, {
         pipelines: ["test-pipeline"],
       });
 
-    nock("http://localhost:8000")
+    nock("http://localhost")
       .persist()
       .get("/api/metrics")
       .reply(200, [
