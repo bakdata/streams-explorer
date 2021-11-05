@@ -2,12 +2,7 @@ import nock from "nock";
 import React from "react";
 import { RestfulProvider } from "restful-react";
 
-import {
-  fireEvent,
-  render,
-  wait,
-  waitForElement,
-} from "@testing-library/react";
+import { fireEvent, render, waitFor } from "@testing-library/react";
 import Details from "../components/Details";
 
 describe("display node information", () => {
@@ -38,7 +33,7 @@ describe("display node information", () => {
       </RestfulProvider>
     );
 
-    await waitForElement(() => getByTestId("no-node-info"));
+    await waitFor(() => getByTestId("no-node-info"));
     expect(asFragment()).toMatchSnapshot();
   });
 
@@ -55,7 +50,7 @@ describe("display node information", () => {
       </RestfulProvider>
     );
 
-    await waitForElement(() => getByText("connector"));
+    await waitFor(() => getByText("connector"));
     expect(asFragment()).toMatchSnapshot();
   });
 
@@ -72,7 +67,7 @@ describe("display node information", () => {
       </RestfulProvider>
     );
 
-    await waitForElement(() => getByText("connector"));
+    await waitFor(() => getByText("connector"));
     expect(asFragment()).toMatchSnapshot();
   });
 
@@ -110,7 +105,7 @@ describe("display node information", () => {
       </RestfulProvider>
     );
 
-    await waitForElement(() => getByText("streaming-app"));
+    await waitFor(() => getByText("streaming-app"));
     expect(asFragment()).toMatchSnapshot();
   });
 
@@ -202,7 +197,7 @@ describe("display node information", () => {
       </RestfulProvider>
     );
 
-    await waitForElement(() => getByText("v2")); // get dropdown menu for schema version
+    await waitFor(() => getByText("v2")); // get dropdown menu for schema version
     let schemaVersion = getByText("v2");
     expect(nockSchema2.isDone()).toBeTruthy();
     expect(nockSchema1.isDone()).toBeFalsy();
@@ -210,19 +205,19 @@ describe("display node information", () => {
     expect(schema2).toMatchSnapshot();
 
     fireEvent.mouseOver(getByTestId("schema-version"));
-    await wait(() => {
+    await waitFor(() => {
       const menu = getByTestId("schema-version-select");
       fireEvent.mouseOver(menu);
       const v1 = getByText("v1");
       fireEvent.click(v1);
     });
 
-    await wait(() => {
+    await waitFor(() => {
       expect(schemaVersion).toHaveTextContent("v1");
       expect(nockSchema1.isDone()).toBeTruthy();
     });
 
-    await wait(() => {
+    await waitFor(() => {
       expect(schema2).not.toBeInTheDocument();
       const schema1 = getByTestId("schema");
       expect(schema1).toMatchSnapshot();
@@ -254,7 +249,7 @@ describe("display node information", () => {
       </RestfulProvider>
     );
 
-    await wait(() => {
+    await waitFor(() => {
       const menu = getByTestId("no-schema-versions");
       expect(menu).toBeInTheDocument();
     });
@@ -285,7 +280,7 @@ describe("display node information", () => {
       </RestfulProvider>
     );
 
-    await wait(() => {
+    await waitFor(() => {
       const menu = getByTestId("no-schema-versions");
       expect(menu).toBeInTheDocument();
     });
@@ -320,7 +315,7 @@ describe("display node information", () => {
       </RestfulProvider>
     );
 
-    await wait(() => {
+    await waitFor(() => {
       const menu = getByTestId("no-schema");
       expect(menu).toBeInTheDocument();
     });

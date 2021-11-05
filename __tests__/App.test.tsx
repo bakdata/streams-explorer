@@ -2,8 +2,7 @@ import {
   act,
   fireEvent,
   render,
-  wait,
-  waitForElement,
+  waitFor,
   within,
 } from "@testing-library/react";
 import { createMemoryHistory } from "history";
@@ -116,7 +115,7 @@ describe("Streams Explorer", () => {
         </RestfulProvider>
       );
 
-      await waitForElement(() => getByTestId("graph"));
+      await waitFor(() => getByTestId("graph"));
       const nodeSelect = getByTestId("node-select");
 
       // -- open the search dropdown
@@ -194,7 +193,7 @@ describe("Streams Explorer", () => {
         "?pipeline=test-pipeline"
       );
 
-      await waitForElement(() => getByTestId("graph"));
+      await waitFor(() => getByTestId("graph"));
       expect(asFragment()).toMatchSnapshot();
 
       const currentPipeline = getByTestId("pipeline-current");
@@ -236,9 +235,9 @@ describe("Streams Explorer", () => {
         "?focus-node=test-app"
       );
 
-      await waitForElement(() => getByTestId("graph"));
+      await waitFor(() => getByTestId("graph"));
 
-      await wait(() => {
+      await waitFor(() => {
         const currentPipeline = getByTestId("pipeline-current");
         expect(
           within(currentPipeline).getByText("all pipelines")
@@ -268,9 +267,9 @@ describe("Streams Explorer", () => {
         </RestfulProvider>
       );
 
-      await waitForElement(() => getByTestId("graph"));
+      await waitFor(() => getByTestId("graph"));
 
-      await wait(() => {
+      await waitFor(() => {
         // check pipeline set to all
         const currentPipeline = getByTestId("pipeline-current");
         expect(
@@ -299,7 +298,7 @@ describe("Streams Explorer", () => {
         </RestfulProvider>
       );
 
-      await waitForElement(() => getByTestId("graph"));
+      await waitFor(() => getByTestId("graph"));
       const nodeSelect = getByTestId("node-select");
       const input = within(nodeSelect).getByRole(
         "combobox"
@@ -345,7 +344,7 @@ describe("Streams Explorer", () => {
       expect(getByTestId("location-search")).toHaveTextContent(
         "?pipeline=test-pipeline&focus-node=test-app"
       );
-      await wait(() => {
+      await waitFor(() => {
         expect(nockAppNode.isDone()).toBeTruthy();
       });
 
@@ -358,7 +357,7 @@ describe("Streams Explorer", () => {
 
       options = await findAllByTestId("node-option");
       fireEvent.click(options[1]);
-      await wait(() => {
+      await waitFor(() => {
         expect(input).toHaveValue("test-topic");
 
         // -- check focus-node updated, pipeline still present
@@ -370,7 +369,7 @@ describe("Streams Explorer", () => {
 
       // -- (re-)set pipeline through UI
       fireEvent.mouseOver(getByTestId("pipeline-current"));
-      await wait(() => {
+      await waitFor(() => {
         expect(getByTestId("pipeline-select")).toBeInTheDocument();
         const pipeline = getByText("all pipelines");
         expect(pipeline).toBeInTheDocument();
@@ -411,15 +410,15 @@ describe("Streams Explorer", () => {
         "?pipeline=doesnt-exist"
       );
 
-      await waitForElement(() => getByTestId("graph"));
+      await waitFor(() => getByTestId("graph"));
 
-      await wait(() => {
+      await waitFor(() => {
         const currentPipeline = getByTestId("pipeline-current");
         expect(
           within(currentPipeline).getByText("all pipelines")
         ).toBeInTheDocument();
       });
-      await wait(() => {
+      await waitFor(() => {
         expect(nockPipeline.isDone()).toBeTruthy();
         expect(nockUpdate.isDone()).toBeTruthy();
       });
@@ -463,18 +462,18 @@ describe("Streams Explorer", () => {
         "?pipeline=avail-after-scrape"
       );
 
-      await wait(() => {
+      await waitFor(() => {
         // wait for the first pipeline request to fail
         expect(nockPipeline.isDone()).toBeTruthy();
         // pipeline becomes available
         nockPipeline = mockBackendGraph(true, "avail-after-scrape");
       });
 
-      await waitForElement(() => getByTestId("graph"));
+      await waitFor(() => getByTestId("graph"));
 
       expect(nockUpdate.isDone()).toBeTruthy();
       expect(nockPipeline.isDone()).toBeTruthy();
-      await wait(() => {
+      await waitFor(() => {
         const currentPipeline = getByTestId("pipeline-current");
         expect(
           within(currentPipeline).getByText("avail-after-scrape")
@@ -492,10 +491,10 @@ describe("Streams Explorer", () => {
 
       const { getByTestId, getByText, rerender } = render(<TestApp />);
 
-      await waitForElement(() => getByTestId("graph"));
+      await waitFor(() => getByTestId("graph"));
 
       let anchor: HTMLAnchorElement;
-      await wait(() => {
+      await waitFor(() => {
         const metricsSelect = getByText("Metrics refresh:");
         anchor = metricsSelect.lastElementChild as HTMLAnchorElement;
         expect(anchor).toHaveTextContent("30s");
@@ -505,7 +504,7 @@ describe("Streams Explorer", () => {
         fireEvent.mouseOver(anchor);
       });
 
-      await wait(() => {
+      await waitFor(() => {
         const intervalOff = getByText("off");
         expect(intervalOff).toBeInTheDocument();
         fireEvent.click(intervalOff);
@@ -519,8 +518,8 @@ describe("Streams Explorer", () => {
 
       // reload page: window.location.reload() doesn't work in test
       rerender(<TestApp />);
-      await waitForElement(() => getByTestId("graph"));
-      await wait(() => {
+      await waitFor(() => getByTestId("graph"));
+      await waitFor(() => {
         expect(anchor).toHaveTextContent("off");
       });
     });
@@ -536,9 +535,9 @@ describe("Streams Explorer", () => {
 
       const { getByTestId, getByText } = render(<TestApp />);
 
-      await waitForElement(() => getByTestId("graph"));
+      await waitFor(() => getByTestId("graph"));
 
-      await wait(() => {
+      await waitFor(() => {
         const metricsSelect = getByText("Metrics refresh:");
         const anchor = metricsSelect.lastElementChild as HTMLAnchorElement;
         expect(anchor).toHaveTextContent("off");
