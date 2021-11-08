@@ -26,6 +26,7 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import { useMutate } from "restful-react";
 import { useHistory, useLocation } from "react-router-dom";
+import Settings from "./components/Settings";
 
 const { Option } = AutoComplete;
 
@@ -56,7 +57,7 @@ const App: React.FC = () => {
     refreshRate: 100,
     onResize,
   });
-  const defaultRefreshInterval = 30;
+  const DEFAULT_REFRESH_INTERVAL = 30;
   const refreshIntervals: Record<number, string> = {
     0: "off",
     60: "60s",
@@ -65,11 +66,12 @@ const App: React.FC = () => {
   };
   const REFRESH_INTERVAL = "metrics-interval";
   const [refreshInterval, setRefreshInterval] = useState(0);
+  const [animate, setAnimate] = useState<boolean>(true);
 
   // on initial page load
   useEffect(() => {
     const storedRefreshInterval = Number(
-      localStorage.getItem(REFRESH_INTERVAL) || defaultRefreshInterval
+      localStorage.getItem(REFRESH_INTERVAL) || DEFAULT_REFRESH_INTERVAL
     );
     setRefreshInterval(storedRefreshInterval);
     if (storedRefreshInterval) {
@@ -324,6 +326,9 @@ const App: React.FC = () => {
                   </a>
                 </Dropdown>
               </Menu.Item>
+              <Menu.Item style={{ float: "right" }}>
+                <Settings animate={animate} setAnimate={setAnimate} />
+              </Menu.Item>
               <Menu.Item
                 style={{ float: "right" }}
                 onClick={() => {
@@ -366,6 +371,7 @@ const App: React.FC = () => {
                   width={width}
                   height={height ? height - 64 : 500}
                   focusedNode={focusedNode}
+                  animate={animate}
                 />
               ) : (
                 <Alert

@@ -25,6 +25,7 @@ interface GraphVisualizationProps {
   width: number | undefined;
   height: number | undefined;
   focusedNode: Node | null;
+  animate: boolean;
 }
 
 class Icon implements IIcon {
@@ -65,7 +66,11 @@ function setEdgeActivity(
   });
 }
 
-export function updateNodeMetrics(graph: Graph, metrics: Metric[]) {
+export function updateNodeMetrics(
+  graph: Graph,
+  metrics: Metric[],
+  animate: boolean
+) {
   let unavailableStreamingApps: INode[] = [];
   metrics.forEach((metric) => {
     let metricsString: string = [
@@ -118,27 +123,29 @@ export function updateNodeMetrics(graph: Graph, metrics: Metric[]) {
         metric: metricsString,
       });
 
-      // update edge animation
-      const nodeType = node.getModel().node_type;
-      if (nodeType === "topic" || nodeType === "error-topic") {
-        setEdgeActivity(graph, node.getInEdges(), !!metric.messages_in);
-        node.getOutEdges().forEach((edge: IEdge) => {
-          setEdgeActivity(graph, edge, !!metric.messages_out);
-        });
-      } else if (metric.replicas === 0) {
-        unavailableStreamingApps.push(node);
-      } else if (
-        nodeType === "streaming-app" &&
-        metric.consumer_read_rate === 0
-      ) {
-        // do not animate incoming edges on streaming apps with read rate 0
-        setEdgeActivity(graph, node.getInEdges(), false);
-      } else if (nodeType === "connector") {
-        // animate edges on connector nodes if read rate and running tasks is not 0
-        const active: boolean = !(
-          !metric.consumer_read_rate || metric.connector_tasks === 0
-        );
-        setEdgeActivity(graph, node.getEdges(), active);
+      if (animate) {
+        // update edge animation
+        const nodeType = node.getModel().node_type;
+        if (nodeType === "topic" || nodeType === "error-topic") {
+          setEdgeActivity(graph, node.getInEdges(), !!metric.messages_in);
+          node.getOutEdges().forEach((edge: IEdge) => {
+            setEdgeActivity(graph, edge, !!metric.messages_out);
+          });
+        } else if (metric.replicas === 0) {
+          unavailableStreamingApps.push(node);
+        } else if (
+          nodeType === "streaming-app" &&
+          metric.consumer_read_rate === 0
+        ) {
+          // do not animate incoming edges on streaming apps with read rate 0
+          setEdgeActivity(graph, node.getInEdges(), false);
+        } else if (nodeType === "connector") {
+          // animate edges on connector nodes if read rate and running tasks is not 0
+          const active: boolean = !(
+            !metric.consumer_read_rate || metric.connector_tasks === 0
+          );
+          setEdgeActivity(graph, node.getEdges(), active);
+        }
       }
     }
   });
@@ -177,6 +184,7 @@ const GraphVisualization = ({
   width,
   height,
   focusedNode,
+  animate,
 }: GraphVisualizationProps) => {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -189,10 +197,17 @@ const GraphVisualization = ({
     if (graph && focusedNode) {
       setFocusedNode(graph, focusedNode);
     }
-  }, [focusedNode, graph]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [graph, focusedNode]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (graph && !animate) {
+      // disable all edge animations
+      graph.getEdges().forEach((edge) => setEdgeActivity(graph, edge, false));
+    }
+  }, [animate]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (graph && metrics) {
-    updateNodeMetrics(graph, metrics);
+    updateNodeMetrics(graph, metrics, animate);
   }
 
   const mouseEnterCallback = useCallback(
