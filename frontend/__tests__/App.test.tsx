@@ -88,9 +88,7 @@ describe("Streams Explorer", () => {
 
     it("node icons in search", async () => {
       // render App
-      const { getByTestId, findByTestId, findAllByTestId } = render(
-        <App />
-      );
+      const { getByTestId, findByTestId, findAllByTestId } = render(<App />);
 
       await findByTestId("graph");
       const nodeSelect = getByTestId("node-select");

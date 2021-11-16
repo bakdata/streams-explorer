@@ -71,22 +71,14 @@ describe("Streams Explorer", () => {
 
   mockBackendGraph(true);
 
-  nock("http://localhost")
-    .persist()
-    .get("/api/metrics")
-    .reply(200, []);
+  nock("http://localhost").persist().get("/api/metrics").reply(200, []);
 
-  nock("http://localhost")
-    .persist()
-    .get("/api/pipelines")
-    .reply(200, {
-      pipelines: [],
-    });
+  nock("http://localhost").persist().get("/api/pipelines").reply(200, {
+    pipelines: [],
+  });
 
   it("renders without crashing", async () => {
-    const { findByTestId } = render(
-      <App />
-    );
+    const { findByTestId } = render(<App />);
     await findByTestId("graph");
   });
 });

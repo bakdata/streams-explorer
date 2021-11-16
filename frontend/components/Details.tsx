@@ -60,18 +60,18 @@ interface NodeInfoDetailProps {
 const NodeInfoDetail = ({ infoListItem, nodeId }: NodeInfoDetailProps) => {
   switch (infoListItem.type) {
     case "json":
-      return infoListItem.name === "Schema"
-        ? <Schema nodeId={nodeId} />
-        : (
-          <div className="jsonDetail">
-            <ReactJson
-              name={false}
-              src={infoListItem.value}
-              displayDataTypes={false}
-              collapsed={false}
-            />
-          </div>
-        );
+      return infoListItem.name === "Schema" ? (
+        <Schema nodeId={nodeId} />
+      ) : (
+        <div className="jsonDetail">
+          <ReactJson
+            name={false}
+            src={infoListItem.value}
+            displayDataTypes={false}
+            collapsed={false}
+          />
+        </div>
+      );
 
     case "link":
       return <LinkInfo nodeId={nodeId} infoListItem={infoListItem} />;

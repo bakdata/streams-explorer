@@ -4,7 +4,7 @@ import { updateNodeMetrics } from "../components/GraphVisualization";
 
 describe("visualize node metrics", () => {
   it("should differentiate node id and label", () => {
-    document.body.innerHTML = "<div id=\"testGraph\"></div>";
+    document.body.innerHTML = '<div id="testGraph"></div>';
     graphConfig.container = "testGraph";
     const graph = new G6.Graph(graphConfig);
 
@@ -22,7 +22,7 @@ describe("visualize node metrics", () => {
   });
 
   it("should update node metric labels", () => {
-    document.body.innerHTML = "<div id=\"testGraph\"></div>";
+    document.body.innerHTML = '<div id="testGraph"></div>';
     graphConfig.container = "testGraph";
     const graph = new G6.Graph(graphConfig);
 
@@ -124,7 +124,7 @@ describe("visualize node metrics", () => {
   });
 
   it("should animate data processing edges", () => {
-    document.body.innerHTML = "<div id=\"testGraph\"></div>";
+    document.body.innerHTML = '<div id="testGraph"></div>';
     graphConfig.container = "testGraph";
     const graph = new G6.Graph(graphConfig);
 

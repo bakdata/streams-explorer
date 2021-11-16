@@ -86,10 +86,10 @@ export function updateNodeMetrics(graph: Graph, metrics: Metric[]) {
       `${
         typeof metric.replicas === "number"
           ? `REPLICAS ${
-            typeof metric.replicas_available === "number"
-              ? `${metric.replicas_available}/`
-              : ""
-          }${metric.replicas}`
+              typeof metric.replicas_available === "number"
+                ? `${metric.replicas_available}/`
+                : ""
+            }${metric.replicas}`
           : ""
       }`,
       `${
@@ -127,8 +127,8 @@ export function updateNodeMetrics(graph: Graph, metrics: Metric[]) {
       } else if (metric.replicas === 0) {
         unavailableStreamingApps.push(node);
       } else if (
-        nodeType === "streaming-app"
-        && metric.consumer_read_rate === 0
+        nodeType === "streaming-app" &&
+        metric.consumer_read_rate === 0
       ) {
         // do not animate incoming edges on streaming apps with read rate 0
         setEdgeActivity(graph, node.getInEdges(), false);
