@@ -1,5 +1,6 @@
 import {
   act,
+  findByTestId,
   fireEvent,
   queryAllByText,
   render,
@@ -235,100 +236,97 @@ describe("Streams Explorer", () => {
       expect(input).toBeEmptyDOMElement();
     });
 
-    //     it("should update focus-node & pipeline parameters", async () => {
-    //       history.push({ pathname: "/", search: "?pipeline=test-pipeline" });
+    it("should update focus-node & pipeline parameters", async () => {
+      mockRouter.setCurrentUrl("/?pipeline=test-pipeline");
 
-    //       // render App
-    //       const { getByTestId, getByText, findAllByTestId } = render(
-    //         <RestfulProvider base="http://localhost">
-    //           <Router history={history}>
-    //             <LocationDisplay />
-    //             <App />
-    //           </Router>
-    //         </RestfulProvider>
-    //       );
+      // render App
+      const { getByTestId, getByText, findByTestId, findAllByTestId } = render(
+        <App />
+      );
 
-    //       await waitFor(() => getByTestId("graph"));
-    //       const nodeSelect = getByTestId("node-select");
-    //       const input = within(nodeSelect).getByRole(
-    //         "combobox"
-    //       ) as HTMLInputElement;
-    //       expect(input).toBeEmpty();
+      await findByTestId("graph");
+      const nodeSelect = getByTestId("node-select");
+      const input = within(nodeSelect).getByRole(
+        "combobox"
+      ) as HTMLInputElement;
+      expect(input).toBeEmptyDOMElement();
 
-    //       const nockAppNode = nock("http://localhost")
-    //         .get("/api/node/test-app")
-    //         .reply(200, {
-    //           node_id: "test-app",
-    //           node_type: "streaming-app",
-    //           info: [],
-    //         });
+      const nockAppNode = nock("http://localhost")
+        .get("/api/node/test-app")
+        .reply(200, {
+          node_id: "test-app",
+          node_type: "streaming-app",
+          info: [],
+        });
 
-    //       const nockTopicNode = nock("http://localhost")
-    //         .get("/api/node/test-topic")
-    //         .reply(200, {
-    //           node_id: "test-topic",
-    //           node_type: "topic",
-    //           info: [],
-    //         });
-    //       expect(nockAppNode.isDone()).toBeFalsy();
-    //       expect(nockTopicNode.isDone()).toBeFalsy();
+      const nockTopicNode = nock("http://localhost")
+        .get("/api/node/test-topic")
+        .reply(200, {
+          node_id: "test-topic",
+          node_type: "topic",
+          info: [],
+        });
+      expect(nockAppNode.isDone()).toBeFalsy();
+      expect(nockTopicNode.isDone()).toBeFalsy();
 
-    //       // -- set focus-node through UI
-    //       act(() => {
-    //         fireEvent.change(input, { target: { value: "test-app-name" } });
-    //       });
-    //       expect(input).toHaveValue("test-app-name");
+      // -- set focus-node through UI
+      act(() => {
+        fireEvent.change(input, { target: { value: "test-app-name" } });
+      });
+      expect(input).toHaveValue("test-app-name");
 
-    //       // -- open the search dropdown
-    //       const trigger = nodeSelect.lastElementChild;
-    //       expect(trigger).not.toBeNull();
-    //       fireEvent.mouseDown(trigger!);
+      // -- open the search dropdown
+      const trigger = nodeSelect.lastElementChild;
+      expect(trigger).not.toBeNull();
+      fireEvent.mouseDown(trigger!);
 
-    //       let options = await findAllByTestId("node-option");
-    //       expect(options).toHaveLength(2);
-    //       act(() => {
-    //         fireEvent.click(options[0]);
-    //       });
+      let options = await findAllByTestId("node-option");
+      expect(options).toHaveLength(2);
+      act(() => {
+        fireEvent.click(options[0]);
+      });
 
-    //       // -- check result: pipeline should be present
-    //       expect(getByTestId("location-search")).toHaveTextContent(
-    //         "?pipeline=test-pipeline&focus-node=test-app"
-    //       );
-    //       await waitFor(() => {
-    //         expect(nockAppNode.isDone()).toBeTruthy();
-    //       });
+      // -- check result: pipeline should be present
+      expect(singletonRouter).toMatchObject({
+        asPath: "/?pipeline=test-pipeline&focus-node=test-app",
+      });
+      await waitFor(() => {
+        expect(nockAppNode.isDone()).toBeTruthy();
+      });
 
-    //       // -- open the search dropdown
-    //       fireEvent.mouseDown(trigger!);
+      // -- open the search dropdown
+      fireEvent.mouseDown(trigger!);
 
-    //       // -- update focus-node through UI
-    //       fireEvent.change(input, { target: { value: "test-topic-name" } });
-    //       expect(input).toHaveValue("test-topic-name");
+      // -- update focus-node through UI
+      fireEvent.change(input, { target: { value: "test-topic-name" } });
+      expect(input).toHaveValue("test-topic-name");
 
-    //       options = await findAllByTestId("node-option");
-    //       fireEvent.click(options[1]);
-    //       await waitFor(() => {
-    //         expect(input).toHaveValue("test-topic");
+      options = await findAllByTestId("node-option");
+      fireEvent.click(options[1]);
+      await waitFor(() => {
+        expect(input).toHaveValue("test-topic");
 
-    //         // -- check focus-node updated, pipeline still present
-    //         expect(getByTestId("location-search")).toHaveTextContent(
-    //           "?pipeline=test-pipeline&focus-node=test-topic"
-    //         );
-    //         expect(nockTopicNode.isDone()).toBeTruthy();
-    //       });
+        // -- check focus-node updated, pipeline still present
+        expect(singletonRouter).toMatchObject({
+          asPath: "/?pipeline=test-pipeline&focus-node=test-topic",
+        });
+        expect(nockTopicNode.isDone()).toBeTruthy();
+      });
 
-    //       // -- (re-)set pipeline through UI
-    //       fireEvent.mouseOver(getByTestId("pipeline-current"));
-    //       await waitFor(() => {
-    //         expect(getByTestId("pipeline-select")).toBeInTheDocument();
-    //         const pipeline = getByText("all pipelines");
-    //         expect(pipeline).toBeInTheDocument();
-    //         fireEvent.click(pipeline);
-    //         expect(getByTestId("location-search")).toHaveTextContent(
-    //           "?pipeline=all pipelines"
-    //         );
-    //       });
-    //     });
+      // -- (re-)set pipeline through UI
+      const currentPipeline = getByTestId("pipeline-current");
+      fireEvent.mouseOver(currentPipeline);
+      await findByTestId("pipeline-select");
+
+      await waitFor(() => {
+        const pipeline = getByText("all pipelines");
+        expect(pipeline).toBeInTheDocument();
+        fireEvent.click(pipeline);
+      });
+      expect(singletonRouter).toMatchObject({
+        asPath: "/",
+      });
+    });
 
     //     it("should redirect to all pipelines if pipeline is not found", async () => {
     //       const nockPipeline = nock("http://localhost")
