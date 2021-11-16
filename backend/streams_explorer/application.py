@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from starlette.responses import RedirectResponse
+from starlette.responses import FileResponse
 from starlette.staticfiles import StaticFiles
 
 from streams_explorer.api.routes import api
@@ -7,15 +7,14 @@ from streams_explorer.core.config import API_PREFIX, APP_NAME
 
 
 def get_application() -> FastAPI:
-    application = FastAPI(title=APP_NAME)
-    application.mount(
-        "/static", StaticFiles(directory="static", html=True), name="static"
+    app = FastAPI(title=APP_NAME)
+    app.mount(
+        "/_next/static", StaticFiles(directory="_next/static", html=True), name="static"
     )
 
-    @application.get("/")
-    @application.get("/static")
-    def frontend():
-        return RedirectResponse(url="/static/")
+    @app.get("/", include_in_schema=False)
+    async def index():
+        return FileResponse("index.html")
 
-    application.include_router(api.router, prefix=API_PREFIX)
-    return application
+    app.include_router(api.router, prefix=API_PREFIX)
+    return app
