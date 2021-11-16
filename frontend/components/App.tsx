@@ -117,12 +117,8 @@ const App: React.FC = () => {
     error: metricsError,
   } = useGetMetricsApiMetricsGet({ lazy: true });
 
-  const getParams = useCallback(() => {
-    return new URLSearchParams(location.search);
-  }, []);
-
   function pushHistoryFocusNode(nodeId: string) {
-    const pipeline = getParams().get("pipeline");
+    const pipeline = router.query.pipeline as string;
     router.push(
       `/?${pipeline ? `pipeline=${pipeline}&` : ""}focus-node=${nodeId}`
     );
@@ -147,12 +143,13 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (!graph) return;
-    const params = getParams();
-    const pipeline = params.get("pipeline");
+
+    const pipeline = router.query.pipeline as string;
     if (pipeline) {
       setCurrentPipeline(pipeline);
     }
-    const focusNode = params.get("focus-node");
+
+    const focusNode = router.query["focus-node"] as string;
     if (focusNode) {
       const node = graph?.nodes.find((node) => node.id === focusNode);
       if (node) {
