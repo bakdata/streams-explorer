@@ -368,58 +368,43 @@ describe("Streams Explorer", () => {
       // });
     });
 
-    // it("should update and retry if pipeline is not found", async () => {
-    //   let nockPipeline = nock("http://localhost")
-    //     .get(`/api/graph?pipeline_name=avail-after-scrape`)
-    //     .reply(404);
+    it("should update and retry if pipeline is not found", async () => {
+      let nockPipeline = nock("http://localhost")
+        .get(`/api/graph?pipeline_name=avail-after-scrape`)
+        .reply(404);
 
-    //   const nockUpdate = nock("http://localhost")
-    //     .post(`/api/update`)
-    //     .reply(200);
+      const nockUpdate = nock("http://localhost")
+        .post(`/api/update`)
+        .reply(200);
 
-    //   mockBackendGraph(true);
+      mockBackendGraph(true);
 
-    //   act(() => {
-    //     history.push({ pathname: "/", search: "?pipeline=avail-after-scrape" });
-    //   });
+      mockRouter.setCurrentUrl("/?pipeline=avail-after-scrape");
 
-    //   const { getByTestId } = render(
-    //     <RestfulProvider base="http://localhost">
-    //       <Router history={history}>
-    //         <LocationDisplay />
-    //         <App />
-    //       </Router>
-    //     </RestfulProvider>
-    //   );
+      const { getByTestId, findByTestId } = render(<App />);
 
-    //   expect(getByTestId("location-pathname")).toHaveTextContent("/");
-    //   expect(getByTestId("location-search")).toHaveTextContent(
-    //     "?pipeline=avail-after-scrape"
-    //   );
+      expect(singletonRouter.asPath).toBe("/?pipeline=avail-after-scrape");
 
-    //   await waitFor(() => {
-    //     // wait for the first pipeline request to fail
-    //     expect(nockPipeline.isDone()).toBeTruthy();
-    //     // pipeline becomes available
-    //     nockPipeline = mockBackendGraph(true, "avail-after-scrape");
-    //   });
+      await waitFor(() => {
+        // wait for the first pipeline request to fail
+        expect(nockPipeline.isDone()).toBeTruthy();
+        // pipeline becomes available
+        nockPipeline = mockBackendGraph(true, "avail-after-scrape");
+      });
 
-    //   await waitFor(() => getByTestId("graph"));
+      await findByTestId("graph");
 
-    //   expect(nockUpdate.isDone()).toBeTruthy();
-    //   expect(nockPipeline.isDone()).toBeTruthy();
-    //   await waitFor(() => {
-    //     const currentPipeline = getByTestId("pipeline-current");
-    //     expect(
-    //       within(currentPipeline).getByText("avail-after-scrape")
-    //     ).toBeInTheDocument();
-    //   });
+      expect(nockUpdate.isDone()).toBeTruthy();
+      expect(nockPipeline.isDone()).toBeTruthy();
+      await waitFor(() => {
+        const currentPipeline = getByTestId("pipeline-current");
+        expect(
+          within(currentPipeline).getByText("avail-after-scrape")
+        ).toBeInTheDocument();
+      });
 
-    //   expect(getByTestId("location-pathname")).toHaveTextContent("/");
-    //   expect(getByTestId("location-search")).toHaveTextContent(
-    //     "?pipeline=avail-after-scrape"
-    //   );
-    // });
+      expect(singletonRouter.asPath).toBe("/?pipeline=avail-after-scrape");
+    });
 
     it("should persist metrics refresh interval across page reloads", async () => {
       mockBackendGraph(true);
