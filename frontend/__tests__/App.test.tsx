@@ -1,4 +1,11 @@
-import { fireEvent, render, waitFor, within } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  queryAllByText,
+  render,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import mockRouter from "next-router-mock";
 import singletonRouter, { useRouter } from "next/router";
 import nock from "nock";
@@ -445,43 +452,38 @@ describe("Streams Explorer", () => {
     //       );
     //     });
 
-    //     it("should persist metrics refresh interval across page reloads", async () => {
-    //       mockBackendGraph(true);
+    it("should persist metrics refresh interval across page reloads", async () => {
+      mockBackendGraph(true);
 
-    //       const { getByTestId, getByText, rerender } = render(<TestApp />);
+      const { getByText, findByTestId, rerender } = render(<App />);
 
-    //       await waitFor(() => getByTestId("graph"));
+      await findByTestId("graph");
 
-    //       let anchor: HTMLAnchorElement;
-    //       await waitFor(() => {
-    //         const metricsSelect = getByText("Metrics refresh:");
-    //         anchor = metricsSelect.lastElementChild as HTMLAnchorElement;
-    //         expect(anchor).toHaveTextContent("30s");
-    //       });
+      let anchor: HTMLAnchorElement;
+      await waitFor(() => {
+        const metricsSelect = getByText("Metrics refresh:");
+        anchor = metricsSelect.lastElementChild as HTMLAnchorElement;
+        expect(anchor).toHaveTextContent("30s");
+      });
+      expect(window.localStorage.getItem("metrics-interval")).toBe("30");
 
-    //       act(() => {
-    //         fireEvent.mouseOver(anchor);
-    //       });
+      act(() => {
+        fireEvent.mouseOver(anchor);
+      });
 
-    //       await waitFor(() => {
-    //         const intervalOff = getByText("off");
-    //         expect(intervalOff).toBeInTheDocument();
-    //         fireEvent.click(intervalOff);
-    //         expect(anchor).toHaveTextContent("off");
+      const metricsSelect = await findByTestId("metrics-select");
+      const intervalOff = within(metricsSelect).getByText("off");
+      expect(intervalOff).toBeInTheDocument();
+      fireEvent.click(intervalOff);
+      expect(anchor).toHaveTextContent("off");
 
-    //         // trigger onClick of antd Menu component
-    //         fireEvent.click(getByTestId("metrics-select"));
+      expect(window.localStorage.getItem("metrics-interval")).toBe("0");
 
-    //         expect(window.localStorage.getItem("metrics-interval")).toBe("0");
-    //       });
-
-    //       // reload page: window.location.reload() doesn't work in test
-    //       rerender(<TestApp />);
-    //       await waitFor(() => getByTestId("graph"));
-    //       await waitFor(() => {
-    //         expect(anchor).toHaveTextContent("off");
-    //       });
-    //     });
+      // reload page: window.location.reload() doesn't work in test
+      rerender(<App />);
+      await findByTestId("graph");
+      expect(anchor).toHaveTextContent("off");
+    });
 
     //     it("should not fetch metrics if interval is set to 'off'", async () => {
     //       mockBackendGraph(true);
