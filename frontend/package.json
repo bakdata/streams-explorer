@@ -31,8 +31,8 @@
     "@testing-library/user-event": "^13.5.0",
     "@types/jest": "^27.0.2",
     "@types/node": "^16.3.3",
-    "@types/react": "^17.0.14",
-    "@types/react-dom": "^17.0.2",
+    "@types/react": "^17.0.35",
+    "@types/react-dom": "^17.0.11",
     "@types/testing-library__jest-dom": "^5.14.1",
     "babel-jest": "^27.3.1",
     "canvas": "^2.8.0",
@@ -44,7 +44,7 @@
     "next-router-mock": "^0.6.1",
     "nock": "^13.1.4",
     "react-test-renderer": "^17.0.2",
-    "typescript": "^4.3.5",
+    "typescript": "^4.4.4",
     "whatwg-fetch": "^3.6.2"
   },
   "homepage": "http://localhost/static"
