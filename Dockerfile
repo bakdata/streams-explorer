@@ -20,7 +20,7 @@ RUN npm ci --prefix /frontend_build
 COPY ./frontend /frontend_build
 RUN npm run build --prefix /frontend_build && \
     mkdir -p /app/static && \
-    mv /frontend_build/build/* /app/static/ && \
+    mv /frontend_build/out/* /app/static/ && \
     rm -rf /frontend_build
 
 RUN apt-get -y purge --auto-remove -o APT::AutoRemove::RecommendsImportant=false
