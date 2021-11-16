@@ -326,7 +326,7 @@ const App: React.FC = () => {
                 style={{ float: "right", marginLeft: "auto" }}
                 onClick={() => {
                   update({})
-                    .then(() => window.location.reload())
+                    .then(() => router.reload())
                     .catch(() => message.error("Failed to update!"));
                 }}
               >
