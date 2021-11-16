@@ -46,6 +46,5 @@
     "nock": "^13.1.4",
     "react-test-renderer": "^17.0.2",
     "whatwg-fetch": "^3.6.2"
-  },
-  "homepage": "http://localhost/static"
+  }
 }
