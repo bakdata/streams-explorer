@@ -94,59 +94,6 @@ export interface ValidationError {
   type: string;
 }
 
-export interface FrontendStaticGetResponse {}
-
-export type FrontendStaticGetProps = Omit<
-  GetProps<FrontendStaticGetResponse, unknown, void, void>,
-  "path"
->;
-
-/**
- * Frontend
- */
-export const FrontendStaticGet = (props: FrontendStaticGetProps) => (
-  <Get<FrontendStaticGetResponse, unknown, void, void>
-    path={`/static`}
-    {...props}
-  />
-);
-
-export type UseFrontendStaticGetProps = Omit<
-  UseGetProps<FrontendStaticGetResponse, unknown, void, void>,
-  "path"
->;
-
-/**
- * Frontend
- */
-export const useFrontendStaticGet = (props: UseFrontendStaticGetProps) =>
-  useGet<FrontendStaticGetResponse, unknown, void, void>(`/static`, props);
-
-export interface FrontendGetResponse {}
-
-export type FrontendGetProps = Omit<
-  GetProps<FrontendGetResponse, unknown, void, void>,
-  "path"
->;
-
-/**
- * Frontend
- */
-export const FrontendGet = (props: FrontendGetProps) => (
-  <Get<FrontendGetResponse, unknown, void, void> path={`/`} {...props} />
-);
-
-export type UseFrontendGetProps = Omit<
-  UseGetProps<FrontendGetResponse, unknown, void, void>,
-  "path"
->;
-
-/**
- * Frontend
- */
-export const useFrontendGet = (props: UseFrontendGetProps) =>
-  useGet<FrontendGetResponse, unknown, void, void>(`/`, props);
-
 export interface UpdateApiUpdatePostResponse {}
 
 export type UpdateApiUpdatePostProps = Omit<
