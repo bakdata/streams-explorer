@@ -32,13 +32,13 @@ describe("display node information", () => {
       detail: 'Could not find information for node with name "fake-node"',
     });
 
-    const { getByTestId, asFragment } = render(
+    const { findByTestId, asFragment } = render(
       <RestfulProvider base="http://localhost">
         <Details nodeId="1" />
       </RestfulProvider>
     );
 
-    await waitFor(() => getByTestId("no-node-info"));
+    await findByTestId("no-node-info");
     expect(asFragment()).toMatchSnapshot();
   });
 
@@ -49,13 +49,13 @@ describe("display node information", () => {
       info: [],
     });
 
-    const { getByText, asFragment } = render(
+    const { findByText, asFragment } = render(
       <RestfulProvider base="http://localhost">
         <Details nodeId="2" />
       </RestfulProvider>
     );
 
-    await waitFor(() => getByText("connector"));
+    await findByText("connector");
     expect(asFragment()).toMatchSnapshot();
   });
 
@@ -66,13 +66,13 @@ describe("display node information", () => {
       info: [],
     });
 
-    const { getByText, asFragment } = render(
+    const { findByText, asFragment } = render(
       <RestfulProvider base="http://localhost">
         <Details nodeId="2" />
       </RestfulProvider>
     );
 
-    await waitFor(() => getByText("connector"));
+    await findByText("connector");
     expect(asFragment()).toMatchSnapshot();
   });
 
@@ -198,13 +198,13 @@ describe("display node information", () => {
         "http://localhost:3000/d/path/to/dashboard?var-topics=atm-fraud-incoming-transactions-topic"
       );
 
-    const { getByText, getByTestId } = render(
+    const { getByText, findByText, getByTestId } = render(
       <RestfulProvider base="http://localhost">
         <Details nodeId="atm-fraud-incoming-transactions-topic" />
       </RestfulProvider>
     );
 
-    await waitFor(() => getByText("v2")); // get dropdown menu for schema version
+    await findByText("v2"); // get dropdown menu for schema version
     let schemaVersion = getByText("v2");
     expect(nockSchema2.isDone()).toBeTruthy();
     expect(nockSchema1.isDone()).toBeFalsy();
@@ -250,16 +250,13 @@ describe("display node information", () => {
       .get("/api/node/atm-fraud-incoming-transactions-topic/schema")
       .reply(404);
 
-    const { getByTestId } = render(
+    const { findByTestId } = render(
       <RestfulProvider base="http://localhost">
         <Details nodeId="atm-fraud-incoming-transactions-topic" />
       </RestfulProvider>
     );
 
-    await waitFor(() => {
-      const menu = getByTestId("no-schema-versions");
-      expect(menu).toBeInTheDocument();
-    });
+    await findByTestId("no-schema-versions");
   });
 
   it("should show error if schema versions is empty", async () => {
@@ -281,16 +278,13 @@ describe("display node information", () => {
       .get("/api/node/atm-fraud-incoming-transactions-topic/schema")
       .reply(200, []);
 
-    const { getByTestId } = render(
+    const { findByTestId } = render(
       <RestfulProvider base="http://localhost">
         <Details nodeId="atm-fraud-incoming-transactions-topic" />
       </RestfulProvider>
     );
 
-    await waitFor(() => {
-      const menu = getByTestId("no-schema-versions");
-      expect(menu).toBeInTheDocument();
-    });
+    await findByTestId("no-schema-versions");
   });
 
   it("should show error if schema is unavailable", async () => {
@@ -316,15 +310,12 @@ describe("display node information", () => {
       .get("/api/node/atm-fraud-incoming-transactions-topic/schema/1")
       .reply(404);
 
-    const { getByTestId } = render(
+    const { findByTestId } = render(
       <RestfulProvider base="http://localhost">
         <Details nodeId="atm-fraud-incoming-transactions-topic" />
       </RestfulProvider>
     );
 
-    await waitFor(() => {
-      const menu = getByTestId("no-schema");
-      expect(menu).toBeInTheDocument();
-    });
+    await findByTestId("no-schema");
   });
 });
