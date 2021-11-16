@@ -160,13 +160,15 @@ describe("Streams Explorer", () => {
     it("should set pipeline from url parameter", async () => {
       mockRouter.setCurrentUrl("/?pipeline=test-pipeline");
 
-      const { getByTestId, findByTestId } = render(<App />);
+      const { getByTestId, findByTestId, asFragment } = render(<App />);
 
       expect(singletonRouter).toMatchObject({
         asPath: "/?pipeline=test-pipeline",
       });
 
       await findByTestId("graph");
+
+      expect(asFragment()).toMatchSnapshot();
 
       const currentPipeline = getByTestId("pipeline-current");
       expect(currentPipeline).toHaveTextContent("test-pipeline");
