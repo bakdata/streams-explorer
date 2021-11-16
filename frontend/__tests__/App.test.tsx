@@ -186,47 +186,37 @@ describe("Streams Explorer", () => {
     //   expect(input).toBeEmptyDOMElement();
     // });
 
-    //     it("should set focus-node from url parameter", async () => {
-    //       history.push({ pathname: "/", search: "?focus-node=test-app" });
+    it("should set focus-node from url parameter", async () => {
+      mockRouter.setCurrentUrl("/?focus-node=test-app");
 
-    //       const nockAppNode = nock("http://localhost")
-    //         .get("/api/node/test-app")
-    //         .reply(200, {
-    //           node_id: "test-app",
-    //           node_type: "streaming-app",
-    //           info: [],
-    //         });
+      const nockAppNode = nock("http://localhost")
+        .get("/api/node/test-app")
+        .reply(200, {
+          node_id: "test-app",
+          node_type: "streaming-app",
+          info: [],
+        });
 
-    //       const { getByTestId } = render(
-    //         <RestfulProvider base="http://localhost">
-    //           <Router history={history}>
-    //             <LocationDisplay />
-    //             <App />
-    //           </Router>
-    //         </RestfulProvider>
-    //       );
+      const { findByTestId, getByTestId } = render(<App />);
 
-    //       expect(getByTestId("location-pathname")).toHaveTextContent("/");
-    //       expect(getByTestId("location-search")).toHaveTextContent(
-    //         "?focus-node=test-app"
-    //       );
+      expect(singletonRouter).toMatchObject({
+        asPath: "/?focus-node=test-app",
+      });
 
-    //       await waitFor(() => getByTestId("graph"));
+      await findByTestId("graph");
 
-    //       await waitFor(() => {
-    //         const currentPipeline = getByTestId("pipeline-current");
-    //         expect(
-    //           within(currentPipeline).getByText("all pipelines")
-    //         ).toBeInTheDocument();
+      const currentPipeline = getByTestId("pipeline-current");
+      expect(
+        within(currentPipeline).getByText("all pipelines")
+      ).toBeInTheDocument();
 
-    //         const nodeSelect = getByTestId("node-select");
-    //         const input = within(nodeSelect).getByRole(
-    //           "combobox"
-    //         ) as HTMLInputElement;
-    //         expect(input).toHaveValue("test-app-name"); // shows label
-    //         expect(nockAppNode.isDone()).toBeTruthy();
-    //       });
-    //     });
+      const nodeSelect = getByTestId("node-select");
+      const input = within(nodeSelect).getByRole(
+        "combobox"
+      ) as HTMLInputElement;
+      expect(input).toHaveValue("test-app-name"); // shows label
+      expect(nockAppNode.isDone()).toBeTruthy();
+    });
 
     it("should render without url parameters", async () => {
       mockRouter.setCurrentUrl("/");
