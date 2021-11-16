@@ -66,7 +66,7 @@ const NodeInfoDetail = ({ infoListItem, nodeId }: NodeInfoDetailProps) => {
         <div className="jsonDetail">
           <ReactJson
             name={false}
-            src={infoListItem.value}
+            src={infoListItem.value as object}
             displayDataTypes={false}
             collapsed={false}
           />
