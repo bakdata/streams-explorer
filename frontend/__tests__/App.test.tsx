@@ -169,10 +169,9 @@ describe("Streams Explorer", () => {
       await findByTestId("graph");
 
       const currentPipeline = getByTestId("pipeline-current");
-      console.log(currentPipeline.textContent);
+      expect(currentPipeline).toHaveTextContent("test-pipeline");
       expect(nockGraph.isDone()).toBeFalsy();
       expect(nockPipelineGraph.isDone()).toBeTruthy(); // specific graph endpoint was called
-      expect(currentPipeline).toHaveTextContent("test-pipeline");
 
       const nodeSelect = getByTestId("node-select");
       const input = within(nodeSelect).getByRole(
