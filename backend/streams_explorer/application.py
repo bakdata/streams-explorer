@@ -16,5 +16,9 @@ def get_application() -> FastAPI:
     async def index():
         return FileResponse("index.html")
 
+    @app.get("/{path}", include_in_schema=False)
+    async def public(path: str):
+        return FileResponse(path)
+
     app.include_router(api.router, prefix=API_PREFIX)
     return app
