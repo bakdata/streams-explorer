@@ -485,27 +485,25 @@ describe("Streams Explorer", () => {
       expect(anchor).toHaveTextContent("off");
     });
 
-    //     it("should not fetch metrics if interval is set to 'off'", async () => {
-    //       mockBackendGraph(true);
-    //       const nockMetrics = nock("http://localhost")
-    //         .get("/api/metrics")
-    //         .reply(200, []);
+    it("should not fetch metrics if interval is set to 'off'", async () => {
+      mockBackendGraph(true);
+      const nockMetrics = nock("http://localhost")
+        .get("/api/metrics")
+        .reply(200, []);
 
-    //       // set metrics refresh interval to 'off'
-    //       window.localStorage.setItem("metrics-interval", "0");
+      // set metrics refresh interval to 'off'
+      window.localStorage.setItem("metrics-interval", "0");
 
-    //       const { getByTestId, getByText } = render(<TestApp />);
+      const { findByTestId, getByText } = render(<App />);
 
-    //       await waitFor(() => getByTestId("graph"));
+      await findByTestId("graph");
 
-    //       await waitFor(() => {
-    //         const metricsSelect = getByText("Metrics refresh:");
-    //         const anchor = metricsSelect.lastElementChild as HTMLAnchorElement;
-    //         expect(anchor).toHaveTextContent("off");
-    //         // verify metrics haven't been refreshed
-    //         expect(nockMetrics.isDone()).toBeFalsy();
-    //       });
-    //     });
+      const metricsSelect = getByText("Metrics refresh:");
+      const anchor = metricsSelect.lastElementChild as HTMLAnchorElement;
+      expect(anchor).toHaveTextContent("off");
+      // verify metrics haven't been refreshed
+      expect(nockMetrics.isDone()).toBeFalsy();
+    });
   });
 });
 
