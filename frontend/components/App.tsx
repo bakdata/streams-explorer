@@ -340,7 +340,7 @@ const App: React.FC = () => {
               <Menu.Item key="4" style={{ float: "right", marginLeft: "auto" }}>
                 Metrics refresh:&nbsp;
                 <Dropdown overlay={menuRefresh}>
-                  <a href={"/#"}>
+                  <a href={"/#"} onClick={(e) => e.preventDefault()}>
                     {refreshIntervals[refreshInterval]} <DownOutlined />
                   </a>
                 </Dropdown>
