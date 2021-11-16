@@ -156,35 +156,29 @@ describe("Streams Explorer", () => {
         },
       ]);
 
-    // it("should set pipeline from url parameter", async () => {
-    //   mockRouter.setCurrentUrl("/?pipeline=test-pipeline");
+    it("should set pipeline from url parameter", async () => {
+      mockRouter.setCurrentUrl("/?pipeline=test-pipeline");
 
-    //   const { getByTestId, asFragment, findByTestId } = render(<App />);
+      const { getByTestId, findByTestId } = render(<App />);
 
-    //   expect(singletonRouter).toMatchObject({
-    //     asPath: "/?pipeline=test-pipeline",
-    //   });
+      expect(singletonRouter).toMatchObject({
+        asPath: "/?pipeline=test-pipeline",
+      });
 
-    //   await findByTestId("graph");
-    //   // expect(asFragment()).toMatchSnapshot();
+      await findByTestId("graph");
 
-    //   const currentPipeline = getByTestId("pipeline-current");
-    //   console.log(currentPipeline.textContent);
-    //   expect(nockGraph.isDone()).toBeFalsy();
-    //   // expect(nockPipelineGraph.isDone()).toBeTruthy(); // specific graph endpoint was called
-    //   // expect(
-    //   //   within(currentPipeline).getByText("test-pipeline")
-    //   // ).toBeInTheDocument();
-    //   await waitFor(() => {
-    //     expect(currentPipeline).toHaveTextContent("test-pipeline");
-    //   });
+      const currentPipeline = getByTestId("pipeline-current");
+      console.log(currentPipeline.textContent);
+      expect(nockGraph.isDone()).toBeFalsy();
+      expect(nockPipelineGraph.isDone()).toBeTruthy(); // specific graph endpoint was called
+      expect(currentPipeline).toHaveTextContent("test-pipeline");
 
-    //   const nodeSelect = getByTestId("node-select");
-    //   const input = within(nodeSelect).getByRole(
-    //     "combobox"
-    //   ) as HTMLInputElement;
-    //   expect(input).toBeEmptyDOMElement();
-    // });
+      const nodeSelect = getByTestId("node-select");
+      const input = within(nodeSelect).getByRole(
+        "combobox"
+      ) as HTMLInputElement;
+      expect(input).toBeEmptyDOMElement();
+    });
 
     it("should set focus-node from url parameter", async () => {
       mockRouter.setCurrentUrl("/?focus-node=test-app");
