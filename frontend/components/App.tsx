@@ -25,6 +25,7 @@ import DetailsCard from "./DetailsCard";
 import { graphConfig } from "./graphConfiguration";
 import GraphVisualization from "./GraphVisualization";
 import Node from "./Node";
+import Settings from "./Settings";
 
 const { Header, Content } = Layout;
 
@@ -53,7 +54,7 @@ const App: React.FC = () => {
     refreshRate: 100,
     onResize,
   });
-  const defaultRefreshInterval = 30;
+  const DEFAULT_REFRESH_INTERVAL = 30;
   const refreshIntervals: Record<number, string> = {
     0: "off",
     60: "60s",
@@ -62,11 +63,12 @@ const App: React.FC = () => {
   };
   const REFRESH_INTERVAL = "metrics-interval";
   const [refreshInterval, setRefreshInterval] = useState(0);
+  const [animate, setAnimate] = useState<boolean>(true);
 
   // on initial page load
   useEffect(() => {
     const storedRefreshInterval = Number(
-      localStorage.getItem(REFRESH_INTERVAL) || defaultRefreshInterval
+      localStorage.getItem(REFRESH_INTERVAL) || DEFAULT_REFRESH_INTERVAL
     );
     setRefreshInterval(storedRefreshInterval);
     if (storedRefreshInterval) {
@@ -335,6 +337,9 @@ const App: React.FC = () => {
                 </Button>
               </Menu.Item>
               <Menu.Item key="4" style={{ float: "right", marginLeft: "auto" }}>
+                <Settings animate={animate} setAnimate={setAnimate} />
+              </Menu.Item>
+              <Menu.Item key="5" style={{ float: "right", marginLeft: "auto" }}>
                 Metrics refresh:&nbsp;
                 <Dropdown overlay={menuRefresh}>
                   <a href={"/#"} onClick={(e) => e.preventDefault()}>
@@ -372,6 +377,7 @@ const App: React.FC = () => {
                   width={width ? width : window.innerWidth}
                   height={height ? height - 64 : window.innerHeight - 64}
                   focusedNode={focusedNode}
+                  animate={animate}
                 />
               ) : (
                 <Alert

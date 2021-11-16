@@ -2,7 +2,12 @@ import nock from "nock";
 import React from "react";
 import { RestfulProvider } from "restful-react";
 
-import { fireEvent, render, waitFor } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  waitFor,
+  waitForElementToBeRemoved,
+} from "@testing-library/react";
 import Details from "../components/Details";
 
 describe("display node information", () => {
@@ -93,19 +98,21 @@ describe("display node information", () => {
         ],
       });
 
-    nock("http://localhost")
+    const nockLinking = nock("http://localhost")
       .get("/api/node/linking/atm-fraud-transactionavroproducer?")
       .reply(
         200,
         "http://localhost:5601/app/kibana#/discover?_a=(columns:!(_source),query:(language:lucene,query:'kubernetes.labels.app:%20%22atm-fraud-transactionavroproducer%22'))"
       );
-    const { getByText, asFragment } = render(
+    const { findByText, asFragment, queryByText } = render(
       <RestfulProvider base="http://localhost">
         <Details nodeId="atm-fraud-transactionavroproducer" />
       </RestfulProvider>
     );
 
-    await waitFor(() => getByText("streaming-app"));
+    await findByText("streaming-app");
+    await waitForElementToBeRemoved(() => queryByText("Loading link..."));
+    expect(nockLinking.isDone()).toBeTruthy();
     expect(asFragment()).toMatchSnapshot();
   });
 
