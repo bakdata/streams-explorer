@@ -23,4 +23,5 @@ RUN npm run build --prefix /frontend_build && \
     mv /frontend_build/out/* /app/static/ && \
     rm -rf /frontend_build
 
-RUN apt-get -y purge --auto-remove -o APT::AutoRemove::RecommendsImportant=false
+RUN apt-get -y purge nodejs && \
+    apt-get -y purge --auto-remove -o APT::AutoRemove::RecommendsImportant=false
