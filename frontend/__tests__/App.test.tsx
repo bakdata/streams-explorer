@@ -1,14 +1,12 @@
 import {
   act,
-  findByTestId,
   fireEvent,
-  queryAllByText,
   render,
   waitFor,
   within,
 } from "@testing-library/react";
 import mockRouter from "next-router-mock";
-import singletonRouter, { useRouter } from "next/router";
+import singletonRouter from "next/router";
 import nock from "nock";
 import React from "react";
 import App from "../components/App";
@@ -21,12 +19,6 @@ jest.mock("../components/GraphVisualization", () => {
     return <div data-testid="graph"></div>;
   };
 });
-
-// -- Mock component to display url location & search paramters
-// const LocationDisplay = () => {
-//   const router = useRouter();
-//   return <div data-testid="location-pathname">{router.asPath}</div>;
-// };
 
 function mockBackendGraph(persist?: boolean, pipelineName?: string) {
   return nock("http://localhost")
