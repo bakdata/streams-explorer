@@ -199,10 +199,17 @@ const GraphVisualization = ({
   }, [graph, focusedNode]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
+    if (graph && !animate) {
+      // disable all edge animations
+      graph.getEdges().forEach((edge) => setEdgeActivity(graph, edge, false));
+    }
+  }, [animate]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
     if (graph && metrics) {
       updateNodeMetrics(graph, metrics, animate);
     }
-  }, [graph, metrics]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [graph, metrics, animate]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const mouseEnterCallback = useCallback(
     (e: IG6GraphEvent) => {
