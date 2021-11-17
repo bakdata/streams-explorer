@@ -97,8 +97,8 @@ stages:
           vmImage: $(vmImage)
         strategy:
           matrix:
-            node_14_x:
-              node.version: "14.x"
+            Node16:
+              node.version: "16.x"
         variables:
           PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
         steps:
