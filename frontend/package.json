@@ -6,7 +6,7 @@
     "dev": "next dev",
     "lint": "next lint",
     "build": "next build && next export",
-    "start": "next start",
+    "prod": "next start",
     "test": "jest --watch",
     "test:ci": "jest --ci",
     "generate-fetcher": "restful-react import --file ../backend/docs/openapi.json --output ./components/api/fetchers.tsx",
