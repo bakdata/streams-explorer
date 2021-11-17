@@ -4,7 +4,7 @@ ENV PIP_NO_CACHE_DIR=1 NODE_ENV=production
 
 RUN apt-get -y update && \
     apt-get --no-install-recommends -y install gcc curl && \
-    curl -sL https://deb.nodesource.com/setup_14.x | bash - && \
+    curl -sL https://deb.nodesource.com/setup_16.x | bash - && \
     apt-get --no-install-recommends -y install nodejs python3-dev graphviz libgraphviz-dev pkg-config && \
     rm -rf /var/lib/apt/lists/*
 
