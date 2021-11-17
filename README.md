@@ -100,7 +100,7 @@ npm ci
 2. Start the frontend server
 
 ```sh
-npm start
+npm run dev
 ```
 
 Visit <http://localhost:3000>
