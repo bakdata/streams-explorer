@@ -30,7 +30,7 @@ import Settings from "./Settings";
 const { Header, Content } = Layout;
 
 const NodeIcon = ({ nodeType }: { nodeType: string }) => (
-  // TODO: switch to Image component
+  // eslint-disable-next-line @next/next/no-img-element
   <img
     src={nodeType + ".svg"}
     alt={nodeType + "-icon"}
