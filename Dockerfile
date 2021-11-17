@@ -1,4 +1,4 @@
-# stage 1: frontend builder
+# build stage 1: frontend
 FROM node:16 AS builder
 
 WORKDIR /build
@@ -9,7 +9,7 @@ RUN npm ci --prefix /build
 COPY ./frontend /build
 RUN npm run build --prefix /build
 
-# stage 2: production server
+# build stage 2: backend
 FROM tiangolo/uvicorn-gunicorn-fastapi:python3.9-slim
 
 COPY --from=builder /build/out /app/static
