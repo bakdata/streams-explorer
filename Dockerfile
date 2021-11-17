@@ -15,7 +15,7 @@ FROM tiangolo/uvicorn-gunicorn-fastapi:python3.9-slim
 COPY --from=builder /build/out /app/static
 
 RUN apt-get -y update && \
-    apt-get --no-install-recommends -y install python3-dev graphviz libgraphviz-dev pkg-config && \
+    apt-get --no-install-recommends -y install graphviz graphviz-dev && \
     rm -rf /var/lib/apt/lists/*
 
 COPY ./backend/pyproject.toml ./backend/poetry.lock /app/
