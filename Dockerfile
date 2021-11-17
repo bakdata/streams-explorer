@@ -12,7 +12,7 @@ RUN npm run build --prefix /frontend_build && \
 
 FROM tiangolo/uvicorn-gunicorn-fastapi:python3.9-slim
 
-COPY --from=builder /frontend_build/out/* /app/static/
+COPY --from=builder /frontend_build/out /app/static
 
 RUN apt-get -y update && \
     apt-get --no-install-recommends -y install gcc && \
