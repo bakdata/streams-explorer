@@ -41,9 +41,7 @@ describe("Settings", () => {
       fireEvent.click(settings);
 
       const checkbox = await findByTestId("animate");
-      // HACK: needed as a workaround until we update react-testing library & react-scripts
-      // because .toBeChecked() doesn't work with role 'switch'
-      expect(checkbox).toHaveAttribute("aria-checked", "true");
+      expect(checkbox).toBeChecked();
     });
   });
 
@@ -57,7 +55,7 @@ describe("Settings", () => {
       fireEvent.click(settings);
 
       const checkbox = await findByTestId("animate");
-      expect(checkbox).toHaveAttribute("aria-checked", "false"); // HACK
+      expect(checkbox).not.toBeChecked();
     });
 
     it("animate enabled", async () => {
@@ -69,7 +67,7 @@ describe("Settings", () => {
       fireEvent.click(settings);
 
       const checkbox = await findByTestId("animate");
-      expect(checkbox).toHaveAttribute("aria-checked", "true"); // HACK
+      expect(checkbox).toBeChecked();
     });
   });
 });
