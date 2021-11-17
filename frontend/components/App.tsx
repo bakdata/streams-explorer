@@ -337,10 +337,10 @@ const App: React.FC = () => {
                   Update Graphs
                 </Button>
               </Menu.Item>
-              <Menu.Item key="4" style={{ float: "right", marginLeft: "auto" }}>
+              <Menu.Item key="4" style={{ float: "right" }}>
                 <Settings animate={animate} setAnimate={setAnimate} />
               </Menu.Item>
-              <Menu.Item key="5" style={{ float: "right", marginLeft: "auto" }}>
+              <Menu.Item key="5" style={{ float: "right" }}>
                 Metrics refresh:&nbsp;
                 <Dropdown overlay={menuRefresh}>
                   <a href={"/#"} onClick={(e) => e.preventDefault()}>

@@ -105,7 +105,7 @@ exports[`Streams Explorer handles url parameters should set pipeline from url pa
           <li
             class="ant-menu-overflow-item ant-menu-item ant-menu-item-only-child"
             role="menuitem"
-            style="opacity: 1; order: 3; float: right; margin-left: auto;"
+            style="opacity: 1; order: 3; float: right;"
             tabindex="-1"
           >
             <span
@@ -142,7 +142,7 @@ exports[`Streams Explorer handles url parameters should set pipeline from url pa
           <li
             class="ant-menu-overflow-item ant-menu-item"
             role="menuitem"
-            style="opacity: 1; order: 4; float: right; margin-left: auto;"
+            style="opacity: 1; order: 4; float: right;"
             tabindex="-1"
           >
             <span
