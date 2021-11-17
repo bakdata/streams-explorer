@@ -46,6 +46,7 @@ const App: React.FC = () => {
   const [focusedNode, setFocusedNode] = useState<Node | null>(null);
   const [searchWidth, setSearchWidth] = useState<number>(300);
   const router = useRouter();
+  const { query } = router;
   const ref = useRef<HTMLDivElement>(null!);
   const onResize = useCallback(() => {}, []);
   const { width, height } = useResizeDetector({
@@ -120,7 +121,7 @@ const App: React.FC = () => {
   } = useGetMetricsApiMetricsGet({ lazy: true });
 
   function pushHistoryFocusNode(nodeId: string) {
-    const pipeline = router.query.pipeline as string;
+    const pipeline = query.pipeline as string;
     router.push(
       `/?${pipeline ? `pipeline=${pipeline}&` : ""}focus-node=${nodeId}`
     );
@@ -146,12 +147,12 @@ const App: React.FC = () => {
   useEffect(() => {
     if (!graph) return;
 
-    const pipeline = router.query.pipeline as string;
+    const pipeline = query.pipeline as string;
     if (pipeline) {
       setCurrentPipeline(pipeline);
     }
 
-    const focusNode = router.query["focus-node"] as string;
+    const focusNode = query["focus-node"] as string;
     if (focusNode) {
       const node = graph?.nodes.find((node) => node.id === focusNode);
       if (node) {
@@ -159,7 +160,7 @@ const App: React.FC = () => {
         setFocusedNode(node);
       }
     }
-  }, [graph, location]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [graph, query]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (graphError) {
