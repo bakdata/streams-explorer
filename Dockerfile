@@ -15,7 +15,6 @@ FROM tiangolo/uvicorn-gunicorn-fastapi:python3.9-slim
 COPY --from=builder /build/out /app/static
 
 RUN apt-get -y update && \
-    apt-get --no-install-recommends -y install gcc && \
     apt-get --no-install-recommends -y install python3-dev graphviz libgraphviz-dev pkg-config && \
     rm -rf /var/lib/apt/lists/*
 
