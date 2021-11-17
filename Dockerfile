@@ -1,18 +1,18 @@
+# stage 1: frontend builder
 FROM node:16 AS builder
 
-COPY ./frontend/package.json ./frontend/package-lock.json /frontend_build/
+WORKDIR /build
+COPY ./frontend/package.json ./frontend/package-lock.json /build/
 ENV NODE_ENV=production
-RUN npm ci --prefix /frontend_build
+RUN npm ci --prefix /build
 
-COPY ./frontend /frontend_build
-RUN npm run build --prefix /frontend_build && \
-    mkdir -p /app/static && \
-    mv /frontend_build/out/* /app/static/ && \
-    rm -rf /frontend_build
+COPY ./frontend /build
+RUN npm run build --prefix /build
 
+# stage 2: production server
 FROM tiangolo/uvicorn-gunicorn-fastapi:python3.9-slim
 
-COPY --from=builder /frontend_build/out /app/static
+COPY --from=builder /build/out /app/static
 
 RUN apt-get -y update && \
     apt-get --no-install-recommends -y install gcc && \
