@@ -1,13 +1,5 @@
 ---
 repos:
-  # - repo: local
-  #   hooks:
-  #     - id: eslint
-  #       name: eslint
-  #       language: system
-  #       files: '\.(js|jsx|ts|tsx)$'
-  #       entry: npx eslint --fix
-  #       pass_filenames: true
   - repo: local
     hooks:
       - id: eslint
