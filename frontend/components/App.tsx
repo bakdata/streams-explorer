@@ -120,7 +120,7 @@ const App: React.FC = () => {
     error: metricsError,
   } = useGetMetricsApiMetricsGet({ lazy: true });
 
-  function pushHistoryFocusNode(nodeId: string) {
+  function pushRouteFocusNode(nodeId: string) {
     const pipeline = query.pipeline as string;
     router.push(
       `/?${pipeline ? `pipeline=${pipeline}&` : ""}focus-node=${nodeId}`
@@ -306,7 +306,7 @@ const App: React.FC = () => {
                       setFocusedNode(node);
                       setDetailNode(node);
                     }
-                    pushHistoryFocusNode(nodeId);
+                    pushRouteFocusNode(nodeId);
                   }}
                 >
                   {graph?.nodes.map((node) => (
