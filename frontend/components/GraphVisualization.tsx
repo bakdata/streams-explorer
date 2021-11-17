@@ -263,7 +263,7 @@ const GraphVisualization = ({
 
   useEffect(() => {
     if (graph) graph.destroy();
-    config.container = ref.current;
+    config.container = ref.current as HTMLDivElement;
     const currentGraph = new G6.Graph(config);
     const defaultIconConfig = config?.defaultNode?.icon as NodeConfig["icon"];
     let nodes = data["nodes"];
