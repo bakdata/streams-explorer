@@ -23,7 +23,7 @@ interface GraphVisualizationProps {
   onClickNode: Function;
   width: number;
   height: number;
-  focusedNode: Node | null;
+  focusedNode: Node | undefined;
   animate: boolean;
 }
 
