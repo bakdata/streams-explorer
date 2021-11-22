@@ -1,14 +1,15 @@
+import { CopyOutlined } from "@ant-design/icons";
+import { Alert, Button, Descriptions, message, Space, Spin } from "antd";
+import copy from "copy-to-clipboard";
 import React from "react";
+import ReactJson from "react-json-view";
 import {
-  useGetNodeInfoApiNodeNodeIdGet,
   NodeInfoListItem,
   useGetLinkingApiNodeLinkingNodeIdGet,
-} from "../api/fetchers";
-import { Spin, Alert, Descriptions, Button, Space, message } from "antd";
-import ReactJson from "react-json-view";
-import { CopyOutlined } from "@ant-design/icons";
-import copy from "copy-to-clipboard";
+  useGetNodeInfoApiNodeNodeIdGet,
+} from "./api/fetchers";
 import Schema from "./Schema";
+import style from "./Details.module.css";
 
 interface DetailsProps {
   nodeId: string;
@@ -20,7 +21,7 @@ const Details = ({ nodeId }: DetailsProps) => {
   });
   if (loading) {
     return (
-      <div className="loadingSpinnerContainer">
+      <div className={style.loadingSpinnerContainer}>
         <Spin tip="Loading..." />
       </div>
     );
@@ -36,12 +37,12 @@ const Details = ({ nodeId }: DetailsProps) => {
   }
   return (
     <Descriptions layout="horizontal" bordered column={1} size="small">
-      <Descriptions.Item className="descItem" label="Type" key={1}>
+      <Descriptions.Item className={style.descItem} label="Type" key={1}>
         {data.node_type}
       </Descriptions.Item>
       {data.info.map((nodeInfoListItem) => (
         <Descriptions.Item
-          className="descItem"
+          className={style.descItem}
           label={nodeInfoListItem.name}
           key={nodeInfoListItem.name}
         >
@@ -63,10 +64,10 @@ const NodeInfoDetail = ({ infoListItem, nodeId }: NodeInfoDetailProps) => {
       return infoListItem.name === "Schema" ? (
         <Schema nodeId={nodeId} />
       ) : (
-        <div className="jsonDetail">
+        <div className={style.jsonDetail}>
           <ReactJson
             name={false}
-            src={infoListItem.value}
+            src={infoListItem.value as object}
             displayDataTypes={false}
             collapsed={false}
           />

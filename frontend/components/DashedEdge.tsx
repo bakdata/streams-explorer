@@ -1,5 +1,5 @@
-import G6, { ModelConfig } from "@antv/g6";
 import { IGroup, IShape } from "@antv/g-canvas/lib/interfaces";
+import G6, { ModelConfig } from "@antv/g6";
 
 const lineDash = [4, 2, 1, 2];
 G6.registerEdge(

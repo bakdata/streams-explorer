@@ -1,44 +1,24 @@
 import {
+  act,
   fireEvent,
   render,
-  wait,
-  waitForElement,
+  waitFor,
   within,
-  act,
 } from "@testing-library/react";
-import { createMemoryHistory } from "history";
+import mockRouter from "next-router-mock";
+import singletonRouter from "next/router";
 import nock from "nock";
 import React from "react";
-import { Router } from "react-router";
-import { HashRouter, useLocation } from "react-router-dom";
-import { RestfulProvider } from "restful-react";
-import App from "./App";
+import App from "../components/App";
+
+jest.mock("next/router", () => require("next-router-mock"));
 
 // -- Mock GraphVisualization
-jest.mock("./components/GraphVisualization", () => {
+jest.mock("../components/GraphVisualization", () => {
   return function DummyGraphVisualization() {
     return <div data-testid="graph"></div>;
   };
 });
-
-// -- Mock component to display url location & search paramters
-const LocationDisplay = () => {
-  const location = useLocation();
-  return (
-    <div>
-      <div data-testid="location-pathname">{location.pathname}</div>
-      <div data-testid="location-search">{location.search}</div>
-    </div>
-  );
-};
-
-const TestApp = () => {
-  return (
-    <HashRouter>
-      <App />
-    </HashRouter>
-  );
-};
 
 function mockBackendGraph(persist?: boolean, pipelineName?: string) {
   return nock("http://localhost")
@@ -101,22 +81,16 @@ describe("Streams Explorer", () => {
 
   describe("renders", () => {
     mockBackendGraph(true);
-    it("without crashing", () => {
-      render(<TestApp />);
+    it("without crashing", async () => {
+      const { findByTestId } = render(<App />);
+      await findByTestId("graph");
     });
 
-    const history = createMemoryHistory();
     it("node icons in search", async () => {
       // render App
-      const { getByTestId, findAllByTestId } = render(
-        <RestfulProvider base="http://localhost">
-          <Router history={history}>
-            <App />
-          </Router>
-        </RestfulProvider>
-      );
+      const { getByTestId, findByTestId, findAllByTestId } = render(<App />);
 
-      await waitForElement(() => getByTestId("graph"));
+      await findByTestId("graph");
       const nodeSelect = getByTestId("node-select");
 
       // -- open the search dropdown
@@ -175,44 +149,33 @@ describe("Streams Explorer", () => {
         },
       ]);
 
-    const history = createMemoryHistory();
-
     it("should set pipeline from url parameter", async () => {
-      history.push({ pathname: "/", search: "?pipeline=test-pipeline" });
+      mockRouter.setCurrentUrl("/?pipeline=test-pipeline");
 
-      const { getByTestId, asFragment } = render(
-        <RestfulProvider base="http://localhost">
-          <Router history={history}>
-            <LocationDisplay />
-            <App />
-          </Router>
-        </RestfulProvider>
-      );
+      const { getByTestId, findByTestId, asFragment } = render(<App />);
 
-      expect(getByTestId("location-pathname")).toHaveTextContent("/");
-      expect(getByTestId("location-search")).toHaveTextContent(
-        "?pipeline=test-pipeline"
-      );
+      expect(singletonRouter).toMatchObject({
+        asPath: "/?pipeline=test-pipeline",
+      });
 
-      await waitForElement(() => getByTestId("graph"));
+      await findByTestId("graph");
+
       expect(asFragment()).toMatchSnapshot();
 
       const currentPipeline = getByTestId("pipeline-current");
-      expect(
-        within(currentPipeline).getByText("test-pipeline")
-      ).toBeInTheDocument();
-      expect(nockPipelineGraph.isDone()).toBeTruthy(); // specific graph endpoint was called
+      expect(currentPipeline).toHaveTextContent("test-pipeline");
       expect(nockGraph.isDone()).toBeFalsy();
+      expect(nockPipelineGraph.isDone()).toBeTruthy(); // specific graph endpoint was called
 
       const nodeSelect = getByTestId("node-select");
       const input = within(nodeSelect).getByRole(
         "combobox"
       ) as HTMLInputElement;
-      expect(input).toBeEmpty();
+      expect(input).toBeEmptyDOMElement();
     });
 
     it("should set focus-node from url parameter", async () => {
-      history.push({ pathname: "/", search: "?focus-node=test-app" });
+      mockRouter.setCurrentUrl("/?focus-node=test-app");
 
       const nockAppNode = nock("http://localhost")
         .get("/api/node/test-app")
@@ -222,89 +185,64 @@ describe("Streams Explorer", () => {
           info: [],
         });
 
-      const { getByTestId } = render(
-        <RestfulProvider base="http://localhost">
-          <Router history={history}>
-            <LocationDisplay />
-            <App />
-          </Router>
-        </RestfulProvider>
-      );
+      const { findByTestId, getByTestId } = render(<App />);
 
-      expect(getByTestId("location-pathname")).toHaveTextContent("/");
-      expect(getByTestId("location-search")).toHaveTextContent(
-        "?focus-node=test-app"
-      );
-
-      await waitForElement(() => getByTestId("graph"));
-
-      await wait(() => {
-        const currentPipeline = getByTestId("pipeline-current");
-        expect(
-          within(currentPipeline).getByText("all pipelines")
-        ).toBeInTheDocument();
-
-        const nodeSelect = getByTestId("node-select");
-        const input = within(nodeSelect).getByRole(
-          "combobox"
-        ) as HTMLInputElement;
-        expect(input).toHaveValue("test-app-name"); // shows label
-        expect(nockAppNode.isDone()).toBeTruthy();
-      });
-    });
-
-    it("should render without url parameters", async () => {
-      act(() => {
-        history.push({ pathname: "/", search: "" });
+      expect(singletonRouter).toMatchObject({
+        asPath: "/?focus-node=test-app",
       });
 
-      // render App
-      const { getByTestId } = render(
-        <RestfulProvider base="http://localhost">
-          <Router history={history}>
-            <LocationDisplay />
-            <App />
-          </Router>
-        </RestfulProvider>
-      );
+      await findByTestId("graph");
 
-      await waitForElement(() => getByTestId("graph"));
+      const currentPipeline = getByTestId("pipeline-current");
+      expect(
+        within(currentPipeline).getByText("all pipelines")
+      ).toBeInTheDocument();
 
-      await wait(() => {
-        // check pipeline set to all
-        const currentPipeline = getByTestId("pipeline-current");
-        expect(
-          within(currentPipeline).getByText("all pipelines")
-        ).toBeInTheDocument();
-
-        // check focus-node empty
-        const nodeSelect = getByTestId("node-select");
-        const input = within(nodeSelect).getByRole(
-          "combobox"
-        ) as HTMLInputElement;
-        expect(input).toBeEmpty();
-      });
-    });
-
-    it("should update focus-node & pipeline parameters", async () => {
-      history.push({ pathname: "/", search: "?pipeline=test-pipeline" });
-
-      // render App
-      const { getByTestId, getByText, findAllByTestId } = render(
-        <RestfulProvider base="http://localhost">
-          <Router history={history}>
-            <LocationDisplay />
-            <App />
-          </Router>
-        </RestfulProvider>
-      );
-
-      await waitForElement(() => getByTestId("graph"));
       const nodeSelect = getByTestId("node-select");
       const input = within(nodeSelect).getByRole(
         "combobox"
       ) as HTMLInputElement;
-      expect(input).toBeEmpty();
+      expect(input).toHaveValue("test-app-name"); // shows label
+      expect(nockAppNode.isDone()).toBeTruthy();
+    });
+
+    it("should render without url parameters", async () => {
+      mockRouter.setCurrentUrl("/");
+
+      const { getByTestId, findByTestId } = render(<App />);
+
+      expect(singletonRouter).toMatchObject({
+        asPath: "/",
+      });
+
+      await findByTestId("graph");
+
+      // check pipeline set to all
+      const currentPipeline = getByTestId("pipeline-current");
+      expect(currentPipeline).toHaveTextContent("all pipelines");
+
+      // check focus-node empty
+      const nodeSelect = getByTestId("node-select");
+      const input = within(nodeSelect).getByRole(
+        "combobox"
+      ) as HTMLInputElement;
+      expect(input).toBeEmptyDOMElement();
+    });
+
+    it("should update focus-node & pipeline parameters", async () => {
+      mockRouter.setCurrentUrl("/?pipeline=test-pipeline");
+
+      // render App
+      const { getByTestId, getByText, findByTestId, findAllByTestId } = render(
+        <App />
+      );
+
+      await findByTestId("graph");
+      const nodeSelect = getByTestId("node-select");
+      const input = within(nodeSelect).getByRole(
+        "combobox"
+      ) as HTMLInputElement;
+      expect(input).toBeEmptyDOMElement();
 
       const nockAppNode = nock("http://localhost")
         .get("/api/node/test-app")
@@ -342,10 +280,10 @@ describe("Streams Explorer", () => {
       });
 
       // -- check result: pipeline should be present
-      expect(getByTestId("location-search")).toHaveTextContent(
-        "?pipeline=test-pipeline&focus-node=test-app"
-      );
-      await wait(() => {
+      expect(singletonRouter).toMatchObject({
+        asPath: "/?pipeline=test-pipeline&focus-node=test-app",
+      });
+      await waitFor(() => {
         expect(nockAppNode.isDone()).toBeTruthy();
       });
 
@@ -358,26 +296,28 @@ describe("Streams Explorer", () => {
 
       options = await findAllByTestId("node-option");
       fireEvent.click(options[1]);
-      await wait(() => {
+      await waitFor(() => {
         expect(input).toHaveValue("test-topic");
 
         // -- check focus-node updated, pipeline still present
-        expect(getByTestId("location-search")).toHaveTextContent(
-          "?pipeline=test-pipeline&focus-node=test-topic"
-        );
+        expect(singletonRouter).toMatchObject({
+          asPath: "/?pipeline=test-pipeline&focus-node=test-topic",
+        });
         expect(nockTopicNode.isDone()).toBeTruthy();
       });
 
       // -- (re-)set pipeline through UI
-      fireEvent.mouseOver(getByTestId("pipeline-current"));
-      await wait(() => {
-        expect(getByTestId("pipeline-select")).toBeInTheDocument();
+      const currentPipeline = getByTestId("pipeline-current");
+      fireEvent.mouseOver(currentPipeline);
+      await findByTestId("pipeline-select");
+
+      await waitFor(() => {
         const pipeline = getByText("all pipelines");
         expect(pipeline).toBeInTheDocument();
         fireEvent.click(pipeline);
-        expect(getByTestId("location-search")).toHaveTextContent(
-          "?pipeline=all pipelines"
-        );
+      });
+      expect(singletonRouter).toMatchObject({
+        asPath: "/",
       });
     });
 
@@ -393,45 +333,32 @@ describe("Streams Explorer", () => {
 
       mockBackendGraph(true);
 
-      act(() => {
-        history.push({ pathname: "/", search: "?pipeline=doesnt-exist" });
+      mockRouter.setCurrentUrl("/?pipeline=doesnt-exist");
+
+      const { findByTestId } = render(<App />);
+
+      expect(singletonRouter).toMatchObject({
+        asPath: "/?pipeline=doesnt-exist",
       });
 
-      const { getByTestId } = render(
-        <RestfulProvider base="http://localhost">
-          <Router history={history}>
-            <LocationDisplay />
-            <App />
-          </Router>
-        </RestfulProvider>
-      );
+      await findByTestId("graph");
 
-      expect(getByTestId("location-pathname")).toHaveTextContent("/");
-      expect(getByTestId("location-search")).toHaveTextContent(
-        "?pipeline=doesnt-exist"
-      );
-
-      await waitForElement(() => getByTestId("graph"));
-
-      await wait(() => {
-        const currentPipeline = getByTestId("pipeline-current");
-        expect(
-          within(currentPipeline).getByText("all pipelines")
-        ).toBeInTheDocument();
-      });
-      await wait(() => {
+      const currentPipeline = await findByTestId("pipeline-current");
+      expect(
+        within(currentPipeline).getByText("all pipelines")
+      ).toBeInTheDocument();
+      await waitFor(() => {
         expect(nockPipeline.isDone()).toBeTruthy();
         expect(nockUpdate.isDone()).toBeTruthy();
       });
 
-      expect(getByTestId("location-pathname")).toHaveTextContent("/");
-      expect(getByTestId("location-search")).toHaveTextContent("");
+      expect(singletonRouter).toMatchObject({ asPath: "/" });
+      await findByTestId("graph");
 
-      history.goBack();
-      expect(getByTestId("location-pathname")).toHaveTextContent("/");
-      expect(getByTestId("location-search")).toHaveTextContent(
-        "?pipeline=doesnt-exist"
-      );
+      singletonRouter.back(); // FIXME: currently not supported by next-router-mock
+      // expect(singletonRouter).toMatchObject({
+      //   asPath: "/?pipeline=doesnt-exist",
+      // });
     });
 
     it("should update and retry if pipeline is not found", async () => {
@@ -445,84 +372,64 @@ describe("Streams Explorer", () => {
 
       mockBackendGraph(true);
 
-      act(() => {
-        history.push({ pathname: "/", search: "?pipeline=avail-after-scrape" });
-      });
+      mockRouter.setCurrentUrl("/?pipeline=avail-after-scrape");
 
-      const { getByTestId } = render(
-        <RestfulProvider base="http://localhost">
-          <Router history={history}>
-            <LocationDisplay />
-            <App />
-          </Router>
-        </RestfulProvider>
-      );
+      const { getByTestId, findByTestId } = render(<App />);
 
-      expect(getByTestId("location-pathname")).toHaveTextContent("/");
-      expect(getByTestId("location-search")).toHaveTextContent(
-        "?pipeline=avail-after-scrape"
-      );
+      expect(singletonRouter.asPath).toBe("/?pipeline=avail-after-scrape");
 
-      await wait(() => {
+      await waitFor(() => {
         // wait for the first pipeline request to fail
         expect(nockPipeline.isDone()).toBeTruthy();
         // pipeline becomes available
         nockPipeline = mockBackendGraph(true, "avail-after-scrape");
       });
 
-      await waitForElement(() => getByTestId("graph"));
+      await findByTestId("graph");
 
       expect(nockUpdate.isDone()).toBeTruthy();
       expect(nockPipeline.isDone()).toBeTruthy();
-      await wait(() => {
+      await waitFor(() => {
         const currentPipeline = getByTestId("pipeline-current");
         expect(
           within(currentPipeline).getByText("avail-after-scrape")
         ).toBeInTheDocument();
       });
 
-      expect(getByTestId("location-pathname")).toHaveTextContent("/");
-      expect(getByTestId("location-search")).toHaveTextContent(
-        "?pipeline=avail-after-scrape"
-      );
+      expect(singletonRouter.asPath).toBe("/?pipeline=avail-after-scrape");
     });
 
     it("should persist metrics refresh interval across page reloads", async () => {
       mockBackendGraph(true);
 
-      const { getByTestId, getByText, rerender } = render(<TestApp />);
+      const { getByText, findByTestId, rerender } = render(<App />);
 
-      await waitForElement(() => getByTestId("graph"));
+      await findByTestId("graph");
 
       let anchor: HTMLAnchorElement;
-      await wait(() => {
+      await waitFor(() => {
         const metricsSelect = getByText("Metrics refresh:");
         anchor = metricsSelect.lastElementChild as HTMLAnchorElement;
         expect(anchor).toHaveTextContent("30s");
       });
+      expect(window.localStorage.getItem("metrics-interval")).toBe("30");
 
       act(() => {
         fireEvent.mouseOver(anchor);
       });
 
-      await wait(() => {
-        const intervalOff = getByText("off");
-        expect(intervalOff).toBeInTheDocument();
-        fireEvent.click(intervalOff);
-        expect(anchor).toHaveTextContent("off");
+      const metricsSelect = await findByTestId("metrics-select");
+      const intervalOff = within(metricsSelect).getByText("off");
+      expect(intervalOff).toBeInTheDocument();
+      fireEvent.click(intervalOff);
+      expect(anchor).toHaveTextContent("off");
 
-        // trigger onClick of antd Menu component
-        fireEvent.click(getByTestId("metrics-select"));
-
-        expect(window.localStorage.getItem("metrics-interval")).toBe("0");
-      });
+      expect(window.localStorage.getItem("metrics-interval")).toBe("0");
 
       // reload page: window.location.reload() doesn't work in test
-      rerender(<TestApp />);
-      await waitForElement(() => getByTestId("graph"));
-      await wait(() => {
-        expect(anchor).toHaveTextContent("off");
-      });
+      rerender(<App />);
+      await findByTestId("graph");
+      expect(anchor).toHaveTextContent("off");
     });
 
     it("should not fetch metrics if interval is set to 'off'", async () => {
@@ -534,17 +441,15 @@ describe("Streams Explorer", () => {
       // set metrics refresh interval to 'off'
       window.localStorage.setItem("metrics-interval", "0");
 
-      const { getByTestId, getByText } = render(<TestApp />);
+      const { findByTestId, getByText } = render(<App />);
 
-      await waitForElement(() => getByTestId("graph"));
+      await findByTestId("graph");
 
-      await wait(() => {
-        const metricsSelect = getByText("Metrics refresh:");
-        const anchor = metricsSelect.lastElementChild as HTMLAnchorElement;
-        expect(anchor).toHaveTextContent("off");
-        // verify metrics haven't been refreshed
-        expect(nockMetrics.isDone()).toBeFalsy();
-      });
+      const metricsSelect = getByText("Metrics refresh:");
+      const anchor = metricsSelect.lastElementChild as HTMLAnchorElement;
+      expect(anchor).toHaveTextContent("off");
+      // verify metrics haven't been refreshed
+      expect(nockMetrics.isDone()).toBeFalsy();
     });
   });
 });

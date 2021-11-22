@@ -1,6 +1,6 @@
 import G6 from "@antv/g6";
-import { graphConfig } from "../graphConfiguration";
-import { updateNodeMetrics } from "./GraphVisualization";
+import { graphConfig } from "../components/graphConfiguration";
+import { updateNodeMetrics } from "../components/GraphVisualization";
 
 describe("visualize node metrics", () => {
   it("should differentiate node id and label", () => {

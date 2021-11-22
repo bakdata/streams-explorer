@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from "react";
-import {
-  useGetNodeSchemaVersionsApiNodeNodeIdSchemaGet,
-  useGetNodeSchemaApiNodeNodeIdSchemaVersionGet,
-} from "../api/fetchers";
-import { Spin, Space, Alert, Button, Menu, Dropdown } from "antd";
-import ReactJson from "react-json-view";
 import { DownOutlined } from "@ant-design/icons";
+import { Alert, Button, Dropdown, Menu, Space, Spin } from "antd";
+import React, { useEffect, useState } from "react";
+import ReactJson from "react-json-view";
+import {
+  useGetNodeSchemaApiNodeNodeIdSchemaVersionGet,
+  useGetNodeSchemaVersionsApiNodeNodeIdSchemaGet,
+} from "./api/fetchers";
+import style from "./Details.module.css";
 
 interface SchemaProps {
   nodeId: string;
@@ -59,7 +60,7 @@ const Schema = ({ nodeId }: SchemaProps) => {
 
   if (schemaLoading || versionsLoading) {
     return (
-      <div className="loadingSpinnerContainer">
+      <div className={style.loadingSpinnerContainer}>
         <Spin tip="Loading schema..." />
       </div>
     );
@@ -92,7 +93,7 @@ const Schema = ({ nodeId }: SchemaProps) => {
             v{schemaVersion} <DownOutlined />
           </Button>
         </Dropdown>
-        <div className="jsonDetail" data-testid="schema">
+        <div className={style.jsonDetail} data-testid="schema">
           <ReactJson
             name={false}
             src={schema}

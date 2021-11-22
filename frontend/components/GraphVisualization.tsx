@@ -1,7 +1,3 @@
-import { Graph as Data, Icon as IIcon, Metric } from "../api/fetchers";
-import "./DashedEdge";
-import "./MetricCustomNode";
-import Node from "./Node";
 import G6, {
   Graph,
   GraphData,
@@ -11,10 +7,13 @@ import G6, {
   INode,
   NodeConfig,
 } from "@antv/g6";
-import { millify } from "millify";
-import React, { useRef, useEffect, useCallback, useState } from "react";
-import ReactDOM from "react-dom";
 import { message } from "antd";
+import { millify } from "millify";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { Graph as Data, Icon as IIcon, Metric } from "./api/fetchers";
+import "./DashedEdge";
+import "./MetricCustomNode";
+import Node from "./Node";
 
 interface GraphVisualizationProps {
   data: Data | GraphData;
@@ -22,8 +21,8 @@ interface GraphVisualizationProps {
   metrics: Metric[] | null;
   refetchMetrics: Function;
   onClickNode: Function;
-  width: number | undefined;
-  height: number | undefined;
+  width: number;
+  height: number;
   focusedNode: Node | null;
   animate: boolean;
 }
@@ -189,7 +188,7 @@ const GraphVisualization = ({
   const ref = useRef<HTMLDivElement>(null);
 
   const [graph, setGraph] = useState<Graph | null>(null);
-  if (graph && width && height) {
+  if (graph) {
     graph.changeSize(width, height);
   }
 
@@ -206,9 +205,11 @@ const GraphVisualization = ({
     }
   }, [animate]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (graph && metrics) {
-    updateNodeMetrics(graph, metrics, animate);
-  }
+  useEffect(() => {
+    if (graph && metrics) {
+      updateNodeMetrics(graph, metrics, animate);
+    }
+  }, [graph, metrics, animate]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const mouseEnterCallback = useCallback(
     (e: IG6GraphEvent) => {
@@ -260,14 +261,19 @@ const GraphVisualization = ({
     [graph, onClickNode]
   );
 
+  // register callbacks
+  graph?.on("node:mouseenter", mouseEnterCallback);
+  graph?.on("node:mouseleave", mouseLeaveCallback);
+  graph?.on("node:click", clickCallback);
+  graph?.on("node:touchstart", touchCallback);
+  graph?.on("nodeselectchange", selectCallback);
+
   useEffect(() => {
-    config.container = ReactDOM.findDOMNode(ref.current) as HTMLElement;
-    let currentGraph: Graph | null = graph;
-    if (!currentGraph && ref) {
-      currentGraph = new G6.Graph(config);
-    }
-    let nodes = data["nodes"];
+    if (graph) graph.destroy();
+    config.container = ref.current as HTMLDivElement;
+    const currentGraph = new G6.Graph(config);
     const defaultIconConfig = config?.defaultNode?.icon as NodeConfig["icon"];
+    let nodes = data["nodes"];
 
     nodes?.forEach((node: any) => {
       if (!node.icon) {
@@ -280,19 +286,12 @@ const GraphVisualization = ({
       }
     });
 
-    currentGraph?.data(data as GraphData);
-    currentGraph?.render();
-
-    // register callbacks
-    currentGraph?.on("node:mouseenter", mouseEnterCallback);
-    currentGraph?.on("node:mouseleave", mouseLeaveCallback);
-    currentGraph?.on("node:click", clickCallback);
-    currentGraph?.on("node:touchstart", touchCallback);
-    currentGraph?.on("nodeselectchange", selectCallback);
+    currentGraph.data(data as GraphData);
+    currentGraph.render();
 
     setGraph(currentGraph);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [graph, setGraph, config, data]);
+  }, [config, data]);
 
   return <div ref={ref}></div>;
 };

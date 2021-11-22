@@ -1,4 +1,4 @@
-import "./Settings.css";
+import style from "./Settings.module.css";
 import React, { useState, useEffect } from "react";
 import { Modal, Button, Tooltip, Switch, Row, Col } from "antd";
 import { SettingOutlined } from "@ant-design/icons";
@@ -44,7 +44,7 @@ const Settings = ({ animate, setAnimate }: SettingsProps) => {
       >
         <Row>
           <Col flex="none">
-            <div className="setting">Animate data flow:</div>
+            <div className={style.setting}>Animate data flow:</div>
           </Col>
           <Col flex="auto">
             <Switch

@@ -1,38 +1,36 @@
-import "./App.css";
-import {
-  useGetPipelinesApiPipelinesGet,
-  useGetPositionedGraphApiGraphGet,
-  useGetMetricsApiMetricsGet,
-  HTTPValidationError,
-} from "./api/fetchers";
-import Node from "./components/Node";
-import DetailsCard from "./components/DetailsCard";
-import GraphVisualization from "./components/GraphVisualization";
-import { graphConfig } from "./graphConfiguration";
 import { DownOutlined, LoadingOutlined } from "@ant-design/icons";
 import {
-  Layout,
-  Menu,
-  Dropdown,
-  Button,
-  Row,
-  Spin,
-  message,
   Alert,
   AutoComplete,
+  Button,
+  Dropdown,
+  Layout,
+  Menu,
+  message,
+  Row,
   Space,
+  Spin,
 } from "antd";
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import { useRouter } from "next/router";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import { useMutate } from "restful-react";
-import { useHistory, useLocation } from "react-router-dom";
-import Settings from "./components/Settings";
-
-const { Option } = AutoComplete;
+import {
+  HTTPValidationError,
+  useGetMetricsApiMetricsGet,
+  useGetPipelinesApiPipelinesGet,
+  useGetPositionedGraphApiGraphGet,
+} from "./api/fetchers";
+import DetailsCard from "./DetailsCard";
+import { graphConfig } from "./graphConfiguration";
+import GraphVisualization from "./GraphVisualization";
+import Node from "./Node";
+import Settings from "./Settings";
 
 const { Header, Content } = Layout;
 
 const NodeIcon = ({ nodeType }: { nodeType: string }) => (
+  // eslint-disable-next-line @next/next/no-img-element
   <img
     src={nodeType + ".svg"}
     alt={nodeType + "-icon"}
@@ -47,8 +45,8 @@ const App: React.FC = () => {
   const [detailNode, setDetailNode] = useState<Node | null>(null);
   const [focusedNode, setFocusedNode] = useState<Node | null>(null);
   const [searchWidth, setSearchWidth] = useState<number>(300);
-  const history = useHistory();
-  const location = useLocation();
+  const router = useRouter();
+  const { query } = router;
   const ref = useRef<HTMLDivElement>(null!);
   const onResize = useCallback(() => {}, []);
   const { width, height } = useResizeDetector({
@@ -122,13 +120,9 @@ const App: React.FC = () => {
     error: metricsError,
   } = useGetMetricsApiMetricsGet({ lazy: true });
 
-  const getParams = useCallback(() => {
-    return new URLSearchParams(location.search);
-  }, [location.search]);
-
-  function pushHistoryFocusNode(nodeId: string) {
-    const pipeline = getParams().get("pipeline");
-    history.push(
+  function pushRouteFocusNode(nodeId: string) {
+    const pipeline = query.pipeline as string;
+    router.push(
       `/?${pipeline ? `pipeline=${pipeline}&` : ""}focus-node=${nodeId}`
     );
   }
@@ -151,20 +145,22 @@ const App: React.FC = () => {
   }, [graph]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    const params = getParams();
-    const pipeline = params.get("pipeline");
+    if (!graph) return;
+
+    const pipeline = query.pipeline as string;
     if (pipeline) {
       setCurrentPipeline(pipeline);
     }
-    const focusNode = params.get("focus-node");
+
+    const focusNode = query["focus-node"] as string;
     if (focusNode) {
       const node = graph?.nodes.find((node) => node.id === focusNode);
       if (node) {
-        setFocusedNode(node);
         setDetailNode(node);
+        setFocusedNode(node);
       }
     }
-  }, [getParams, location, graph]);
+  }, [graph, query]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (graphError) {
@@ -212,7 +208,7 @@ const App: React.FC = () => {
   const redirectAllPipelines = () => {
     message.info("Redirecting to all pipelines");
     setCurrentPipeline(ALL_PIPELINES);
-    history.push("/");
+    router.push("/");
   };
 
   useEffect(() => {
@@ -231,7 +227,12 @@ const App: React.FC = () => {
     <Menu
       data-testid="pipeline-select"
       onClick={(e) => {
-        history.push(`/?pipeline=${e.key.toString()}`);
+        let pipeline = e.key.toString();
+        if (pipeline === ALL_PIPELINES) {
+          router.push("/");
+        } else {
+          router.push(`/?pipeline=${e.key.toString()}`);
+        }
         setCurrentPipeline(e.key.toString());
         setFocusedNode(null);
       }}
@@ -260,7 +261,12 @@ const App: React.FC = () => {
     </Menu>
   );
 
-  if (!isLoadingGraph && !isLoadingPipelines && !isUpdating) {
+  if (
+    typeof window !== undefined &&
+    !isLoadingGraph &&
+    !isLoadingPipelines &&
+    !isUpdating
+  ) {
     return (
       <div ref={ref} className="application">
         <Layout className="layout">
@@ -274,7 +280,7 @@ const App: React.FC = () => {
                   </Button>
                 </Dropdown>
               </Menu.Item>
-              <Menu.Item>
+              <Menu.Item key="2">
                 <AutoComplete
                   data-testid="node-select"
                   style={{
@@ -300,11 +306,11 @@ const App: React.FC = () => {
                       setFocusedNode(node);
                       setDetailNode(node);
                     }
-                    pushHistoryFocusNode(nodeId);
+                    pushRouteFocusNode(nodeId);
                   }}
                 >
                   {graph?.nodes.map((node) => (
-                    <Option
+                    <AutoComplete.Option
                       data-testid="node-option"
                       value={node.id}
                       key={node.id}
@@ -314,32 +320,33 @@ const App: React.FC = () => {
                         <NodeIcon nodeType={node.node_type} />
                         {node.label}
                       </Space>
-                    </Option>
+                    </AutoComplete.Option>
                   ))}
                 </AutoComplete>
               </Menu.Item>
-              <Menu.Item style={{ float: "right" }}>
-                Metrics refresh:&nbsp;
-                <Dropdown overlay={menuRefresh}>
-                  <a href={"/#"} onClick={(e) => e.preventDefault()}>
-                    {refreshIntervals[refreshInterval]} <DownOutlined />
-                  </a>
-                </Dropdown>
-              </Menu.Item>
-              <Menu.Item style={{ float: "right" }}>
-                <Settings animate={animate} setAnimate={setAnimate} />
-              </Menu.Item>
               <Menu.Item
-                style={{ float: "right" }}
+                key="3"
+                style={{ float: "right", marginLeft: "auto" }}
                 onClick={() => {
                   update({})
-                    .then(() => window.location.reload())
+                    .then(() => router.reload())
                     .catch(() => message.error("Failed to update!"));
                 }}
               >
                 <Button type="dashed" ghost={true}>
                   Update Graphs
                 </Button>
+              </Menu.Item>
+              <Menu.Item key="4" style={{ float: "right" }}>
+                <Settings animate={animate} setAnimate={setAnimate} />
+              </Menu.Item>
+              <Menu.Item key="5" style={{ float: "right" }}>
+                Metrics refresh:&nbsp;
+                <Dropdown overlay={menuRefresh}>
+                  <a href={"/#"} onClick={(e) => e.preventDefault()}>
+                    {refreshIntervals[refreshInterval]} <DownOutlined />
+                  </a>
+                </Dropdown>
               </Menu.Item>
             </Menu>
             <Spin
@@ -368,8 +375,8 @@ const App: React.FC = () => {
                   metrics={metrics}
                   refetchMetrics={() => refetchMetrics()}
                   onClickNode={(node: Node) => setDetailNode(node)}
-                  width={width}
-                  height={height ? height - 64 : 500}
+                  width={width ? width : window.innerWidth}
+                  height={height ? height - 64 : window.innerHeight - 64}
                   focusedNode={focusedNode}
                   animate={animate}
                 />

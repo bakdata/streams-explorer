@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { fireEvent, render, waitForElement } from "@testing-library/react";
-import Settings from "./Settings";
+import { fireEvent, render } from "@testing-library/react";
+import Settings from "../components/Settings";
 
 const StateDisplay = ({ id, state }: { id: string; state: any }) => {
   return <div data-testid={id}>{state}</div>;
@@ -40,11 +40,8 @@ describe("Settings", () => {
       const settings = getByTestId("settings-button");
       fireEvent.click(settings);
 
-      await waitForElement(() => getByTestId("animate"));
-      const checkbox = getByTestId("animate");
-      // HACK: needed as a workaround until we update react-testing library & react-scripts
-      // because .toBeChecked() doesn't work with role 'switch'
-      expect(checkbox).toHaveAttribute("aria-checked", "true");
+      const checkbox = await findByTestId("animate");
+      expect(checkbox).toBeChecked();
     });
   });
 
@@ -57,10 +54,8 @@ describe("Settings", () => {
       const settings = getByTestId("settings-button");
       fireEvent.click(settings);
 
-      await waitForElement(() => getByTestId("animate"));
-
-      const checkbox = getByTestId("animate");
-      expect(checkbox).toHaveAttribute("aria-checked", "false"); // HACK
+      const checkbox = await findByTestId("animate");
+      expect(checkbox).not.toBeChecked();
     });
 
     it("animate enabled", async () => {
@@ -71,9 +66,8 @@ describe("Settings", () => {
       const settings = getByTestId("settings-button");
       fireEvent.click(settings);
 
-      await waitForElement(() => getByTestId("animate"));
-      const checkbox = getByTestId("animate");
-      expect(checkbox).toHaveAttribute("aria-checked", "true"); // HACK
+      const checkbox = await findByTestId("animate");
+      expect(checkbox).toBeChecked();
     });
   });
 });

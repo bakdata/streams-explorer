@@ -20,18 +20,8 @@ class TestApplication:
     def client(self) -> TestClient:
         return TestClient(get_application())
 
-    def test_redirect_from_root(self, client: TestClient):
-        response = client.get("/", allow_redirects=False)
-        assert response.status_code == status.HTTP_307_TEMPORARY_REDIRECT
-        assert response.headers["location"] == "/static/"
-
-    def test_redirect_from_static(self, client: TestClient):
-        response = client.get("/static", allow_redirects=False)
-        assert response.status_code == status.HTTP_307_TEMPORARY_REDIRECT
-        assert response.headers["location"] == "/static/"
-
     def test_static_resources(self, client: TestClient):
-        response = client.get("/static/.gitkeep")
+        response = client.get("/.gitkeep")
         assert response.status_code == status.HTTP_200_OK
         assert response.headers["content-type"] == "text/plain; charset=utf-8"
         assert response.content.decode() == ""

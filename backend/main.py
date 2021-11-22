@@ -7,6 +7,7 @@ from streams_explorer.core.config import settings
 from streams_explorer.default import setup_default
 
 app = get_application()
+
 app.add_event_handler("startup", setup_default(app))
 
 

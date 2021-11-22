@@ -1,3 +1,5 @@
+import GGroup from "@antv/g-canvas/lib/group";
+import { IGroup, IShape } from "@antv/g-canvas/lib/interfaces";
 import G6, {
   Global,
   Item,
@@ -6,8 +8,6 @@ import G6, {
   ShapeOptions,
   ShapeStyle,
 } from "@antv/g6";
-import GGroup from "@antv/g-canvas/lib/group";
-import { IGroup, IShape } from "@antv/g-canvas/lib/interfaces";
 import deepMix from "@antv/util/lib/deep-mix";
 
 G6.registerNode(
