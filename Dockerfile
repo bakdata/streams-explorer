@@ -4,7 +4,7 @@ ENV PIP_NO_CACHE_DIR=1 NODE_ENV=production
 
 RUN apt-get -y update && \
     apt-get --no-install-recommends -y install gcc curl && \
-    curl -sL https://deb.nodesource.com/setup_14.x | bash - && \
+    curl -sL https://deb.nodesource.com/setup_16.x | bash - && \
     apt-get --no-install-recommends -y install nodejs python3-dev graphviz libgraphviz-dev pkg-config && \
     rm -rf /var/lib/apt/lists/*
 
@@ -23,4 +23,5 @@ RUN npm run build --prefix /frontend_build && \
     mv /frontend_build/out/* /app/static/ && \
     rm -rf /frontend_build
 
-RUN apt-get -y purge --auto-remove -o APT::AutoRemove::RecommendsImportant=false
+RUN apt-get -y purge nodejs && \
+    apt-get -y purge --auto-remove -o APT::AutoRemove::RecommendsImportant=false
