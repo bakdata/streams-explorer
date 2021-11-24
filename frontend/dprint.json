@@ -5,6 +5,7 @@
     "locked": true,
     "indentWidth": 2,
     "lineWidth": 80,
+    "quoteStyle": "preferDouble",
     "arguments.trailingCommas": "never",
     "parameters.trailingCommas": "never"
   },
