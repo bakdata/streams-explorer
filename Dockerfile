@@ -29,4 +29,6 @@ RUN apt-get -y purge --auto-remove -o APT::AutoRemove::RecommendsImportant=false
 
 COPY --from=frontend /build/out /app/static
 
+EXPOSE 80
+
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "80"]
