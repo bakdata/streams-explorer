@@ -402,16 +402,13 @@ describe("Streams Explorer", () => {
     it("should persist metrics refresh interval across page reloads", async () => {
       mockBackendGraph(true);
 
-      const { getByText, findByTestId, rerender } = render(<App />);
+      const { findByText, findByTestId, rerender } = render(<App />);
 
       await findByTestId("graph");
 
-      let anchor: HTMLAnchorElement;
-      await waitFor(() => {
-        const metricsSelect = getByText("Metrics refresh:");
-        anchor = metricsSelect.lastElementChild as HTMLAnchorElement;
-        expect(anchor).toHaveTextContent("30s");
-      });
+      const metricsMenu = await findByText("Metrics refresh:");
+      const anchor = metricsMenu.lastElementChild as HTMLAnchorElement;
+      expect(anchor).toHaveTextContent("30s");
       expect(window.localStorage.getItem("metrics-interval")).toBe("30");
 
       act(() => {
