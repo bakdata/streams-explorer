@@ -7,7 +7,7 @@ ENV NODE_ENV=production
 RUN npm ci --prefix /build
 
 COPY ./frontend /build
-RUN npm run build --prefix /build
+RUN npm run build
 
 # build stage 2: backend
 FROM python:3.9-slim
