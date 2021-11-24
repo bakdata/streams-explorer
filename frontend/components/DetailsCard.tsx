@@ -6,7 +6,7 @@ import style from "./Details.module.css";
 import Node from "./Node";
 
 interface DetailsCardProps {
-  node: Node | null;
+  node: Node | undefined;
 }
 
 const DetailsCard = ({ node }: DetailsCardProps) => {

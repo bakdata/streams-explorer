@@ -1,14 +1,12 @@
 import { DownOutlined, LoadingOutlined } from "@ant-design/icons";
 import {
   Alert,
-  AutoComplete,
   Button,
   Dropdown,
   Layout,
   Menu,
   message,
   Row,
-  Space,
   Spin,
 } from "antd";
 import { useRouter } from "next/router";
@@ -25,29 +23,19 @@ import DetailsCard from "./DetailsCard";
 import { graphConfig } from "./graphConfiguration";
 import GraphVisualization from "./GraphVisualization";
 import Node from "./Node";
+import Search from "./Search";
 import Settings from "./Settings";
 
 const { Header, Content } = Layout;
 
-const NodeIcon = ({ nodeType }: { nodeType: string }) => (
-  // eslint-disable-next-line @next/next/no-img-element
-  <img
-    src={nodeType + ".svg"}
-    alt={nodeType + "-icon"}
-    height="18px"
-    data-testid="node-icon"
-  />
-);
-
 const App: React.FC = () => {
   const ALL_PIPELINES = "all pipelines";
   const [currentPipeline, setCurrentPipeline] = useState(ALL_PIPELINES);
-  const [detailNode, setDetailNode] = useState<Node | null>(null);
-  const [focusedNode, setFocusedNode] = useState<Node | null>(null);
-  const [searchWidth, setSearchWidth] = useState<number>(300);
+  const [detailNode, setDetailNode] = useState<Node>();
+  const [focusedNode, setFocusedNode] = useState<Node>();
   const router = useRouter();
   const { query } = router;
-  const ref = useRef<HTMLDivElement>(null!);
+  const ref = useRef<HTMLDivElement>(null);
   const onResize = useCallback(() => {}, []);
   const { width, height } = useResizeDetector({
     targetRef: ref,
@@ -64,7 +52,7 @@ const App: React.FC = () => {
   };
   const REFRESH_INTERVAL = "metrics-interval";
   const [refreshInterval, setRefreshInterval] = useState(0);
-  const [animate, setAnimate] = useState<boolean>(true);
+  const [animate, setAnimate] = useState(true);
 
   // on initial page load
   useEffect(() => {
@@ -119,29 +107,12 @@ const App: React.FC = () => {
     error: metricsError,
   } = useGetMetricsApiMetricsGet({ lazy: true });
 
-  function pushRouteFocusNode(nodeId: string) {
-    const pipeline = query.pipeline as string;
-    router.push(
-      `/?${pipeline ? `pipeline=${pipeline}&` : ""}focus-node=${nodeId}`
-    );
-  }
-
   useEffect(() => {
     if (refreshInterval && refreshInterval > 0) {
       const interval = setInterval(refetchMetrics, refreshInterval * 1000);
       return () => clearInterval(interval);
     }
   }, [refreshInterval]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // find longest node name and multiply string length by char width 8
-  // doesn't cause long delays as builtin function
-  useEffect(() => {
-    if (graph) {
-      setSearchWidth(
-        Math.max(...graph.nodes.map((node) => node.label.length)) * 8
-      );
-    }
-  }, [graph]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!graph) return;
@@ -233,7 +204,7 @@ const App: React.FC = () => {
           router.push(`/?pipeline=${e.key.toString()}`);
         }
         setCurrentPipeline(e.key.toString());
-        setFocusedNode(null);
+        setFocusedNode(undefined);
       }}
     >
       <Menu.Item key={ALL_PIPELINES}>
@@ -280,47 +251,12 @@ const App: React.FC = () => {
                 </Dropdown>
               </Menu.Item>
               <Menu.Item key="2">
-                <AutoComplete
-                  data-testid="node-select"
-                  style={{
-                    width: searchWidth,
-                    maxWidth: 480,
-                  }}
-                  placeholder="Search Node"
-                  allowClear={true}
-                  defaultActiveFirstOption={true}
-                  listHeight={512}
-                  dropdownStyle={{
-                    minWidth: searchWidth,
-                  }}
-                  filterOption={(inputValue, option) =>
-                    option?.value
-                      .toUpperCase()
-                      .indexOf(inputValue.toUpperCase()) !== -1}
-                  defaultValue={focusedNode ? focusedNode.label : undefined}
-                  onSelect={(nodeId, option) => {
-                    const node = option.node as Node;
-                    if (node) {
-                      setFocusedNode(node);
-                      setDetailNode(node);
-                    }
-                    pushRouteFocusNode(nodeId);
-                  }}
-                >
-                  {graph?.nodes.map((node) => (
-                    <AutoComplete.Option
-                      data-testid="node-option"
-                      value={node.id}
-                      key={node.id}
-                      node={node}
-                    >
-                      <Space direction="horizontal">
-                        <NodeIcon nodeType={node.node_type} />
-                        {node.label}
-                      </Space>
-                    </AutoComplete.Option>
-                  ))}
-                </AutoComplete>
+                <Search
+                  nodes={graph?.nodes}
+                  focusedNode={focusedNode}
+                  setFocusedNode={setFocusedNode}
+                  setDetailNode={setDetailNode}
+                />
               </Menu.Item>
               <Menu.Item
                 key="3"
