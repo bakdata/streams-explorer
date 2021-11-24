@@ -121,9 +121,6 @@ stages:
             displayName: "Lint"
             workingDirectory: $(frontendPath)
 
-          - script: curl -fsSL https://dprint.dev/install.sh | sh
-            displayName: "Install dprint"
-
           - script: pre-commit run dprint --all-files
             displayName: "Formatting (dprint)"
 
