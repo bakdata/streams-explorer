@@ -29,7 +29,7 @@ describe("display node information", () => {
 
   it("should handle node not found error", async () => {
     nock("http://localhost").get("/api/node/1").reply(404, {
-      detail: 'Could not find information for node with name "fake-node"',
+      detail: "Could not find information for node with name \"fake-node\"",
     });
 
     const { findByTestId, asFragment } = render(
