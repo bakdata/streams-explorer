@@ -85,30 +85,6 @@ describe("Streams Explorer", () => {
       const { findByTestId } = render(<App />);
       await findByTestId("graph");
     });
-
-    it("node icons in search", async () => {
-      // render App
-      const { getByTestId, findByTestId, findAllByTestId } = render(<App />);
-
-      await findByTestId("graph");
-      const nodeSelect = getByTestId("node-select");
-
-      // -- open the search dropdown
-      const trigger = nodeSelect.lastElementChild;
-      expect(trigger).not.toBeNull();
-      fireEvent.mouseDown(trigger!);
-
-      let options = await findAllByTestId("node-option");
-      expect(options).toHaveLength(2);
-      let iconApp = within(options[0]).getByTestId("node-icon");
-      expect(iconApp).toBeInTheDocument();
-      expect(iconApp).toHaveAttribute("src", "streaming-app.svg");
-      expect(iconApp).toHaveProperty("alt", "streaming-app-icon");
-      let iconTopic = within(options[1]).getByTestId("node-icon");
-      expect(iconTopic).toBeInTheDocument();
-      expect(iconTopic).toHaveAttribute("src", "topic.svg");
-      expect(iconTopic).toHaveProperty("alt", "topic-icon");
-    });
   });
 
   describe("handles url parameters", () => {
@@ -402,16 +378,13 @@ describe("Streams Explorer", () => {
     it("should persist metrics refresh interval across page reloads", async () => {
       mockBackendGraph(true);
 
-      const { getByText, findByTestId, rerender } = render(<App />);
+      const { findByText, findByTestId, rerender } = render(<App />);
 
       await findByTestId("graph");
 
-      let anchor: HTMLAnchorElement;
-      await waitFor(() => {
-        const metricsSelect = getByText("Metrics refresh:");
-        anchor = metricsSelect.lastElementChild as HTMLAnchorElement;
-        expect(anchor).toHaveTextContent("30s");
-      });
+      const metricsMenu = await findByText("Metrics refresh:");
+      const anchor = metricsMenu.lastElementChild as HTMLAnchorElement;
+      expect(anchor).toHaveTextContent("30s");
       expect(window.localStorage.getItem("metrics-interval")).toBe("30");
 
       act(() => {
