@@ -22,8 +22,6 @@ config:
 #   ...
 
 envPrefix: "SE_"
-env:
-  MAX_WORKERS: "1" # Max number of FastAPI worker processes inside the pod
 
 # Configure secret env variables here
 secrets: {}
