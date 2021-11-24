@@ -12,7 +12,7 @@
   "json": {},
   "includes": [
     "**/*.{ts,tsx,js,jsx}",
-    "./{package,tsconfig}.json"
+    "./{package,tsconfig,dprint}.json"
   ],
   "excludes": [
     "**/node_modules",
