@@ -11,13 +11,12 @@
   "json": {},
   "markdown": {},
   "dockerfile": {},
-  "includes": ["**/*.{ts,tsx}"],
-  "excludes": [
-    "**/node_modules",
-    "**/*-lock.json",
-    "frontend/build",
-    "backend/.venv"
+  "includes": [
+    "**/*.{ts,tsx}",
+    "grafana/*.json",
+    "frontend/{package,tsconfig}.json"
   ],
+  "excludes": ["**/node_modules", "frontend/build", "backend/.venv"],
   "plugins": [
     "https://plugins.dprint.dev/typescript-0.59.1.wasm",
     "https://plugins.dprint.dev/json-0.13.2.wasm",
