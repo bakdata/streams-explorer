@@ -6,6 +6,7 @@ repos:
         name: eslint
         entry: npm --prefix frontend run lint
         language: system
+        pass_filenames: false
   - repo: local
     hooks:
       - id: dprint

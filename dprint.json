@@ -16,7 +16,12 @@
     "grafana/*.json",
     "frontend/{package,tsconfig}.json"
   ],
-  "excludes": ["**/node_modules", "frontend/build", "backend/.venv"],
+  "excludes": [
+    "**/node_modules",
+    "frontend/build",
+    "frontend/src/api/fetchers.tsx",
+    "backend/.venv"
+  ],
   "plugins": [
     "https://plugins.dprint.dev/typescript-0.59.1.wasm",
     "https://plugins.dprint.dev/json-0.13.2.wasm",
