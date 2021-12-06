@@ -94,6 +94,7 @@ health:
   readinessProbeTimeout: 30
   readinessProbeFailureThreshold: 3
   readinessProbeSuccessThreshold: 1
+
 # nodeAffinity:
 #   requiredDuringSchedulingIgnoredDuringExecution:
 #     nodeSelectorTerms:
