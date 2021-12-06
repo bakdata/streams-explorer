@@ -41,12 +41,16 @@ spec:
         {{- if $sslRedirect }}
           - path: /*
             backend:
-              serviceName: ssl-redirect
-              servicePort: use-annotation
+              service:
+                name: ssl-redirect
+                port:
+                  name: use-annotation
         {{- end }}
           - path: {{ $ingressPath }}
             backend:
-              serviceName: {{ $fullName }}
-              servicePort: http
+              service:
+                name: {{ $fullName }}
+                port:
+                  name: http
   {{- end }}
 {{- end }}
