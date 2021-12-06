@@ -40,6 +40,7 @@ spec:
         paths:
         {{- if $sslRedirect }}
           - path: /*
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: ssl-redirect
@@ -47,6 +48,7 @@ spec:
                   name: use-annotation
         {{- end }}
           - path: {{ $ingressPath }}
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: {{ $fullName }}
