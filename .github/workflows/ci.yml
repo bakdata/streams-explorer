@@ -64,3 +64,50 @@ jobs:
       - name: Test
         run: poetry run pytest tests
         working-directory: ${{ env.working-directory }}
+
+  frontend:
+    runs-on: ubuntu-latest
+    env:
+      working-directory: ./frontend
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: ["16"]
+        python-version: ["3.9"]
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ${{ env.working-directory }}
+
+      - name: Lint
+        run: npm run lint
+        working-directory: ${{ env.working-directory }}
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install pre-commit
+        run: python -m pip install pre-commit
+
+      - name: Formatting (prettier)
+        run: pre-commit run prettier --all-files
+        working-directory: ${{ env.working-directory }}
+
+      - name: Fetchers
+        run: pre-commit run generate-fetchers --all-files
+        working-directory: ${{ env.working-directory }}
+
+      - name: Run Tests
+        run: npm run test:ci
+        working-directory: ${{ env.working-directory }}
