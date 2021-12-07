@@ -11,7 +11,7 @@ jobs:
   backend:
     runs-on: ubuntu-latest
     env:
-      backend: ./backend
+      working-directory: ./backend
     strategy:
       fail-fast: false
       matrix:
@@ -43,24 +43,24 @@ jobs:
         run: |
           sudo apt-get -y install python3-dev graphviz libgraphviz-dev pkg-config python3-wheel
           poetry install --no-interaction
-        working-directory: ${{ env.backend }}
+        working-directory: ${{ env.working-directory }}
 
       - name: Lint (flake8)
         run: poetry run pre-commit run flake8 --all-files --show-diff-on-failure
-        working-directory: ${{ env.backend }}
+        working-directory: ${{ env.working-directory }}
 
       - name: Order of imports (isort)
         run: poetry run pre-commit run isort --all-files --show-diff-on-failure
-        working-directory: ${{ env.backend }}
+        working-directory: ${{ env.working-directory }}
 
       - name: Formatting (black)
         run: poetry run pre-commit run black --all-files --show-diff-on-failure
-        working-directory: ${{ env.backend }}
+        working-directory: ${{ env.working-directory }}
 
       - name: Typing (mypy)
         run: poetry run pre-commit run mypy --all-files
-        working-directory: ${{ env.backend }}
+        working-directory: ${{ env.working-directory }}
 
       - name: Test
         run: poetry run pytest tests
-        working-directory: ${{ env.backend }}
+        working-directory: ${{ env.working-directory }}
