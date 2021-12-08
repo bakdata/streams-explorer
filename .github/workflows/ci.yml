@@ -20,8 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version:
-          - ${{ env.target-python-version }}
+        python-version: ["${{ env.target-python-version }}"]
 
     steps:
       - uses: actions/checkout@v2
@@ -77,8 +76,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version:
-          - ${{ env.target-node-version }}
+        node-version: ["${{ env.target-node-version }}"]
 
     steps:
       - uses: actions/checkout@v2
