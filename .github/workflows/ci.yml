@@ -127,3 +127,44 @@ jobs:
       - name: Run Tests
         run: npm run test:ci
         working-directory: ${{ env.working-directory }}
+
+  docker:
+    runs-on: ubuntu-latest
+    env:
+      # image: bakdata/streams-explorer
+      image: user/test
+      default-image-tag: ${{ env.GITHUB_RUN_ID }}-${{ env.GITHUB_SHA }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.image }}
+          tags: |
+            type=sha,event=pr
+            type=semver,pattern=v{{version}},event=tag
+
+      # - name: Login to DockerHub
+      #   if: github.event_name != 'pull_request'
+      #   uses: docker/login-action@v1
+      #   with:
+      #     username: ${{ secrets.DOCKERHUB_USERNAME }}
+      #     password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: false
+          tags: ${{ steps.meta.outputs.tags }}
+          # tags: ${{ env.image }}:${{ env.default-image-tag }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
