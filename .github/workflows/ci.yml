@@ -137,7 +137,7 @@ jobs:
     env:
       # image: bakdata/streams-explorer
       image: user/test
-      default-image-tag: ${{ env.GITHUB_RUN_ID }}-${{ env.GITHUB_SHA }}
+      # default-image-tag: ${{ env.GITHUB_RUN_ID }}-${{ env.GITHUB_SHA }}
     steps:
       - uses: actions/checkout@v2
         with:
