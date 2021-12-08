@@ -7,9 +7,6 @@ on:
   pull_request:
     branches: [main]
 
-env:
-  poetry-version: "1.1.12"
-
 jobs:
   backend:
     runs-on: ubuntu-latest
@@ -36,7 +33,7 @@ jobs:
       - name: Run poetry image
         uses: abatilo/actions-poetry@v2.1.4
         with:
-          poetry-version: ${{ env.poetry-version }}
+          poetry-version: 1.1.12
 
       - name: Set poetry virtualenv
         run: poetry config virtualenvs.in-project true
