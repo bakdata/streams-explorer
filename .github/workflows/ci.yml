@@ -6,6 +6,12 @@ on:
     tags: ["v*.*.*"]
   pull_request:
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      releaseType:
+        description: "The type of the release."
+        default: "patch"
+        required: false
 
 jobs:
   backend:
@@ -133,6 +139,7 @@ jobs:
   docker:
     name: Docker
     needs: [backend, frontend]
+    if: success()
     runs-on: ubuntu-latest
     env:
       # image: bakdata/streams-explorer
@@ -172,3 +179,28 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  bump-version:
+    name: Bump version
+    needs: [backend, frontend, docker]
+    if: success() && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+          repository: "bakdata/ci-templates"
+          path: "ci-templates"
+
+      - name: Bump version
+        uses: ./ci-templates/bump-version
+        with:
+          githubToken: "${{ secrets.GH_TOKEN }}"
+          githubUsername: "${{ secrets.GH_USERNAME }}"
+          githubEmail: "${{ secrets.GH_EMAIL }}"
+          releaseType: "${{ github.event.inputs.releaseType }}"
