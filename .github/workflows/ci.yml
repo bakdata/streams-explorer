@@ -146,17 +146,14 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
 
-      - name: Print Workflow run ID
-        run: echo $GITHUB_WORKFLOW $GITHUB_RUN_ID
-
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v3
         with:
           images: ${{ env.image }}
           tags: |
-            type=sha,prefix=${{ env.GITHUB_RUN_ID }}-,event=pr
-            type=semver,pattern=v{{version}},event=tag
+            event=pr,type=sha,prefix="${{ env.GITHUB_RUN_ID }}"-
+            event=tag,type=semver,pattern=v{{version}}
 
       # - name: Login to DockerHub
       #   if: github.event_name != 'pull_request'
