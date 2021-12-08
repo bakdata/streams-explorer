@@ -152,7 +152,7 @@ jobs:
         with:
           images: ${{ env.image }}
           tags: |
-            type=sha,prefix=${context.runId}-,event=pr
+            type=sha,prefix={{runId}}-,event=pr
             type=semver,pattern=v{{version}},event=tag
 
       # - name: Login to DockerHub
