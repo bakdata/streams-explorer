@@ -32,6 +32,9 @@ jobs:
         shell: bash
         run: echo ::set-output name=version::$(python -c "import sys; print('-'.join(str(v) for v in sys.version_info))")
 
+      - name: Install packages
+        run: sudo apt-get -y install python3-dev graphviz libgraphviz-dev pkg-config python3-wheel
+
       - name: Run poetry image
         uses: abatilo/actions-poetry@v2.1.4
         with:
@@ -53,9 +56,7 @@ jobs:
         run: timeout 10s python -m poetry run pip --version || rm -rf .venv
 
       - name: Install dependencies
-        run: |
-          sudo apt-get -y install python3-dev graphviz libgraphviz-dev pkg-config python3-wheel
-          poetry install --no-interaction
+        run: poetry install --no-interaction
         working-directory: ${{ env.working-directory }}
 
       - name: Lint (flake8)
