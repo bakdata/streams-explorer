@@ -142,9 +142,7 @@ jobs:
     if: success()
     runs-on: ubuntu-latest
     env:
-      # image: bakdata/streams-explorer
-      image: user/test
-      # default-image-tag: ${{ env.GITHUB_RUN_ID }}-${{ env.GITHUB_SHA }}
+      image: bakdata/streams-explorer
     steps:
       - uses: actions/checkout@v2
         with:
@@ -162,20 +160,19 @@ jobs:
             event=pr,type=sha
             event=tag,type=semver,pattern=v{{version}}
 
-      # - name: Login to DockerHub
-      #   if: github.event_name != 'pull_request'
-      #   uses: docker/login-action@v1
-      #   with:
-      #     username: ${{ secrets.DOCKERHUB_USERNAME }}
-      #     password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Login to DockerHub
+        if: github.event_name == 'pull_request' || startsWith(github.ref, 'refs/tags/v')
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build
+      - name: Build & Push
         uses: docker/build-push-action@v2
         with:
           context: .
-          push: false
+          push: true
           tags: ${{ steps.meta.outputs.tags }}
-          # tags: ${{ env.image }}:${{ env.default-image-tag }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
