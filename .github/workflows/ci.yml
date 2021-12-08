@@ -9,6 +9,7 @@ on:
 
 jobs:
   backend:
+    name: Backend
     runs-on: ubuntu-latest
     env:
       working-directory: ./backend
@@ -81,6 +82,7 @@ jobs:
         working-directory: ${{ env.working-directory }}
 
   frontend:
+    name: Frontend
     runs-on: ubuntu-latest
     env:
       working-directory: ./frontend
@@ -129,6 +131,8 @@ jobs:
         working-directory: ${{ env.working-directory }}
 
   docker:
+    name: Docker
+    needs: [backend, frontend]
     runs-on: ubuntu-latest
     env:
       # image: bakdata/streams-explorer
