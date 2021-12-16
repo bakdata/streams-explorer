@@ -49,7 +49,6 @@ spec:
                   {{- else }}
                   name: http
                   {{- end }}
-                  {{- end }}
           {{- end }}
   {{- end }}
 {{- end }}
