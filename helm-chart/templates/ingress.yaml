@@ -40,10 +40,15 @@ spec:
               service:
                 name: {{ .serviceName | default $fullName | quote }}
                 port:
-                  {{- if and (.servicePort) (regexMatch "^[0-9]+$" .servicePort) }}
+                  {{- if .servicePort }}
+                  {{- if (regexMatch "^[0-9]+$" .servicePort) }}
                   number: {{ .servicePort }}
                   {{- else }}
-                  name: {{ .servicePort | default "http" | quote }}
+                  name: {{ .servicePort }}
+                  {{- end }}
+                  {{- else }}
+                  name: http
+                  {{- end }}
                   {{- end }}
           {{- end }}
   {{- end }}
