@@ -41,7 +41,7 @@ spec:
                 name: {{ .serviceName | default $fullName | quote }}
                 port:
                   {{- if .servicePort }}
-                  {{- if (regexMatch "^[0-9]+$" (printf "%s" .servicePort) }}
+                  {{- if regexMatch "^[0-9]+$" (printf "%s" .servicePort) }}
                   number: {{ .servicePort }}
                   {{- else }}
                   name: {{ .servicePort }}
