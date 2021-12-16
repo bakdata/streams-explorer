@@ -66,12 +66,14 @@ rbac:
 ingress:
   enabled: true
   annotations: {}
-  path: /
   hosts:
-    - sample.dev.daaa.cloud
+    - host: sample.dev.daaa.cloud
+      paths:
+        - path: /
+          # pathType: ImplementationSpecific
+          # serviceName: 
+          # servicePort: 
   tls: []
-  # Redirect http to https: https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.1/guide/tasks/ssl_redirect/
-  sslRedirect: true
   # Commonly used to map ingress objects to specific ingress controller installations within your cluster
   #ingressClassName: nginx-web-ingress
 
