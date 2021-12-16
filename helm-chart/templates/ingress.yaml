@@ -35,12 +35,12 @@ spec:
         paths:
           {{- range .paths }}
           - path: {{ .path }}
-            pathType: {{ .pathType | default "ImplementationSpecific" | quote }}
+            pathType: {{ .pathType | default "ImplementationSpecific | quote }}
             backend:
               service:
                 name: {{ .serviceName | default $fullName | quote }}
                 port:
-                  {{- if regexMatch "^\\d+$" .servicePort }}
+                  {{- if regexMatch "^[0-9]+$" .servicePort }}
                   number: {{ .servicePort }}
                   {{- else }}
                   name: {{ .servicePort | default "http" | quote }}
