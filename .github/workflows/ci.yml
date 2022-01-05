@@ -26,8 +26,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-        with:
-          fetch-depth: 1
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
@@ -99,8 +97,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-        with:
-          fetch-depth: 1
 
       - uses: actions/setup-node@v2
         with:
@@ -145,8 +141,6 @@ jobs:
       image: bakdata/streams-explorer
     steps:
       - uses: actions/checkout@v2
-        with:
-          fetch-depth: 1
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
@@ -185,12 +179,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          fetch-depth: 1
           persist-credentials: false
 
       - uses: actions/checkout@v2
         with:
-          fetch-depth: 1
           repository: "bakdata/ci-templates"
           path: "ci-templates"
 
@@ -210,8 +202,6 @@ jobs:
       BACKEND_DIR: ./backend
     steps:
       - uses: actions/checkout@v2
-        with:
-          fetch-depth: 1
 
       - name: Set up Python
         uses: actions/setup-python@v2
