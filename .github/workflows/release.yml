@@ -1,0 +1,34 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      releaseType:
+        description: "The type of the release."
+        default: "patch"
+        required: false
+
+jobs:
+  bump-version:
+    name: Bump version
+    needs: [backend, frontend, docker]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+          repository: "bakdata/ci-templates"
+          path: "ci-templates"
+
+      - name: Bump version
+        uses: ./ci-templates/bump-version
+        with:
+          githubToken: "${{ secrets.GH_TOKEN }}"
+          githubUsername: "${{ secrets.GH_USERNAME }}"
+          githubEmail: "${{ secrets.GH_EMAIL }}"
+          releaseType: "${{ github.event.inputs.releaseType }}"
