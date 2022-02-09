@@ -3,8 +3,7 @@ FROM node:16 AS frontend
 
 WORKDIR /build
 COPY ./frontend/package.json ./frontend/package-lock.json /build/
-ENV NODE_ENV=production
-RUN npm ci --include=dev
+RUN npm ci
 
 COPY ./frontend /build
 RUN npm run build
