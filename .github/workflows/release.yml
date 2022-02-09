@@ -32,3 +32,44 @@ jobs:
           githubUsername: "${{ secrets.GH_USERNAME }}"
           githubEmail: "${{ secrets.GH_EMAIL }}"
           releaseType: "${{ github.event.inputs.releaseType }}"
+
+  pypi:
+    name: Publish PyPI
+    needs: [bump-version]
+    runs-on: ubuntu-latest
+    env:
+      BACKEND_DIR: ./backend
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.9"
+
+      - name: Copy Readme
+        run: |
+          cp README.md $BACKEND_DIR/
+          git add $BACKEND_DIR/README.md
+          sed -E -i.bak 's/\.\.\/README/README/' $BACKEND_DIR/pyproject.toml
+
+      - name: Install packages
+        run: sudo apt-get -y install python3-dev graphviz libgraphviz-dev pkg-config python3-wheel
+
+      - name: Release to PyPI
+        uses: ./ci-templates/actions/python-poetry-release@main
+        with:
+          pypi-token: ${{ secrets.pypi-token }}
+          publish-to-test: ${{ inputs.publish-to-test }}
+          working-directory: ${{ inputs.working-directory }}
+          python-version: ${{ inputs.python-version }}
+          poetry-version: ${{ inputs.poetry-version }}
+
+      - name: Commit and push pyproject.toml file
+        uses: ./ci-templates/actions/commit-and-push@main
+        with:
+          ref: ${{ inputs.ref }}
+          commit-message: "Bump version ${{ steps.release-tag.outputs.old-tag }} → ${{ steps.release-tag.outputs.release-tag }}"
+          github-username: ${{ secrets.github-username }}
+          github-email: ${{ secrets.github-email }}
+          github-token: ${{ secrets.github-token }}
