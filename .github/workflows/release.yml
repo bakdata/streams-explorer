@@ -49,17 +49,22 @@ jobs:
       - name: Install packages
         run: sudo apt-get -y install python3-dev graphviz libgraphviz-dev pkg-config python3-wheel
 
-      - name: Release to PyPI
-        uses: ./ci-templates/actions/python-poetry-release@main
+      - name: Release to TestPyPI
+        uses: ./ci-templates/actions/python-poetry-release
         with:
+          working-directory: ${{ env.BACKEND_DIR }}
+          pypi-token: ${{ secrets.testpypi-token }}
+          publish-to-test: "true"
+
+      - name: Release to PyPI
+        uses: ./ci-templates/actions/python-poetry-release
+        with:
+          working-directory: ${{ env.BACKEND_DIR }}
           pypi-token: ${{ secrets.pypi-token }}
-          publish-to-test: ${{ inputs.publish-to-test }}
-          working-directory: ${{ inputs.working-directory }}
-          python-version: ${{ inputs.python-version }}
-          poetry-version: ${{ inputs.poetry-version }}
+          publish-to-test: "false"
 
       - name: Commit and push pyproject.toml file
-        uses: ./ci-templates/actions/commit-and-push@main
+        uses: ./ci-templates/actions/commit-and-push
         with:
           ref: ${{ inputs.ref }}
           commit-message: "Bump version ${{ steps.release-tag.outputs.old-tag }} → ${{ steps.release-tag.outputs.release-tag }}"
