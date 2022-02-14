@@ -16,12 +16,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          fetch-depth: 1
           persist-credentials: false
 
       - uses: actions/checkout@v2
         with:
-          fetch-depth: 1
           repository: "bakdata/ci-templates"
           path: "ci-templates"
 
