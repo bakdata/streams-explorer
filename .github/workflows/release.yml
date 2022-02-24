@@ -53,14 +53,14 @@ jobs:
         uses: ./ci-templates/actions/python-poetry-release
         with:
           working-directory: ${{ env.BACKEND_DIR }}
-          pypi-token: ${{ secrets.testpypi-token }}
+          pypi-token: ${{ secrets.TEST_PYPI_TOKEN }}
           publish-to-test: "true"
 
       - name: Release to PyPI
         uses: ./ci-templates/actions/python-poetry-release
         with:
           working-directory: ${{ env.BACKEND_DIR }}
-          pypi-token: ${{ secrets.pypi-token }}
+          pypi-token: ${{ secrets.PYPI_TOKEN }}
           publish-to-test: "false"
 
       - name: Commit and push pyproject.toml file
