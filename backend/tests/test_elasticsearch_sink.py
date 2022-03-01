@@ -23,7 +23,7 @@ class TestElasticSearchSinkConnector:
             ),
         )
 
-        indices = elastic_sink_connector.get_indices()
+        indices = elastic_sink_connector.get_routes()
         assert len(indices) == 2
         assert "index-topic-1" in indices
         assert "index-topic-2" in indices
@@ -42,7 +42,7 @@ class TestElasticSearchSinkConnector:
             ),
         )
 
-        indices = elastic_sink_connector.get_indices()
+        indices = elastic_sink_connector.get_routes()
         assert len(indices) == 1
         assert "Order_Data" in indices, "Multiple regex groups should be substituted"
 
@@ -60,7 +60,7 @@ class TestElasticSearchSinkConnector:
                 }
             ),
         )
-        indices = elastic_sink_connector.get_indices()
+        indices = elastic_sink_connector.get_routes()
         assert len(indices) == 2
         assert "my-topic-1-${yyyyMMdd}" in indices
         assert "my-topic-2-${yyyyMMdd}" in indices
@@ -83,7 +83,7 @@ class TestElasticSearchSinkConnector:
             ),
         )
 
-        indices = elastic_sink_connector.get_indices()
+        indices = elastic_sink_connector.get_routes()
 
         assert len(indices) == 2
         assert "index-topic-1-${yyyyMMdd}" in indices
