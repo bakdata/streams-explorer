@@ -133,7 +133,6 @@ class TestTransformerKafkaConnect:
         assert "my-topic-2-${yyyyMMdd}" in routes
 
     def test_custom_transformer(self):
-        # Used as fallback for unknown transforms
         class CustomRouterTransformer(RouterTransformerConfig):
             _type: Literal["org.fake.kafka.CustomRouterTransformer"] = Field(
                 ..., alias="type"
