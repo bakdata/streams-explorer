@@ -3,7 +3,7 @@ from typing import List, Optional, Union
 
 import pydantic
 from loguru import logger
-from pydantic import BaseConfig, BaseModel, Extra, ValidationError
+from pydantic import BaseConfig, BaseModel, Extra, Field, ValidationError
 
 from streams_explorer.core.extractor.default.transformer import (
     GenericTransformerConfig,
@@ -20,6 +20,9 @@ class KafkaConnectorTypesEnum(str, Enum):
 class KafkaConnectorConfig(BaseModel):
     topics: Optional[str]
     transforms: Optional[str]
+    error_topic: Optional[str] = Field(
+        default=None, alias="errors.deadletterqueue.topic.name"
+    )
 
     class Config(BaseConfig):
         extra = Extra.allow
@@ -34,7 +37,7 @@ class KafkaConnector(BaseModel):
     name: str
     type: KafkaConnectorTypesEnum
     config: KafkaConnectorConfig
-    error_topic: Optional[str] = None
+    error_topic: Optional[str]
     topics: Optional[
         List[str]
     ]  # Deprecated please override get_topics for your kafka connector.
@@ -54,6 +57,11 @@ class KafkaConnector(BaseModel):
         if self.topics is None:
             return KafkaConnector.split_topics(self.config.topics)
         return self.topics
+
+    def get_error_topic(self):
+        if self.error_topic is not None:
+            return self.error_topic
+        return self.config.error_topic
 
     @staticmethod
     def split_topics(topics: Optional[str]) -> List[str]:

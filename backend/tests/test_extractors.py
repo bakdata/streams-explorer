@@ -149,10 +149,10 @@ class TestExtractors:
         assert len(connectors) == 2
         assert connectors[0].type == KafkaConnectorTypesEnum.SINK
         assert connectors[0].get_topics() == ["my-topic-1", "my-topic-2"]
-        assert connectors[0].error_topic == "dead-letter-topic"
+        assert connectors[0].get_error_topic() == "dead-letter-topic"
         assert connectors[1].type == KafkaConnectorTypesEnum.SOURCE
         assert connectors[1].get_topics() == []
-        assert connectors[1].error_topic is None
+        assert connectors[1].get_error_topic() is None
 
     def test_extractors_topics_none(self, mocker):
         mocker.patch(
@@ -204,7 +204,7 @@ class TestExtractors:
         assert extractor.sinks[0].name == "es-test-index"
         assert connector is not None
         assert connector.get_topics() == ["my-topic-1", "my-topic-2"]
-        assert connector.error_topic == "dead-letter-topic"
+        assert connector.get_error_topic() == "dead-letter-topic"
 
     def test_s3_sink(self):
         from streams_explorer.core.extractor.default.s3_sink import S3Sink

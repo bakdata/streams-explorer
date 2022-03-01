@@ -23,7 +23,6 @@ class ElasticsearchSink(Extractor):
                 name=connector_name,
                 config=config,
                 type=KafkaConnectorTypesEnum.SINK,
-                error_topic=config.get("errors.deadletterqueue.topic.name"),
             )
             indices = connector.get_routes()
             for index in indices:
