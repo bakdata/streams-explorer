@@ -2,9 +2,8 @@ from enum import Enum
 from typing import List, Optional
 
 import pydantic
-from cfgv import ValidationError
 from loguru import logger
-from pydantic import BaseConfig, BaseModel, Extra
+from pydantic import BaseConfig, BaseModel, Extra, ValidationError
 
 from streams_explorer.core.extractor.default.transformer import TRANSFORMER
 
