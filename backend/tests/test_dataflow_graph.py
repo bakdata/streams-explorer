@@ -6,6 +6,7 @@ from streams_explorer.core.services.dataflow_graph import DataFlowGraph
 from streams_explorer.core.services.metric_providers import MetricProvider
 from streams_explorer.models.kafka_connector import (
     KafkaConnector,
+    KafkaConnectorConfig,
     KafkaConnectorTypesEnum,
 )
 from streams_explorer.models.sink import Sink
@@ -66,16 +67,39 @@ class TestDataFlowGraph:
         sink_connector = KafkaConnector(
             name="test-sink-connector",
             type=KafkaConnectorTypesEnum.SINK,
-            topics=["output-topic"],
-            config={},
+            config=KafkaConnectorConfig(topics="output-topic"),
             error_topic="dead-letter-topic",
         )
         source_connector = KafkaConnector(
             name="test-source-connector",
             type=KafkaConnectorTypesEnum.SOURCE,
-            topics=["input-topic", "input-topic2"],
-            config={},
+            config=KafkaConnectorConfig(topics="input-topic,input-topic2"),
         )
+        df.add_streaming_app(K8sApp.factory(get_streaming_app_deployment()))
+        df.add_connector(sink_connector)
+        df.add_connector(source_connector)
+        assert len(df.graph.nodes) == 8
+        assert df.graph.has_edge("output-topic", "test-sink-connector")
+        assert df.graph.has_edge("test-sink-connector", "dead-letter-topic")
+        assert df.graph.has_edge("test-source-connector", "input-topic")
+        assert df.graph.has_edge("test-source-connector", "input-topic2")
+        assert len(df.pipelines) == 0
+
+    def test_deprecated_connector(self, df: DataFlowGraph):
+        sink_connector = KafkaConnector(
+            name="test-sink-connector",
+            type=KafkaConnectorTypesEnum.SINK,
+            config=KafkaConnectorConfig(topics="output-topic"),
+            error_topic="dead-letter-topic",
+            topics=["output-topic"],
+        )
+        source_connector = KafkaConnector(
+            name="test-source-connector",
+            type=KafkaConnectorTypesEnum.SOURCE,
+            config=KafkaConnectorConfig(topics="input-topic,input-topic2"),
+            topics=["input-topic", "input-topic2"],
+        )
+
         df.add_streaming_app(K8sApp.factory(get_streaming_app_deployment()))
         df.add_connector(sink_connector)
         df.add_connector(source_connector)
@@ -188,8 +212,7 @@ class TestDataFlowGraph:
         source_connector = KafkaConnector(
             name="test-source-connector",
             type=KafkaConnectorTypesEnum.SOURCE,
-            topics=["input-topic2", "source-topic"],
-            config={},
+            config=KafkaConnectorConfig(topics="input-topic2,source-topic"),
         )
         df.add_connector(source_connector)
         assert "test-source-connector" in pipeline2.nodes
@@ -268,8 +291,7 @@ class TestDataFlowGraph:
         sink_connector = KafkaConnector(
             name="test-sink-connector",
             type=KafkaConnectorTypesEnum.SINK,
-            topics=["output-topic1", "output-topic2"],
-            config={},
+            config=KafkaConnectorConfig(topics="output-topic1,output-topic2"),
         )
         df.add_connector(sink_connector)
         assert "test-sink-connector" in df.graph.nodes
@@ -284,8 +306,7 @@ class TestDataFlowGraph:
         source_connector = KafkaConnector(
             name="test-source-connector",
             type=KafkaConnectorTypesEnum.SOURCE,
-            topics=["input-topic1", "input-topic2"],
-            config={},
+            config=KafkaConnectorConfig(topics="input-topic1,input-topic2"),
         )
         df.add_connector(source_connector)
         assert "test-source-connector" in df.graph.nodes
@@ -300,8 +321,7 @@ class TestDataFlowGraph:
         unrelated_sink_connector = KafkaConnector(
             name="unrelated-sink-connector",
             type=KafkaConnectorTypesEnum.SINK,
-            topics=["input-topic1"],
-            config={},
+            config=KafkaConnectorConfig(topics="input-topic1"),
         )
         df.add_connector(unrelated_sink_connector)
         assert "unrelated-sink-connector" in df.graph.nodes
@@ -311,8 +331,7 @@ class TestDataFlowGraph:
         unrelated_source_connector = KafkaConnector(
             name="unrelated-source-connector",
             type=KafkaConnectorTypesEnum.SOURCE,
-            topics=["output-topic1"],
-            config={},
+            config=KafkaConnectorConfig(topics="output-topic1"),
         )
         df.add_connector(unrelated_source_connector)
         assert "unrelated-source-connector" in df.graph.nodes
@@ -346,15 +365,13 @@ class TestDataFlowGraph:
         sink_connector1 = KafkaConnector(
             name="sink-connector1",
             type=KafkaConnectorTypesEnum.SINK,
-            topics=["output-topic1"],
-            config={},
+            config=KafkaConnectorConfig(topics="output-topic1"),
         )
         df.add_connector(sink_connector1)
         sink_connector2 = KafkaConnector(
             name="sink-connector2",
             type=KafkaConnectorTypesEnum.SINK,
-            topics=["output-topic2"],
-            config={},
+            config=KafkaConnectorConfig(topics="output-topic2"),
         )
         df.add_connector(sink_connector2)
 

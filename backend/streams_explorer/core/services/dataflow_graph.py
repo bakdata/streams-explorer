@@ -79,14 +79,14 @@ class DataFlowGraph:
             label=connector.name,
             node_type=NodeTypesEnum.CONNECTOR,
         )
-        for topic in connector.topics:
+        for topic in connector.get_topics():
             self._add_topic(graph, topic)
             if connector.type == KafkaConnectorTypesEnum.SINK:
                 graph.add_edge(topic, connector.name)
             elif connector.type == KafkaConnectorTypesEnum.SOURCE:
                 graph.add_edge(connector.name, topic)
-        if connector.error_topic:
-            self._add_error_topic(graph, connector.name, connector.error_topic)
+        if connector.get_error_topic() is not None:
+            self._add_error_topic(graph, connector.name, connector.get_error_topic())
 
         # Add to pipeline graph
         if pipeline is None:
