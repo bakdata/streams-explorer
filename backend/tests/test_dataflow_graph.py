@@ -5,6 +5,7 @@ from streams_explorer.core.k8s_app import ATTR_PIPELINE, K8sApp
 from streams_explorer.core.services.dataflow_graph import DataFlowGraph
 from streams_explorer.core.services.metric_providers import MetricProvider
 from streams_explorer.models.kafka_connector import (
+    KafkaConnector,
     KafkaConnectorConfig,
     KafkaConnectorTypesEnum,
 )
@@ -78,6 +79,31 @@ class TestDataFlowGraph:
             type=KafkaConnectorTypesEnum.SOURCE,
             config=KafkaConnectorConfig(topics="input-topic,input-topic2"),
         )
+        df.add_streaming_app(K8sApp.factory(get_streaming_app_deployment()))
+        df.add_connector(sink_connector)
+        df.add_connector(source_connector)
+        assert len(df.graph.nodes) == 8
+        assert df.graph.has_edge("output-topic", "test-sink-connector")
+        assert df.graph.has_edge("test-sink-connector", "dead-letter-topic")
+        assert df.graph.has_edge("test-source-connector", "input-topic")
+        assert df.graph.has_edge("test-source-connector", "input-topic2")
+        assert len(df.pipelines) == 0
+
+    def test_deprecated_connector(self, df: DataFlowGraph):
+        sink_connector = KafkaConnector(
+            name="test-sink-connector",
+            type=KafkaConnectorTypesEnum.SINK,
+            config=KafkaConnectorConfig(topics="output-topic"),
+            error_topic="dead-letter-topic",
+            topics=["output-topic"],
+        )
+        source_connector = KafkaConnector(
+            name="test-source-connector",
+            type=KafkaConnectorTypesEnum.SOURCE,
+            config=KafkaConnectorConfig(topics="input-topic,input-topic2"),
+            topics=["input-topic", "input-topic2"],
+        )
+
         df.add_streaming_app(K8sApp.factory(get_streaming_app_deployment()))
         df.add_connector(sink_connector)
         df.add_connector(source_connector)

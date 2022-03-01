@@ -1,4 +1,3 @@
-from abc import abstractmethod
 from enum import Enum
 from typing import List, Optional
 
@@ -28,7 +27,14 @@ class KafkaConnector(BaseModel):
     type: KafkaConnectorTypesEnum
     config: KafkaConnectorConfig
     error_topic: Optional[str] = None
+    topics: Optional[
+        List[str]
+    ]  # Deprecated please override get_topics for your kafka connector
 
-    @abstractmethod
     def get_topics(self) -> List[str]:
-        ...
+        """
+        Override in your kafka connector. Use the config to retrieve and parse the topics.
+        This implementation only ensures the support of (older) plugins that use the deprecated topics field.
+        """
+
+        return self.topics
