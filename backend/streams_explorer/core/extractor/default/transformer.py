@@ -1,6 +1,6 @@
 import re
 from abc import ABC, abstractmethod
-from typing import List, Literal, Optional, Pattern, Union
+from typing import List, Literal, Optional, Pattern
 
 from pydantic import BaseConfig, BaseModel, Extra, Field, PrivateAttr
 
@@ -66,11 +66,3 @@ class GenericTransformerConfig(RouterTransformerConfig):
 
     def transform_topic(self, topic: str) -> str:
         return topic
-
-
-# Do not change order here. The fallback GenericTransformerConfig should always be the last element
-TRANSFORMER = Union[
-    RegexRouterTransformerConfig,
-    TimestampRouterTransformerConfig,
-    GenericTransformerConfig,
-]

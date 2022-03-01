@@ -1,11 +1,15 @@
 from enum import Enum
-from typing import List, Optional
+from typing import List, Optional, Union
 
 import pydantic
 from loguru import logger
 from pydantic import BaseConfig, BaseModel, Extra, ValidationError
 
-from streams_explorer.core.extractor.default.transformer import TRANSFORMER
+from streams_explorer.core.extractor.default.transformer import (
+    GenericTransformerConfig,
+    RegexRouterTransformerConfig,
+    TimestampRouterTransformerConfig,
+)
 
 
 class KafkaConnectorTypesEnum(str, Enum):
@@ -31,16 +35,31 @@ class KafkaConnector(BaseModel):
     type: KafkaConnectorTypesEnum
     config: KafkaConnectorConfig
     error_topic: Optional[str] = None
-    topics: List[
-        str
-    ] = []  # Deprecated please override get_topics for your kafka connector.
+    topics: Optional[
+        List[str]
+    ]  # Deprecated please override get_topics for your kafka connector.
+
+    # Do not change order here. The fallback GenericTransformerConfig should always be the last element
+    _transformers = Union[
+        RegexRouterTransformerConfig,
+        TimestampRouterTransformerConfig,
+        GenericTransformerConfig,
+    ]
 
     def get_topics(self) -> List[str]:
         """
         Override in your kafka connector. Use the config to retrieve and parse the topics.
         This implementation only ensures the support of (older) plugins that use the deprecated topics field.
         """
+        if self.topics is None:
+            return KafkaConnector.split_topics(self.config.topics)
         return self.topics
+
+    @staticmethod
+    def split_topics(topics: Optional[str]) -> List[str]:
+        if topics:
+            return topics.replace(" ", "").split(",")
+        return []
 
     def get_routes(self) -> List[str]:
         """
@@ -62,7 +81,7 @@ class KafkaConnector(BaseModel):
         }
         transformer_config["topics"] = indices
         try:
-            transformer = pydantic.parse_obj_as(TRANSFORMER, transformer_config)
+            transformer = pydantic.parse_obj_as(self._transformers, transformer_config)
             return transformer.get_routes()
         except ValidationError as e:
             logger.exception(

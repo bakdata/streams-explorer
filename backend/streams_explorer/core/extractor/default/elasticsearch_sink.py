@@ -8,11 +8,6 @@ from streams_explorer.models.kafka_connector import (
 from streams_explorer.models.sink import Sink
 
 
-class ElasticSearchSinkConnector(KafkaConnector):
-    def get_topics(self) -> List[str]:
-        return Extractor.split_topics(self.config.topics)
-
-
 class ElasticsearchSink(Extractor):
     def __init__(self):
         self.sinks: List[Sink] = []
@@ -24,7 +19,7 @@ class ElasticsearchSink(Extractor):
         connector_class = config.get("connector.class")
         if connector_class and "ElasticsearchSinkConnector" in connector_class:
 
-            connector = ElasticSearchSinkConnector(
+            connector = KafkaConnector(
                 name=connector_name,
                 config=config,
                 type=KafkaConnectorTypesEnum.SINK,

@@ -8,11 +8,6 @@ from streams_explorer.models.kafka_connector import (
 from streams_explorer.models.sink import Sink
 
 
-class JdbcSinkConnector(KafkaConnector):
-    def get_topics(self) -> List[str]:
-        return Extractor.split_topics(self.config.topics)
-
-
 class JdbcSink(Extractor):
     def __init__(self):
         self.sinks: List[Sink] = []
@@ -32,7 +27,7 @@ class JdbcSink(Extractor):
                         source=connector_name,
                     )
                 )
-            return JdbcSinkConnector(
+            return KafkaConnector(
                 name=connector_name,
                 config=config,
                 type=KafkaConnectorTypesEnum.SINK,

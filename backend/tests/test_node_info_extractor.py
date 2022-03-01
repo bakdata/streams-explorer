@@ -8,11 +8,12 @@ from streams_explorer.core.node_info_extractor import (
     get_displayed_information_topic,
 )
 from streams_explorer.models.kafka_connector import (
+    KafkaConnector,
     KafkaConnectorConfig,
     KafkaConnectorTypesEnum,
 )
 from streams_explorer.models.node_information import NodeInfoListItem, NodeInfoType
-from tests.utils import MockKafkaConnector, get_streaming_app_deployment
+from tests.utils import get_streaming_app_deployment
 
 
 class TestNodeInfoExtractor:
@@ -45,7 +46,7 @@ class TestNodeInfoExtractor:
             ],
         )
 
-        connector = MockKafkaConnector(
+        connector = KafkaConnector(
             name="test-connector",
             type=KafkaConnectorTypesEnum.SINK,
             config=KafkaConnectorConfig(
