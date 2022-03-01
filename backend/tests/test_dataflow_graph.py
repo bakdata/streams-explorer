@@ -5,12 +5,16 @@ from streams_explorer.core.k8s_app import ATTR_PIPELINE, K8sApp
 from streams_explorer.core.services.dataflow_graph import DataFlowGraph
 from streams_explorer.core.services.metric_providers import MetricProvider
 from streams_explorer.models.kafka_connector import (
-    KafkaConnector,
+    KafkaConnectorConfig,
     KafkaConnectorTypesEnum,
 )
 from streams_explorer.models.sink import Sink
 from streams_explorer.models.source import Source
-from tests.utils import get_streaming_app_cronjob, get_streaming_app_deployment
+from tests.utils import (
+    MockKafkaConnector,
+    get_streaming_app_cronjob,
+    get_streaming_app_deployment,
+)
 
 settings.k8s.pipeline.label = "pipeline"
 
@@ -63,18 +67,16 @@ class TestDataFlowGraph:
         assert df.graph.has_edge("test-app", "extra-output2")
 
     def test_add_connector(self, df: DataFlowGraph):
-        sink_connector = KafkaConnector(
+        sink_connector = MockKafkaConnector(
             name="test-sink-connector",
             type=KafkaConnectorTypesEnum.SINK,
-            topics=["output-topic"],
-            config={},
+            config=KafkaConnectorConfig(topics="output-topic"),
             error_topic="dead-letter-topic",
         )
-        source_connector = KafkaConnector(
+        source_connector = MockKafkaConnector(
             name="test-source-connector",
             type=KafkaConnectorTypesEnum.SOURCE,
-            topics=["input-topic", "input-topic2"],
-            config={},
+            config=KafkaConnectorConfig(topics="input-topic,input-topic2"),
         )
         df.add_streaming_app(K8sApp.factory(get_streaming_app_deployment()))
         df.add_connector(sink_connector)
@@ -185,11 +187,10 @@ class TestDataFlowGraph:
         df.add_sink(Sink("test-sink", "output-topic"))
         assert "test-sink" in pipeline1.nodes
 
-        source_connector = KafkaConnector(
+        source_connector = MockKafkaConnector(
             name="test-source-connector",
             type=KafkaConnectorTypesEnum.SOURCE,
-            topics=["input-topic2", "source-topic"],
-            config={},
+            config=KafkaConnectorConfig(topics="input-topic2,source-topic"),
         )
         df.add_connector(source_connector)
         assert "test-source-connector" in pipeline2.nodes
@@ -265,11 +266,10 @@ class TestDataFlowGraph:
             "error-topic2",
         }
 
-        sink_connector = KafkaConnector(
+        sink_connector = MockKafkaConnector(
             name="test-sink-connector",
             type=KafkaConnectorTypesEnum.SINK,
-            topics=["output-topic1", "output-topic2"],
-            config={},
+            config=KafkaConnectorConfig(topics="output-topic1,output-topic2"),
         )
         df.add_connector(sink_connector)
         assert "test-sink-connector" in df.graph.nodes
@@ -281,11 +281,10 @@ class TestDataFlowGraph:
         assert "test-sink" in pipeline1.nodes
         assert "test-sink" in pipeline2.nodes
 
-        source_connector = KafkaConnector(
+        source_connector = MockKafkaConnector(
             name="test-source-connector",
             type=KafkaConnectorTypesEnum.SOURCE,
-            topics=["input-topic1", "input-topic2"],
-            config={},
+            config=KafkaConnectorConfig(topics="input-topic1,input-topic2"),
         )
         df.add_connector(source_connector)
         assert "test-source-connector" in df.graph.nodes
@@ -297,22 +296,20 @@ class TestDataFlowGraph:
         assert "test-source" in pipeline1.nodes
         assert "test-source" in pipeline2.nodes
 
-        unrelated_sink_connector = KafkaConnector(
+        unrelated_sink_connector = MockKafkaConnector(
             name="unrelated-sink-connector",
             type=KafkaConnectorTypesEnum.SINK,
-            topics=["input-topic1"],
-            config={},
+            config=KafkaConnectorConfig(topics="input-topic1"),
         )
         df.add_connector(unrelated_sink_connector)
         assert "unrelated-sink-connector" in df.graph.nodes
         assert "unrelated-sink-connector" not in pipeline1.nodes
         assert "unrelated-sink-connector" not in pipeline2.nodes
 
-        unrelated_source_connector = KafkaConnector(
+        unrelated_source_connector = MockKafkaConnector(
             name="unrelated-source-connector",
             type=KafkaConnectorTypesEnum.SOURCE,
-            topics=["output-topic1"],
-            config={},
+            config=KafkaConnectorConfig(topics="output-topic1"),
         )
         df.add_connector(unrelated_source_connector)
         assert "unrelated-source-connector" in df.graph.nodes
@@ -343,18 +340,16 @@ class TestDataFlowGraph:
                 )
             )
         )
-        sink_connector1 = KafkaConnector(
+        sink_connector1 = MockKafkaConnector(
             name="sink-connector1",
             type=KafkaConnectorTypesEnum.SINK,
-            topics=["output-topic1"],
-            config={},
+            config=KafkaConnectorConfig(topics="output-topic1"),
         )
         df.add_connector(sink_connector1)
-        sink_connector2 = KafkaConnector(
+        sink_connector2 = MockKafkaConnector(
             name="sink-connector2",
             type=KafkaConnectorTypesEnum.SINK,
-            topics=["output-topic2"],
-            config={},
+            config=KafkaConnectorConfig(topics="output-topic2"),
         )
         df.add_connector(sink_connector2)
 

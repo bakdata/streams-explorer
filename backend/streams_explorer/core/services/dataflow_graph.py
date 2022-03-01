@@ -79,7 +79,7 @@ class DataFlowGraph:
             label=connector.name,
             node_type=NodeTypesEnum.CONNECTOR,
         )
-        for topic in connector.topics:
+        for topic in connector.get_topics():
             self._add_topic(graph, topic)
             if connector.type == KafkaConnectorTypesEnum.SINK:
                 graph.add_edge(topic, connector.name)

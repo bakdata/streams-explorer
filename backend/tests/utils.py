@@ -18,7 +18,9 @@ from kubernetes.client import (
     V1StatefulSetSpec,
 )
 
+from streams_explorer.core.extractor.extractor import Extractor
 from streams_explorer.core.k8s_app import ATTR_PIPELINE
+from streams_explorer.models.kafka_connector import KafkaConnector
 
 
 class ConfigType(str, Enum):
@@ -233,3 +235,8 @@ def get_template(
             annotations={"consumerGroup": consumer_group},
         )
     return V1PodTemplateSpec(spec=pod_spec, metadata=spec_metadata)
+
+
+class MockKafkaConnector(KafkaConnector):
+    def get_topics(self) -> List[str]:
+        return Extractor.split_topics(self.config.topics)

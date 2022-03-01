@@ -8,11 +8,11 @@ from streams_explorer.core.node_info_extractor import (
     get_displayed_information_topic,
 )
 from streams_explorer.models.kafka_connector import (
-    KafkaConnector,
+    KafkaConnectorConfig,
     KafkaConnectorTypesEnum,
 )
 from streams_explorer.models.node_information import NodeInfoListItem, NodeInfoType
-from tests.utils import get_streaming_app_deployment
+from tests.utils import MockKafkaConnector, get_streaming_app_deployment
 
 
 class TestNodeInfoExtractor:
@@ -45,17 +45,19 @@ class TestNodeInfoExtractor:
             ],
         )
 
-        connector = KafkaConnector(
+        connector = MockKafkaConnector(
             name="test-connector",
             type=KafkaConnectorTypesEnum.SINK,
-            topics=["topic1"],
-            config={
-                "test": "testValue",
-                "foo": {"bar": {"testDict": "test"}, "test": ["test", "test"]},
-            },
+            config=KafkaConnectorConfig(
+                **{
+                    "test": "testValue",
+                    "foo": {"bar": {"testDict": "test"}, "test": ["test", "test"]},
+                },
+                topics="topic1"
+            ),
         )
 
-        output = get_displayed_information_connector(connector.config)
+        output = get_displayed_information_connector(connector.config.dict())
         assert (
             NodeInfoListItem(name="Test1", value="testValue", type=NodeInfoType.BASIC)
             in output
@@ -63,7 +65,7 @@ class TestNodeInfoExtractor:
         assert (
             NodeInfoListItem(
                 name="bar",
-                value=connector.config["foo"]["bar"],
+                value=connector.config.dict()["foo"]["bar"],
                 type=NodeInfoType.JSON,
             )
             in output
@@ -71,7 +73,7 @@ class TestNodeInfoExtractor:
         assert (
             NodeInfoListItem(
                 name="testlist",
-                value=str(connector.config["foo"]["test"]),
+                value=str(connector.config.dict()["foo"]["test"]),
                 type=NodeInfoType.BASIC,
             )
             in output

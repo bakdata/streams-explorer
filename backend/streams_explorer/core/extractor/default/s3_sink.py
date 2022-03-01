@@ -8,6 +8,11 @@ from streams_explorer.models.kafka_connector import (
 from streams_explorer.models.sink import Sink
 
 
+class S3SinkConnector(KafkaConnector):
+    def get_topics(self) -> List[str]:
+        return Extractor.split_topics(self.config.topics)
+
+
 class S3Sink(Extractor):
     def __init__(self):
         self.sinks: List[Sink] = []
@@ -27,11 +32,10 @@ class S3Sink(Extractor):
                         source=connector_name,
                     )
                 )
-            return KafkaConnector(
+            return S3SinkConnector(
                 name=connector_name,
                 config=config,
                 type=KafkaConnectorTypesEnum.SINK,
-                topics=Extractor.split_topics(config.get("topics")),
                 error_topic=config.get("errors.deadletterqueue.topic.name"),
             )
         return None

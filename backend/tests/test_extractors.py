@@ -129,16 +129,14 @@ class TestExtractors:
                     "type": "sink",
                     "config": {
                         "connector.class": "CustomSinkConnector",
-                        "topics": "my-topic-1, my-topic-2",
+                        "topics": "my-topic-1,my-topic-2",
                         "errors.deadletterqueue.topic.name": "dead-letter-topic",
                     },
                 }
             if connector_name == "custom-source":
                 return {
                     "type": "source",
-                    "config": {
-                        "connector.class": "CustomSourceConnector",
-                    },
+                    "config": {"connector.class": "CustomSourceConnector"},
                 }
             return {}
 
@@ -150,10 +148,10 @@ class TestExtractors:
         connectors = KafkaConnect.connectors()
         assert len(connectors) == 2
         assert connectors[0].type == KafkaConnectorTypesEnum.SINK
-        assert connectors[0].topics == ["my-topic-1", "my-topic-2"]
+        assert connectors[0].get_topics() == ["my-topic-1", "my-topic-2"]
         assert connectors[0].error_topic == "dead-letter-topic"
         assert connectors[1].type == KafkaConnectorTypesEnum.SOURCE
-        assert connectors[1].topics == []
+        assert connectors[1].get_topics() == []
         assert connectors[1].error_topic is None
 
     def test_extractors_topics_none(self, mocker):
@@ -193,8 +191,10 @@ class TestExtractors:
             {
                 "config": {
                     "connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
+                    "topics": "my-topic-1,my-topic-2",
+                    "transforms": "changeTopic",
+                    "transforms.changeTopic.type": "org.apache.kafka.connect.transforms.RegexRouter",
                     "transforms.changeTopic.replacement": "es-test-index",
-                    "topics": "my-topic-1, my-topic-2",
                     "errors.deadletterqueue.topic.name": "dead-letter-topic",
                 }
             },
@@ -203,7 +203,7 @@ class TestExtractors:
         assert len(extractor.sinks) == 1
         assert extractor.sinks[0].name == "es-test-index"
         assert connector is not None
-        assert connector.topics == ["my-topic-1", "my-topic-2"]
+        assert connector.get_topics() == ["my-topic-1", "my-topic-2"]
         assert connector.error_topic == "dead-letter-topic"
 
     def test_s3_sink(self):
