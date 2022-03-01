@@ -1,77 +1,74 @@
-from streams_explorer.core.extractor.default.elasticsearch_sink import (
-    ElasticSearchSinkConnector,
-)
 from streams_explorer.models.kafka_connector import (
+    KafkaConnector,
     KafkaConnectorConfig,
     KafkaConnectorTypesEnum,
 )
 
 
-class TestElasticSearchSinkConnector:
+class TestTransformerKafkaConnect:
     def test_regex_router_transformer(self):
-        elastic_sink_connector = ElasticSearchSinkConnector(
+        connector = KafkaConnector(
             name="example-connector",
             type=KafkaConnectorTypesEnum.SINK,
             config=KafkaConnectorConfig(
                 **{
-                    "topics": "my-topic-1,my-topic-2",
                     "transforms": "changeTopic",
                     "transforms.changeTopic.type": "org.apache.kafka.connect.transforms.RegexRouter",
                     "transforms.changeTopic.regex": "my-(.*)",
                     "transforms.changeTopic.replacement": "index-$1",
                 }
             ),
+            topics=["my-topic-1", "my-topic-2"],
         )
 
-        indices = elastic_sink_connector.get_routes()
-        assert len(indices) == 2
-        assert "index-topic-1" in indices
-        assert "index-topic-2" in indices
+        routes = connector.get_routes()
+        assert len(routes) == 2
+        assert "index-topic-1" in routes
+        assert "index-topic-2" in routes
 
-        elastic_sink_connector = ElasticSearchSinkConnector(
+        connector = KafkaConnector(
             name="example-connector",
             type=KafkaConnectorTypesEnum.SINK,
             config=KafkaConnectorConfig(
                 **{
-                    "topics": "Order_Stream_Data",
                     "transforms": "RemoveString",
                     "transforms.RemoveString.type": "org.apache.kafka.connect.transforms.RegexRouter",
                     "transforms.RemoveString.regex": "(.)Stream_(.)",
                     "transforms.RemoveString.replacement": "$1$2",
                 }
             ),
+            topics=["Order_Stream_Data"],
         )
 
-        indices = elastic_sink_connector.get_routes()
-        assert len(indices) == 1
-        assert "Order_Data" in indices, "Multiple regex groups should be substituted"
+        routes = connector.get_routes()
+        assert len(routes) == 1
+        assert "Order_Data" in routes, "Multiple regex groups should be substituted"
 
     def test_timestamp_router_transformer(self):
-        elastic_sink_connector = ElasticSearchSinkConnector(
+        connector = KafkaConnector(
             name="example-connector",
             type=KafkaConnectorTypesEnum.SINK,
             config=KafkaConnectorConfig(
                 **{
-                    "topics": "my-topic-1,my-topic-2",
                     "transforms": "changeTopic",
                     "transforms.changeTopic.type": "org.apache.kafka.connect.transforms.TimestampRouter",
                     "transforms.changeTopic.topic.format": "${topic}-${timestamp}",
                     "transforms.changeTopic.timestamp.format": "yyyyMMdd",
                 }
             ),
+            topics=["my-topic-1", "my-topic-2"],
         )
-        indices = elastic_sink_connector.get_routes()
-        assert len(indices) == 2
-        assert "my-topic-1-${yyyyMMdd}" in indices
-        assert "my-topic-2-${yyyyMMdd}" in indices
+        routes = connector.get_routes()
+        assert len(routes) == 2
+        assert "my-topic-1-${yyyyMMdd}" in routes
+        assert "my-topic-2-${yyyyMMdd}" in routes
 
     def test_regex_and_timestamp_router(self):
-        elastic_sink_connector = ElasticSearchSinkConnector(
+        connector = KafkaConnector(
             name="example-connector",
             type=KafkaConnectorTypesEnum.SINK,
             config=KafkaConnectorConfig(
                 **{
-                    "topics": "my-topic-1,my-topic-2",
                     "transforms": "regexRouter,timestampRouter",
                     "transforms.regexRouter.type": "org.apache.kafka.connect.transforms.RegexRouter",
                     "transforms.regexRouter.regex": "my-(.*)",
@@ -81,10 +78,51 @@ class TestElasticSearchSinkConnector:
                     "transforms.timestampRouter.timestamp.format": "yyyyMMdd",
                 }
             ),
+            topics=["my-topic-1", "my-topic-2"],
         )
 
-        indices = elastic_sink_connector.get_routes()
+        routes = connector.get_routes()
 
-        assert len(indices) == 2
-        assert "index-topic-1-${yyyyMMdd}" in indices
-        assert "index-topic-2-${yyyyMMdd}" in indices
+        assert len(routes) == 2
+        assert "index-topic-1-${yyyyMMdd}" in routes
+        assert "index-topic-2-${yyyyMMdd}" in routes
+
+    def test_unknown_transformer(self):
+        connector = KafkaConnector(
+            name="example-connector",
+            type=KafkaConnectorTypesEnum.SINK,
+            config=KafkaConnectorConfig(
+                **{
+                    "transforms": "fakeTransformer",
+                    "transforms.fakeTransformer.type": "org.apache.kafka.connect.transforms.FakeTransformer",
+                }
+            ),
+            topics=["my-topic-1", "my-topic-2"],
+        )
+
+        routes = connector.get_routes()
+
+        assert len(routes) == 2
+        assert "my-topic-1" in routes
+        assert "my-topic-2" in routes
+
+        connector = KafkaConnector(
+            name="example-connector",
+            type=KafkaConnectorTypesEnum.SINK,
+            config=KafkaConnectorConfig(
+                **{
+                    "transforms": "fakeTransformer,timestampRouter",
+                    "transforms.fakeTransformer.type": "org.apache.kafka.connect.transforms.FakeTransformer",
+                    "transforms.timestampRouter.type": "org.apache.kafka.connect.transforms.TimestampRouter",
+                    "transforms.timestampRouter.topic.format": "${topic}-${timestamp}",
+                    "transforms.timestampRouter.timestamp.format": "yyyyMMdd",
+                }
+            ),
+            topics=["my-topic-1", "my-topic-2"],
+        )
+
+        routes = connector.get_routes()
+
+        assert len(routes) == 2
+        assert "my-topic-1-${yyyyMMdd}" in routes
+        assert "my-topic-2-${yyyyMMdd}" in routes

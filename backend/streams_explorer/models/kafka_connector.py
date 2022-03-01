@@ -32,7 +32,9 @@ class KafkaConnector(BaseModel):
     type: KafkaConnectorTypesEnum
     config: KafkaConnectorConfig
     error_topic: Optional[str] = None
-    topics: List[str] = []  # Deprecated please override get_topics for your kafka connector.
+    topics: List[
+        str
+    ] = []  # Deprecated please override get_topics for your kafka connector.
 
     def get_topics(self) -> List[str]:
         """

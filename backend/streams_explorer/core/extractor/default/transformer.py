@@ -2,7 +2,7 @@ import re
 from abc import ABC, abstractmethod
 from typing import List, Literal, Optional, Pattern, Union
 
-from pydantic import BaseModel, Field, PrivateAttr
+from pydantic import BaseConfig, BaseModel, Extra, Field, PrivateAttr
 
 
 class RouterTransformerConfig(BaseModel, ABC):
@@ -57,4 +57,20 @@ class TimestampRouterTransformerConfig(RouterTransformerConfig):
         return transformed_topic
 
 
-TRANSFORMER = Union[RegexRouterTransformerConfig, TimestampRouterTransformerConfig]
+# Used as fallback for unknown transforms
+class GenericTransformerConfig(RouterTransformerConfig):
+    _type: str = Field(..., alias="type")
+
+    class Config(BaseConfig):
+        extra = Extra.allow
+
+    def transform_topic(self, topic: str) -> str:
+        return topic
+
+
+# Do not change order here. The fallback GenericTransformerConfig should always be the last element
+TRANSFORMER = Union[
+    RegexRouterTransformerConfig,
+    TimestampRouterTransformerConfig,
+    GenericTransformerConfig,
+]
