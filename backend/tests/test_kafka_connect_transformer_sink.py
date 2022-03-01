@@ -1,3 +1,8 @@
+from typing import Literal, Union
+
+from pydantic import Field
+
+from streams_explorer.core.extractor.default.transformer import RouterTransformerConfig
 from streams_explorer.models.kafka_connector import (
     KafkaConnector,
     KafkaConnectorConfig,
@@ -126,3 +131,33 @@ class TestTransformerKafkaConnect:
         assert len(routes) == 2
         assert "my-topic-1-${yyyyMMdd}" in routes
         assert "my-topic-2-${yyyyMMdd}" in routes
+
+    def test_custom_transformer(self):
+        # Used as fallback for unknown transforms
+        class CustomRouterTransformer(RouterTransformerConfig):
+            _type: Literal["org.fake.kafka.CustomRouterTransformer"] = Field(
+                ..., alias="type"
+            )
+
+            def transform_topic(self, topic: str) -> str:
+                return "example-topic"
+
+        class CustomKafkaConnectorTransformer(KafkaConnector):
+            _transformers = Union[
+                CustomRouterTransformer,
+            ]
+
+        connector = CustomKafkaConnectorTransformer(
+            name="example-connector",
+            type=KafkaConnectorTypesEnum.SINK,
+            config=KafkaConnectorConfig(
+                **{
+                    "transforms": "changeTopic",
+                    "transforms.changeTopic.type": "org.fake.kafka.CustomRouterTransformer",
+                }
+            ),
+            topics=["my-topic-1", "my-topic-2"],
+        )
+        routes = connector.get_routes()
+        assert len(routes) == 1
+        assert "example-topic" in routes
