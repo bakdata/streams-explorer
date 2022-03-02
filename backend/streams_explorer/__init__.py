@@ -1,2 +1,2 @@
 """Streams Explorer."""
-__version__ = "1.4.4"
+__version__ = "1.5.0"
