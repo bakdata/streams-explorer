@@ -1,3 +1,4 @@
+import re
 from typing import Dict, List, Optional, Set, Type
 
 import networkx as nx
@@ -30,6 +31,10 @@ class DataFlowGraph:
         self.json_pipelines: Dict[str, dict] = {}
         self.metric_provider_class = metric_provider
 
+        self._topic_pattern_queue: Dict[
+            str, Set[str]
+        ] = {}  # topic pattern -> list of target node ids
+
     async def store_json_graph(self):
         self.json_graph = await self.get_positioned_graph()
 
@@ -54,20 +59,25 @@ class DataFlowGraph:
             node_type=NodeTypesEnum.STREAMING_APP,
             **app.attributes,
         )
+
+        for input_topic in app.input_topics:
+            self._add_topic(graph, input_topic)
+            self._add_input_topic(graph, app.id, input_topic)
         if app.output_topic:
             self._add_topic(graph, app.output_topic)
             self._add_output_topic(graph, app.id, app.output_topic)
         if app.error_topic:
             self._add_error_topic(graph, app.id, app.error_topic)
-        for input_topic in app.input_topics:
-            self._add_topic(graph, input_topic)
-            self._add_input_topic(graph, app.id, input_topic)
+        if app.input_pattern:
+            self._enqueue_input_pattern(app.input_pattern, app.id)
         for extra_input in app.extra_input_topics:
             self._add_topic(graph, extra_input)
             self._add_input_topic(graph, app.id, extra_input)
         for extra_output in app.extra_output_topics:
             self._add_topic(graph, extra_output)
             self._add_output_topic(graph, app.id, extra_output)
+        for extra_pattern in app.extra_input_patterns:
+            self._enqueue_input_pattern(extra_pattern, app.id)
 
     def add_connector(self, connector: KafkaConnector, pipeline: Optional[str] = None):
         graph = self.graph
@@ -144,7 +154,7 @@ class DataFlowGraph:
 
     def get_node_type(self, id: str) -> str:
         try:
-            return self.graph.nodes[id].get("node_type")
+            return DataFlowGraph.__get_node_topic(self.graph.nodes[id])
         except KeyError:
             raise NodeNotFound()
 
@@ -171,6 +181,19 @@ class DataFlowGraph:
         graph.add_node(name, label=name, node_type=NodeTypesEnum.TOPIC)
 
     @staticmethod
+    def _get_topic_node_ids(graph: nx.DiGraph) -> List[str]:
+        return [
+            node_id
+            for node_id, data in graph.nodes(data=True)
+            if DataFlowGraph.__get_node_topic(data) == NodeTypesEnum.TOPIC
+            or DataFlowGraph.__get_node_topic(data) == NodeTypesEnum.ERROR_TOPIC
+        ]
+
+    @staticmethod
+    def __get_node_topic(node_data: Dict):
+        return node_data.get("node_type")
+
+    @staticmethod
     def _add_input_topic(graph: nx.DiGraph, app_id: str, topic_name: str):
         graph.add_edge(topic_name, app_id)
 
@@ -182,6 +205,57 @@ class DataFlowGraph:
     ):
         self._add_topic(graph, topic_name)
         graph.add_edge(app_id, topic_name)
+
+    def _enqueue_input_pattern(self, pattern: str, node_id: str):
+        """
+        Enqueue a input topic pattern for an app or Kafka Connector
+        """
+        node_ids = self._topic_pattern_queue.get(pattern, set())
+        node_ids.add(node_id)
+        self._topic_pattern_queue[pattern] = node_ids
+
+    def apply_input_pattern_edges(self):
+        topics = DataFlowGraph._get_topic_node_ids(self.graph)
+        for pattern, node_ids in self._topic_pattern_queue.items():
+            rx = re.compile(pattern=pattern)
+            matched_topics = list(filter(rx.match, topics))
+            for node_id in node_ids:  # node_id can be an app or a kafka connector
+                pipeline = self.graph.nodes[node_id].get(ATTR_PIPELINE)
+                for matched_topic in matched_topics:
+                    if pipeline is not None:
+                        self.resolve_topic_pattern_in_pipeline(
+                            matched_topic, node_id, pipeline, pattern
+                        )
+                    self.resolve_topic_pattern_in_all_graph(
+                        matched_topic, node_id, pattern
+                    )
+
+    def resolve_topic_pattern_in_all_graph(
+        self, matched_topic: str, node_id: str, pattern: str
+    ):
+        # resolve topic pattern in overall graph containing all pipelines
+        if settings.graph.resolve.input_pattern_topics.all:
+            # connect topic to graph
+            self.graph.add_edge(matched_topic, node_id)
+        else:
+            self.add_pattern_as_topic(self.graph, node_id, pattern)
+
+    def add_pattern_as_topic(self, graph: nx.DiGraph, node_id: str, pattern: str):
+        # visualize the pattern as topic
+        self._add_topic(graph, pattern)
+        graph.add_edge(pattern, node_id)
+
+    def resolve_topic_pattern_in_pipeline(
+        self, matched_topic: str, node_id: str, pipeline: str, pattern: str
+    ):
+        # resolve topic patterns in pipelines
+        if settings.graph.resolve.input_pattern_topics.pipelines:
+            if matched_topic not in self.pipelines[pipeline].nodes:
+                node = self.graph.nodes[matched_topic]
+                self.pipelines[pipeline].add_node(matched_topic, **node)
+            self.pipelines[pipeline].add_edge(matched_topic, node_id)
+        else:
+            self.add_pattern_as_topic(self.pipelines[pipeline], node_id, pattern)
 
     @staticmethod
     def _add_error_topic(

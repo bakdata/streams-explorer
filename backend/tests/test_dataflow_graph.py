@@ -63,6 +63,131 @@ class TestDataFlowGraph:
         assert df.graph.has_edge("test-app", "extra-output1")
         assert df.graph.has_edge("test-app", "extra-output2")
 
+    def test_resolve_input_pattern(self, df: DataFlowGraph):
+        df.add_streaming_app(
+            K8sApp.factory(
+                get_streaming_app_deployment(error_topic="fake-dead-letter-topic")
+            )
+        )
+
+        assert len(df.graph.nodes) == 4
+
+        settings.graph.resolve.input_pattern_topics.all = True
+        df.add_streaming_app(
+            K8sApp.factory(
+                get_streaming_app_deployment(
+                    name="test-app2",
+                    input_topics=None,
+                    output_topic="output-topic2",
+                    error_topic="fake2-dead-letter-topic",
+                    input_pattern=".*-dead-letter-topic",
+                )
+            )
+        )
+        df.apply_input_pattern_edges()
+        assert len(df.graph.nodes) == 7
+        assert df.graph.has_edge("fake-dead-letter-topic", "test-app2")
+        assert df.graph.has_edge(
+            "fake2-dead-letter-topic", "test-app2"
+        ), "Should match on app's own error topic"
+        assert df.graph.has_edge("test-app2", "output-topic2")
+        assert df.graph.has_edge("test-app2", "fake2-dead-letter-topic")
+
+    def test_no_resolve_input_pattern(self, df: DataFlowGraph):
+        df.add_streaming_app(
+            K8sApp.factory(
+                get_streaming_app_deployment(error_topic="fake-dead-letter-topic")
+            )
+        )
+
+        assert len(df.graph.nodes) == 4
+
+        settings.graph.resolve.input_pattern_topics.all = False
+        df.add_streaming_app(
+            K8sApp.factory(
+                get_streaming_app_deployment(
+                    name="test-app2",
+                    input_topics=None,
+                    output_topic="output-topic2",
+                    error_topic="fake2-dead-letter-topic",
+                    input_pattern=".*-dead-letter-topic",
+                )
+            )
+        )
+        df.apply_input_pattern_edges()
+        assert len(df.graph.nodes) == 8
+        assert df.graph.has_edge(".*-dead-letter-topic", "test-app2")
+        assert not df.graph.has_edge("fake2-dead-letter-topic", "test-app2")
+        assert df.graph.has_edge("test-app2", "output-topic2")
+        assert df.graph.has_edge("test-app2", "fake2-dead-letter-topic")
+
+    def test_resolve_extra_input_patterns(self, df: DataFlowGraph):
+        df.add_streaming_app(
+            K8sApp.factory(
+                get_streaming_app_deployment(
+                    multiple_outputs="out=output-non-match-topic",
+                    error_topic="fake-dead-letter-topic",
+                )
+            )
+        )
+
+        assert len(df.graph.nodes) == 5
+        assert df.graph.has_edge("input-topic", "test-app")
+        assert df.graph.has_edge("test-app", "output-topic")
+        assert df.graph.has_edge("test-app", "fake-dead-letter-topic")
+
+        settings.graph.resolve.input_pattern_topics.all = True
+        df.add_streaming_app(
+            K8sApp.factory(
+                get_streaming_app_deployment(
+                    name="test-app2",
+                    input_topics="output-topic",
+                    output_topic="another-topic",
+                    error_topic="fake2-dead-letter-topic",
+                    extra={
+                        "EXTRA_INPUT_PATTERNS": "fake1=.*-dead-letter-topic,fake2=.*-output-topic"
+                    },
+                )
+            )
+        )
+        df.apply_input_pattern_edges()
+        assert len(df.graph.nodes) == 8
+        assert df.graph.has_edge("fake-dead-letter-topic", "test-app2")
+        assert df.graph.has_edge(
+            "fake2-dead-letter-topic", "test-app2"
+        ), "Should match on app's own error topic"
+        assert not df.graph.has_edge("another-topic", "test-app2")
+        assert df.graph.has_edge("fake-dead-letter-topic", "test-app2")
+
+    def test_no_resolve_extra_input_patterns(self, df: DataFlowGraph):
+        settings.graph.resolve.input_pattern_topics.all = False
+        df.add_streaming_app(
+            K8sApp.factory(
+                get_streaming_app_deployment(
+                    multiple_outputs="out=output-non-match-topic",
+                    error_topic="fake-dead-letter-topic",
+                )
+            )
+        )
+
+        df.add_streaming_app(
+            K8sApp.factory(
+                get_streaming_app_deployment(
+                    name="test-app2",
+                    input_topics="output-topic",
+                    output_topic="output-topic2",
+                    error_topic="fake2-dead-letter-topic",
+                    extra={
+                        "EXTRA_INPUT_PATTERNS": "fake1=.*-dead-letter-topic,fake2=.*output-topic"
+                    },
+                )
+            )
+        )
+        df.apply_input_pattern_edges()
+        assert len(df.graph.nodes) == 10
+        assert df.graph.has_edge(".*-dead-letter-topic", "test-app2")
+        assert df.graph.has_edge(".*output-topic", "test-app2")
+
     def test_add_connector(self, df: DataFlowGraph):
         sink_connector = KafkaConnector(
             name="test-sink-connector",

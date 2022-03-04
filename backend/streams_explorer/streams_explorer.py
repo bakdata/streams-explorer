@@ -221,3 +221,5 @@ class StreamsExplorer:
 
         for sink in sinks:
             self.data_flow.add_sink(sink)
+
+        self.data_flow.apply_input_pattern_edges()

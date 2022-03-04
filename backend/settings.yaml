@@ -3,6 +3,12 @@ graph:
   update_interval: 300
   layout_arguments: "-Grankdir=LR -Gnodesep=0.8 -Gpad=10"
   pipeline_distance: 500
+  resolve:
+    input_pattern_topics:
+      # If true input pattern (extra) topics are connected to the streaming app in the graph containing all pipelines
+      all: false
+      # If true input pattern (extra) topics are connected to the streaming app in pipeline graphs
+      pipelines: false
 
 k8s:
   deployment:
