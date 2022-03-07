@@ -487,3 +487,34 @@ export type UseGetMetricsApiMetricsGetProps = Omit<
 export const useGetMetricsApiMetricsGet = (
   props: UseGetMetricsApiMetricsGetProps
 ) => useGet<Metric[], unknown, void, void>(`/api/metrics`, props);
+
+export interface VersionApiVersionGetResponse {}
+
+export type VersionApiVersionGetProps = Omit<
+  GetProps<VersionApiVersionGetResponse, unknown, void, void>,
+  "path"
+>;
+
+/**
+ * Version
+ */
+export const VersionApiVersionGet = (props: VersionApiVersionGetProps) => (
+  <Get<VersionApiVersionGetResponse, unknown, void, void>
+    path={`/api/version`}
+    {...props}
+  />
+);
+
+export type UseVersionApiVersionGetProps = Omit<
+  UseGetProps<VersionApiVersionGetResponse, unknown, void, void>,
+  "path"
+>;
+
+/**
+ * Version
+ */
+export const useVersionApiVersionGet = (props: UseVersionApiVersionGetProps) =>
+  useGet<VersionApiVersionGetResponse, unknown, void, void>(
+    `/api/version`,
+    props
+  );

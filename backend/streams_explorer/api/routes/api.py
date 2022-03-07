@@ -7,6 +7,7 @@ from streams_explorer.api.routes import (
     node,
     pipelines,
     update,
+    version,
 )
 
 router = APIRouter()
@@ -17,3 +18,4 @@ router.include_router(pipelines.router, prefix="/pipelines")
 router.include_router(node.router, prefix="/node")
 router.include_router(metrics.router, prefix="/metrics")
 router.include_router(kubernetes_health.router, prefix="/health")
+router.include_router(version.router, prefix="/version")
