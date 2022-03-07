@@ -1,7 +1,8 @@
-import style from "./Settings.module.css";
-import React, { useState, useEffect } from "react";
-import { Modal, Button, Tooltip, Switch, Row, Col } from "antd";
 import { SettingOutlined } from "@ant-design/icons";
+import { Button, Col, Modal, Row, Switch, Tooltip } from "antd";
+import React, { useEffect, useState } from "react";
+import { useVersionApiVersionGet } from "./api/fetchers";
+import style from "./Settings.module.css";
 
 const ANIMATE = "animate";
 
@@ -12,6 +13,7 @@ interface SettingsProps {
 
 const Settings = ({ animate, setAnimate }: SettingsProps) => {
   const [visible, setVisible] = useState(false);
+  const { data: version } = useVersionApiVersionGet({});
 
   // on initial page load
   useEffect(() => {
@@ -38,8 +40,9 @@ const Settings = ({ animate, setAnimate }: SettingsProps) => {
       </Tooltip>
       <Modal
         title="Settings"
+        centered
         visible={visible}
-        footer={null}
+        footer={<p className={style.version}>Streams Explorer {version}</p>}
         onCancel={() => setVisible(false)}
       >
         <Row>

@@ -2,3 +2,8 @@
   font-weight: bold;
   padding-right: 16px;
 }
+
+.version {
+  color: #383838;
+  margin: 0.5em;
+}
