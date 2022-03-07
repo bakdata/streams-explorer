@@ -27,9 +27,3 @@ class Extractor:
 
     def on_cron_job_parsing(self, cron_job: V1beta1CronJob) -> Optional[K8sAppCronJob]:
         ...
-
-    @staticmethod
-    def split_topics(topics: Optional[str]) -> List[str]:
-        if topics:
-            return topics.replace(" ", "").split(",")
-        return []

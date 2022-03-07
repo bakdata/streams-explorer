@@ -31,7 +31,5 @@ class S3Sink(Extractor):
                 name=connector_name,
                 config=config,
                 type=KafkaConnectorTypesEnum.SINK,
-                topics=Extractor.split_topics(config.get("topics")),
-                error_topic=config.get("errors.deadletterqueue.topic.name"),
             )
         return None
