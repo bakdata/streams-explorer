@@ -1,3 +1,4 @@
+# bakdata/streams-explorer
 # build stage 1: frontend
 FROM node:16 AS frontend
 
