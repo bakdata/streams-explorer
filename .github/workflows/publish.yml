@@ -7,6 +7,7 @@ on:
 jobs:
   pypi:
     name: PyPI
+    needs: [backend, frontend, docker]
     runs-on: ubuntu-latest
     env:
       BACKEND_DIR: ./backend
