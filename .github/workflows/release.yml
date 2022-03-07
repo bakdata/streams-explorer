@@ -3,7 +3,7 @@ name: Release
 on:
   workflow_dispatch:
     inputs:
-      releaseType:
+      release-type:
         description: "The type of the release."
         default: "patch"
         required: false
@@ -13,6 +13,8 @@ jobs:
     name: Bump version
     needs: [backend, frontend, docker]
     runs-on: ubuntu-latest
+    env:
+      BACKEND_DIR: ./backend
     steps:
       - uses: actions/checkout@v2
         with:
@@ -24,50 +26,22 @@ jobs:
           path: "ci-templates"
 
       - name: Bump version
-        uses: ./ci-templates/bump-version
+        id: bump-version
+        uses: ./ci-templates/actions/python-poetry-bump-version
         with:
-          githubToken: "${{ secrets.GH_TOKEN }}"
-          githubUsername: "${{ secrets.GH_USERNAME }}"
-          githubEmail: "${{ secrets.GH_EMAIL }}"
-          releaseType: "${{ github.event.inputs.releaseType }}"
-
-  pypi:
-    name: Publish PyPI
-    needs: [bump-version]
-    runs-on: ubuntu-latest
-    env:
-      BACKEND_DIR: ./backend
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Copy Readme
-        run: |
-          cp README.md $BACKEND_DIR/
-          git add $BACKEND_DIR/README.md
-          sed -E -i.bak 's/\.\.\/README/README/' $BACKEND_DIR/pyproject.toml
-
-      - name: Install packages
-        run: sudo apt-get -y install python3-dev graphviz libgraphviz-dev pkg-config python3-wheel
-
-      - name: Release to TestPyPI
-        uses: ./ci-templates/actions/python-poetry-release
-        with:
+          release-type: "${{ github.event.inputs.release-type }}"
           working-directory: ${{ env.BACKEND_DIR }}
-          pypi-token: ${{ secrets.TEST_PYPI_TOKEN }}
-          publish-to-test: "true"
-
-      - name: Release to PyPI
-        uses: ./ci-templates/actions/python-poetry-release
-        with:
-          working-directory: ${{ env.BACKEND_DIR }}
-          pypi-token: ${{ secrets.PYPI_TOKEN }}
-          publish-to-test: "false"
 
       - name: Commit and push pyproject.toml file
         uses: ./ci-templates/actions/commit-and-push
         with:
           ref: ${{ inputs.ref }}
-          commit-message: "Bump version ${{ steps.release-tag.outputs.old-tag }} → ${{ steps.release-tag.outputs.release-tag }}"
+          commit-message: "Bump version ${{ steps.bump-version.outputs.old-tag }} → ${{ steps.bump-version.outputs.release-tag }}"
           github-username: ${{ secrets.github-username }}
           github-email: ${{ secrets.github-email }}
           github-token: ${{ secrets.github-token }}
+
+      - name: Create and push tag
+        run: |
+          git tag ${{ steps.bump-version.outputs.release-tag }}
+          git push origin ${{ steps.bump-version.outputs.release-tag }}
