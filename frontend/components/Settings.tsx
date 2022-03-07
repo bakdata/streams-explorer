@@ -42,7 +42,15 @@ const Settings = ({ animate, setAnimate }: SettingsProps) => {
         title="Settings"
         centered
         visible={visible}
-        footer={<p className={style.version}>Streams Explorer {version}</p>}
+        footer={
+          version ? (
+            <p className={style.version} data-testid="version">
+              Streams Explorer {version}
+            </p>
+          ) : (
+            "unknown"
+          )
+        }
         onCancel={() => setVisible(false)}
       >
         <Row>
