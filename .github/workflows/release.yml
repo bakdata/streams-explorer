@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       release-type:
-        description: "The type of the release."
+        description: "Scope of the release; See: https://python-poetry.org/docs/cli/#version"
         default: "patch"
         required: false
 
