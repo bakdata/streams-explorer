@@ -11,22 +11,15 @@ COPY ./frontend /build
 RUN npm run build
 
 # build stage 2: backend
-FROM python:3.9-slim
-
-RUN apt-get -y update && \
-    apt-get --no-install-recommends -y install gcc python3-dev graphviz libgraphviz-dev pkg-config && \
-    rm -rf /var/lib/apt/lists/*
+FROM bakdata/streams-explorer-base
 
 WORKDIR /app
-
 COPY ./backend/pyproject.toml ./backend/poetry.lock /app/
 ENV PIP_NO_CACHE_DIR=1
 RUN pip install -U pip poetry && \
     poetry config virtualenvs.create false && \
     poetry install --no-dev --no-interaction
 COPY ./backend /app
-
-RUN apt-get -y purge --auto-remove -o APT::AutoRemove::RecommendsImportant=false
 
 COPY --from=frontend /build/out /app/static
 
