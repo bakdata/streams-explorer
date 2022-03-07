@@ -43,5 +43,5 @@ jobs:
 
       - name: Create and push tag
         run: |
-          git tag ${{ steps.bump-version.outputs.release-tag }}
-          git push origin ${{ steps.bump-version.outputs.release-tag }}
+          git tag v${{ steps.bump-version.outputs.release-tag }}
+          git push origin v${{ steps.bump-version.outputs.release-tag }}
