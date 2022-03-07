@@ -83,6 +83,7 @@ class TestApplication:
                 "config": {
                     "connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
                     "topics": "output-topic3",
+                    "transforms": "changeTopic",
                     "transforms.changeTopic.replacement": "test-index",
                 },
                 "type": "sink",

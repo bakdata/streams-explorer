@@ -114,6 +114,10 @@ class TestStreamsExplorer:
                         "connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
                         "test": "test_value",
                         "topics": "output-topic1,output-topic2",
+                        "transforms": "changeTopic",
+                        "transforms.changeTopic.type": "org.apache.kafka.connect.transforms.RegexRouter",
+                        "transforms.changeTopic.regex": ".*",
+                        "transforms.changeTopic.replacement": "fake-index",
                         "errors.deadletterqueue.topic.name": "es-sink-connector-dead-letter-topic",
                     },
                     "type": KafkaConnectorTypesEnum.SINK,
@@ -392,8 +396,8 @@ class TestStreamsExplorer:
         await streams_explorer.update()
         json_graph = streams_explorer.data_flow.json_graph
         assert json_graph
-        assert len(json_graph["nodes"]) == 15
-        assert len(json_graph["edges"]) == 12
+        assert len(json_graph["nodes"]) == 16
+        assert len(json_graph["edges"]) == 13
 
         streams_explorer.data_flow.reset()
         assert not streams_explorer.data_flow.json_graph
