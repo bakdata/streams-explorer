@@ -26,7 +26,7 @@ jobs:
         run: sudo apt-get -y install python3-dev graphviz libgraphviz-dev pkg-config python3-wheel
 
       - name: Set up Poetry ${{ env.poetry-version }}
-        uses: bakdata/ci-templates/actions/python-setup-poetry@v1
+        uses: bakdata/ci-templates/actions/python-setup-poetry@main
         with:
           python-version: ${{ matrix.python-version }}
           poetry-version: ${{ env.poetry-version }}
