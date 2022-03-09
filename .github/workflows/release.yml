@@ -20,20 +20,15 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: actions/checkout@v3
-        with:
-          repository: "bakdata/ci-templates"
-          path: "ci-templates"
-
       - name: Bump version
         id: bump-version
-        uses: ./ci-templates/actions/python-poetry-bump-version
+        uses: bakdata/ci-templates/actions/python-poetry-bump-version@v1
         with:
           release-type: "${{ github.event.inputs.release-type }}"
           working-directory: ${{ env.BACKEND_DIR }}
 
       - name: Commit and push pyproject.toml file
-        uses: ./ci-templates/actions/commit-and-push
+        uses: bakdata/ci-templates/actions/commit-and-push@v1
         with:
           ref: ${{ inputs.ref }}
           commit-message: "Bump version ${{ steps.bump-version.outputs.old-tag }} → ${{ steps.bump-version.outputs.release-tag }}"

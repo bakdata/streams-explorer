@@ -24,14 +24,14 @@ jobs:
         run: sudo apt-get -y install python3-dev graphviz libgraphviz-dev pkg-config python3-wheel
 
       - name: Release to TestPyPI
-        uses: ./ci-templates/actions/python-poetry-release
+        uses: bakdata/ci-templates/actions/python-poetry-release@v1
         with:
           working-directory: ${{ env.BACKEND_DIR }}
           pypi-token: ${{ secrets.TEST_PYPI_TOKEN }}
           publish-to-test: "true"
 
       - name: Release to PyPI
-        uses: ./ci-templates/actions/python-poetry-release
+        uses: bakdata/ci-templates/actions/python-poetry-release@v1
         with:
           working-directory: ${{ env.BACKEND_DIR }}
           pypi-token: ${{ secrets.PYPI_TOKEN }}
