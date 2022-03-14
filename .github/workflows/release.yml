@@ -30,9 +30,9 @@ jobs:
         uses: bakdata/ci-templates/actions/commit-and-push@v1.0.0
         with:
           commit-message: "Bump version ${{ steps.bump-version.outputs.old-tag }} → ${{ steps.bump-version.outputs.release-tag }}"
-          github-username: ${{ secrets.github-username }}
-          github-email: ${{ secrets.github-email }}
-          github-token: ${{ secrets.github-token }}
+          github-username: ${{ secrets.GH_USERNAME }}
+          github-email: ${{ secrets.GH_EMAIL }}
+          github-token: ${{ secrets.GH_TOKEN }}
 
       - name: Create and push tag
         run: |
