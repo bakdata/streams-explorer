@@ -101,7 +101,6 @@ jobs:
   docker:
     name: Docker
     needs: [backend, frontend]
-    if: success()
     runs-on: ubuntu-latest
     env:
       image: bakdata/streams-explorer
