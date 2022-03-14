@@ -4,10 +4,15 @@ on:
   push:
     tags: ["v[0-9]+.[0-9]+.[0-9]+"]
 
+  # trigger after main CI pipeline is complete
+  # workflow_run:
+  #   workflows: ["CI"]
+  #   types:
+  #     - completed
+
 jobs:
   pypi:
     name: PyPI
-    needs: [backend, frontend, docker]
     runs-on: ubuntu-latest
     env:
       BACKEND_DIR: ./backend

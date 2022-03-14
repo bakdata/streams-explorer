@@ -11,7 +11,6 @@ on:
 jobs:
   bump-version:
     name: Bump version
-    needs: [backend, frontend, docker]
     runs-on: ubuntu-latest
     env:
       BACKEND_DIR: ./backend
