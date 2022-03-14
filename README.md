@@ -130,7 +130,7 @@ The following configuration options are available:
 - `kafka.enable` Enable Kafka (bool, default: `false`)
 - `kafka.config` librdkafka configuration properties ([reference](https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md)) (dict, default: `{"bootstrap.servers": "localhost:9092"}`)
 - `kafka.displayed_information` Configuration options of Kafka topics displayed in the frontend (list of dict)
-- `kafka.topic_names_cache.ttl` Cache for retrieving all topic names (used when input topic patterns are resolved) (int, default: 3600)
+- `kafka.topic_names_cache.ttl` Cache for retrieving all topic names (used when input topic patterns are resolved) (int, default: `3600`)
 
 #### Kafka Connect
 
