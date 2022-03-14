@@ -18,6 +18,9 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ["3.8", "3.9"]
+    defaults:
+      run:
+        working-directory: ${{ env.working-directory }}
 
     steps:
       - uses: actions/checkout@v3
@@ -34,27 +37,21 @@ jobs:
 
       - name: Install dependencies
         run: poetry install --no-interaction
-        working-directory: ${{ env.working-directory }}
 
       - name: Lint (flake8)
         run: poetry run pre-commit run flake8 --all-files --show-diff-on-failure
-        working-directory: ${{ env.working-directory }}
 
       - name: Order of imports (isort)
         run: poetry run pre-commit run isort --all-files --show-diff-on-failure
-        working-directory: ${{ env.working-directory }}
 
       - name: Formatting (black)
         run: poetry run pre-commit run black --all-files --show-diff-on-failure
-        working-directory: ${{ env.working-directory }}
 
       - name: Typing (mypy)
         run: poetry run pre-commit run mypy --all-files
-        working-directory: ${{ env.working-directory }}
 
       - name: Test
         run: poetry run pytest tests
-        working-directory: ${{ env.working-directory }}
 
   frontend:
     name: Frontend
@@ -65,6 +62,9 @@ jobs:
       fail-fast: false
       matrix:
         node-version: ["16"]
+    defaults:
+      run:
+        working-directory: ${{ env.working-directory }}
 
     steps:
       - uses: actions/checkout@v3
@@ -77,11 +77,9 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
-        working-directory: ${{ env.working-directory }}
 
       - name: Lint
         run: npm run lint
-        working-directory: ${{ env.working-directory }}
 
       - name: Set up Python
         uses: actions/setup-python@v2
@@ -93,15 +91,12 @@ jobs:
 
       - name: Formatting (prettier)
         run: pre-commit run prettier --all-files
-        working-directory: ${{ env.working-directory }}
 
       - name: Fetchers
         run: pre-commit run generate-fetchers --all-files
-        working-directory: ${{ env.working-directory }}
 
       - name: Run Tests
         run: npm run test:ci
-        working-directory: ${{ env.working-directory }}
 
   docker:
     name: Docker
