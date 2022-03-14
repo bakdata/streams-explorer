@@ -172,7 +172,7 @@ class DataFlowGraph:
 
     def get_node_type(self, id: str) -> str:
         try:
-            return self.graph.nodes[id].get(NodeDataFields.NODE_TYPE)
+            return self.graph.nodes[id][NodeDataFields.NODE_TYPE]
         except KeyError:
             raise NodeNotFound()
 
@@ -200,14 +200,12 @@ class DataFlowGraph:
 
     @staticmethod
     def _filter_topic_node_ids(graph: nx.DiGraph) -> Set[str]:
-        return set(
-            [
-                node_id
-                for node_id, data in graph.nodes(data=True)
-                if data.get(NodeDataFields.NODE_TYPE) == NodeTypesEnum.TOPIC
-                or data.get(NodeDataFields.NODE_TYPE) == NodeTypesEnum.ERROR_TOPIC
-            ]
-        )
+        return {
+            node_id
+            for node_id, data in graph.nodes(data=True)
+            if data.get(NodeDataFields.NODE_TYPE) == NodeTypesEnum.TOPIC
+            or data.get(NodeDataFields.NODE_TYPE) == NodeTypesEnum.ERROR_TOPIC
+        }
 
     @staticmethod
     def _add_input_topic(graph: nx.DiGraph, app_id: str, topic_name: str):

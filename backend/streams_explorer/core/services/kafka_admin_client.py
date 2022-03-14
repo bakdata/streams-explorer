@@ -56,8 +56,7 @@ class KafkaAdminClient:
 
     @ttl_cache(maxsize=1, ttl=settings.kafka.topic_names_cache.ttl)
     def get_all_topic_names(self) -> Set[str]:
-        s = set(self._client.list_topics().topics.keys())
-        return s
+        return set(self._client.list_topics().topics.keys())
 
     @staticmethod
     def format_values(values: List[ConfigEntry]) -> Dict[str, Any]:
