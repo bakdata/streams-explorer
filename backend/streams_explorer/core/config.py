@@ -39,6 +39,7 @@ settings: Any = Dynaconf(
             )
         ),
         Validator("kafka.displayed_information", is_type_of=list, default=[]),
+        Validator("kafka.topic_names_cache.ttl", is_type_of=int, default=3600),
         Validator("node_info.cache_ttl", must_exist=True, is_type_of=int),
         Validator("kafkaconnect.url", default=None),
         Validator("kafkaconnect.displayed_information", is_type_of=list, default=[]),

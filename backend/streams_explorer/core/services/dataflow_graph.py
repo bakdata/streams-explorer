@@ -199,7 +199,7 @@ class DataFlowGraph:
         graph.add_node(name, label=name, node_type=NodeTypesEnum.TOPIC)
 
     @staticmethod
-    def _get_topic_node_ids(graph: nx.DiGraph) -> Set[str]:
+    def _filter_topics_node_ids(graph: nx.DiGraph) -> Set[str]:
         return set(
             [
                 node_id
@@ -231,7 +231,7 @@ class DataFlowGraph:
         self._topic_pattern_queue[pattern] = node_ids
 
     def apply_input_pattern_edges(self):
-        topics = DataFlowGraph._get_topic_node_ids(self.graph)
+        topics = DataFlowGraph._filter_topics_node_ids(self.graph)
         kafka_topics = self.kafka.get_all_topic_names() if self.kafka.enabled else set()
         for pattern, node_ids in self._topic_pattern_queue.items():
             regex = re.compile(pattern=pattern)

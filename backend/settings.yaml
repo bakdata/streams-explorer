@@ -41,7 +41,7 @@ kafka:
   displayed_information:
     - name: "Cleanup Policy"
       key: "cleanup.policy"
-  # ttl and max size for topic information (used when input topic patterns get resolved)
+  # cache for retrieving all topic names (used when input topic patterns are resolved)
   topic_names_cache:
     ttl: 3600
 

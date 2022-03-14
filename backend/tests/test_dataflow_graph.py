@@ -1,4 +1,4 @@
-from collections import Set
+from typing import Set
 
 import pytest
 
@@ -174,9 +174,7 @@ class TestDataFlowGraph:
                     input_topics="output-topic",
                     output_topic="another-topic",
                     error_topic="fake2-dead-letter-topic",
-                    extra={
-                        "EXTRA_INPUT_PATTERNS": "fake1=.*-dead-letter-topic,fake2=.*-output-topic"
-                    },
+                    extra_input_patterns="fake1=.*-dead-letter-topic,fake2=.*-output-topic",
                 )
             )
         )
@@ -207,9 +205,7 @@ class TestDataFlowGraph:
                     input_topics="output-topic",
                     output_topic="output-topic2",
                     error_topic="fake2-dead-letter-topic",
-                    extra={
-                        "EXTRA_INPUT_PATTERNS": "fake1=.*-dead-letter-topic,fake2=.*output-topic"
-                    },
+                    extra_input_patterns="fake1=.*-dead-letter-topic,fake2=.*output-topic",
                 )
             )
         )
