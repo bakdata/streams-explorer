@@ -234,7 +234,7 @@ class DataFlowGraph:
         topics = DataFlowGraph._filter_topic_node_ids(self.graph)
         kafka_topics = self.kafka.get_all_topic_names() if self.kafka.enabled else set()
         for pattern, node_ids in self._topic_pattern_queue.items():
-            regex = re.compile(pattern=pattern)
+            regex = re.compile(pattern)
             matching_graph_known_topics = set(filter(regex.match, topics))
             # for unknown topics (unkown means not already present in the graph)
             # in the graph we have to create the topic node
