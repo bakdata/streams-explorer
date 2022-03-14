@@ -226,9 +226,7 @@ class DataFlowGraph:
         """
         Enqueue a input topic pattern for an app or Kafka Connector
         """
-        node_ids = self._topic_pattern_queue[pattern]
-        node_ids.add(node_id)
-        self._topic_pattern_queue[pattern] = node_ids
+        self._topic_pattern_queue[pattern].add(node_id)
 
     def apply_input_pattern_edges(self):
         topics = DataFlowGraph._filter_topic_node_ids(self.graph)
