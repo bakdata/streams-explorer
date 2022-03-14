@@ -144,7 +144,7 @@ class DataFlowGraph:
 
     def get_node_type(self, id: str) -> str:
         try:
-            return self.graph.nodes[id].get("node_type")
+            return self.graph.nodes[id]["node_type"]
         except KeyError:
             raise NodeNotFound()
 
