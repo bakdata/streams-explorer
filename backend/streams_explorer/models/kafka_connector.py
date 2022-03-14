@@ -79,7 +79,7 @@ class KafkaConnector(BaseModel):
             routes = self.apply_transformer(routes, transformer_name)
         return list(set(routes))
 
-    def apply_transformer(self, indices, transformer_name) -> List[str]:
+    def apply_transformer(self, indices: List[str], transformer_name: str) -> List[str]:
         transformer_prefix = KafkaConnector.get_transformer_prefix(transformer_name)
         # transformer config without transformer_prefix
         transformer_config = {
