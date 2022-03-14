@@ -1,8 +1,11 @@
+from collections import Set
+
 import pytest
 
 from streams_explorer.core.config import settings
 from streams_explorer.core.k8s_app import ATTR_PIPELINE, K8sApp
 from streams_explorer.core.services.dataflow_graph import DataFlowGraph
+from streams_explorer.core.services.kafka_admin_client import KafkaAdminClient
 from streams_explorer.core.services.metric_providers import MetricProvider
 from streams_explorer.models.kafka_connector import (
     KafkaConnector,
@@ -19,7 +22,7 @@ settings.k8s.pipeline.label = "pipeline"
 class TestDataFlowGraph:
     @pytest.fixture()
     def df(self) -> DataFlowGraph:
-        return DataFlowGraph(metric_provider=MetricProvider)
+        return DataFlowGraph(metric_provider=MetricProvider, kafka=KafkaAdminClient())
 
     @pytest.mark.asyncio
     async def test_positioned_pipeline_graph_not_found(self, df: DataFlowGraph):
@@ -92,6 +95,33 @@ class TestDataFlowGraph:
         ), "Should match on app's own error topic"
         assert df.graph.has_edge("test-app2", "output-topic2")
         assert df.graph.has_edge("test-app2", "fake2-dead-letter-topic")
+
+    def test_resolve_input_patterns_for_topics_in_kafka(self, monkeypatch):
+        kafka = KafkaAdminClient()
+        kafka._enabled = True
+
+        def get_all_topic_names() -> Set[str]:
+            return {"another-dead-letter-topic"}
+
+        monkeypatch.setattr(kafka, "get_all_topic_names", get_all_topic_names)
+        df = DataFlowGraph(metric_provider=MetricProvider, kafka=kafka)
+
+        settings.graph.resolve.input_pattern_topics.all = True
+        df.add_streaming_app(
+            K8sApp.factory(
+                get_streaming_app_deployment(
+                    name="test-app2",
+                    input_topics=None,
+                    output_topic="output-topic2",
+                    error_topic="fake2-dead-letter-topic",
+                    input_pattern=".*-dead-letter-topic",
+                )
+            )
+        )
+        df.apply_input_pattern_edges()
+        assert len(df.graph.nodes) == 4
+        assert df.graph.has_edge("another-dead-letter-topic", "test-app2")
+        assert df.graph.has_node("another-dead-letter-topic")
 
     def test_no_resolve_input_pattern(self, df: DataFlowGraph):
         df.add_streaming_app(

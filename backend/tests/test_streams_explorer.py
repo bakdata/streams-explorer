@@ -156,11 +156,11 @@ class TestStreamsExplorer:
             lambda config: config,
         )
         mocker.patch(
-            "streams_explorer.core.services.kafka.Kafka.get_topic_config",
+            "streams_explorer.core.services.kafka_admin_client.KafkaAdminClient.get_topic_config",
             get_topic_config,
         )
         mocker.patch(
-            "streams_explorer.core.services.kafka.Kafka.get_topic_partitions",
+            "streams_explorer.core.services.kafka_admin_client.KafkaAdminClient.get_topic_partitions",
             get_topic_partitions,
         )
 

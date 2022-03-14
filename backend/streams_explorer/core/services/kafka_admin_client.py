@@ -1,6 +1,7 @@
 import concurrent.futures
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Set
 
+from cachetools.func import ttl_cache
 from confluent_kafka.admin import (
     AdminClient,
     ConfigEntry,
@@ -12,7 +13,7 @@ from confluent_kafka.admin import (
 from streams_explorer.core.config import settings
 
 
-class Kafka:
+class KafkaAdminClient:
     def __init__(self):
         self._enabled: bool = settings.kafka.enable
         self._client: AdminClient
@@ -52,6 +53,11 @@ class Kafka:
         if metadata is None:
             return None
         return metadata.partitions
+
+    @ttl_cache(maxsize=1, ttl=settings.kafka.topic_names_cache.ttl)
+    def get_all_topic_names(self) -> Set[str]:
+        s = set(self._client.list_topics().topics.keys())
+        return s
 
     @staticmethod
     def format_values(values: List[ConfigEntry]) -> Dict[str, Any]:
