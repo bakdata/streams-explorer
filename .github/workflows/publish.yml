@@ -16,11 +16,6 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: actions/checkout@v3
-        with:
-          repository: bakdata/ci-templates
-          path: ci-templates
-
       - name: Copy Readme
         run: |
           cp README.md $BACKEND_DIR/
@@ -31,14 +26,14 @@ jobs:
         run: sudo apt-get -y install python3-dev graphviz libgraphviz-dev pkg-config python3-wheel
 
       - name: Release to TestPyPI
-        uses: ./ci-templates/actions/python-poetry-release
+        uses: bakdata/ci-templates/actions/python-poetry-release@v1.0.0
         with:
           working-directory: ${{ env.BACKEND_DIR }}
           pypi-token: ${{ secrets.TEST_PYPI_TOKEN }}
           publish-to-test: "true"
 
       - name: Release to PyPI
-        uses: ./ci-templates/actions/python-poetry-release
+        uses: bakdata/ci-templates/actions/python-poetry-release@v1.0.0
         with:
           working-directory: ${{ env.BACKEND_DIR }}
           pypi-token: ${{ secrets.PYPI_TOKEN }}
