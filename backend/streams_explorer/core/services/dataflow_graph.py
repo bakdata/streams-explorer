@@ -245,7 +245,7 @@ class DataFlowGraph:
                     node_id,
                     pattern,
                     pipeline,
-                    add_topic=True,
+                    add_topic=False,
                 )
                 # handle unknown topics that are not present in the graph
                 self.handle_matching_topics(
