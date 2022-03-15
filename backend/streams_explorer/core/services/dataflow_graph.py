@@ -240,24 +240,38 @@ class DataFlowGraph:
             for node_id in node_ids:  # node_id can be an app or a kafka connector
                 pipeline = self.graph.nodes[node_id].get(ATTR_PIPELINE)
                 # handle matching topics that are already present in the graph
-                for matched_topic in matching_graph_known_topics:
-                    if pipeline is not None:
-                        self.resolve_topic_pattern_in_pipeline(
-                            matched_topic, node_id, pipeline, pattern
-                        )
-                    self.resolve_topic_pattern_in_all_graph(
-                        matched_topic, node_id, pattern
-                    )
+                self.handle_matching_topics(
+                    matching_graph_known_topics,
+                    node_id,
+                    pattern,
+                    pipeline,
+                    add_topic=True,
+                )
                 # handle unknown topics that are not present in the graph
-                for matched_topic in matching_unknown_kafka_topics:
-                    self._add_topic(self.graph, matched_topic)
-                    if pipeline is not None:
-                        self.resolve_topic_pattern_in_pipeline(
-                            matched_topic, node_id, pipeline, pattern
-                        )
-                    self.resolve_topic_pattern_in_all_graph(
-                        matched_topic, node_id, pattern
-                    )
+                self.handle_matching_topics(
+                    matching_unknown_kafka_topics,
+                    node_id,
+                    pattern,
+                    pipeline,
+                    add_topic=True,
+                )
+
+    def handle_matching_topics(
+        self,
+        matching_unknown_kafka_topics: Set[str],
+        node_id: str,
+        pattern: str,
+        pipeline: str,
+        add_topic: bool = False,
+    ):
+        for matched_topic in matching_unknown_kafka_topics:
+            if add_topic:
+                self._add_topic(self.graph, matched_topic)
+            if pipeline is not None:
+                self.resolve_topic_pattern_in_pipeline(
+                    matched_topic, node_id, pipeline, pattern
+                )
+            self.resolve_topic_pattern_in_all_graph(matched_topic, node_id, pattern)
 
     def resolve_topic_pattern_in_all_graph(
         self, matched_topic: str, node_id: str, pattern: str

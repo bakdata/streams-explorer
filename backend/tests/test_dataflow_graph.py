@@ -101,7 +101,7 @@ class TestDataFlowGraph:
         kafka._enabled = True
 
         def get_all_topic_names() -> Set[str]:
-            return {"another-dead-letter-topic"}
+            return {"another-dead-letter-topic", "another-non-matching-topic"}
 
         monkeypatch.setattr(kafka, "get_all_topic_names", get_all_topic_names)
         df = DataFlowGraph(metric_provider=MetricProvider, kafka=kafka)
@@ -121,7 +121,9 @@ class TestDataFlowGraph:
         df.apply_input_pattern_edges()
         assert len(df.graph.nodes) == 4
         assert df.graph.has_edge("another-dead-letter-topic", "test-app2")
+        assert df.graph.has_edge("fake2-dead-letter-topic", "test-app2")
         assert df.graph.has_node("another-dead-letter-topic")
+        assert not df.graph.has_node("another-non-matching-topic")
 
     def test_no_resolve_input_pattern(self, df: DataFlowGraph):
         df.add_streaming_app(
