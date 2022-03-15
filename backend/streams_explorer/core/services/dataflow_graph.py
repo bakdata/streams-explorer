@@ -203,8 +203,8 @@ class DataFlowGraph:
         return {
             node_id
             for node_id, data in graph.nodes(data=True)
-            if data.get(NodeDataFields.NODE_TYPE) == NodeTypesEnum.TOPIC
-            or data.get(NodeDataFields.NODE_TYPE) == NodeTypesEnum.ERROR_TOPIC
+            if data[NodeDataFields.NODE_TYPE] == NodeTypesEnum.TOPIC
+            or data[NodeDataFields.NODE_TYPE] == NodeTypesEnum.ERROR_TOPIC
         }
 
     @staticmethod
