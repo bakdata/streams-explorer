@@ -20,13 +20,12 @@ WORKDIR /app
 
 COPY ./backend/pyproject.toml ./backend/poetry.lock /app/
 ENV PIP_NO_CACHE_DIR=1
-RUN pip install -U pip poetry && \
-    poetry config virtualenvs.create false && \
+RUN pip install -U pip poetry virtualenv && \
     poetry install --no-dev --no-interaction
 COPY ./backend /app
 
 # install streams_explorer package
-RUN poetry config virtualenvs.create false && poetry run pip install -e .
+RUN poetry run pip install -e .
 
 RUN apt-get -y purge --auto-remove -o APT::AutoRemove::RecommendsImportant=false
 
