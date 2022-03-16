@@ -26,7 +26,7 @@ RUN pip install -U pip poetry && \
 COPY ./backend /app
 
 # install streams_explorer package
-RUN poetry install --no-dev --no-interaction
+RUN poetry add --editable ./streams_explorer
 
 RUN apt-get -y purge --auto-remove -o APT::AutoRemove::RecommendsImportant=false
 
