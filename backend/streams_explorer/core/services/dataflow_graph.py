@@ -42,7 +42,7 @@ class DataFlowGraph:
 
         self._topic_pattern_queue: Dict[str, Set[str]] = defaultdict(
             set
-        )  # topic pattern -> list of target node ids
+        )  # topic pattern -> set of target node ids
 
     async def store_json_graph(self):
         self.json_graph = await self.get_positioned_graph()
