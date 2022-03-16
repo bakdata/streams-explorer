@@ -25,7 +25,7 @@ RUN pip install -U pip poetry virtualenv && \
 COPY ./backend /app
 
 # install streams_explorer package
-RUN touch ../README.md && poetry run pip install -e .
+RUN poetry run pip install -e .
 
 RUN apt-get -y purge --auto-remove -o APT::AutoRemove::RecommendsImportant=false
 
