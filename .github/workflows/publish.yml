@@ -4,15 +4,13 @@ on:
   push:
     tags: ["v[0-9]+.[0-9]+.[0-9]+"]
 
-  # trigger after main CI pipeline is complete
-  # workflow_run:
-  #   workflows: ["CI"]
-  #   types:
-  #     - completed
-
 jobs:
+  tests:
+    uses: ./.github/workflows/ci.yml # call main CI job to run tests
+
   pypi:
     name: PyPI
+    needs: [tests] # require tests to pass before this runs
     runs-on: ubuntu-latest
     env:
       BACKEND_DIR: ./backend
