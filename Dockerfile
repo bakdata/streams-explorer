@@ -26,7 +26,7 @@ RUN pip install -U pip poetry && \
 COPY ./backend /app
 
 # install streams_explorer package
-RUN poetry run pip install -e .
+RUN poetry config virtualenvs.create false && poetry run pip install -e .
 
 RUN apt-get -y purge --auto-remove -o APT::AutoRemove::RecommendsImportant=false
 
