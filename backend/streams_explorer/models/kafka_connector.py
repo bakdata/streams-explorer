@@ -59,9 +59,9 @@ class KafkaConnector(BaseModel):
         return self.topics
 
     def get_error_topic(self):
-        if self.error_topic is not None:
-            return self.error_topic
-        return self.config.error_topic
+        if self.error_topic is None:
+            return self.config.error_topic
+        return self.error_topic
 
     @staticmethod
     def split_topics(topics: Optional[str]) -> List[str]:
