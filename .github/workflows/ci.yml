@@ -102,6 +102,7 @@ jobs:
   docker:
     name: Docker
     needs: [backend, frontend]
+    if: github.event_name != 'workflow_call'
     runs-on: ubuntu-latest
     env:
       image: bakdata/streams-explorer
