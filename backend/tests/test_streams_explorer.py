@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Set
 
 import pytest
 from kubernetes.client import V1beta1CronJob
@@ -143,6 +143,9 @@ class TestStreamsExplorer:
                 return {i: _ for i in range(5)}
             return None
 
+        def get_all_topic_names(_) -> Set[str]:
+            return set()
+
         mocker.patch(
             "streams_explorer.core.services.kafkaconnect.KafkaConnect.get_connectors",
             get_connectors,
@@ -156,12 +159,16 @@ class TestStreamsExplorer:
             lambda config: config,
         )
         mocker.patch(
-            "streams_explorer.core.services.kafka.Kafka.get_topic_config",
+            "streams_explorer.core.services.kafka_admin_client.KafkaAdminClient.get_topic_config",
             get_topic_config,
         )
         mocker.patch(
-            "streams_explorer.core.services.kafka.Kafka.get_topic_partitions",
+            "streams_explorer.core.services.kafka_admin_client.KafkaAdminClient.get_topic_partitions",
             get_topic_partitions,
+        )
+        mocker.patch(
+            "streams_explorer.core.services.kafka_admin_client.KafkaAdminClient.get_all_topic_names",
+            get_all_topic_names,
         )
 
         return explorer
