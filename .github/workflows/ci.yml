@@ -101,7 +101,6 @@ jobs:
   docker:
     name: Docker
     needs: [backend, frontend]
-    if: github.event_name != 'workflow_call'
     runs-on: ubuntu-latest
     env:
       image: bakdata/streams-explorer
@@ -118,6 +117,7 @@ jobs:
           images: ${{ env.image }}
           tags: |
             event=pr,type=sha
+            event=push,type=sha
             event=tag,type=semver,pattern=v{{version}}
 
       - name: Login to DockerHub
