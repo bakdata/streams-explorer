@@ -31,8 +31,10 @@ def get_streaming_app_deployment(
     input_topics: Optional[str] = "input-topic",
     output_topic: Optional[str] = "output-topic",
     error_topic: Optional[str] = "error-topic",
+    input_pattern: Optional[str] = None,
     multiple_inputs: Optional[str] = None,
     multiple_outputs: Optional[str] = None,
+    extra_input_patterns: Optional[str] = None,
     extra: Dict[str, str] = {},
     env_prefix: str = "APP_",
     pipeline: Optional[str] = None,
@@ -43,8 +45,10 @@ def get_streaming_app_deployment(
         input_topics,
         output_topic,
         error_topic,
+        input_pattern=input_pattern,
         multiple_inputs=multiple_inputs,
         multiple_outputs=multiple_outputs,
+        extra_input_patterns=extra_input_patterns,
         extra=extra,
         env_prefix=env_prefix,
         consumer_group=consumer_group,
@@ -60,8 +64,10 @@ def get_streaming_app_stateful_set(
     input_topics: str = "input-topic",
     output_topic: str = "output-topic",
     error_topic: str = "error-topic",
+    input_pattern: Optional[str] = None,
     multiple_inputs: Optional[str] = None,
     multiple_outputs: Optional[str] = None,
+    extra_input_patterns: Optional[str] = None,
     extra: Dict[str, str] = {},
     env_prefix: str = "APP_",
     pipeline: Optional[str] = None,
@@ -73,8 +79,10 @@ def get_streaming_app_stateful_set(
         input_topics,
         output_topic,
         error_topic,
+        input_pattern,
         multiple_inputs=multiple_inputs,
         multiple_outputs=multiple_outputs,
+        extra_input_patterns=extra_input_patterns,
         extra=extra,
         env_prefix=env_prefix,
         consumer_group=consumer_group,
@@ -138,8 +146,10 @@ def get_env(
     input_topics: Optional[str],
     output_topic: Optional[str],
     error_topic: Optional[str],
+    input_pattern: Optional[str] = None,
     multiple_inputs: Optional[str] = None,
     multiple_outputs: Optional[str] = None,
+    extra_input_patterns: Optional[str] = None,
     extra: Dict[str, str] = {},
     env_prefix: str = "APP_",
 ) -> List[V1EnvVar]:
@@ -150,6 +160,8 @@ def get_env(
         env.append(V1EnvVar(name=env_prefix + "OUTPUT_TOPIC", value=output_topic))
     if error_topic:
         env.append(V1EnvVar(name=env_prefix + "ERROR_TOPIC", value=error_topic))
+    if input_pattern:
+        env.append(V1EnvVar(name=env_prefix + "INPUT_PATTERN", value=input_pattern))
     if multiple_inputs:
         env.append(
             V1EnvVar(name=env_prefix + "EXTRA_INPUT_TOPICS", value=multiple_inputs)
@@ -157,6 +169,12 @@ def get_env(
     if multiple_outputs:
         env.append(
             V1EnvVar(name=env_prefix + "EXTRA_OUTPUT_TOPICS", value=multiple_outputs)
+        )
+    if extra_input_patterns:
+        env.append(
+            V1EnvVar(
+                name=env_prefix + "EXTRA_INPUT_PATTERNS", value=extra_input_patterns
+            )
         )
     if extra:
         for k, v in extra.items():
@@ -174,6 +192,7 @@ def get_args(
     error_topic: Optional[str],
     multiple_inputs: Optional[str],
     multiple_outputs: Optional[str],
+    extra_input_patterns: Optional[str],
     extra: Dict[str, str],
 ) -> List[str]:
     args = []
@@ -187,6 +206,8 @@ def get_args(
         args.append(_create_arg("extra-input-topics", multiple_inputs))
     if multiple_outputs:
         args.append(_create_arg("extra-output-topics", multiple_outputs))
+    if extra_input_patterns:
+        args.append(_create_arg("extra-input-patterns", extra_input_patterns))
     if extra:
         for k, v in extra.items():
             args.append(_create_arg(k, v))
@@ -197,8 +218,10 @@ def get_template(
     input_topics: Optional[str],
     output_topic: Optional[str],
     error_topic: Optional[str],
+    input_pattern: Optional[str],
     multiple_inputs: Optional[str],
     multiple_outputs: Optional[str],
+    extra_input_patterns: Optional[str],
     extra: Dict[str, str],
     env_prefix: str = "APP_",
     consumer_group: Optional[str] = None,
@@ -211,8 +234,10 @@ def get_template(
             input_topics,
             output_topic,
             error_topic,
+            input_pattern,
             multiple_inputs,
             multiple_outputs,
+            extra_input_patterns=extra_input_patterns,
             env_prefix=env_prefix,
             extra=extra,
         )
@@ -223,6 +248,7 @@ def get_template(
             error_topic,
             multiple_inputs,
             multiple_outputs,
+            extra_input_patterns,
             extra,
         )
     container = V1Container(name="test-container", env=env, args=args)

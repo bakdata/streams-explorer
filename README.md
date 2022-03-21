@@ -119,15 +119,18 @@ The following configuration options are available:
 
 #### General
 
-- `graph.update_interval` Update the graph every X seconds (integer, **required**, default: `300`)
+- `graph.update_interval` Update the graph every X seconds (int, **required**, default: `300`)
 - `graph.layout_arguments` Arguments passed to graphviz layout (string, **required**, default: `-Grankdir=LR -Gnodesep=0.8 -Gpad=10`)
 - `graph.pipeline_distance` Increase/decrease vertical space between pipeline graphs by X pixels (int, **required**, default: `500`)
+- `graph.resolve.input_pattern_topics.all` If true topics that match (extra) input pattern(s) are connected to the streaming app in the graph containing all pipelines (bool, **required**, default: `false`)
+- `graph.resolve.input_pattern_topics.pipelines` If true topics that match (extra) input pattern(s) are connected to the streaming app in pipeline graphs (bool, **required**, default: `false`)
 
 #### Kafka
 
 - `kafka.enable` Enable Kafka (bool, default: `false`)
 - `kafka.config` librdkafka configuration properties ([reference](https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md)) (dict, default: `{"bootstrap.servers": "localhost:9092"}`)
 - `kafka.displayed_information` Configuration options of Kafka topics displayed in the frontend (list of dict)
+- `kafka.topic_names_cache.ttl` Cache for retrieving all topic names (used when input topic patterns are resolved) (int, default: `3600`)
 
 #### Kafka Connect
 

@@ -13,6 +13,14 @@ settings: Any = Dynaconf(
         Validator("graph.update_interval", must_exist=True, is_type_of=int),
         Validator("graph.layout_arguments", must_exist=True, is_type_of=str),
         Validator("graph.pipeline_distance", must_exist=True, is_type_of=int),
+        Validator(
+            "graph.resolve.input_pattern_topics.all", must_exist=True, is_type_of=bool
+        ),
+        Validator(
+            "graph.resolve.input_pattern_topics.pipelines",
+            must_exist=True,
+            is_type_of=bool,
+        ),
         Validator("k8s.deployment.cluster", must_exist=True, is_type_of=bool),
         Validator("k8s.deployment.context", is_type_of=str),
         Validator("k8s.deployment.namespaces", must_exist=True, is_type_of=list),
@@ -31,6 +39,7 @@ settings: Any = Dynaconf(
             )
         ),
         Validator("kafka.displayed_information", is_type_of=list, default=[]),
+        Validator("kafka.topic_names_cache.ttl", is_type_of=int, default=3600),
         Validator("node_info.cache_ttl", must_exist=True, is_type_of=int),
         Validator("kafkaconnect.url", default=None),
         Validator("kafkaconnect.displayed_information", is_type_of=list, default=[]),
