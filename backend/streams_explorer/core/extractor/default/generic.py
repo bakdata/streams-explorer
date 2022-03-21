@@ -1,4 +1,4 @@
-from typing import Any, List, Optional
+from typing import List, Optional
 
 from streams_explorer.core.extractor.extractor import Extractor
 from streams_explorer.models.kafka_connector import (
@@ -22,9 +22,9 @@ class GenericSink(Extractor):
 
 
 class GenericSourceConnector(KafkaConnector):
-    def __init__(self, **data: Any):
+    def __init__(self, **kwargs):
         super().__init__(
-            **data,
+            **kwargs,
             type=KafkaConnectorTypesEnum.SOURCE,
         )
 
