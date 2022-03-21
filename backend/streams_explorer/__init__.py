@@ -1,2 +1,4 @@
 """Streams Explorer."""
-__version__ = "1.6.0"
+import importlib.metadata
+
+__version__ = importlib.metadata.version(__name__)
