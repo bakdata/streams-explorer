@@ -14,7 +14,7 @@ from streams_explorer.core.node_info_extractor import (
     get_displayed_information_topic,
 )
 from streams_explorer.core.services.dataflow_graph import DataFlowGraph, NodeTypesEnum
-from streams_explorer.core.services.kafka import Kafka
+from streams_explorer.core.services.kafka_admin_client import KafkaAdminClient
 from streams_explorer.core.services.kafkaconnect import KafkaConnect
 from streams_explorer.core.services.linking_services import LinkingService
 from streams_explorer.core.services.metric_providers import MetricProvider
@@ -37,9 +37,11 @@ class StreamsExplorer:
     ):
         self.applications: Dict[str, K8sApp] = {}
         self.kafka_connectors: List[KafkaConnector] = []
-        self.data_flow = DataFlowGraph(metric_provider=metric_provider)
+        self.kafka = KafkaAdminClient()
+        self.data_flow = DataFlowGraph(
+            metric_provider=metric_provider, kafka=self.kafka
+        )
         self.linking_service = linking_service
-        self.kafka = Kafka()
 
     def setup(self):
         self.__setup_k8s_environment()
@@ -221,3 +223,5 @@ class StreamsExplorer:
 
         for sink in sinks:
             self.data_flow.add_sink(sink)
+
+        self.data_flow.apply_input_pattern_edges()

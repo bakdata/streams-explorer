@@ -3,6 +3,7 @@ FROM node:16 AS frontend
 
 WORKDIR /build
 COPY ./frontend/package.json ./frontend/package-lock.json /build/
+ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm ci
 
 COPY ./frontend /build
