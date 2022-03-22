@@ -1,0 +1,39 @@
+name: Publish
+
+on:
+  workflow_call:
+    secrets:
+      pypi-token:
+        description: "The token for PyPI to publish the package."
+        required: true
+      test-pypi-token:
+        description: "The token for TestPyPI to publish the package."
+        required: true
+
+jobs:
+  pypi:
+    name: PyPI
+    runs-on: ubuntu-latest
+    env:
+      BACKEND_DIR: ./backend
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+
+      - name: Install packages
+        run: sudo apt-get -y install python3-dev graphviz libgraphviz-dev pkg-config python3-wheel
+
+      - name: Release to TestPyPI
+        uses: bakdata/ci-templates/actions/python-poetry-release@v1.0.0
+        with:
+          working-directory: ${{ env.BACKEND_DIR }}
+          pypi-token: ${{ secrets.test-pypi-token }}
+          publish-to-test: "true"
+
+      - name: Release to PyPI
+        uses: bakdata/ci-templates/actions/python-poetry-release@v1.0.0
+        with:
+          working-directory: ${{ env.BACKEND_DIR }}
+          pypi-token: ${{ secrets.pypi-token }}
+          publish-to-test: "false"
