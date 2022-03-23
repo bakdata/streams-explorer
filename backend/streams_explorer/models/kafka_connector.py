@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List, Optional, Union
+from typing import List, Optional, Set, Union
 
 import pydantic
 from loguru import logger
@@ -59,9 +59,9 @@ class KafkaConnector(BaseModel):
         return self.topics
 
     def get_error_topic(self):
-        if self.error_topic is not None:
-            return self.error_topic
-        return self.config.error_topic
+        if self.error_topic is None:
+            return self.config.error_topic
+        return self.error_topic
 
     @staticmethod
     def split_topics(topics: Optional[str]) -> List[str]:
@@ -69,7 +69,7 @@ class KafkaConnector(BaseModel):
             return topics.replace(" ", "").split(",")
         return []
 
-    def get_routes(self) -> List[str]:
+    def get_routes(self) -> Set[str]:
         """
         Applies the single message transformers to get target routes (e.g. for the ElasticSearchSinkConnector)
         """
@@ -77,9 +77,9 @@ class KafkaConnector(BaseModel):
         transforms = self.config.get_transforms()
         for transformer_name in transforms:
             routes = self.apply_transformer(routes, transformer_name)
-        return list(set(routes))
+        return set(routes)
 
-    def apply_transformer(self, indices, transformer_name) -> List[str]:
+    def apply_transformer(self, indices: List[str], transformer_name: str) -> List[str]:
         transformer_prefix = KafkaConnector.get_transformer_prefix(transformer_name)
         # transformer config without transformer_prefix
         transformer_config = {
