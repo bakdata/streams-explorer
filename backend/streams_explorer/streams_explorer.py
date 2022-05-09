@@ -49,8 +49,25 @@ class StreamsExplorer:
         await self.__setup_k8s_environment()
 
     async def watch(self):
-        for namespace in self.namespaces:
-            asyncio.create_task(self.__retrieve_deployments(namespace))
+        def list_deployments(namespace: str, *args, **kwargs):
+            # TODO: list deployments from multiple namespaces using `self.k8s_app_client.list_deployment_for_all_namespaces` and filter results to included namespaces
+            return self.k8s_app_client.list_namespaced_deployment(
+                *args, namespace=namespace, **kwargs
+            )
+
+        def list_stateful_sets(namespace: str, *args, **kwargs):
+            return self.k8s_app_client.list_namespaced_stateful_set(
+                *args, namespace=namespace, **kwargs
+            )
+
+        resources = (list_deployments, "V1Deployment"), (
+            list_stateful_sets,
+            "V1StatefulSet",
+        )
+
+        for resource, return_type in resources:
+            for namespace in self.namespaces:
+                asyncio.create_task(self.__watch_k8s(resource, namespace, return_type))
         # self.__retrieve_cron_jobs()
         # self.__get_connectors()
 
@@ -160,22 +177,16 @@ class StreamsExplorer:
         self.k8s_app_client = kubernetes_asyncio.client.AppsV1Api()
         self.k8s_batch_client = kubernetes_asyncio.client.BatchV1beta1Api()
 
-    async def __retrieve_deployments(self, namespace: str):
-        def list_deployments(*args, **kwargs):
-            # TODO: list deployments from multiple namespaces using `self.k8s_app_client.list_deployment_for_all_namespaces` and filter results to included namespaces
-            return self.k8s_app_client.list_namespaced_deployment(
-                *args, namespace=namespace, **kwargs
-            )
-
-        async with kubernetes_asyncio.watch.Watch(return_type="V1Deployment") as w:
-            async with w.stream(list_deployments) as stream:
+    async def __watch_k8s(self, resource, namespace: str, return_type: str):
+        async with kubernetes_asyncio.watch.Watch(return_type=return_type) as w:
+            async with w.stream(resource, namespace) as stream:
                 async for event in stream:
                     self.handle_event(event)
 
     def handle_event(self, event: dict):
         item = event["object"]
         logger.info(
-            f"{item.metadata.namespace} Deployment {event['type']}: {item.metadata.name}"
+            f"{item.metadata.namespace} {item.__class__.__name__} {event['type']}: {item.metadata.name}"
         )
         app = K8sApp.factory(item)
         if event["type"] in ("ADDED", "MODIFIED"):
