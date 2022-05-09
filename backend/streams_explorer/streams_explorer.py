@@ -162,7 +162,7 @@ class StreamsExplorer:
         def list_deployments(*args, **kwargs):
             # TODO: list deployments from multiple namespaces using `self.k8s_app_client.list_deployment_for_all_namespaces` and filter results to included namespaces
             return self.k8s_app_client.list_namespaced_deployment(
-                *args, namespace=settings.k8s.deployment.namespaces[0], **kwargs
+                *args, namespace=self.namespaces[0], **kwargs
             )
 
         async with kubernetes_asyncio.watch.Watch(return_type="V1Deployment") as w:
@@ -177,7 +177,7 @@ class StreamsExplorer:
                     self.handle_event(event)
 
     def handle_event(self, event: dict):
-        item: V1Deployment = event["object"]  # type: ignore
+        item = event["object"]
         logger.info(f"Deployment {event['type']}: {item.metadata.name}")
         app = K8sApp.factory(item)
         if event["type"] in ("ADDED", "MODIFIED"):
