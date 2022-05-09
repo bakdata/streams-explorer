@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, List, Optional
 
-from kubernetes.client import V1beta1CronJob
+from kubernetes_asyncio.client import V1beta1CronJob
 
 from streams_explorer.models.k8s_config import K8sConfig
 from streams_explorer.models.kafka_connector import KafkaConnector

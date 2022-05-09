@@ -1,7 +1,7 @@
 from typing import List, Optional, Set
 
 import pytest
-from kubernetes.client import V1beta1CronJob
+from kubernetes_asyncio.client import V1beta1CronJob
 
 from streams_explorer.core.config import settings
 from streams_explorer.core.extractor.default.elasticsearch_sink import ElasticsearchSink

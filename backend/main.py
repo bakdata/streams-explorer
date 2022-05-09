@@ -1,3 +1,5 @@
+import asyncio
+
 import uvicorn as uvicorn
 from fastapi_utils.tasks import repeat_every
 from loguru import logger
@@ -9,6 +11,11 @@ from streams_explorer.default import setup_default
 app = get_application()
 
 app.add_event_handler("startup", setup_default(app))
+
+
+@app.on_event("startup")
+async def watch():
+    asyncio.create_task(app.state.streams_explorer.watch())
 
 
 @app.on_event("startup")

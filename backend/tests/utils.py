@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Dict, List, Optional
 
-from kubernetes.client import (
+from kubernetes_asyncio.client import (
     V1beta1CronJob,
     V1beta1CronJobSpec,
     V1beta1JobTemplateSpec,

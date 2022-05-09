@@ -16,6 +16,6 @@ def setup_default(app: FastAPI) -> Callable:
         app.state.streams_explorer = StreamsExplorer(
             linking_service=linking_service(), metric_provider=metric_provider
         )
-        app.state.streams_explorer.setup()
+        await app.state.streams_explorer.setup()
 
     return setup

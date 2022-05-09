@@ -3,7 +3,7 @@ import asyncio
 import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
-from kubernetes.client import V1beta1CronJob, V1ObjectMeta
+from kubernetes_asyncio.client import V1beta1CronJob, V1ObjectMeta
 
 from streams_explorer.application import get_application
 from streams_explorer.core.config import API_PREFIX, settings

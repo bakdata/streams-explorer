@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, List, Optional, Tuple
 
-from kubernetes.client import V1beta1CronJob
+from kubernetes_asyncio.client import V1beta1CronJob
 from loguru import logger
 
 from streams_explorer.core.extractor.default.generic import GenericSink, GenericSource

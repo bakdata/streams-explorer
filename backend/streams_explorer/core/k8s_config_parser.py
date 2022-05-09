@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from kubernetes.client import V1Container
+from kubernetes_asyncio.client import V1Container
 
 from streams_explorer.models.k8s_config import K8sConfig
 

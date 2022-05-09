@@ -1,13 +1,14 @@
 from typing import Dict, List, Optional, Type
 
-import kubernetes.client
-import kubernetes.config
+import kubernetes_asyncio.client
+import kubernetes_asyncio.config
+import kubernetes_asyncio.watch
 from cachetools.func import ttl_cache
-from kubernetes.client import V1beta1CronJob, V1Deployment, V1StatefulSet
+from kubernetes_asyncio.client import V1beta1CronJob, V1Deployment, V1StatefulSet
 from loguru import logger
 
 from streams_explorer.core.config import settings
-from streams_explorer.core.k8s_app import K8sApp, K8sObject
+from streams_explorer.core.k8s_app import K8sApp
 from streams_explorer.core.node_info_extractor import (
     get_displayed_information_connector,
     get_displayed_information_deployment,
@@ -43,17 +44,18 @@ class StreamsExplorer:
         )
         self.linking_service = linking_service
 
-    def setup(self):
-        self.__setup_k8s_environment()
+    async def setup(self):
+        await self.__setup_k8s_environment()
+
+    async def watch(self):
+        await self.__retrieve_deployments()
+        # self.__retrieve_cron_jobs()
+        # self.__get_connectors()
 
     async def update(self):
-        self.applications = {}
-        self.kafka_connectors = []
+        self.kafka_connectors.clear()
         extractor_container.reset()
         self.data_flow.reset()
-        self.__retrieve_deployments()
-        self.__retrieve_cron_jobs()
-        self.__get_connectors()
         self.__create_graph()
         self.data_flow.setup_metric_provider()
         await self.data_flow.store_json_graph()
@@ -142,30 +144,46 @@ class StreamsExplorer:
         if node_type in self.linking_service.sink_source_redirects:
             return self.linking_service.get_sink_source_redirects(node_type, node_id)
 
-    def __setup_k8s_environment(self):
+    async def __setup_k8s_environment(self):
         try:
             if settings.k8s.deployment.cluster:
                 logger.info("Setup K8s environment in cluster")
-                kubernetes.config.load_incluster_config()
+                kubernetes_asyncio.config.load_incluster_config()
             else:
                 logger.info("Setup K8s environment")
-                kubernetes.config.load_kube_config(context=self.context)
-        except kubernetes.config.ConfigException:
+                await kubernetes_asyncio.config.load_kube_config(context=self.context)
+        except kubernetes_asyncio.config.ConfigException:
             raise Exception("Could not load K8s environment configuration")
 
-        self.k8s_app_client = kubernetes.client.AppsV1Api()
-        self.k8s_batch_client = kubernetes.client.BatchV1beta1Api()
+        self.k8s_app_client = kubernetes_asyncio.client.AppsV1Api()
+        self.k8s_batch_client = kubernetes_asyncio.client.BatchV1beta1Api()
 
-    def __retrieve_deployments(self):
-        items: List[K8sObject] = []
-        items += self.get_deployments()
-        items += self.get_stateful_sets()
-        for item in items:
-            try:
-                app = K8sApp.factory(item)
-                self.__add_app(app)
-            except Exception as e:
-                logger.debug(e)
+    async def __retrieve_deployments(self):
+        def list_deployments(*args, **kwargs):
+            # TODO: list deployments from multiple namespaces using `self.k8s_app_client.list_deployment_for_all_namespaces` and filter results to included namespaces
+            return self.k8s_app_client.list_namespaced_deployment(
+                *args, namespace=settings.k8s.deployment.namespaces[0], **kwargs
+            )
+
+        async with kubernetes_asyncio.watch.Watch(return_type="V1Deployment") as w:
+            async with w.stream(list_deployments) as stream:
+                async for event in stream:
+                    item: V1Deployment = event["object"]  # type: ignore
+                    if item.metadata and item.metadata.namespace not in self.namespaces:
+                        logger.debug(
+                            f"ignored Event in namespace {item.metadata.namespace}"
+                        )
+                        continue
+                    self.handle_event(event)
+
+    def handle_event(self, event: dict):
+        item: V1Deployment = event["object"]  # type: ignore
+        logger.info(f"Deployment {event['type']}: {item.metadata.name}")
+        app = K8sApp.factory(item)
+        if event["type"] in ("ADDED", "MODIFIED"):
+            self.__add_app(app)
+        elif event["type"] == "DELETED":
+            self.__remove_app(app)
 
     def get_deployments(self) -> List[V1Deployment]:
         deployments: List[V1Deployment] = []
@@ -208,6 +226,9 @@ class StreamsExplorer:
     def __add_app(self, app: K8sApp):
         if app.is_streams_bootstrap_app():
             self.applications[app.id] = app
+
+    def __remove_app(self, app: K8sApp):
+        self.applications.pop(app.id)
 
     def __create_graph(self):
         logger.info("Setup pipeline graph")

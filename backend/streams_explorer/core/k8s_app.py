@@ -3,7 +3,7 @@ from __future__ import annotations
 import dataclasses
 from typing import Dict, List, Optional, Set, Type, Union
 
-from kubernetes.client import (
+from kubernetes_asyncio.client import (
     V1beta1CronJob,
     V1Container,
     V1Deployment,
