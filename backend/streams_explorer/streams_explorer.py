@@ -1,3 +1,4 @@
+import asyncio
 from typing import Dict, List, Optional, Type
 
 import kubernetes_asyncio.client
@@ -48,7 +49,8 @@ class StreamsExplorer:
         await self.__setup_k8s_environment()
 
     async def watch(self):
-        await self.__retrieve_deployments()
+        for namespace in self.namespaces:
+            asyncio.create_task(self.__retrieve_deployments(namespace))
         # self.__retrieve_cron_jobs()
         # self.__get_connectors()
 
@@ -158,27 +160,23 @@ class StreamsExplorer:
         self.k8s_app_client = kubernetes_asyncio.client.AppsV1Api()
         self.k8s_batch_client = kubernetes_asyncio.client.BatchV1beta1Api()
 
-    async def __retrieve_deployments(self):
+    async def __retrieve_deployments(self, namespace: str):
         def list_deployments(*args, **kwargs):
             # TODO: list deployments from multiple namespaces using `self.k8s_app_client.list_deployment_for_all_namespaces` and filter results to included namespaces
             return self.k8s_app_client.list_namespaced_deployment(
-                *args, namespace=self.namespaces[0], **kwargs
+                *args, namespace=namespace, **kwargs
             )
 
         async with kubernetes_asyncio.watch.Watch(return_type="V1Deployment") as w:
             async with w.stream(list_deployments) as stream:
                 async for event in stream:
-                    item: V1Deployment = event["object"]  # type: ignore
-                    if item.metadata and item.metadata.namespace not in self.namespaces:
-                        logger.debug(
-                            f"ignored Event in namespace {item.metadata.namespace}"
-                        )
-                        continue
                     self.handle_event(event)
 
     def handle_event(self, event: dict):
         item = event["object"]
-        logger.info(f"Deployment {event['type']}: {item.metadata.name}")
+        logger.info(
+            f"{item.metadata.namespace} Deployment {event['type']}: {item.metadata.name}"
+        )
         app = K8sApp.factory(item)
         if event["type"] in ("ADDED", "MODIFIED"):
             self.__add_app(app)

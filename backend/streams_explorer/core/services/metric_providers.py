@@ -165,7 +165,7 @@ class PrometheusMetricProvider(MetricProvider):
         logger.debug("Pulling metrics from Prometheus")
         tasks = []
         for metric in PrometheusMetric:
-            tasks.append(asyncio.ensure_future(self._process_metric(metric)))
+            tasks.append(asyncio.create_task(self._process_metric(metric)))
         await asyncio.gather(*tasks)
 
     async def _process_metric(self, metric: PrometheusMetric):
