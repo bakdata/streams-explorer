@@ -77,10 +77,8 @@ class StreamsExplorer:
                 )
 
     async def update(self):
-        self.kafka_connectors.clear()
-        extractor_container.reset()
+        # extractor_container.reset()
         self.data_flow.reset()
-        # self.__get_connectors()
         self.__create_graph()
         self.data_flow.setup_metric_provider()
         await self.data_flow.store_json_graph()
@@ -244,7 +242,8 @@ class StreamsExplorer:
             ).items
         return cron_jobs
 
-    def __get_connectors(self):
+    def update_connectors(self):
+        self.kafka_connectors.clear()
         logger.info("Retrieve Kafka connectors")
         self.kafka_connectors = KafkaConnect.connectors()
 

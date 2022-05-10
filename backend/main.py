@@ -24,6 +24,12 @@ async def update():
     logger.info("Update graph completed")
 
 
+@app.on_event("startup")
+@repeat_every(seconds=600)  # TODO: make configurable
+async def update_connectors():
+    await app.state.streams_explorer.update_connectors()
+
+
 def start():
     # Run the main for debugging.
     # You can also use uvicorn to start the backend with auto reload on code changes:  uvicorn main:app --reload
