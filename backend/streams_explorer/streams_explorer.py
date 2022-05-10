@@ -200,7 +200,7 @@ class StreamsExplorer:
                     self.__add_app(app)
                 elif event["type"] == "DELETED":
                     self.__remove_app(app)
-                return
+            return
 
         app = K8sApp.factory(item)
         if event["type"] in ("ADDED", "MODIFIED"):
