@@ -50,8 +50,7 @@ class ExtractorContainer:
 
     def on_cron_job(self, cron_job: V1beta1CronJob) -> Optional[K8sAppCronJob]:
         for extractor in self.extractors:
-            app = extractor.on_cron_job_parsing(cron_job)
-            if app:
+            if app := extractor.on_cron_job_parsing(cron_job):
                 return app
         return None
 
