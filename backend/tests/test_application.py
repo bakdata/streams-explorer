@@ -26,6 +26,9 @@ class TestApplication:
         assert response.headers["content-type"] == "text/plain; charset=utf-8"
         assert response.content.decode() == ""
 
+    async def setup(self):
+        pass
+
     @pytest.mark.asyncio
     async def test_update_every_x_seconds(self, mocker, monkeypatch):
         # workaround for exception "This event loop is already running"
@@ -62,7 +65,8 @@ class TestApplication:
             StreamsExplorer, "get_stateful_sets", mock_get_stateful_sets
         )
         monkeypatch.setattr(StreamsExplorer, "get_cron_jobs", mock_get_cron_jobs)
-        monkeypatch.setattr(StreamsExplorer, "setup", lambda _: None)
+
+        monkeypatch.setattr(StreamsExplorer, "setup", self.setup)
 
         mocker.patch(
             "streams_explorer.core.services.kafkaconnect.KafkaConnect.get_connectors",
@@ -144,7 +148,7 @@ class TestApplication:
     def test_pipeline_not_found(self, monkeypatch):
         from main import app
 
-        monkeypatch.setattr(StreamsExplorer, "setup", lambda _: None)
+        monkeypatch.setattr(StreamsExplorer, "setup", self.setup)
 
         with TestClient(app) as client:
             response = client.get(
