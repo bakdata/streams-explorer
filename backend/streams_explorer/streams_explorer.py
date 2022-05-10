@@ -59,9 +59,15 @@ class StreamsExplorer:
                 *args, namespace=namespace, **kwargs
             )
 
+        def list_cron_jobs(namespace: str, *args, **kwargs):
+            return self.k8s_batch_client.list_namespaced_cron_job(
+                *args, namespace=namespace, **kwargs
+            )
+
         resources = (
             (list_deployments, V1Deployment),
             (list_stateful_sets, V1StatefulSet),
+            (list_cron_jobs, V1beta1CronJob),
         )
 
         for resource, return_type in resources:
@@ -74,7 +80,7 @@ class StreamsExplorer:
         self.kafka_connectors.clear()
         extractor_container.reset()
         self.data_flow.reset()
-        self.__get_connectors()
+        # self.__get_connectors()
         self.__create_graph()
         self.data_flow.setup_metric_provider()
         await self.data_flow.store_json_graph()
@@ -183,11 +189,21 @@ class StreamsExplorer:
                 async for event in stream:
                     self.handle_event(event)
 
-    def handle_event(self, event: dict):
+    def handle_event(self, event: dict) -> None:
         item = event["object"]
         logger.info(
             f"{item.metadata.namespace} {item.__class__.__name__} {event['type']}: {item.metadata.name}"
         )
+
+        # cronjobs need special treatment
+        if isinstance(item, V1beta1CronJob):
+            if app := extractor_container.on_cron_job(item):
+                if event["type"] in ("ADDED", "MODIFIED"):
+                    self.__add_app(app)
+                elif event["type"] == "DELETED":
+                    self.__remove_app(app)
+                return
+
         app = K8sApp.factory(item)
         if event["type"] in ("ADDED", "MODIFIED"):
             self.__add_app(app)
