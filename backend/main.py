@@ -25,7 +25,7 @@ async def update():
 
 
 @app.on_event("startup")
-@repeat_every(seconds=600)  # TODO: make configurable
+@repeat_every(seconds=settings.kafkaconnect.update_interval)
 async def update_connectors():
     await app.state.streams_explorer.update_connectors()
 

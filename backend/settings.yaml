@@ -1,5 +1,5 @@
 graph:
-  # update graph (fetch deployments and connectors) every X seconds
+  # render graph every x seconds
   update_interval: 300
   layout_arguments: "-Grankdir=LR -Gnodesep=0.8 -Gpad=10"
   pipeline_distance: 500
@@ -49,14 +49,16 @@ node_info:
   # cache time-to-live in seconds
   cache_ttl: 3600
 
-## (optional) configure Kafka Connect url and displayed information
-#  kafkaconnect:
-#    url: "http://localhost:8083"
-#    displayed_information:
-#      - name: "Transformer"
-#        key: "transforms.changeTopic.regex"
-#      - name: "Type"
-#        key: "transforms.changeTopic.type"
+# (optional) configure Kafka Connect url and displayed information
+# kafkaconnect:
+#   url: "http://localhost:8083"
+#   # fetch connectors every x seconds
+#   update_interval: 300
+#   displayed_information:
+#     - name: "Transformer"
+#       key: "transforms.changeTopic.regex"
+#     - name: "Type"
+#       key: "transforms.changeTopic.type"
 
 ## (optional) configure Schema Registry for topic information (supports Karapace and Confluent Schema Registry)
 # schemaregistry:
