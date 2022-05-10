@@ -50,7 +50,6 @@ class StreamsExplorer:
 
     async def watch(self):
         def list_deployments(namespace: str, *args, **kwargs):
-            # TODO: list deployments from multiple namespaces using `self.k8s_app_client.list_deployment_for_all_namespaces` and filter results to included namespaces
             return self.k8s_app_client.list_namespaced_deployment(
                 *args, namespace=namespace, **kwargs
             )
@@ -60,21 +59,22 @@ class StreamsExplorer:
                 *args, namespace=namespace, **kwargs
             )
 
-        resources = (list_deployments, "V1Deployment"), (
-            list_stateful_sets,
-            "V1StatefulSet",
+        resources = (
+            (list_deployments, V1Deployment),
+            (list_stateful_sets, V1StatefulSet),
         )
 
         for resource, return_type in resources:
             for namespace in self.namespaces:
-                asyncio.create_task(self.__watch_k8s(resource, namespace, return_type))
-        # self.__retrieve_cron_jobs()
-        # self.__get_connectors()
+                asyncio.create_task(
+                    self.__watch_k8s(resource, namespace, return_type.__name__)
+                )
 
     async def update(self):
         self.kafka_connectors.clear()
         extractor_container.reset()
         self.data_flow.reset()
+        self.__get_connectors()
         self.__create_graph()
         self.data_flow.setup_metric_provider()
         await self.data_flow.store_json_graph()
