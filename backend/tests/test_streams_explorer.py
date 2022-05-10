@@ -179,12 +179,7 @@ class TestStreamsExplorer:
     @pytest.mark.asyncio
     async def test_update(self, streams_explorer: StreamsExplorer):
         await streams_explorer.update()
-        # assert len(streams_explorer.applications) == 3
-        assert set(streams_explorer.applications.keys()) == {
-            "streaming-app1",
-            "streaming-app2",
-            "streaming-app3",
-        }
+        assert len(streams_explorer.applications) == 3
         assert "streaming-app1" in streams_explorer.applications
         assert "streaming-app2" in streams_explorer.applications
         assert "streaming-app3" in streams_explorer.applications
