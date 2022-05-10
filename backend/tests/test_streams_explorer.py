@@ -179,6 +179,7 @@ class TestStreamsExplorer:
     @pytest.mark.asyncio
     async def test_update(self, streams_explorer: StreamsExplorer):
         await streams_explorer.update()
+        streams_explorer.update_connectors()
         assert len(streams_explorer.applications) == 3
         assert "streaming-app1" in streams_explorer.applications
         assert "streaming-app2" in streams_explorer.applications
