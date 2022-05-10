@@ -82,9 +82,7 @@ class TestStreamsExplorer:
         return FakeLinker()
 
     @pytest.fixture()
-    def streams_explorer(
-        self, mocker, deployments, cron_jobs, monkeypatch, fake_linker
-    ):
+    def streams_explorer(self, monkeypatch, deployments, cron_jobs, fake_linker):
         monkeypatch.setattr(settings.kafka, "enable", True)
 
         explorer = StreamsExplorer(
@@ -144,31 +142,30 @@ class TestStreamsExplorer:
         def get_all_topic_names(_) -> Set[str]:
             return set()
 
-        mocker.patch(
+        monkeypatch.setattr(
             "streams_explorer.core.services.kafkaconnect.KafkaConnect.get_connectors",
             get_connectors,
         )
-        mocker.patch(
+        monkeypatch.setattr(
             "streams_explorer.core.services.kafkaconnect.KafkaConnect.get_connector_info",
             get_connector_info,
         )
-        mocker.patch(
+        monkeypatch.setattr(
             "streams_explorer.core.services.kafkaconnect.KafkaConnect.sanitize_connector_config",
             lambda config: config,
         )
-        mocker.patch(
+        monkeypatch.setattr(
             "streams_explorer.core.services.kafka_admin_client.KafkaAdminClient.get_topic_config",
             get_topic_config,
         )
-        mocker.patch(
+        monkeypatch.setattr(
             "streams_explorer.core.services.kafka_admin_client.KafkaAdminClient.get_topic_partitions",
             get_topic_partitions,
         )
-        mocker.patch(
+        monkeypatch.setattr(
             "streams_explorer.core.services.kafka_admin_client.KafkaAdminClient.get_all_topic_names",
             get_all_topic_names,
         )
-
         monkeypatch.setattr(explorer, "watch", watch)
 
         return explorer
