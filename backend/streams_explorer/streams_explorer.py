@@ -77,7 +77,7 @@ class StreamsExplorer:
                 )
 
     async def update(self):
-        # extractor_container.reset()
+        # extractor_container.reset() # TODO
         self.data_flow.reset()
         self.__create_graph()
         self.data_flow.setup_metric_provider()
