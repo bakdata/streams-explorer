@@ -27,7 +27,9 @@ async def update():
 @app.on_event("startup")
 @repeat_every(seconds=settings.kafkaconnect.update_interval)
 async def update_connectors():
-    await app.state.streams_explorer.update_connectors()
+    if not settings.kafkaconnect.url:
+        return
+    app.state.streams_explorer.update_connectors()
 
 
 def start():

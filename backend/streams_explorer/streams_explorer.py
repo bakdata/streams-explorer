@@ -243,7 +243,6 @@ class StreamsExplorer:
         return cron_jobs
 
     def update_connectors(self):
-        self.kafka_connectors.clear()
         logger.info("Retrieve Kafka connectors")
         self.kafka_connectors = KafkaConnect.connectors()
 
