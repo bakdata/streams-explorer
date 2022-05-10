@@ -96,13 +96,16 @@ class TestStreamsExplorer:
             GenericSource(),
         ]
         monkeypatch.setattr(settings.k8s, "consumer_group_annotation", "consumerGroup")
-        mocker.patch.object(
-            explorer, attribute="get_deployments", return_value=deployments
-        )
+        # mocker.patch.object(
+        #     explorer, attribute="get_deployments", return_value=deployments
+        # )
+        for deployment in deployments + cron_jobs:
+            event = {"type": "ADDED", "object": deployment}
+            explorer.handle_event(event)
 
-        mocker.patch.object(explorer, attribute="get_stateful_sets", return_value=[])
+        # mocker.patch.object(explorer, attribute="get_stateful_sets", return_value=[])
 
-        mocker.patch.object(explorer, attribute="get_cron_jobs", return_value=cron_jobs)
+        # mocker.patch.object(explorer, attribute="get_cron_jobs", return_value=cron_jobs)
 
         def get_connectors():
             return ["es-sink-connector", "generic-source-connector"]
@@ -176,7 +179,12 @@ class TestStreamsExplorer:
     @pytest.mark.asyncio
     async def test_update(self, streams_explorer: StreamsExplorer):
         await streams_explorer.update()
-        assert len(streams_explorer.applications) == 3
+        # assert len(streams_explorer.applications) == 3
+        assert set(streams_explorer.applications.keys()) == {
+            "streaming-app1",
+            "streaming-app2",
+            "streaming-app3",
+        }
         assert "streaming-app1" in streams_explorer.applications
         assert "streaming-app2" in streams_explorer.applications
         assert "streaming-app3" in streams_explorer.applications
