@@ -319,7 +319,7 @@ class DataFlowGraph:
         graph.add_edge(app_id, topic_name)
 
     def reset(self):
-        self.graph = nx.DiGraph()
+        self.graph.clear()
         self.json_graph.clear()
         self.pipelines.clear()
         self.json_pipelines.clear()
