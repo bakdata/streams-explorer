@@ -67,8 +67,8 @@ class TestApplication:
     async def test_update_every_x_seconds(
         self, mocker, monkeypatch, deployments, stateful_sets, cron_jobs
     ):
-        settings.graph.update_interval = 2
-        settings.kafkaconnect.update_interval = 2
+        settings.graph.update_interval = 1
+        settings.kafkaconnect.update_interval = 1
 
         async def watch(self):
             for deployment in deployments + cron_jobs:
@@ -122,7 +122,7 @@ class TestApplication:
                 response = client.get(f"{API_PREFIX}/graph")
                 return [node["id"] for node in response.json()["nodes"]]
 
-            await asyncio.sleep(2)
+            await asyncio.sleep(1)
 
             nodes = fetch_graph()
             assert "streaming-app1" in nodes
@@ -154,9 +154,8 @@ class TestApplication:
                 ),
             }
             app.state.streams_explorer.handle_event(event)
-            await app.state.streams_explorer.update()
 
-            await asyncio.sleep(2)
+            await asyncio.sleep(1)  # update graph
             nodes = fetch_graph()
             assert "streaming-app1" in nodes
             assert "streaming-app2" in nodes
@@ -178,12 +177,12 @@ class TestApplication:
             # remove a connector
             connectors = ["connector1"]
             assert KafkaConnect.get_connectors() == connectors
-            app.state.streams_explorer.update_connectors()
 
+            await asyncio.sleep(2)  # update connectors
             assert len(app.state.streams_explorer.kafka_connectors) == 1
             assert app.state.streams_explorer.kafka_connectors[0].name == "connector1"
 
-            await asyncio.sleep(2)
+            await asyncio.sleep(1)  # update graph
             nodes = fetch_graph()
             assert "streaming-app1" in nodes
             assert "streaming-app2" in nodes
