@@ -117,10 +117,14 @@ class TestApplication:
         from main import app
 
         with TestClient(app) as client:
-            await asyncio.sleep(2)
-            response = client.get(f"{API_PREFIX}/graph")
 
-            nodes = [node["id"] for node in response.json()["nodes"]]
+            def fetch_graph() -> List[str]:
+                response = client.get(f"{API_PREFIX}/graph")
+                return [node["id"] for node in response.json()["nodes"]]
+
+            await asyncio.sleep(2)
+
+            nodes = fetch_graph()
             assert "streaming-app1" in nodes
             assert "streaming-app2" in nodes
             assert "streaming-app3" in nodes
@@ -153,9 +157,7 @@ class TestApplication:
             await app.state.streams_explorer.update()
 
             await asyncio.sleep(2)
-            response = client.get(f"{API_PREFIX}/graph")
-
-            nodes = [node["id"] for node in response.json()["nodes"]]
+            nodes = fetch_graph()
             assert "streaming-app1" in nodes
             assert "streaming-app2" in nodes
             assert "streaming-app3" not in nodes
@@ -182,13 +184,12 @@ class TestApplication:
             assert app.state.streams_explorer.kafka_connectors[0].name == "connector1"
 
             await asyncio.sleep(2)
-            response = client.get(f"{API_PREFIX}/graph")
-            assert len(response.json().get("nodes")) == 9
+            nodes = fetch_graph()
             assert "streaming-app1" in nodes
             assert "streaming-app2" in nodes
             assert "streaming-app3" not in nodes
             assert "connector1" in nodes
-            assert "connector2" in nodes
+            assert "connector2" not in nodes
             assert "input-topic1" in nodes
             assert "output-topic1" in nodes
             assert "error-topic1" in nodes
@@ -196,7 +197,8 @@ class TestApplication:
             assert "output-topic2" in nodes
             assert "error-topic2" in nodes
             assert "input-topic3" not in nodes
-            assert "test-index" in nodes
+            assert "test-index" not in nodes
+            assert len(nodes) == 9
 
     @pytest.mark.asyncio
     async def test_pipeline_not_found(self, monkeypatch):
