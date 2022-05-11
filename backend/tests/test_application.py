@@ -1,9 +1,15 @@
 import asyncio
+from typing import List
 
 import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
-from kubernetes_asyncio.client import V1beta1CronJob, V1ObjectMeta
+from kubernetes_asyncio.client import (
+    V1beta1CronJob,
+    V1Deployment,
+    V1ObjectMeta,
+    V1StatefulSet,
+)
 
 from streams_explorer.application import get_application
 from streams_explorer.core.config import API_PREFIX, settings
@@ -29,48 +35,63 @@ class TestApplication:
     async def setup(self):
         pass
 
+    @pytest.fixture()
+    def deployments(self) -> List[V1Deployment]:
+        return [
+            get_streaming_app_deployment(
+                "streaming-app1", "input-topic1", "output-topic1", "error-topic1"
+            ),
+            get_streaming_app_deployment(
+                "streaming-app2", "input-topic2", "output-topic2", "error-topic2"
+            ),
+            get_streaming_app_deployment(
+                "streaming-app3",
+                "input-topic3",
+                "output-topic3",
+                "error-topic3",
+                pipeline="pipeline2",
+            ),
+        ]
+
+    # def deployments_after(self):
+    #     return [
+    #         get_streaming_app_deployment(
+    #             "streaming-app1",
+    #             "input-topic1",
+    #             "output-topic1",
+    #             "error-topic1",
+    #         ),
+    #         get_streaming_app_deployment(
+    #             "streaming-app2",
+    #             "input-topic2",
+    #             "output-topic2",
+    #             "error-topic2",
+    #         ),
+    #     ]
+
+    @pytest.fixture()
+    def stateful_sets(self) -> List[V1StatefulSet]:
+        return []
+
+    @pytest.fixture()
+    def cron_jobs(self) -> List[V1beta1CronJob]:
+        return [V1beta1CronJob(metadata=V1ObjectMeta(name="test"))]
+
     @pytest.mark.skip
     @pytest.mark.asyncio
-    async def test_update_every_x_seconds(self, mocker, monkeypatch):
+    async def test_update_every_x_seconds(
+        self, mocker, monkeypatch, deployments, stateful_sets, cron_jobs
+    ):
         # workaround for exception "This event loop is already running"
         import nest_asyncio
 
         nest_asyncio.apply()
         settings.graph.update_interval = 2
 
-        def mock_get_deployments(*_):
-            return [
-                get_streaming_app_deployment(
-                    "streaming-app1", "input-topic1", "output-topic1", "error-topic1"
-                ),
-                get_streaming_app_deployment(
-                    "streaming-app2", "input-topic2", "output-topic2", "error-topic2"
-                ),
-                get_streaming_app_deployment(
-                    "streaming-app3",
-                    "input-topic3",
-                    "output-topic3",
-                    "error-topic3",
-                    pipeline="pipeline2",
-                ),
-            ]
-
-        def mock_get_stateful_sets(*_):
-            return []
-
-        def mock_get_cron_jobs(*_):
-            return [V1beta1CronJob(metadata=V1ObjectMeta(name="test"))]
-
         async def watch(self):
-            for deployment in mock_get_deployments() + mock_get_cron_jobs():
+            for deployment in deployments + cron_jobs:
                 event = {"type": "ADDED", "object": deployment}
                 self.handle_event(event)
-
-        # monkeypatch.setattr(StreamsExplorer, "get_deployments", mock_get_deployments)
-        # monkeypatch.setattr(
-        #     StreamsExplorer, "get_stateful_sets", mock_get_stateful_sets
-        # )
-        # monkeypatch.setattr(StreamsExplorer, "get_cron_jobs", mock_get_cron_jobs)
 
         monkeypatch.setattr(StreamsExplorer, "setup", self.setup)
         monkeypatch.setattr(StreamsExplorer, "watch", watch)
@@ -117,28 +138,6 @@ class TestApplication:
 
             assert len(response.json().get("nodes")) == 15
 
-            def mock_get_deployments_after(*_):
-                return [
-                    get_streaming_app_deployment(
-                        "streaming-app1",
-                        "input-topic1",
-                        "output-topic1",
-                        "error-topic1",
-                    ),
-                    get_streaming_app_deployment(
-                        "streaming-app2",
-                        "input-topic2",
-                        "output-topic2",
-                        "error-topic2",
-                    ),
-                ]
-
-            monkeypatch.setattr(
-                StreamsExplorer, "get_deployments", mock_get_deployments_after
-            )
-            monkeypatch.setattr(
-                StreamsExplorer, "get_stateful_sets", mock_get_stateful_sets
-            )
             await asyncio.sleep(2)
             response = client.get(f"{API_PREFIX}/graph")
 
