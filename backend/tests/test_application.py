@@ -32,9 +32,6 @@ class TestApplication:
         assert response.headers["content-type"] == "text/plain; charset=utf-8"
         assert response.content.decode() == ""
 
-    async def setup(self):
-        pass
-
     @pytest.fixture()
     def deployments(self) -> List[V1Deployment]:
         return [
@@ -155,7 +152,10 @@ class TestApplication:
     async def test_pipeline_not_found(self, monkeypatch):
         from main import app
 
-        monkeypatch.setattr(StreamsExplorer, "setup", self.setup)
+        async def setup(_):
+            pass
+
+        monkeypatch.setattr(StreamsExplorer, "setup", setup)
 
         with TestClient(app) as client:
             response = client.get(
