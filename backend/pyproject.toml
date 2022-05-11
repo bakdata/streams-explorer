@@ -51,7 +51,6 @@ pytest-asyncio = "^0.15.1"
 pytest-clarity = "^1.0.1"
 pytest-cov = "^3.0.0"
 pytest-mock = "^3.6.1"
-nest-asyncio = "^1.5.1"
 respx = "^0.18.0"
 
 [tool.poetry.scripts]

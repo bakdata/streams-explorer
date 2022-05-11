@@ -67,10 +67,6 @@ class TestApplication:
     async def test_update_every_x_seconds(
         self, mocker, monkeypatch, deployments, stateful_sets, cron_jobs
     ):
-        # workaround for exception "This event loop is already running"
-        # import nest_asyncio
-
-        # nest_asyncio.apply()
         settings.graph.update_interval = 2
         settings.kafkaconnect.update_interval = 2
 
