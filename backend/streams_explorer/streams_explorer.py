@@ -1,5 +1,5 @@
 import asyncio
-from typing import Dict, List, Optional, Type
+from typing import Callable, Dict, List, Optional, Type
 
 import kubernetes_asyncio.client
 import kubernetes_asyncio.config
@@ -181,7 +181,7 @@ class StreamsExplorer:
         self.k8s_app_client = kubernetes_asyncio.client.AppsV1Api()
         self.k8s_batch_client = kubernetes_asyncio.client.BatchV1beta1Api()
 
-    async def __watch_k8s(self, resource, namespace: str, return_type: str):
+    async def __watch_k8s(self, resource: Callable, namespace: str, return_type: str):
         async with kubernetes_asyncio.watch.Watch(return_type=return_type) as w:
             async with w.stream(resource, namespace) as stream:
                 async for event in stream:
