@@ -13,12 +13,15 @@ from streams_explorer.core.services.dataflow_graph import NodeTypesEnum
 from streams_explorer.core.services.metric_providers import MetricProvider
 from streams_explorer.defaultlinker import DefaultLinker
 from streams_explorer.extractors import extractor_container
+from streams_explorer.models.k8s_config import K8sConfig
 from streams_explorer.models.kafka_connector import KafkaConnectorTypesEnum
 from streams_explorer.models.node_information import (
     NodeInfoListItem,
     NodeInformation,
     NodeInfoType,
 )
+from streams_explorer.models.sink import Sink
+from streams_explorer.models.source import Source
 from streams_explorer.streams_explorer import StreamsExplorer
 from tests.utils import get_streaming_app_cronjob, get_streaming_app_deployment
 
@@ -296,6 +299,36 @@ class TestStreamsExplorer:
         assert "test-cronjob" in streams_explorer.applications
         assert "non-streams-app-cronjob" not in streams_explorer.applications
         extractor_container.extractors.clear()
+
+    @pytest.mark.asyncio
+    async def test_refresh_connectors(self, streams_explorer: StreamsExplorer):
+        class MockAppExtractor(Extractor):
+            def on_streaming_app_config_parsing(self, config: K8sConfig):
+                self.sources.append(
+                    Source(
+                        node_type="app-source",
+                        name=f"{config.id}-source",
+                        target=config.id,
+                    )
+                )
+
+        extractor = MockAppExtractor()
+        extractor_container.extractors.append(extractor)
+        await streams_explorer.watch()
+        await streams_explorer.update()
+        sources, sinks = extractor_container.get_sources_sinks()
+        assert len(sources) == 3
+        assert not sinks
+        streams_explorer.update_connectors()
+        sources, sinks = extractor_container.get_sources_sinks()
+        assert len(sources) == 3
+        assert len(sinks) == 1
+        assert sinks[0].node_type == "elasticsearch-index"
+        # updating connectors should only clear sinks & sources added from connectors
+        streams_explorer.update_connectors()
+        sources, sinks = extractor_container.get_sources_sinks()
+        assert len(sources) == 3
+        assert len(sinks) == 1
 
     @pytest.mark.asyncio
     async def test_get_link_default(self, streams_explorer: StreamsExplorer):
