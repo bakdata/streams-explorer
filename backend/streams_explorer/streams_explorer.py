@@ -217,40 +217,6 @@ class StreamsExplorer:
         elif event["type"] == K8sDeploymentEvent.DELETED:
             self.__remove_app(app)
 
-    def get_deployments(self) -> List[V1Deployment]:
-        deployments: List[V1Deployment] = []
-        for namespace in self.namespaces:
-            logger.info(f"List deployments in namespace {namespace}")
-            deployments += self.k8s_app_client.list_namespaced_deployment(
-                namespace=namespace, watch=False
-            ).items
-        return deployments
-
-    def get_stateful_sets(self) -> List[V1StatefulSet]:
-        stateful_sets: List[V1StatefulSet] = []
-        for namespace in self.namespaces:
-            logger.info(f"List statefulsets in namespace {namespace}")
-            stateful_sets += self.k8s_app_client.list_namespaced_stateful_set(
-                namespace=namespace, watch=False
-            ).items
-        return stateful_sets
-
-    def __retrieve_cron_jobs(self):
-        logger.info("Retrieve cronjob descriptions")
-        cron_jobs = self.get_cron_jobs()
-        for cron_job in cron_jobs:
-            if app := extractor_container.on_cron_job(cron_job):
-                self.__add_app(app)
-
-    def get_cron_jobs(self) -> List[V1beta1CronJob]:
-        cron_jobs: List[V1beta1CronJob] = []
-        for namespace in self.namespaces:
-            logger.info(f"List cronjobs in namespace {namespace}")
-            cron_jobs += self.k8s_batch_client.list_namespaced_cron_job(
-                namespace=namespace, watch=False
-            ).items
-        return cron_jobs
-
     def update_connectors(self):
         extractor_container.reset_connector()
         logger.info("Retrieve Kafka connectors")
