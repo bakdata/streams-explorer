@@ -73,7 +73,7 @@ class TestApplication:
         settings.kafkaconnect.update_interval = 1
 
         async def watch(self):
-            for deployment in deployments + cron_jobs:
+            for deployment in deployments + stateful_sets + cron_jobs:
                 event = K8sEvent(type=K8sEventType.ADDED, object=deployment)
                 self.handle_event(event)
 
