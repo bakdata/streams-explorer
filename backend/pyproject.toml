@@ -52,6 +52,7 @@ pytest-clarity = "^1.0.1"
 pytest-cov = "^3.0.0"
 pytest-mock = "^3.6.1"
 respx = "^0.18.0"
+requests = "^2.27.1"
 
 [tool.poetry.scripts]
 start = "main:start"
