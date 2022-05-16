@@ -261,7 +261,7 @@ class TestStreamsExplorer:
         )
 
         # clear topic_info
-        streams_explorer.linking_service.topic_info = []
+        streams_explorer.linking_service.topic_info.clear()
         # verify caching
         assert (
             streams_explorer.get_node_information("es-sink-connector-dead-letter-topic")
@@ -295,7 +295,7 @@ class TestStreamsExplorer:
         assert extractor.cron_job.metadata.name == "test-cronjob"
         assert "test-cronjob" in streams_explorer.applications
         assert "non-streams-app-cronjob" not in streams_explorer.applications
-        extractor_container.extractors = []
+        extractor_container.extractors.clear()
 
     @pytest.mark.asyncio
     async def test_get_link_default(self, streams_explorer: StreamsExplorer):
