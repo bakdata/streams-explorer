@@ -298,7 +298,7 @@ class TestStreamsExplorer:
     @pytest.mark.asyncio
     async def test_update_sinks_sources(self, streams_explorer: StreamsExplorer):
         class MockAppExtractor(Extractor):
-            def _create_source(self, config: K8sConfig) -> Source:
+            def _parse(self, config: K8sConfig) -> Source:
                 return Source(
                     node_type="app-source",
                     name=f"{config.id}-source",
@@ -306,11 +306,11 @@ class TestStreamsExplorer:
                 )
 
             def on_streaming_app_add(self, config: K8sConfig):
-                source = self._create_source(config)
+                source = self._parse(config)
                 self.sources.append(source)
 
             def on_streaming_app_delete(self, config: K8sConfig):
-                source = self._create_source(config)
+                source = self._parse(config)
                 self.sources.remove(source)
 
         extractor = MockAppExtractor()
