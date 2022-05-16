@@ -96,7 +96,8 @@ class K8sApp:
             return False
         return True
 
-    def get_class_name(self) -> str:
+    @property
+    def class_name(self) -> str:
         return self.__class__.__name__
 
     def __get_attributes(self):
@@ -109,7 +110,7 @@ class K8sApp:
                 self.attributes[key] = value
             elif self.is_streams_bootstrap_app():
                 logger.warning(
-                    f"{self.get_class_name()} {self.name} does not have a label with the name: {key}"
+                    f"{self.class_name} {self.name} does not have a label with the name: {key}"
                 )
 
         pipeline = self.get_pipeline()
@@ -182,7 +183,7 @@ class K8sAppCronJob(K8sApp):
                 self.attributes[key] = value
             elif self.is_streams_bootstrap_app():
                 logger.warning(
-                    f"{self.get_class_name()} {self.name} does not have a label with the name: {key}"
+                    f"{self.class_name} {self.name} does not have a label with the name: {key}"
                 )
 
         pipeline = self.get_pipeline()
