@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-import dataclasses
-from typing import Dict, List, Optional, Set, Type, Union
+from typing import Dict, Optional, Set, Type, Union
 
 from kubernetes_asyncio.client import (
     V1beta1CronJob,
@@ -29,32 +28,59 @@ class K8sApp:
     def __init__(self, k8s_object: K8sObject):
         self.k8s_object = k8s_object
         self.metadata: V1ObjectMeta = k8s_object.metadata or V1ObjectMeta()
-        self.id: str
-        self.name: str
-        self.input_topics: List[str] = []
-        self.input_pattern: Optional[str] = None
-        self.output_topic: Optional[str] = None
-        self.error_topic: Optional[str] = None
-        self.extra_input_topics: List[str] = []
-        self.extra_output_topics: List[str] = []
-        self.extra_input_patterns: List[str] = []
         self.attributes: Dict[str, str] = {}
         self.config: K8sConfig
         self.setup()
+
+    @property
+    def id(self) -> str:
+        return self.config.id
+
+    @property
+    def name(self) -> str:
+        return self.config.name
+
+    @property
+    def input_topics(self) -> list[str]:
+        return self.config.input_topics
+
+    @property
+    def output_topic(self) -> str | None:
+        return self.config.output_topic
+
+    @property
+    def error_topic(self) -> str | None:
+        return self.config.error_topic
+
+    @property
+    def input_pattern(self) -> str | None:
+        return self.config.input_pattern
+
+    @property
+    def extra_input_topics(self) -> list[str]:
+        return self.config.extra_input_topics
+
+    @property
+    def extra_output_topics(self) -> list[str]:
+        return self.config.extra_output_topics
+
+    @property
+    def extra_input_patterns(self) -> list[str]:
+        return self.config.extra_input_patterns
 
     def setup(self):
         self.spec = self._get_pod_spec()
         self._ignore_containers = self.get_ignore_containers()
         self.container = self.get_app_container(self.spec, self._ignore_containers)
-        self.get_common_configuration()
+        self.extract_config()
         self.__get_attributes()
 
     def _get_pod_spec(self) -> V1PodSpec | None:
         if self.k8s_object.spec and self.k8s_object.spec.template.spec:
             return self.k8s_object.spec.template.spec
 
-    def extract_config(self) -> K8sConfig:
-        return config_parser(self).parse()
+    def extract_config(self) -> None:
+        self.config = config_parser(self).parse()
 
     def to_dict(self) -> dict:
         return self.k8s_object.to_dict()
@@ -64,11 +90,6 @@ class K8sApp:
 
     def get_consumer_group(self) -> Optional[str]:
         return self.attributes.get(settings.k8s.consumer_group_annotation)
-
-    def get_common_configuration(self):  # TODO: refactor
-        self.config = self.extract_config()
-        for key, value in dataclasses.asdict(self.config).items():
-            setattr(self, key, value)
 
     def is_streams_bootstrap_app(self) -> bool:
         if not self.input_topics and not self.output_topic:
@@ -140,7 +161,7 @@ class K8sAppCronJob(K8sApp):
     def setup(self):
         self.spec = self._get_pod_spec()
         self.container = self.get_app_container(self.spec)
-        self.get_common_configuration()
+        self.extract_config()
         self.__get_attributes()
 
     def _get_pod_spec(self) -> V1PodSpec | None:
