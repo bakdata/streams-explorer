@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Optional, Tuple
+from typing import TYPE_CHECKING, NamedTuple
 
 from kubernetes_asyncio.client import V1beta1CronJob
 from loguru import logger
@@ -16,9 +16,14 @@ if TYPE_CHECKING:
     from streams_explorer.core.k8s_app import K8sAppCronJob
 
 
+class SourcesSinks(NamedTuple):
+    sources: list[Source]
+    sinks: list[Sink]
+
+
 class ExtractorContainer:
-    def __init__(self, extractors=None):
-        self.extractors: List[Extractor] = extractors if extractors else []
+    def __init__(self, extractors: list[Extractor] | None = None):
+        self.extractors: list[Extractor] = extractors if extractors else []
 
     def add(self, extractor: Extractor):
         self.extractors.append(extractor)
@@ -30,8 +35,7 @@ class ExtractorContainer:
 
     def reset(self):
         for extractor in self.extractors:
-            extractor.sinks = []
-            extractor.sources = []
+            extractor.reset()
 
     def on_streaming_app_config_parsing(self, config: K8sConfig):
         for extractor in self.extractors:
@@ -39,29 +43,22 @@ class ExtractorContainer:
 
     def on_connector_info_parsing(
         self, info: dict, connector_name: str
-    ) -> Optional[KafkaConnector]:
+    ) -> KafkaConnector | None:
         for extractor in self.extractors:
-            connector: Optional[KafkaConnector] = extractor.on_connector_info_parsing(
-                info, connector_name
-            )
-            if connector:
+            if connector := extractor.on_connector_info_parsing(info, connector_name):
                 return connector
         return None
 
-    def on_cron_job(self, cron_job: V1beta1CronJob) -> Optional[K8sAppCronJob]:
+    def on_cron_job(self, cron_job: V1beta1CronJob) -> K8sAppCronJob | None:
         for extractor in self.extractors:
             if app := extractor.on_cron_job_parsing(cron_job):
                 return app
         return None
 
-    def get_sources_sinks(self) -> Tuple[List[Source], List[Sink]]:
-        sources: List[Source] = []
-        sinks: List[Sink] = []
+    def get_sources_sinks(self) -> SourcesSinks:
+        sources: list[Source] = []
+        sinks: list[Sink] = []
         for extractor in self.extractors:
-            if extractor.sources:
-                for source in extractor.sources:
-                    sources.append(source)
-            if extractor.sinks:
-                for sink in extractor.sinks:
-                    sinks.append(sink)
-        return sources, sinks
+            sources.extend(extractor.sources)
+            sinks.extend(extractor.sinks)
+        return SourcesSinks(sources, sinks)

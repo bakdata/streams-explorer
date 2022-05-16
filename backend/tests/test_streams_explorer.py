@@ -1,4 +1,4 @@
-from typing import List, Optional, Set
+from typing import Optional, Set
 
 import pytest
 from kubernetes_asyncio.client import V1beta1CronJob
@@ -19,7 +19,6 @@ from streams_explorer.models.node_information import (
     NodeInformation,
     NodeInfoType,
 )
-from streams_explorer.models.source import Source
 from streams_explorer.streams_explorer import StreamsExplorer
 from tests.utils import get_streaming_app_cronjob, get_streaming_app_deployment
 
@@ -283,10 +282,6 @@ class TestStreamsExplorer:
     @pytest.mark.asyncio
     async def test_cron_job_extractor(self, streams_explorer: StreamsExplorer):
         class MockCronjobExtractor(Extractor):
-            def __init__(self):
-                self.sources: List[Source] = []
-                self.cron_job = None
-
             def on_cron_job_parsing(self, cron_job: V1beta1CronJob):
                 self.cron_job = cron_job
                 return K8sAppCronJob(cron_job)

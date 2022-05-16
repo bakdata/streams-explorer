@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, List, Optional
 
 from kubernetes_asyncio.client import V1beta1CronJob
@@ -13,9 +14,14 @@ if TYPE_CHECKING:
     from streams_explorer.core.k8s_app import K8sAppCronJob
 
 
+@dataclass
 class Extractor:
-    sources: List[Source] = []
-    sinks: List[Sink] = []
+    sources: List[Source] = field(default_factory=list)
+    sinks: List[Sink] = field(default_factory=list)
+
+    def reset(self):
+        self.sources.clear()
+        self.sinks.clear()
 
     def on_streaming_app_config_parsing(self, config: K8sConfig):
         ...
