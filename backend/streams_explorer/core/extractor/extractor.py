@@ -26,16 +26,16 @@ class Extractor:
     def reset_connector(self):
         ...
 
-    def on_streaming_app_add(self, config: K8sConfig):
+    def on_streaming_app_add(self, _config: K8sConfig):
         ...
 
-    def on_streaming_app_delete(self, config: K8sConfig):
+    def on_streaming_app_delete(self, _config: K8sConfig):
         ...
 
     def on_connector_info_parsing(
-        self, info: dict, connector_name: str
+        self, _info: dict, _connector_name: str
     ) -> Optional[KafkaConnector]:
         ...
 
-    def on_cron_job_parsing(self, cron_job: V1beta1CronJob) -> Optional[K8sAppCronJob]:
+    def on_cron_job_parsing(self, _cron_job: V1beta1CronJob) -> Optional[K8sAppCronJob]:
         ...
