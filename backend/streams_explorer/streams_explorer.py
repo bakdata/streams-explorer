@@ -242,16 +242,18 @@ class StreamsExplorer:
         return cron_jobs
 
     def update_connectors(self):
-        extractor_container.reset()  # TODO: only clear sinks/sources added by connectors
+        extractor_container.reset_connector()
         logger.info("Retrieve Kafka connectors")
         self.kafka_connectors = KafkaConnect.connectors()
 
     def __add_app(self, app: K8sApp):
         if app.is_streams_bootstrap_app():
             self.applications[app.id] = app
+            extractor_container.on_streaming_app_add(app.config)
 
     def __remove_app(self, app: K8sApp):
         self.applications.pop(app.id)
+        extractor_container.on_streaming_app_delete(app.config)
 
     def __create_graph(self):
         logger.info("Setup pipeline graph")

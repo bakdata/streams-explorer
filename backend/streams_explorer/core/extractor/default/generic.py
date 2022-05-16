@@ -20,6 +20,9 @@ class GenericSink(Extractor):
             )
         return None
 
+    def reset_connector(self):
+        self.reset()
+
 
 class GenericSourceConnector(KafkaConnector):
     def __init__(self, **kwargs):
@@ -39,3 +42,6 @@ class GenericSource(Extractor):
         if info["type"] == KafkaConnectorTypesEnum.SOURCE:
             return GenericSourceConnector(name=connector_name, config=info["config"])
         return None
+
+    def reset_connector(self):
+        self.reset()

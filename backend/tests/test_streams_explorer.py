@@ -20,10 +20,13 @@ from streams_explorer.models.node_information import (
     NodeInformation,
     NodeInfoType,
 )
-from streams_explorer.models.sink import Sink
 from streams_explorer.models.source import Source
 from streams_explorer.streams_explorer import StreamsExplorer
 from tests.utils import get_streaming_app_cronjob, get_streaming_app_deployment
+
+APP1 = get_streaming_app_deployment(
+    "streaming-app1", "input-topic1", "output-topic1", "error-topic1"
+)
 
 
 class TestStreamsExplorer:
@@ -38,9 +41,7 @@ class TestStreamsExplorer:
             get_streaming_app_deployment(
                 "non-streams-app-deployment", input_topics=None, output_topic=None
             ),
-            get_streaming_app_deployment(
-                "streaming-app1", "input-topic1", "output-topic1", "error-topic1"
-            ),
+            APP1,
             get_streaming_app_deployment(
                 "streaming-app2",
                 "input-topic2",
@@ -264,7 +265,7 @@ class TestStreamsExplorer:
         )
 
         # clear topic_info
-        streams_explorer.linking_service.topic_info.clear()
+        streams_explorer.linking_service.topic_info = []
         # verify caching
         assert (
             streams_explorer.get_node_information("es-sink-connector-dead-letter-topic")
@@ -301,16 +302,22 @@ class TestStreamsExplorer:
         extractor_container.extractors.clear()
 
     @pytest.mark.asyncio
-    async def test_refresh_connectors(self, streams_explorer: StreamsExplorer):
+    async def test_update_sinks_sources(self, streams_explorer: StreamsExplorer):
         class MockAppExtractor(Extractor):
-            def on_streaming_app_config_parsing(self, config: K8sConfig):
-                self.sources.append(
-                    Source(
-                        node_type="app-source",
-                        name=f"{config.id}-source",
-                        target=config.id,
-                    )
+            def _create_source(self, config: K8sConfig) -> Source:
+                return Source(
+                    node_type="app-source",
+                    name=f"{config.id}-source",
+                    target=config.id,
                 )
+
+            def on_streaming_app_add(self, config: K8sConfig):
+                source = self._create_source(config)
+                self.sources.append(source)
+
+            def on_streaming_app_delete(self, config: K8sConfig):
+                source = self._create_source(config)
+                self.sources.remove(source)
 
         extractor = MockAppExtractor()
         extractor_container.extractors.append(extractor)
@@ -324,10 +331,17 @@ class TestStreamsExplorer:
         assert len(sources) == 3
         assert len(sinks) == 1
         assert sinks[0].node_type == "elasticsearch-index"
+
         # updating connectors should only clear sinks & sources added from connectors
         streams_explorer.update_connectors()
         sources, sinks = extractor_container.get_sources_sinks()
         assert len(sources) == 3
+        assert len(sinks) == 1
+
+        # deleting app deployment should remove source
+        streams_explorer.handle_event({"type": "DELETED", "object": APP1})
+        sources, sinks = extractor_container.get_sources_sinks()
+        assert len(sources) == 2
         assert len(sinks) == 1
 
     @pytest.mark.asyncio

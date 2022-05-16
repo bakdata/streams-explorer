@@ -32,3 +32,6 @@ class ElasticsearchSink(Extractor):
                 )
             return connector
         return None
+
+    def reset_connector(self):
+        self.reset()

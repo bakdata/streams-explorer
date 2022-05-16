@@ -23,7 +23,13 @@ class Extractor:
         self.sources.clear()
         self.sinks.clear()
 
-    def on_streaming_app_config_parsing(self, config: K8sConfig):
+    def reset_connector(self):
+        ...
+
+    def on_streaming_app_add(self, config: K8sConfig):
+        ...
+
+    def on_streaming_app_delete(self, config: K8sConfig):
         ...
 
     def on_connector_info_parsing(

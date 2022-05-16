@@ -37,9 +37,17 @@ class ExtractorContainer:
         for extractor in self.extractors:
             extractor.reset()
 
-    def on_streaming_app_config_parsing(self, config: K8sConfig):
+    def reset_connector(self):
         for extractor in self.extractors:
-            extractor.on_streaming_app_config_parsing(config)
+            extractor.reset_connector()
+
+    def on_streaming_app_add(self, config: K8sConfig):
+        for extractor in self.extractors:
+            extractor.on_streaming_app_add(config)
+
+    def on_streaming_app_delete(self, config: K8sConfig):
+        for extractor in self.extractors:
+            extractor.on_streaming_app_delete(config)
 
     def on_connector_info_parsing(
         self, info: dict, connector_name: str

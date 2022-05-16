@@ -15,7 +15,6 @@ from loguru import logger
 
 from streams_explorer.core.config import settings
 from streams_explorer.core.k8s_config_parser import K8sConfigParser
-from streams_explorer.extractors import extractor_container
 from streams_explorer.k8s_config_parser import load_config_parser
 from streams_explorer.models.k8s_config import K8sConfig
 
@@ -40,6 +39,7 @@ class K8sApp:
         self.extra_output_topics: List[str] = []
         self.extra_input_patterns: List[str] = []
         self.attributes: Dict[str, str] = {}
+        self.config: K8sConfig
         self.setup()
 
     def setup(self):
@@ -65,13 +65,10 @@ class K8sApp:
     def get_consumer_group(self) -> Optional[str]:
         return self.attributes.get(settings.k8s.consumer_group_annotation)
 
-    def get_common_configuration(self):
-        config = self.extract_config()
-        for key, value in dataclasses.asdict(config).items():
+    def get_common_configuration(self):  # TODO: refactor
+        self.config = self.extract_config()
+        for key, value in dataclasses.asdict(self.config).items():
             setattr(self, key, value)
-
-        if self.is_streams_bootstrap_app():
-            extractor_container.on_streaming_app_config_parsing(config)
 
     def is_streams_bootstrap_app(self) -> bool:
         if not self.input_topics and not self.output_topic:
