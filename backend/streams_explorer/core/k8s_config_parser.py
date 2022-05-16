@@ -35,7 +35,7 @@ class StreamsBootstrapConfigParser(K8sConfigParser):
         if not name:
             name = self.k8s_app.metadata.name
         if not name:
-            raise TypeError(f"Name is required for {self.k8s_app.get_class_name()}")
+            raise TypeError(f"Name is required for {self.k8s_app.class_name}")
         return name
 
     def get_name(self) -> str:
