@@ -226,7 +226,7 @@ class StreamsExplorer:
         self.kafka_connectors = KafkaConnect.connectors()
 
     def __add_app(self, app: K8sApp):
-        if app.is_streams_bootstrap_app():
+        if app.is_streams_app():
             self.applications[app.id] = app
             extractor_container.on_streaming_app_add(app.config)
 

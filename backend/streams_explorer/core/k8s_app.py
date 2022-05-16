@@ -91,7 +91,7 @@ class K8sApp:
     def get_consumer_group(self) -> Optional[str]:
         return self.attributes.get(settings.k8s.consumer_group_annotation)
 
-    def is_streams_bootstrap_app(self) -> bool:
+    def is_streams_app(self) -> bool:
         if not self.input_topics and not self.output_topic:
             return False
         return True
@@ -108,7 +108,7 @@ class K8sApp:
             value = labels.get(key)
             if value is not None:
                 self.attributes[key] = value
-            elif self.is_streams_bootstrap_app():
+            elif self.is_streams_app():
                 logger.warning(
                     f"{self.class_name} {self.name} does not have a label with the name: {key}"
                 )
@@ -181,7 +181,7 @@ class K8sAppCronJob(K8sApp):
             value = labels.get(key)
             if value is not None:
                 self.attributes[key] = value
-            elif self.is_streams_bootstrap_app():
+            elif self.is_streams_app():
                 logger.warning(
                     f"{self.class_name} {self.name} does not have a label with the name: {key}"
                 )

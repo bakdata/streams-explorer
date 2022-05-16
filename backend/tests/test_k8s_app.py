@@ -69,7 +69,7 @@ class TestK8sApp:
         assert isinstance(k8s_apps[1], K8sAppStatefulSet)
         assert k8s_apps[1].get_service_name() == "test-service"
 
-    def test_is_streams_bootstrap_app(self):
+    def test_is_streams_app(self):
         streams_app = K8sAppDeployment(
             get_streaming_app_deployment(
                 name="test-app",
@@ -78,7 +78,7 @@ class TestK8sApp:
                 error_topic=None,
             )
         )
-        assert streams_app.is_streams_bootstrap_app()
+        assert streams_app.is_streams_app()
 
         non_streams_app = K8sAppDeployment(
             get_streaming_app_deployment(
@@ -88,7 +88,7 @@ class TestK8sApp:
                 error_topic=None,
             )
         )
-        assert not non_streams_app.is_streams_bootstrap_app()
+        assert not non_streams_app.is_streams_app()
 
     def test_error_topic_undefined(self):
         k8s_app = K8sAppDeployment(
