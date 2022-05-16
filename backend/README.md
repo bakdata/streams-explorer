@@ -234,7 +234,7 @@ For other setups a custom config parser plugin can be created by inheriting from
 import httpx
 
 from streams_explorer.core.k8s_config_parser import K8sConfigParser
-from streams_explorer.models.k8s_config import K8sConfig
+from streams_explorer.models.k8s import K8sConfig
 
 
 class CustomConfigParser(K8sConfigParser):

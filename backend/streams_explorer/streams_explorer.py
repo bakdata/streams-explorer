@@ -1,6 +1,5 @@
 import asyncio
-from enum import Enum
-from typing import Callable, Dict, List, Optional, Type
+from typing import Callable, Dict, List, Optional, Type, TypedDict
 
 import kubernetes_asyncio.client
 import kubernetes_asyncio.config
@@ -10,7 +9,7 @@ from kubernetes_asyncio.client import V1beta1CronJob, V1Deployment, V1StatefulSe
 from loguru import logger
 
 from streams_explorer.core.config import settings
-from streams_explorer.core.k8s_app import K8sApp
+from streams_explorer.core.k8s_app import K8sApp, K8sObject
 from streams_explorer.core.node_info_extractor import (
     get_displayed_information_connector,
     get_displayed_information_deployment,
@@ -23,6 +22,7 @@ from streams_explorer.core.services.linking_services import LinkingService
 from streams_explorer.core.services.metric_providers import MetricProvider
 from streams_explorer.extractors import extractor_container
 from streams_explorer.models.graph import Metric
+from streams_explorer.models.k8s import K8sEventType
 from streams_explorer.models.kafka_connector import KafkaConnector
 from streams_explorer.models.node_information import (
     NodeInfoListItem,
@@ -31,10 +31,9 @@ from streams_explorer.models.node_information import (
 )
 
 
-class K8sDeploymentEvent(str, Enum):
-    ADDED = "ADDED"
-    MODIFIED = "MODIFIED"
-    DELETED = "DELETED"
+class K8sEvent(TypedDict):
+    type: K8sEventType
+    object: K8sObject
 
 
 class StreamsExplorer:
@@ -193,29 +192,30 @@ class StreamsExplorer:
                 async for event in stream:
                     self.handle_event(event)
 
-    def handle_event(self, event: dict) -> None:
+    def handle_event(self, event: K8sEvent) -> None:
         item = event["object"]
         logger.info(
-            f"{item.metadata.namespace} {item.__class__.__name__} {event['type']}: {item.metadata.name}"
+            f"{item.metadata.namespace} {item.__class__.__name__} {event['type']}: {item.metadata.name}"  # type: ignore
         )
 
-        # cronjobs need special treatment
         if isinstance(item, V1beta1CronJob):
-            if app := extractor_container.on_cron_job(item):
-                if event["type"] in (
-                    K8sDeploymentEvent.ADDED,
-                    K8sDeploymentEvent.MODIFIED,
-                ):
-                    self.__add_app(app)
-                elif event["type"] == K8sDeploymentEvent.DELETED:
-                    self.__remove_app(app)
-            return
+            self._handle_event_cron_job(event, item)
+        else:
+            app = K8sApp.factory(item)
+            if event["type"] in (K8sEventType.ADDED, K8sEventType.MODIFIED):
+                self.__add_app(app)
+            elif event["type"] == K8sEventType.DELETED:
+                self.__remove_app(app)
 
-        app = K8sApp.factory(item)
-        if event["type"] in (K8sDeploymentEvent.ADDED, K8sDeploymentEvent.MODIFIED):
-            self.__add_app(app)
-        elif event["type"] == K8sDeploymentEvent.DELETED:
-            self.__remove_app(app)
+    def _handle_event_cron_job(self, event: K8sEvent, cron_job: V1beta1CronJob) -> None:
+        if app := extractor_container.on_cron_job(cron_job):
+            if event["type"] in (
+                K8sEventType.ADDED,
+                K8sEventType.MODIFIED,
+            ):
+                self.__add_app(app)
+            elif event["type"] == K8sEventType.DELETED:
+                self.__remove_app(app)
 
     def update_connectors(self):
         extractor_container.reset_connector()

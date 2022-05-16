@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from enum import Enum
 from typing import Dict, List, Optional
 
 
@@ -14,3 +15,9 @@ class K8sConfig:
     extra_output_topics: List[str] = field(default_factory=list)
     extra_input_patterns: List[str] = field(default_factory=list)
     extra: Dict[str, str] = field(default_factory=dict)
+
+
+class K8sEventType(str, Enum):
+    ADDED = "ADDED"
+    MODIFIED = "MODIFIED"
+    DELETED = "DELETED"

@@ -15,7 +15,7 @@ from loguru import logger
 from streams_explorer.core.config import settings
 from streams_explorer.core.k8s_config_parser import K8sConfigParser
 from streams_explorer.k8s_config_parser import load_config_parser
-from streams_explorer.models.k8s_config import K8sConfig
+from streams_explorer.models.k8s import K8sConfig
 
 ATTR_PIPELINE = "pipeline"
 

@@ -13,7 +13,7 @@ from streams_explorer.core.services.dataflow_graph import NodeTypesEnum
 from streams_explorer.core.services.metric_providers import MetricProvider
 from streams_explorer.defaultlinker import DefaultLinker
 from streams_explorer.extractors import extractor_container
-from streams_explorer.models.k8s_config import K8sConfig
+from streams_explorer.models.k8s import K8sConfig, K8sEventType
 from streams_explorer.models.kafka_connector import KafkaConnectorTypesEnum
 from streams_explorer.models.node_information import (
     NodeInfoListItem,
@@ -21,11 +21,28 @@ from streams_explorer.models.node_information import (
     NodeInfoType,
 )
 from streams_explorer.models.source import Source
-from streams_explorer.streams_explorer import K8sDeploymentEvent, StreamsExplorer
+from streams_explorer.streams_explorer import K8sEvent, StreamsExplorer
 from tests.utils import get_streaming_app_cronjob, get_streaming_app_deployment
 
+NON_STREAMS_APP = get_streaming_app_deployment(
+    "non-streams-app-deployment", input_topics=None, output_topic=None
+)
 APP1 = get_streaming_app_deployment(
     "streaming-app1", "input-topic1", "output-topic1", "error-topic1"
+)
+APP2 = get_streaming_app_deployment(
+    "streaming-app2",
+    "input-topic2",
+    "output-topic2",
+    "error-topic2",
+    consumer_group="consumer-group2",
+)
+APP3 = get_streaming_app_deployment(
+    "streaming-app3",
+    "input-topic3",
+    "output-topic3",
+    "error-topic3",
+    pipeline="pipeline2",
 )
 
 
@@ -37,26 +54,7 @@ class TestStreamsExplorer:
 
     @pytest.fixture()
     def deployments(self):
-        return [
-            get_streaming_app_deployment(
-                "non-streams-app-deployment", input_topics=None, output_topic=None
-            ),
-            APP1,
-            get_streaming_app_deployment(
-                "streaming-app2",
-                "input-topic2",
-                "output-topic2",
-                "error-topic2",
-                consumer_group="consumer-group2",
-            ),
-            get_streaming_app_deployment(
-                "streaming-app3",
-                "input-topic3",
-                "output-topic3",
-                "error-topic3",
-                pipeline="pipeline2",
-            ),
-        ]
+        return [NON_STREAMS_APP, APP1, APP2, APP3]
 
     @pytest.fixture()
     def cron_jobs(self):
@@ -102,7 +100,7 @@ class TestStreamsExplorer:
 
         async def watch():
             for deployment in deployments + cron_jobs:
-                event = {"type": K8sDeploymentEvent.ADDED, "object": deployment}
+                event = K8sEvent(type=K8sEventType.ADDED, object=deployment)
                 explorer.handle_event(event)
 
         def get_connectors():
@@ -341,9 +339,7 @@ class TestStreamsExplorer:
         assert len(sinks) == 1
 
         # deleting app deployment should remove source
-        streams_explorer.handle_event(
-            {"type": K8sDeploymentEvent.DELETED, "object": APP1}
-        )
+        streams_explorer.handle_event({"type": K8sEventType.DELETED, "object": APP1})
         sources, sinks = extractor_container.get_sources_sinks()
         assert len(sources) == 2
         assert len(sinks) == 1

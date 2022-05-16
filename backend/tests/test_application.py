@@ -14,12 +14,28 @@ from kubernetes_asyncio.client import (
 from streams_explorer.application import get_application
 from streams_explorer.core.config import API_PREFIX, settings
 from streams_explorer.core.services.kafkaconnect import KafkaConnect
-from streams_explorer.streams_explorer import K8sDeploymentEvent, StreamsExplorer
+from streams_explorer.models.k8s import K8sEventType
+from streams_explorer.streams_explorer import K8sEvent, StreamsExplorer
 from tests.utils import get_streaming_app_deployment
 
 
-async def setup(_):
+async def mock_setup(_):
     pass
+
+
+APP1 = get_streaming_app_deployment(
+    "streaming-app1", "input-topic1", "output-topic1", "error-topic1"
+)
+APP2 = get_streaming_app_deployment(
+    "streaming-app2", "input-topic2", "output-topic2", "error-topic2"
+)
+APP3 = get_streaming_app_deployment(
+    "streaming-app3",
+    "input-topic3",
+    "output-topic3",
+    "error-topic3",
+    pipeline="pipeline2",
+)
 
 
 class TestApplication:
@@ -39,21 +55,7 @@ class TestApplication:
 
     @pytest.fixture()
     def deployments(self) -> List[V1Deployment]:
-        return [
-            get_streaming_app_deployment(
-                "streaming-app1", "input-topic1", "output-topic1", "error-topic1"
-            ),
-            get_streaming_app_deployment(
-                "streaming-app2", "input-topic2", "output-topic2", "error-topic2"
-            ),
-            get_streaming_app_deployment(
-                "streaming-app3",
-                "input-topic3",
-                "output-topic3",
-                "error-topic3",
-                pipeline="pipeline2",
-            ),
-        ]
+        return [APP1, APP2, APP3]
 
     @pytest.fixture()
     def stateful_sets(self) -> List[V1StatefulSet]:
@@ -72,10 +74,10 @@ class TestApplication:
 
         async def watch(self):
             for deployment in deployments + cron_jobs:
-                event = {"type": K8sDeploymentEvent.ADDED, "object": deployment}
+                event = K8sEvent(type=K8sEventType.ADDED, object=deployment)
                 self.handle_event(event)
 
-        monkeypatch.setattr(StreamsExplorer, "setup", setup)
+        monkeypatch.setattr(StreamsExplorer, "setup", mock_setup)
         monkeypatch.setattr(StreamsExplorer, "watch", watch)
 
         connectors = ["connector1", "connector2"]
@@ -143,16 +145,7 @@ class TestApplication:
             assert len(nodes) == 15
 
             # destroy a deployment
-            event = {
-                "type": K8sDeploymentEvent.DELETED,
-                "object": get_streaming_app_deployment(
-                    "streaming-app3",
-                    "input-topic3",
-                    "output-topic3",
-                    "error-topic3",
-                    pipeline="pipeline2",
-                ),
-            }
+            event = K8sEvent(type=K8sEventType.DELETED, object=APP3)
             app.state.streams_explorer.handle_event(event)
 
             await asyncio.sleep(1)  # update graph
@@ -203,7 +196,7 @@ class TestApplication:
     async def test_pipeline_not_found(self, monkeypatch):
         from main import app
 
-        monkeypatch.setattr(StreamsExplorer, "setup", setup)
+        monkeypatch.setattr(StreamsExplorer, "setup", mock_setup)
 
         with TestClient(app) as client:
             response = client.get(
