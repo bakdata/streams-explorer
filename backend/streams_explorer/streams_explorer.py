@@ -212,9 +212,9 @@ class StreamsExplorer:
             return
 
         app = K8sApp.factory(item)
-        if event["type"] in ("ADDED", "MODIFIED"):
+        if event["type"] in (K8sDeploymentEvent.ADDED, K8sDeploymentEvent.MODIFIED):
             self.__add_app(app)
-        elif event["type"] == "DELETED":
+        elif event["type"] == K8sDeploymentEvent.DELETED:
             self.__remove_app(app)
 
     def get_deployments(self) -> List[V1Deployment]:
