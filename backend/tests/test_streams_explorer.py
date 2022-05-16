@@ -329,7 +329,7 @@ class TestStreamsExplorer:
         assert len(sinks) == 1
 
         # deleting app deployment should remove source
-        streams_explorer.handle_event({"type": K8sEventType.DELETED, "object": APP1})
+        streams_explorer.handle_event(K8sEvent(type=K8sEventType.DELETED, object=APP1))
         sources, sinks = extractor_container.get_sources_sinks()
         assert len(sources) == 2
         assert len(sinks) == 1
