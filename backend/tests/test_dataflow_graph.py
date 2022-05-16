@@ -293,6 +293,7 @@ class TestDataFlowGraph:
         await df.get_positioned_graph()
         nodes = df.graph.nodes(data=True)
         for _, data in iter(nodes):
+            assert data is not None
             assert data.get("x") is not None
             assert data.get("y") is not None
 
