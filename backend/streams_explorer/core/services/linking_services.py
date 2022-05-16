@@ -46,22 +46,22 @@ class LinkingService:
         self._sink_source_info = sink_source_info
 
     def get_redirect_connector(
-        self, _config: dict, _link_type: Optional[str]
+        self, config: dict, link_type: Optional[str]
     ) -> Optional[str]:
-        ...
+        pass
 
     def get_redirect_topic(
-        self, _topic_name: str, _link_type: Optional[str]
+        self, topic_name: str, link_type: Optional[str]
     ) -> Optional[str]:
-        ...
+        pass
 
     def get_redirect_streaming_app(
-        self, _k8s_app: K8sApp, _link_type: Optional[str]
+        self, k8s_app: K8sApp, link_type: Optional[str]
     ) -> Optional[str]:
-        ...
+        pass
 
-    def get_sink_source_redirects(self, _node_type: str, _sink_source_name: str):
-        ...
+    def get_sink_source_redirects(self, node_type: str, sink_source_name: str):
+        pass
 
     def add_streaming_app_info_item(self, info_item: NodeInfoListItem):
         self._streaming_app_info.append(info_item)
