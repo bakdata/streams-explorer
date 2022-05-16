@@ -14,7 +14,7 @@ from kubernetes_asyncio.client import (
 from streams_explorer.application import get_application
 from streams_explorer.core.config import API_PREFIX, settings
 from streams_explorer.core.services.kafkaconnect import KafkaConnect
-from streams_explorer.streams_explorer import StreamsExplorer
+from streams_explorer.streams_explorer import K8sDeploymentEvent, StreamsExplorer
 from tests.utils import get_streaming_app_deployment
 
 
@@ -72,7 +72,7 @@ class TestApplication:
 
         async def watch(self):
             for deployment in deployments + cron_jobs:
-                event = {"type": "ADDED", "object": deployment}
+                event = {"type": K8sDeploymentEvent.ADDED, "object": deployment}
                 self.handle_event(event)
 
         monkeypatch.setattr(StreamsExplorer, "setup", setup)
@@ -144,7 +144,7 @@ class TestApplication:
 
             # destroy a deployment
             event = {
-                "type": "DELETED",
+                "type": K8sDeploymentEvent.DELETED,
                 "object": get_streaming_app_deployment(
                     "streaming-app3",
                     "input-topic3",

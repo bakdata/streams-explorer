@@ -21,7 +21,7 @@ from streams_explorer.models.node_information import (
     NodeInfoType,
 )
 from streams_explorer.models.source import Source
-from streams_explorer.streams_explorer import StreamsExplorer
+from streams_explorer.streams_explorer import K8sDeploymentEvent, StreamsExplorer
 from tests.utils import get_streaming_app_cronjob, get_streaming_app_deployment
 
 APP1 = get_streaming_app_deployment(
@@ -100,7 +100,7 @@ class TestStreamsExplorer:
 
         async def watch():
             for deployment in deployments + cron_jobs:
-                event = {"type": "ADDED", "object": deployment}
+                event = {"type": K8sDeploymentEvent.ADDED, "object": deployment}
                 explorer.handle_event(event)
 
         def get_connectors():
@@ -339,7 +339,9 @@ class TestStreamsExplorer:
         assert len(sinks) == 1
 
         # deleting app deployment should remove source
-        streams_explorer.handle_event({"type": "DELETED", "object": APP1})
+        streams_explorer.handle_event(
+            {"type": K8sDeploymentEvent.DELETED, "object": APP1}
+        )
         sources, sinks = extractor_container.get_sources_sinks()
         assert len(sources) == 2
         assert len(sinks) == 1

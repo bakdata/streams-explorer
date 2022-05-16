@@ -1,4 +1,5 @@
 import asyncio
+from enum import Enum
 from typing import Callable, Dict, List, Optional, Type
 
 import kubernetes_asyncio.client
@@ -28,6 +29,12 @@ from streams_explorer.models.node_information import (
     NodeInformation,
     NodeInfoType,
 )
+
+
+class K8sDeploymentEvent(str, Enum):
+    ADDED = "ADDED"
+    MODIFIED = "MODIFIED"
+    DELETED = "DELETED"
 
 
 class StreamsExplorer:
@@ -195,9 +202,12 @@ class StreamsExplorer:
         # cronjobs need special treatment
         if isinstance(item, V1beta1CronJob):
             if app := extractor_container.on_cron_job(item):
-                if event["type"] in ("ADDED", "MODIFIED"):
+                if event["type"] in (
+                    K8sDeploymentEvent.ADDED,
+                    K8sDeploymentEvent.MODIFIED,
+                ):
                     self.__add_app(app)
-                elif event["type"] == "DELETED":
+                elif event["type"] == K8sDeploymentEvent.DELETED:
                     self.__remove_app(app)
             return
 
