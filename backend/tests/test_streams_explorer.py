@@ -85,7 +85,9 @@ class TestStreamsExplorer:
         return FakeLinker()
 
     @pytest.fixture()
-    def streams_explorer(self, monkeypatch, deployments, cron_jobs, fake_linker):
+    def streams_explorer(  # noqa: C901
+        self, monkeypatch, deployments, cron_jobs, fake_linker
+    ):
         monkeypatch.setattr(settings.kafka, "enable", True)
 
         explorer = StreamsExplorer(
