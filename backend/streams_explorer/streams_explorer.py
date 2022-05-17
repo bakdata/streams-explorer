@@ -82,7 +82,7 @@ class StreamsExplorer:
                     self.__watch_k8s(resource, namespace, return_type.__name__)
                 )
 
-    async def update(self):
+    async def update_graph(self):
         self.data_flow.reset()
         self.__create_graph()
         self.data_flow.setup_metric_provider()

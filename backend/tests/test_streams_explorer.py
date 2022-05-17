@@ -174,7 +174,7 @@ class TestStreamsExplorer:
 
         await explorer.watch()
         explorer.update_connectors()
-        await explorer.update()
+        await explorer.update_graph()
         return explorer
 
     @pytest.mark.asyncio
@@ -287,7 +287,7 @@ class TestStreamsExplorer:
         extractor = MockCronjobExtractor()
         extractor_container.extractors = [extractor]
         await streams_explorer.watch()
-        await streams_explorer.update()
+        await streams_explorer.update_graph()
         assert extractor.cron_job is not None
         assert extractor.cron_job.metadata is not None
         assert extractor.cron_job.metadata.name == "test-cronjob"
@@ -316,7 +316,7 @@ class TestStreamsExplorer:
         extractor = MockAppExtractor()
         extractor_container.extractors.append(extractor)
         await streams_explorer.watch()
-        await streams_explorer.update()
+        await streams_explorer.update_graph()
         sources, sinks = extractor_container.get_sources_sinks()
         assert len(sources) == 3
         assert len(sinks) == 1

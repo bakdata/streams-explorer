@@ -18,9 +18,9 @@ async def watch():
 
 @app.on_event("startup")
 @repeat_every(seconds=settings.graph.update_interval)
-async def update():
+async def update_graph():
     logger.info("Update graph")
-    await app.state.streams_explorer.update()
+    await app.state.streams_explorer.update_graph()
     logger.info("Update graph completed")
 
 
