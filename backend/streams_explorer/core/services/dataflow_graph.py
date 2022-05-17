@@ -264,7 +264,7 @@ class DataFlowGraph:
         matching_unknown_kafka_topics: Set[str],
         node_id: str,
         pattern: str,
-        pipeline: str,
+        pipeline: str | None,
         add_topic: bool = False,
     ):
         for matched_topic in matching_unknown_kafka_topics:
