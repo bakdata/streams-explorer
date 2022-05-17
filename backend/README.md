@@ -241,7 +241,7 @@ class CustomConfigParser(K8sConfigParser):
     def get_name(self) -> str:
         name = self.k8s_app.metadata.name
         if not name:
-            raise TypeError(f"Name is required for {self.k8s_app.get_class_name()}")
+            raise TypeError(f"Name is required for {self.k8s_app.class_name}")
         return name
 
     def parse(self) -> K8sConfig:
