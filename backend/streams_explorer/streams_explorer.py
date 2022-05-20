@@ -195,7 +195,7 @@ class StreamsExplorer:
     def handle_event(self, event: K8sEvent) -> None:
         item = event["object"]
         logger.info(
-            f"{item.metadata.namespace} {item.__class__.__name__} {event['type']}: {item.metadata.name}"  # type: ignore
+            f"{item.metadata.namespace} {item.__class__.__name__} {event['type']}: {item.metadata.name}"  # pyright: ignore[reportOptionalMemberAccess]
         )
 
         if isinstance(item, V1beta1CronJob):
