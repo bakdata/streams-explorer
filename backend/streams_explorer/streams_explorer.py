@@ -201,14 +201,11 @@ class StreamsExplorer:
         if isinstance(item, V1beta1CronJob):
             self._handle_event_cron_job(event, item)
             return
-        try:
-            app = K8sApp.factory(item)
-            if event["type"] in (K8sEventType.ADDED, K8sEventType.MODIFIED):
-                self.__add_app(app)
-            elif event["type"] == K8sEventType.DELETED:
-                self.__remove_app(app)
-        except Exception as e:
-            logger.debug(e)
+        app = K8sApp.factory(item)
+        if event["type"] in (K8sEventType.ADDED, K8sEventType.MODIFIED):
+            self.__add_app(app)
+        elif event["type"] == K8sEventType.DELETED:
+            self.__remove_app(app)
 
     def _handle_event_cron_job(self, event: K8sEvent, cron_job: V1beta1CronJob) -> None:
         if app := extractor_container.on_cron_job(cron_job):
