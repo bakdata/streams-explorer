@@ -68,7 +68,7 @@ helm repo add streams-explorer https://raw.githubusercontent.com/bakdata/streams
 2. Install
 
 ```sh
-helm upgrade --install --values helm-chart/values.yaml streams-explorer
+helm upgrade --install --values helm-chart/values.yaml streams-explorer streams-explorer/streams-explorer
 ```
 
 ### Standalone
