@@ -231,8 +231,9 @@ class StreamsExplorer:
             extractor_container.on_streaming_app_add(app.config)
 
     def __remove_app(self, app: K8sApp):
-        self.applications.pop(app.id)
-        extractor_container.on_streaming_app_delete(app.config)
+        if app.is_streams_app():
+            self.applications.pop(app.id)
+            extractor_container.on_streaming_app_delete(app.config)
 
     def __create_graph(self):
         logger.info("Setup pipeline graph")

@@ -335,6 +335,12 @@ class TestStreamsExplorer:
         assert len(sinks) == 1
 
     @pytest.mark.asyncio
+    async def test_delete_non_streams_app(self, streams_explorer: StreamsExplorer):
+        streams_explorer.handle_event(
+            K8sEvent(type=K8sEventType.DELETED, object=NON_STREAMS_APP)
+        )
+
+    @pytest.mark.asyncio
     async def test_get_link_default(self, streams_explorer: StreamsExplorer):
         # topics
         assert type(streams_explorer.get_link("input-topic1", "grafana")) is str
