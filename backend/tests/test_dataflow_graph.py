@@ -25,6 +25,10 @@ class TestDataFlowGraph:
         return DataFlowGraph(metric_provider=MetricProvider, kafka=KafkaAdminClient())
 
     @pytest.mark.asyncio
+    async def test_metric_provider_before_setup(self, df: DataFlowGraph):
+        assert await df.get_metrics() == []
+
+    @pytest.mark.asyncio
     async def test_positioned_pipeline_graph_not_found(self, df: DataFlowGraph):
         assert await df.get_positioned_pipeline_graph("doesnt-exist") is None
 
