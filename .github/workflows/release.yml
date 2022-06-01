@@ -34,7 +34,14 @@ jobs:
           github-email: ${{ secrets.GH_EMAIL }}
           github-token: ${{ secrets.GH_TOKEN }}
 
-      - name: Create and push tag
+      - name: Create tag
         run: |
+          git config user.name ${{ secrets.GH_USERNAME }}
+          git config user.email ${{ secrets.GH_EMAIL }}
           git tag v${{ steps.bump-version.outputs.release-tag }}
-          git push origin v${{ steps.bump-version.outputs.release-tag }}
+
+      - name: Push tag
+        uses: ad-m/github-push-action@v0.6.0
+        with:
+          github_token: ${{ secrets.GH_TOKEN }}
+          branch: refs/tags/v${{ steps.bump-version.outputs.release-tag }}
