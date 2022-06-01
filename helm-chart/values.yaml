@@ -10,9 +10,6 @@ serviceHttpPort: 80
 # Configure using env variables
 config:
   K8S__deployment__cluster: true
-  SCHEMAREGISTRY__url: http://schema-registry:8081
-  KAFKACONNECT__url: http://kafka-connect:8083
-  PROMETHEUS__url: http://prometheus:9090
 
 # Or pass the whole settings.yaml as a configmap
 # settings:
