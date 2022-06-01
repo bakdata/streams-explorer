@@ -44,4 +44,4 @@ jobs:
         uses: ad-m/github-push-action@v0.6.0
         with:
           github_token: ${{ secrets.GH_TOKEN }}
-          tags: true
+          branch: refs/tags/v${{ steps.bump-version.outputs.release-tag }}
