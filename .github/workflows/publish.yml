@@ -16,6 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       BACKEND_DIR: ./backend
+      python-version: "3.9"
     steps:
       - uses: actions/checkout@v3
         with:
@@ -27,6 +28,7 @@ jobs:
       - name: Release to TestPyPI
         uses: bakdata/ci-templates/actions/python-poetry-release@v1.0.0
         with:
+          python-version: ${{ env.python-version }}
           working-directory: ${{ env.BACKEND_DIR }}
           pypi-token: ${{ secrets.test-pypi-token }}
           publish-to-test: "true"
@@ -34,6 +36,7 @@ jobs:
       - name: Release to PyPI
         uses: bakdata/ci-templates/actions/python-poetry-release@v1.0.0
         with:
+          python-version: ${{ env.python-version }}
           working-directory: ${{ env.BACKEND_DIR }}
           pypi-token: ${{ secrets.pypi-token }}
           publish-to-test: "false"
