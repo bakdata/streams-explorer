@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import re
 from collections import defaultdict
 from enum import Enum
@@ -38,6 +40,7 @@ class DataFlowGraph:
         self.pipelines: Dict[str, nx.DiGraph] = {}
         self.json_pipelines: Dict[str, dict] = {}
         self.metric_provider_class = metric_provider
+        self.metric_provider: MetricProvider | None = None
         self.kafka = kafka
 
         self._topic_pattern_queue: Dict[str, Set[str]] = defaultdict(
