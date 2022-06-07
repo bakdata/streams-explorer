@@ -10,6 +10,7 @@ from streams_explorer.core.extractor.extractor import Extractor
 from streams_explorer.core.k8s_app import K8sAppCronJob
 from streams_explorer.core.services import schemaregistry
 from streams_explorer.core.services.dataflow_graph import NodeTypesEnum
+from streams_explorer.core.services.kubernetes import K8sEvent
 from streams_explorer.core.services.metric_providers import MetricProvider
 from streams_explorer.defaultlinker import DefaultLinker
 from streams_explorer.extractors import extractor_container
@@ -21,7 +22,7 @@ from streams_explorer.models.node_information import (
     NodeInfoType,
 )
 from streams_explorer.models.source import Source
-from streams_explorer.streams_explorer import K8sEvent, StreamsExplorer
+from streams_explorer.streams_explorer import StreamsExplorer
 from tests.utils import get_streaming_app_cronjob, get_streaming_app_deployment
 
 NON_STREAMS_APP = get_streaming_app_deployment(

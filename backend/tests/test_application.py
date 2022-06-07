@@ -14,8 +14,9 @@ from kubernetes_asyncio.client import (
 from streams_explorer.application import get_application
 from streams_explorer.core.config import API_PREFIX, settings
 from streams_explorer.core.services.kafkaconnect import KafkaConnect
+from streams_explorer.core.services.kubernetes import K8sEvent
 from streams_explorer.models.k8s import K8sEventType
-from streams_explorer.streams_explorer import K8sEvent, StreamsExplorer
+from streams_explorer.streams_explorer import StreamsExplorer
 from tests.utils import get_streaming_app_deployment
 
 

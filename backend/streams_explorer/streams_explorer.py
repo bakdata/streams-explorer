@@ -1,15 +1,11 @@
-import asyncio
-from typing import Callable, Dict, List, Optional, Type, TypedDict
+from typing import Dict, List, Optional, Type
 
-import kubernetes_asyncio.client
-import kubernetes_asyncio.config
-import kubernetes_asyncio.watch
 from cachetools.func import ttl_cache
-from kubernetes_asyncio.client import V1beta1CronJob, V1Deployment, V1StatefulSet
+from kubernetes_asyncio.client import V1beta1CronJob
 from loguru import logger
 
 from streams_explorer.core.config import settings
-from streams_explorer.core.k8s_app import K8sApp, K8sObject
+from streams_explorer.core.k8s_app import K8sApp
 from streams_explorer.core.node_info_extractor import (
     get_displayed_information_connector,
     get_displayed_information_deployment,
@@ -18,6 +14,7 @@ from streams_explorer.core.node_info_extractor import (
 from streams_explorer.core.services.dataflow_graph import DataFlowGraph, NodeTypesEnum
 from streams_explorer.core.services.kafka_admin_client import KafkaAdminClient
 from streams_explorer.core.services.kafkaconnect import KafkaConnect
+from streams_explorer.core.services.kubernetes import K8sEvent, Kubernetes
 from streams_explorer.core.services.linking_services import LinkingService
 from streams_explorer.core.services.metric_providers import MetricProvider
 from streams_explorer.extractors import extractor_container
@@ -31,15 +28,7 @@ from streams_explorer.models.node_information import (
 )
 
 
-class K8sEvent(TypedDict):
-    type: K8sEventType
-    object: K8sObject
-
-
 class StreamsExplorer:
-    context = settings.k8s.deployment.context
-    namespaces = settings.k8s.deployment.namespaces
-
     def __init__(
         self, linking_service: LinkingService, metric_provider: Type[MetricProvider]
     ):
@@ -50,37 +39,13 @@ class StreamsExplorer:
             metric_provider=metric_provider, kafka=self.kafka
         )
         self.linking_service = linking_service
+        self.kubernetes = Kubernetes(self)
 
     async def setup(self):
-        await self.__setup_k8s_environment()
+        await self.kubernetes.setup()
 
     async def watch(self):
-        def list_deployments(namespace: str, *args, **kwargs):
-            return self.k8s_app_client.list_namespaced_deployment(
-                *args, namespace=namespace, **kwargs
-            )
-
-        def list_stateful_sets(namespace: str, *args, **kwargs):
-            return self.k8s_app_client.list_namespaced_stateful_set(
-                *args, namespace=namespace, **kwargs
-            )
-
-        def list_cron_jobs(namespace: str, *args, **kwargs):
-            return self.k8s_batch_client.list_namespaced_cron_job(
-                *args, namespace=namespace, **kwargs
-            )
-
-        resources = (
-            (list_deployments, V1Deployment),
-            (list_stateful_sets, V1StatefulSet),
-            (list_cron_jobs, V1beta1CronJob),
-        )
-
-        for resource, return_type in resources:
-            for namespace in self.namespaces:
-                asyncio.create_task(
-                    self.__watch_k8s(resource, namespace, return_type.__name__)
-                )
+        await self.kubernetes.watch()
 
     async def update_graph(self):
         self.data_flow.reset()
@@ -171,26 +136,6 @@ class StreamsExplorer:
 
         if node_type in self.linking_service.sink_source_redirects:
             return self.linking_service.get_sink_source_redirects(node_type, node_id)
-
-    async def __setup_k8s_environment(self):
-        try:
-            if settings.k8s.deployment.cluster:
-                logger.info("Setup K8s environment in cluster")
-                kubernetes_asyncio.config.load_incluster_config()
-            else:
-                logger.info("Setup K8s environment")
-                await kubernetes_asyncio.config.load_kube_config(context=self.context)
-        except kubernetes_asyncio.config.ConfigException:
-            raise Exception("Could not load K8s environment configuration")
-
-        self.k8s_app_client = kubernetes_asyncio.client.AppsV1Api()
-        self.k8s_batch_client = kubernetes_asyncio.client.BatchV1beta1Api()
-
-    async def __watch_k8s(self, resource: Callable, namespace: str, return_type: str):
-        async with kubernetes_asyncio.watch.Watch(return_type=return_type) as w:
-            async with w.stream(resource, namespace) as stream:
-                async for event in stream:
-                    self.handle_event(event)
 
     def handle_event(self, event: K8sEvent) -> None:
         item = event["object"]
