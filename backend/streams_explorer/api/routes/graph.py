@@ -1,7 +1,9 @@
+import asyncio
 from typing import Optional
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, WebSocket
 from fastapi.exceptions import HTTPException
+from loguru import logger
 
 from streams_explorer.api.dependencies.streams_explorer import (
     get_streams_explorer_from_request,
@@ -27,3 +29,14 @@ async def get_positioned_graph(
             )
         return pipeline_graph
     return streams_explorer.get_positioned_json_graph()
+
+
+@router.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    logger.info("Waiting for WebSocket client...")
+    await websocket.accept()
+    logger.info("WebSocket client connected")
+    await websocket.send_text("Connected")
+    for i in range(1, 11):
+        await websocket.send_text(f"Counter {i}")
+        await asyncio.sleep(1)
