@@ -5,10 +5,7 @@ from fastapi import APIRouter, Depends, WebSocket
 from fastapi.exceptions import HTTPException
 from loguru import logger
 
-from streams_explorer.api.dependencies.streams_explorer import (
-    get_streams_explorer_from_request,
-    get_streams_explorer_from_websocket,
-)
+from streams_explorer.api.dependencies.streams_explorer import get_streams_explorer
 from streams_explorer.core.k8s_app import K8sApp
 from streams_explorer.models.graph import Graph
 from streams_explorer.streams_explorer import StreamsExplorer
@@ -19,7 +16,7 @@ router = APIRouter()
 @router.get("", response_model=Graph)
 async def get_positioned_graph(
     pipeline_name: Optional[str] = None,
-    streams_explorer: StreamsExplorer = Depends(get_streams_explorer_from_request),
+    streams_explorer: StreamsExplorer = Depends(get_streams_explorer),
 ):
     if pipeline_name:
         pipeline_graph = await streams_explorer.get_positioned_pipeline_json_graph(
@@ -36,7 +33,7 @@ async def get_positioned_graph(
 @router.websocket("/ws")
 async def websocket_endpoint(
     websocket: WebSocket,
-    streams_explorer: StreamsExplorer = Depends(get_streams_explorer_from_websocket),
+    streams_explorer: StreamsExplorer = Depends(get_streams_explorer),
 ):
     logger.info("Waiting for WebSocket client...")
     await websocket.accept()
