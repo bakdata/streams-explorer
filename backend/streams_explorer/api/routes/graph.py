@@ -40,7 +40,7 @@ async def websocket_endpoint(
     logger.info("WebSocket client connected")
     await websocket.send_text("Connected")
     try:
-        while streams_explorer.running is True:
+        while True:
             logger.info("waiting for state update...")
             app: K8sApp = await streams_explorer.updates.get()
             logger.info("got state update")
