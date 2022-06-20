@@ -1,3 +1,4 @@
+from asyncio.queues import Queue
 from typing import Dict, List, Optional, Type
 
 from cachetools.func import ttl_cache
@@ -40,6 +41,7 @@ class StreamsExplorer:
         )
         self.linking_service = linking_service
         self.kubernetes = Kubernetes(self)
+        self.updates: Queue[K8sApp] = Queue()
 
     async def setup(self):
         await self.kubernetes.setup()
@@ -171,6 +173,9 @@ class StreamsExplorer:
         if app.is_streams_app():
             self.applications[app.id] = app
             extractor_container.on_streaming_app_add(app.config)
+            # TODO: send application state update through websocket
+            logger.info("storing state update for {}", app.id)
+            self.updates.put_nowait(app)
 
     def __remove_app(self, app: K8sApp):
         if app.is_streams_app():

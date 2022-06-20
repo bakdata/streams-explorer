@@ -9,6 +9,7 @@ from streams_explorer.api.dependencies.streams_explorer import (
     get_streams_explorer_from_request,
     get_streams_explorer_from_websocket,
 )
+from streams_explorer.core.k8s_app import K8sApp
 from streams_explorer.models.graph import Graph
 from streams_explorer.streams_explorer import StreamsExplorer
 
@@ -38,11 +39,13 @@ async def websocket_endpoint(
     streams_explorer: StreamsExplorer = Depends(get_streams_explorer_from_websocket),
 ):
     logger.info("Waiting for WebSocket client...")
-    print(streams_explorer.applications)
     await websocket.accept()
     logger.info("WebSocket client connected")
     await websocket.send_text("Connected")
-    for i in range(1, 11):
-        await websocket.send_text(f"Counter {i}")
+    while True:
+        logger.info("waiting for state update...")
+        app: K8sApp = await streams_explorer.updates.get()
+        logger.info("got state update")
+        await websocket.send_json({app.id: [app.replicas_ready, app.replicas_total]})
         await asyncio.sleep(1)
     await websocket.close()

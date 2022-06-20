@@ -76,6 +76,19 @@ class K8sApp:
     def consumer_group(self) -> str | None:
         return self.attributes.get(settings.k8s.consumer_group_annotation)
 
+    @property
+    def replicas_ready(self) -> int | None:
+        if not self.k8s_object.status:
+            return None
+        return self.k8s_object.status.ready_replicas
+        # return self.k8s_object.status.available_replicas
+
+    @property
+    def replicas_total(self) -> int | None:
+        if not self.k8s_object.status:
+            return None
+        return self.k8s_object.status.replicas
+
     def setup(self):
         self.spec = self._get_pod_spec()
         self._ignore_containers = self.get_ignore_containers()
