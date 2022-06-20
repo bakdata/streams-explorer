@@ -68,12 +68,16 @@ class K8sApp:
     def extra_input_patterns(self) -> list[str]:
         return self.config.extra_input_patterns
 
+    @property
+    def pipeline(self) -> str | None:
+        return self.attributes.get(settings.k8s.pipeline.label)
+
     def setup(self):
         self.spec = self._get_pod_spec()
         self._ignore_containers = self.get_ignore_containers()
         self.container = self.get_app_container(self.spec, self._ignore_containers)
         self.extract_config()
-        self.__get_attributes()
+        self.__set_attributes()
 
     def _get_pod_spec(self) -> V1PodSpec | None:
         if self.k8s_object.spec and self.k8s_object.spec.template.spec:
@@ -84,9 +88,6 @@ class K8sApp:
 
     def to_dict(self) -> dict:
         return self.k8s_object.to_dict()
-
-    def get_pipeline(self) -> Optional[str]:
-        return self.attributes.get(settings.k8s.pipeline.label)
 
     def get_consumer_group(self) -> Optional[str]:
         return self.attributes.get(settings.k8s.consumer_group_annotation)
@@ -100,11 +101,17 @@ class K8sApp:
     def class_name(self) -> str:
         return self.__class__.__name__
 
-    def __get_attributes(self):
-        labels = self.metadata.labels or {}
-        labels_to_use = self.get_labels()
+    def __set_attributes(self):
+        self._set_labels()
+        self._set_pipeline()
+        self._set_annotations()
 
-        for key in labels_to_use:
+    def _set_labels(self):
+        labels = self.metadata.labels
+        if not labels:
+            return
+
+        for key in self._labels_to_use():
             value = labels.get(key)
             if value is not None:
                 self.attributes[key] = value
@@ -113,10 +120,11 @@ class K8sApp:
                     f"{self.class_name} {self.name} does not have a label with the name: {key}"
                 )
 
-        pipeline = self.get_pipeline()
-        if pipeline is not None:
-            self.attributes[ATTR_PIPELINE] = pipeline
+    def _set_pipeline(self):
+        if self.pipeline:
+            self.attributes[ATTR_PIPELINE] = self.pipeline
 
+    def _set_annotations(self):
         if (
             self.k8s_object.spec
             and self.k8s_object.spec.template.metadata
@@ -151,7 +159,7 @@ class K8sApp:
         return {container["name"] for container in settings.k8s.containers.ignore}
 
     @staticmethod
-    def get_labels() -> Set[str]:
+    def _labels_to_use() -> Set[str]:
         return set(settings.k8s.labels)
 
 
@@ -163,7 +171,7 @@ class K8sAppCronJob(K8sApp):
         self.spec = self._get_pod_spec()
         self.container = self.get_app_container(self.spec)
         self.extract_config()
-        self.__get_attributes()
+        self.__set_attributes()
 
     def _get_pod_spec(self) -> V1PodSpec | None:
         if (
@@ -173,22 +181,9 @@ class K8sAppCronJob(K8sApp):
         ):
             return self.k8s_object.spec.job_template.spec.template.spec
 
-    def __get_attributes(self):
-        labels = self.metadata.labels or {}
-        labels_to_use = self.get_labels()
-
-        for key in labels_to_use:
-            value = labels.get(key)
-            if value is not None:
-                self.attributes[key] = value
-            elif self.is_streams_app():
-                logger.warning(
-                    f"{self.class_name} {self.name} does not have a label with the name: {key}"
-                )
-
-        pipeline = self.get_pipeline()
-        if pipeline is not None:
-            self.attributes[ATTR_PIPELINE] = pipeline
+    def __set_attributes(self):
+        self._set_labels()
+        self._set_pipeline()
 
 
 class K8sAppDeployment(K8sApp):
