@@ -7,6 +7,7 @@ from loguru import logger
 
 from streams_explorer.api.dependencies.streams_explorer import (
     get_streams_explorer_from_request,
+    get_streams_explorer_from_websocket,
 )
 from streams_explorer.models.graph import Graph
 from streams_explorer.streams_explorer import StreamsExplorer
@@ -32,11 +33,16 @@ async def get_positioned_graph(
 
 
 @router.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket):
+async def websocket_endpoint(
+    websocket: WebSocket,
+    streams_explorer: StreamsExplorer = Depends(get_streams_explorer_from_websocket),
+):
     logger.info("Waiting for WebSocket client...")
+    print(streams_explorer.applications)
     await websocket.accept()
     logger.info("WebSocket client connected")
     await websocket.send_text("Connected")
     for i in range(1, 11):
         await websocket.send_text(f"Counter {i}")
         await asyncio.sleep(1)
+    await websocket.close()
