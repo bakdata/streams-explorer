@@ -45,3 +45,9 @@ class Graph(BaseModel):
     graph: Any
     nodes: List[Node]
     edges: List[Edge]
+
+
+class AppState(BaseModel):
+    id: str
+    replicas_ready: Optional[int]
+    replicas_total: Optional[int]

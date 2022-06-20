@@ -7,7 +7,7 @@ from starlette.websockets import WebSocketDisconnect
 
 from streams_explorer.api.dependencies.streams_explorer import get_streams_explorer
 from streams_explorer.core.k8s_app import K8sApp
-from streams_explorer.models.graph import Graph
+from streams_explorer.models.graph import Graph, StateUpdate
 from streams_explorer.streams_explorer import StreamsExplorer
 
 router = APIRouter()
@@ -45,7 +45,11 @@ async def websocket_endpoint(
             app: K8sApp = await streams_explorer.updates.get()
             logger.info("got state update")
             await websocket.send_json(
-                {app.id: [app.replicas_ready, app.replicas_total]}
+                StateUpdate(
+                    id=app.id,
+                    replicas_ready=app.replicas_ready,
+                    replicas_total=app.replicas_total,
+                ).json()
             )
     except WebSocketDisconnect:
         await websocket.close()
