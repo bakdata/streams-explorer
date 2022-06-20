@@ -1,4 +1,4 @@
-from typing import Any, List, Optional, Tuple
+from typing import Any, List, NamedTuple, Optional, Tuple
 
 from pydantic import BaseModel
 
@@ -47,7 +47,12 @@ class Graph(BaseModel):
     edges: List[Edge]
 
 
+class ReplicaCount(NamedTuple):
+    ready: Optional[int]
+    total: Optional[int]
+
+
 class AppState(BaseModel):
     id: str
-    replicas_ready: Optional[int]
-    replicas_total: Optional[int]
+    replicas: ReplicaCount
+    # reason: str
