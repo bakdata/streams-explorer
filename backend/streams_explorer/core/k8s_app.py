@@ -72,6 +72,10 @@ class K8sApp:
     def pipeline(self) -> str | None:
         return self.attributes.get(settings.k8s.pipeline.label)
 
+    @property
+    def consumer_group(self) -> str | None:
+        return self.attributes.get(settings.k8s.consumer_group_annotation)
+
     def setup(self):
         self.spec = self._get_pod_spec()
         self._ignore_containers = self.get_ignore_containers()
@@ -88,9 +92,6 @@ class K8sApp:
 
     def to_dict(self) -> dict:
         return self.k8s_object.to_dict()
-
-    def get_consumer_group(self) -> Optional[str]:
-        return self.attributes.get(settings.k8s.consumer_group_annotation)
 
     def is_streams_app(self) -> bool:
         if not self.input_topics and not self.output_topic:
