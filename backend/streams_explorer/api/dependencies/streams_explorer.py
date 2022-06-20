@@ -29,7 +29,7 @@ def get_application(
     raise ValueError("no request or websocket argument given")
 
 
-def get_streams_explorer(  # FastAPI complains with proper type annotations
+def get_streams_explorer(  # FastAPI complains with proper type annotations (Optional[Request])
     *, request: Request = None, websocket: WebSocket = None  # type: ignore
 ) -> StreamsExplorer:
     app = get_application(request=request, websocket=websocket)
