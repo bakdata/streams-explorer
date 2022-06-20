@@ -1,6 +1,6 @@
 from typing import List
 
-from pydantic.main import BaseModel
+from pydantic import BaseModel
 
 
 class Pipelines(BaseModel):

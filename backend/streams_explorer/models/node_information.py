@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import List, Union
 
-from pydantic.main import BaseModel
+from pydantic import BaseModel
 
 from streams_explorer.core.services.dataflow_graph import NodeTypesEnum
 
