@@ -1,9 +1,9 @@
-import asyncio
 from typing import Optional
 
 from fastapi import APIRouter, Depends, WebSocket
 from fastapi.exceptions import HTTPException
 from loguru import logger
+from starlette.websockets import WebSocketDisconnect
 
 from streams_explorer.api.dependencies.streams_explorer import get_streams_explorer
 from streams_explorer.core.k8s_app import K8sApp
@@ -39,10 +39,13 @@ async def websocket_endpoint(
     await websocket.accept()
     logger.info("WebSocket client connected")
     await websocket.send_text("Connected")
-    while True:
-        logger.info("waiting for state update...")
-        app: K8sApp = await streams_explorer.updates.get()
-        logger.info("got state update")
-        await websocket.send_json({app.id: [app.replicas_ready, app.replicas_total]})
-        await asyncio.sleep(1)
-    await websocket.close()
+    try:
+        while streams_explorer.running is True:
+            logger.info("waiting for state update...")
+            app: K8sApp = await streams_explorer.updates.get()
+            logger.info("got state update")
+            await websocket.send_json(
+                {app.id: [app.replicas_ready, app.replicas_total]}
+            )
+    except WebSocketDisconnect:
+        await websocket.close()
