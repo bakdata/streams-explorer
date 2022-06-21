@@ -173,7 +173,6 @@ class StreamsExplorer:
         if app.is_streams_app():
             self.applications[app.id] = app
             extractor_container.on_streaming_app_add(app.config)
-            # TODO: send application state update through websocket
             logger.info("storing state update for {}", app.id)
             self.updates.put_nowait(app)
 

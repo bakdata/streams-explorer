@@ -304,10 +304,7 @@ const GraphVisualization = ({
       console.log(event.data);
       try {
         const data = JSON.parse(event.data);
-        // console.log(data.id);
-        // console.log(data.replicas);
         const node = graph?.findById(data.id) as INode;
-        console.log(node);
         if (node) {
           if (!data.replicas[0]) {
             graph.updateItem(node, {
