@@ -10,6 +10,11 @@ import G6, {
 } from "@antv/g6";
 import deepMix from "@antv/util/lib/deep-mix";
 
+/* Custom G6 node to display metrics
+ * based on builtin circle node
+ * https://github.com/antvis/G6/blob/master/packages/element/src/nodes/circle.ts
+ */
+
 G6.registerNode(
   "MetricCustomNode",
   {
@@ -60,14 +65,15 @@ G6.registerNode(
 
       const { width, height, show } = icon;
       if (show) {
+        const iconName = `${(this as any).type}-icon`;
         group!.addShape("image", {
           attrs: {
             x: -width / 2,
             y: -height / 2,
             ...icon,
           },
-          className: `${(this as any).type}-icon`,
-          name: `${(this as any).type}-icon`,
+          className: iconName,
+          name: iconName,
           draggable: true,
         });
       }
@@ -187,7 +193,11 @@ G6.registerNode(
       const metricLabel = group.get("children")[2]; // Get the shape which contains our label
       const metric = metricLabel.attr();
       metric.text = cfg.metric;
-      metricLabel.attr(metric); // Update
+      metricLabel.attr(metric); // Update metric label
+
+      // update other styles
+      const style = { ...cfg.style };
+      (this as any).updateShape(cfg, item, style, true);
     },
   },
   "single-node"

@@ -1,4 +1,5 @@
 import G6, {
+  Global,
   Graph,
   GraphData,
   GraphOptions,
@@ -9,11 +10,19 @@ import G6, {
 } from "@antv/g6";
 import { message } from "antd";
 import { millify } from "millify";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Graph as Data, Icon as IIcon, Metric } from "./api/fetchers";
 import "./DashedEdge";
 import "./MetricCustomNode";
 import Node from "./Node";
+
+export const isBrowser = typeof window !== "undefined"; // disable SSR
 
 interface GraphVisualizationProps {
   data: Data | GraphData;
@@ -25,6 +34,11 @@ interface GraphVisualizationProps {
   height: number;
   focusedNode: Node | undefined;
   animate: boolean;
+}
+
+interface ReplicaCount {
+  id: string;
+  replicas: number[];
 }
 
 class Icon implements IIcon {
@@ -185,6 +199,11 @@ const GraphVisualization = ({
   focusedNode,
   animate,
 }: GraphVisualizationProps) => {
+  const ws = useMemo(
+    () =>
+      isBrowser ? new WebSocket("ws://localhost:8000/api/graph/ws") : null,
+    []
+  );
   const ref = useRef<HTMLDivElement>(null);
 
   const [graph, setGraph] = useState<Graph | null>(null);
@@ -267,6 +286,59 @@ const GraphVisualization = ({
   graph?.on("node:click", clickCallback);
   graph?.on("node:touchstart", touchCallback);
   graph?.on("nodeselectchange", selectCallback);
+
+  if (ws && graph) {
+    ws.onopen = function () {
+      console.log("WebSocket opened");
+    };
+
+    ws.onclose = function () {
+      console.log("WebSocket closed");
+    };
+
+    ws.onerror = function (event) {
+      console.log("WebSocket error", event);
+    };
+
+    ws.onmessage = function (event) {
+      console.log(event.data);
+      try {
+        const data = JSON.parse(event.data);
+        // console.log(data.id);
+        // console.log(data.replicas);
+        const node = graph?.findById(data.id) as INode;
+        console.log(node);
+        if (node) {
+          if (data.replicas[0] < data.replicas[1]) {
+            graph.updateItem(node, {
+              style: {
+                fill: "#AAAAAA",
+                // stroke: "grey",
+              },
+              labelCfg: {
+                style: {
+                  fill: "grey",
+                },
+              },
+              // icon: {
+              //   fill: "red",
+              // },
+              // metric: "disabled",
+            });
+          } else {
+            const defaultLabelCfg = config?.defaultNode?.labelCfg;
+            graph.updateItem(node, {
+              style: {
+                fill: Global.defaultNode.style.fill,
+              },
+              labelCfg: defaultLabelCfg as any,
+            });
+          }
+          // graph.refreshItem(node);
+        }
+      } catch (error) {}
+    };
+  }
 
   useEffect(() => {
     if (graph) graph.destroy();

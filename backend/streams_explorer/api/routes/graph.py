@@ -1,3 +1,4 @@
+import asyncio
 from typing import Optional
 
 from fastapi import APIRouter, Depends, WebSocket
@@ -7,7 +8,7 @@ from starlette.websockets import WebSocketDisconnect
 
 from streams_explorer.api.dependencies.streams_explorer import get_streams_explorer
 from streams_explorer.core.k8s_app import K8sApp
-from streams_explorer.models.graph import AppState, Graph
+from streams_explorer.models.graph import AppState, Graph, ReplicaCount
 from streams_explorer.streams_explorer import StreamsExplorer
 
 router = APIRouter()
@@ -41,13 +42,22 @@ async def websocket_endpoint(
     await websocket.send_text("Connected")
     try:
         while True:
-            logger.info("waiting for state update...")
-            app: K8sApp = await streams_explorer.updates.get()
-            logger.info("got state update")
+            # logger.info("waiting for state update...")
+            # app: K8sApp = await streams_explorer.updates.get()
+            # logger.info("got state update")
+            # await websocket.send_json(
+            #     AppState(
+            #         id=app.id, replicas=(app.replicas_ready, app.replicas_total)
+            #     ).json()
+            # )
             await websocket.send_json(
-                AppState(
-                    id=app.id, replicas=(app.replicas_ready, app.replicas_total)
-                ).json()
+                # AppState(id="atm-fraud-transactionavroproducer", replicas=ReplicaCount(ready=0, total=1)).json()
+                {"id": "atm-fraud-transactionavroproducer", "replicas": [0, 1]},
             )
+            await asyncio.sleep(1)
+            await websocket.send_json(
+                {"id": "atm-fraud-transactionavroproducer", "replicas": [1, 1]},
+            )
+            await asyncio.sleep(1)
     except WebSocketDisconnect:
         await websocket.close()

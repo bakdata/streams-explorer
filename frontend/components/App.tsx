@@ -302,7 +302,6 @@ const App: React.FC = () => {
               position: "relative",
             }}
           >
-            <GraphStates />
             <Row style={{ position: "fixed" }}>
               {graph ? (
                 <GraphVisualization
