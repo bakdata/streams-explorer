@@ -37,7 +37,7 @@ fastapi-utils = "^0.2.1"
 fastapi = "^0.70.0"
 uvicorn = { extras = ["standard"], version = "^0.15.0" }
 pygraphviz = "^1.7"
-confluent-kafka = "^1.7.0"
+confluent-kafka = "^1.9.0"
 cachetools = "^4.2.2"
 
 [tool.poetry.dev-dependencies]
