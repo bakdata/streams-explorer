@@ -202,10 +202,7 @@ const GraphVisualization = ({
   const ws = useMemo(() => {
     if (isBrowser) {
       const hostname = window.location.hostname;
-      let protocol = "ws:";
-      if (window.location.protocol === "https:") {
-        protocol = "wss:";
-      }
+      const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
       const port = process.env.NODE_ENV === "development" ? ":8000" : "";
       const url = `${protocol}//${hostname}${port}/api/graph/ws`;
       return new WebSocket(url);
