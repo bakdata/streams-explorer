@@ -309,7 +309,7 @@ const GraphVisualization = ({
         const node = graph?.findById(data.id) as INode;
         console.log(node);
         if (node) {
-          if (data.replicas[0] < data.replicas[1]) {
+          if (!data.replicas[0]) {
             graph.updateItem(node, {
               style: {
                 fill: "#AAAAAA",
