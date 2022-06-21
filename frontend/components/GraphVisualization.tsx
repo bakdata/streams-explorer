@@ -199,11 +199,18 @@ const GraphVisualization = ({
   focusedNode,
   animate,
 }: GraphVisualizationProps) => {
-  const ws = useMemo(
-    () =>
-      isBrowser ? new WebSocket("ws://localhost:8000/api/graph/ws") : null,
-    []
-  );
+  const ws = useMemo(() => {
+    if (isBrowser) {
+      const hostname = window.location.hostname;
+      let protocol = "ws:";
+      if (window.location.protocol === "https:") {
+        protocol = "wss:";
+      }
+      const port = process.env.NODE_ENV === "development" ? ":8000" : "";
+      const url = `${protocol}//${hostname}${port}/api/graph/ws`;
+      return new WebSocket(url);
+    }
+  }, []);
   const ref = useRef<HTMLDivElement>(null);
 
   const [graph, setGraph] = useState<Graph | null>(null);
