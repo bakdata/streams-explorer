@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Dict, Optional, Set, Type, Union
+from typing import Dict, Optional, Set, Type, TypeAlias, Union
 
 from kubernetes_asyncio.client import (
     V1beta1CronJob,
@@ -19,7 +19,7 @@ from streams_explorer.models.k8s import K8sConfig
 
 ATTR_PIPELINE = "pipeline"
 
-K8sObject = Union[V1Deployment, V1StatefulSet, V1beta1CronJob]
+K8sObject: TypeAlias = Union[V1Deployment, V1StatefulSet, V1beta1CronJob]
 
 config_parser: Type[K8sConfigParser] = load_config_parser()
 

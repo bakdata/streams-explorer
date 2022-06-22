@@ -2,6 +2,8 @@ from typing import Any, List, NamedTuple, Optional, Tuple
 
 from pydantic import BaseModel
 
+from streams_explorer.models.k8s import K8sReason
+
 GraphNode = Tuple[str, dict]
 GraphEdge = Tuple[str, str]
 
@@ -55,4 +57,4 @@ class ReplicaCount(NamedTuple):
 class AppState(BaseModel):
     id: str
     replicas: ReplicaCount
-    # reason: str
+    # reason: K8sReason

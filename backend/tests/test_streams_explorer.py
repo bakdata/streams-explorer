@@ -10,11 +10,11 @@ from streams_explorer.core.extractor.extractor import Extractor
 from streams_explorer.core.k8s_app import K8sAppCronJob
 from streams_explorer.core.services import schemaregistry
 from streams_explorer.core.services.dataflow_graph import NodeTypesEnum
-from streams_explorer.core.services.kubernetes import K8sEvent
+from streams_explorer.core.services.kubernetes import K8sDeploymentUpdate
 from streams_explorer.core.services.metric_providers import MetricProvider
 from streams_explorer.defaultlinker import DefaultLinker
 from streams_explorer.extractors import extractor_container
-from streams_explorer.models.k8s import K8sConfig, K8sEventType
+from streams_explorer.models.k8s import K8sConfig, K8sDeploymentUpdateType
 from streams_explorer.models.kafka_connector import KafkaConnectorTypesEnum
 from streams_explorer.models.node_information import (
     NodeInfoListItem,
@@ -102,8 +102,10 @@ class TestStreamsExplorer:
 
         async def watch():
             for deployment in deployments + cron_jobs:
-                event = K8sEvent(type=K8sEventType.ADDED, object=deployment)
-                explorer.handle_event(event)
+                event = K8sDeploymentUpdate(
+                    type=K8sDeploymentUpdateType.ADDED, object=deployment
+                )
+                explorer.handle_deployment_update(event)
 
         def get_connectors():
             return ["es-sink-connector", "generic-source-connector"]
@@ -330,15 +332,19 @@ class TestStreamsExplorer:
         assert len(sinks) == 1
 
         # deleting app deployment should remove source
-        streams_explorer.handle_event(K8sEvent(type=K8sEventType.DELETED, object=APP1))
+        streams_explorer.handle_deployment_update(
+            K8sDeploymentUpdate(type=K8sDeploymentUpdateType.DELETED, object=APP1)
+        )
         sources, sinks = extractor_container.get_sources_sinks()
         assert len(sources) == 2
         assert len(sinks) == 1
 
     @pytest.mark.asyncio
     async def test_delete_non_streams_app(self, streams_explorer: StreamsExplorer):
-        streams_explorer.handle_event(
-            K8sEvent(type=K8sEventType.DELETED, object=NON_STREAMS_APP)
+        streams_explorer.handle_deployment_update(
+            K8sDeploymentUpdate(
+                type=K8sDeploymentUpdateType.DELETED, object=NON_STREAMS_APP
+            )
         )
 
     @pytest.mark.asyncio

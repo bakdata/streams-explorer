@@ -17,7 +17,17 @@ class K8sConfig:
     extra: Dict[str, str] = field(default_factory=dict)
 
 
-class K8sEventType(str, Enum):
+class K8sDeploymentUpdateType(str, Enum):
     ADDED = "ADDED"
     MODIFIED = "MODIFIED"
     DELETED = "DELETED"
+
+
+class K8sEventType(str, Enum):
+    NORMAL = "Normal"
+    WARNING = "Warning"
+
+
+class K8sReason(str, Enum):
+    BACKOFF = "BackOff"
+    # TODO: SuccessfulCreate | Pulled | ScalingReplicaSet | ...

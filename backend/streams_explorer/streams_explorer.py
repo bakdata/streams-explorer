@@ -15,12 +15,16 @@ from streams_explorer.core.node_info_extractor import (
 from streams_explorer.core.services.dataflow_graph import DataFlowGraph, NodeTypesEnum
 from streams_explorer.core.services.kafka_admin_client import KafkaAdminClient
 from streams_explorer.core.services.kafkaconnect import KafkaConnect
-from streams_explorer.core.services.kubernetes import K8sEvent, Kubernetes
+from streams_explorer.core.services.kubernetes import (
+    K8sDeploymentUpdate,
+    K8sEvent,
+    Kubernetes,
+)
 from streams_explorer.core.services.linking_services import LinkingService
 from streams_explorer.core.services.metric_providers import MetricProvider
 from streams_explorer.extractors import extractor_container
 from streams_explorer.models.graph import Metric
-from streams_explorer.models.k8s import K8sEventType
+from streams_explorer.models.k8s import K8sDeploymentUpdateType, K8sEventType, K8sReason
 from streams_explorer.models.kafka_connector import KafkaConnector
 from streams_explorer.models.node_information import (
     NodeInfoListItem,
@@ -42,6 +46,7 @@ class StreamsExplorer:
         self.linking_service = linking_service
         self.kubernetes = Kubernetes(self)
         self.updates: Queue[K8sApp] = Queue()
+        self.events: Queue = Queue()  # TODO: add type annotation
 
     async def setup(self):
         await self.kubernetes.setup()
@@ -139,30 +144,44 @@ class StreamsExplorer:
         if node_type in self.linking_service.sink_source_redirects:
             return self.linking_service.get_sink_source_redirects(node_type, node_id)
 
-    def handle_event(self, event: K8sEvent) -> None:
-        item = event["object"]
+    def handle_deployment_update(self, update: K8sDeploymentUpdate) -> None:
+        item = update["object"]
         logger.info(
-            f"{item.metadata.namespace} {item.__class__.__name__} {event['type']}: {item.metadata.name}"  # pyright: ignore[reportOptionalMemberAccess]
+            f"{item.metadata.namespace} {item.__class__.__name__} {update['type']}: {item.metadata.name}"  # pyright: ignore[reportOptionalMemberAccess]
         )
 
         if isinstance(item, V1beta1CronJob):
-            self._handle_event_cron_job(event, item)
+            self._handle_cron_job_update(update, item)
             return
         app = K8sApp.factory(item)
-        if event["type"] in (K8sEventType.ADDED, K8sEventType.MODIFIED):
+        if update["type"] in (
+            K8sDeploymentUpdateType.ADDED,
+            K8sDeploymentUpdateType.MODIFIED,
+        ):
             self.__add_app(app)
-        elif event["type"] == K8sEventType.DELETED:
+        elif update["type"] == K8sDeploymentUpdateType.DELETED:
             self.__remove_app(app)
 
-    def _handle_event_cron_job(self, event: K8sEvent, cron_job: V1beta1CronJob) -> None:
+    def _handle_cron_job_update(
+        self, update: K8sDeploymentUpdate, cron_job: V1beta1CronJob
+    ) -> None:
         if app := extractor_container.on_cron_job(cron_job):
-            if event["type"] in (
-                K8sEventType.ADDED,
-                K8sEventType.MODIFIED,
+            if update["type"] in (
+                K8sDeploymentUpdateType.ADDED,
+                K8sDeploymentUpdateType.MODIFIED,
             ):
                 self.__add_app(app)
-            elif event["type"] == K8sEventType.DELETED:
+            elif update["type"] == K8sDeploymentUpdateType.DELETED:
                 self.__remove_app(app)
+
+    def handle_event(self, raw_event: K8sEvent) -> None:
+        # TODO: map event to application
+        event = raw_event["object"]
+        logger.info("Event: {}, Reason: {}", event["type"], event["reason"])
+        logger.debug(event)
+        if event["type"] == K8sEventType.WARNING:
+            if event["reason"] == K8sReason.BACKOFF:
+                self.events.put_nowait(event)
 
     def update_connectors(self):
         extractor_container.reset_connector()

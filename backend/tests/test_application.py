@@ -14,8 +14,8 @@ from kubernetes_asyncio.client import (
 from streams_explorer.application import get_application
 from streams_explorer.core.config import API_PREFIX, settings
 from streams_explorer.core.services.kafkaconnect import KafkaConnect
-from streams_explorer.core.services.kubernetes import K8sEvent
-from streams_explorer.models.k8s import K8sEventType
+from streams_explorer.core.services.kubernetes import K8sDeploymentUpdate
+from streams_explorer.models.k8s import K8sDeploymentUpdateType
 from streams_explorer.streams_explorer import StreamsExplorer
 from tests.utils import get_streaming_app_deployment
 
@@ -75,7 +75,9 @@ class TestApplication:
 
         async def watch(self):
             for deployment in deployments + stateful_sets + cron_jobs:
-                event = K8sEvent(type=K8sEventType.ADDED, object=deployment)
+                event = K8sDeploymentUpdate(
+                    type=K8sDeploymentUpdateType.ADDED, object=deployment
+                )
                 self.handle_event(event)
 
         monkeypatch.setattr(StreamsExplorer, "setup", mock_setup)
@@ -146,7 +148,9 @@ class TestApplication:
             assert len(nodes) == 15
 
             # destroy a deployment
-            event = K8sEvent(type=K8sEventType.DELETED, object=APP3)
+            event = K8sDeploymentUpdate(
+                type=K8sDeploymentUpdateType.DELETED, object=APP3
+            )
             app.state.streams_explorer.handle_event(event)
 
             await asyncio.sleep(1)  # update graph

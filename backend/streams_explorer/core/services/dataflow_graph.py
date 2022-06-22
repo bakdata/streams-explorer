@@ -157,7 +157,7 @@ class DataFlowGraph:
 
     async def get_positioned_pipeline_graph(self, pipeline_name: str) -> Optional[dict]:
         if pipeline_name not in self.pipelines:
-            return None
+            return None  # TODO: raise exception instead of return
         # caching
         if pipeline_name not in self.json_pipelines:
             self.json_pipelines[pipeline_name] = await self.__get_positioned_json_graph(
