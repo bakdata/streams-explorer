@@ -25,7 +25,7 @@ from streams_explorer.core.services.linking_services import LinkingService
 from streams_explorer.core.services.metric_providers import MetricProvider
 from streams_explorer.extractors import extractor_container
 from streams_explorer.models.graph import Metric
-from streams_explorer.models.k8s import K8sDeploymentUpdateType, K8sEventType, K8sReason
+from streams_explorer.models.k8s import K8sDeploymentUpdateType
 from streams_explorer.models.kafka_connector import KafkaConnector
 from streams_explorer.models.node_information import (
     NodeInfoListItem,
@@ -178,33 +178,37 @@ class StreamsExplorer:
     def handle_event(self, raw_event: K8sEvent) -> None:
         event = raw_event["object"]
 
-        ### extract deployment name from pod
+        # extract deployment name from pod
         name = re.findall(r"{(.+?)}", event["regarding"]["fieldPath"])[0]
 
         logger.info(
-            "Event: {} {}, Reason: {}",
-            event["type"],
+            "{} {} {} ({})",
+            event["regarding"]["namespace"],
             name,
             event["reason"],
+            event["type"],
         )
         logger.debug(event)
 
-        ### map event to application
+        # map event to application
         if app := self.applications.get(name):
             app.state = event["reason"]
-            self.updates.put_nowait(app)
+            self._populate_state_update(app)
 
     def update_connectors(self):
         extractor_container.reset_connector()
         logger.info("Retrieve Kafka connectors")
         self.kafka_connectors = KafkaConnect.connectors()
 
+    def _populate_state_update(self, app: K8sApp):
+        logger.info("storing state update for {}", app.id)
+        self.updates.put_nowait(app)
+
     def __add_app(self, app: K8sApp):
         if app.is_streams_app():
             self.applications[app.id] = app
             extractor_container.on_streaming_app_add(app.config)
-            logger.info("storing state update for {}", app.id)
-            self.updates.put_nowait(app)
+            self._populate_state_update(app)
 
     def __remove_app(self, app: K8sApp):
         if app.is_streams_app():
