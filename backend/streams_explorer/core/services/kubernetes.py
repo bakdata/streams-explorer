@@ -1,5 +1,5 @@
 import asyncio
-from typing import TYPE_CHECKING, Callable, TypedDict
+from typing import TYPE_CHECKING, Callable, NamedTuple, Type, TypedDict
 
 import kubernetes_asyncio.client
 import kubernetes_asyncio.config
@@ -13,6 +13,13 @@ from streams_explorer.models.k8s import K8sDeploymentUpdateType, K8sEventType
 
 if TYPE_CHECKING:
     from streams_explorer.streams_explorer import StreamsExplorer
+
+
+class K8sResource(NamedTuple):
+    resource: Callable
+    return_type: Type
+    callback: Callable
+    delay: int = 0
 
 
 class K8sDeploymentUpdate(TypedDict):
@@ -47,7 +54,7 @@ class Kubernetes:
         self.k8s_batch_client = kubernetes_asyncio.client.BatchV1beta1Api()
         self.k8s_events_client = kubernetes_asyncio.client.EventsV1Api()
 
-    async def watch_deployments(self):
+    async def watch(self):
         def list_deployments(namespace: str, *args, **kwargs):
             return self.k8s_app_client.list_namespaced_deployment(
                 *args, namespace=namespace, **kwargs
@@ -63,25 +70,37 @@ class Kubernetes:
                 *args, namespace=namespace, **kwargs
             )
 
+        def list_events(namespace: str, *args, **kwargs):
+            return self.k8s_events_client.list_namespaced_event(
+                *args, namespace=namespace, **kwargs
+            )
+
         resources = (
-            (
+            K8sResource(
                 list_deployments,
                 V1Deployment,
                 self.streams_explorer.handle_deployment_update,
             ),
-            (
+            K8sResource(
                 list_stateful_sets,
                 V1StatefulSet,
                 self.streams_explorer.handle_deployment_update,
             ),
-            (
+            K8sResource(
                 list_cron_jobs,
                 V1beta1CronJob,
                 self.streams_explorer.handle_deployment_update,
             ),
+            K8sResource(
+                list_events,
+                None,  # FIXME: error in kubernetes_asyncio when casting to `EventsV1EventList`
+                self.streams_explorer.handle_event,
+                5,
+            ),
         )
 
-        for resource, return_type, callback in resources:
+        for resource, return_type, callback, delay in resources:
+            await asyncio.sleep(delay)
             for namespace in self.namespaces:
                 asyncio.create_task(
                     self.__watch_namespace(
@@ -91,23 +110,6 @@ class Kubernetes:
                         callback,
                     )
                 )
-
-    async def watch_events(self):
-        def list_events(namespace: str, *args, **kwargs):
-            return self.k8s_events_client.list_namespaced_event(
-                *args, namespace=namespace, **kwargs
-            )
-
-        await asyncio.sleep(5)  # delay until initial deployments are scraped
-        for namespace in self.namespaces:
-            asyncio.create_task(
-                self.__watch_namespace(
-                    list_events,
-                    namespace,
-                    None,  # FIXME: error in kubernetes_asyncio when casting to `EventsV1EventList`
-                    self.streams_explorer.handle_event,
-                )
-            )
 
     async def __watch_namespace(
         self,
