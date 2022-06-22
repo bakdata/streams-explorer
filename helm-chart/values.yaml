@@ -10,9 +10,9 @@ serviceHttpPort: 80
 # Configure using env variables
 config:
   K8S__deployment__cluster: true
-  SCHEMAREGISTRY__url: http://schema-registry:8081
-  KAFKACONNECT__url: http://kafka-connect:8083
-  PROMETHEUS__url: http://prometheus:9090
+  # SCHEMAREGISTRY__url: http://schema-registry:8081
+  # KAFKACONNECT__url: http://kafka-connect:8083
+  # PROMETHEUS__url: http://prometheus:9090
 
 # Or pass the whole settings.yaml as a configmap
 # settings:
@@ -22,8 +22,6 @@ config:
 #   ...
 
 envPrefix: "SE_"
-env:
-  MAX_WORKERS: "1" # Max number of FastAPI worker processes inside the pod
 
 # Configure secret env variables here
 secrets: {}
@@ -68,12 +66,14 @@ rbac:
 ingress:
   enabled: true
   annotations: {}
-  path: /
   hosts:
-    - sample.dev.daaa.cloud
+    - host: sample.dev.daaa.cloud
+      paths:
+        - path: /
+          # pathType: ImplementationSpecific
+          # serviceName: 
+          # servicePort: 
   tls: []
-  # Redirect http to https: https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.1/guide/tasks/ssl_redirect/
-  sslRedirect: true
   # Commonly used to map ingress objects to specific ingress controller installations within your cluster
   #ingressClassName: nginx-web-ingress
 
@@ -96,6 +96,7 @@ health:
   readinessProbeTimeout: 30
   readinessProbeFailureThreshold: 3
   readinessProbeSuccessThreshold: 1
+
 # nodeAffinity:
 #   requiredDuringSchedulingIgnoredDuringExecution:
 #     nodeSelectorTerms:

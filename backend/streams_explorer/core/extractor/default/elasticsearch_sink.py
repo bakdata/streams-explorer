@@ -18,8 +18,14 @@ class ElasticsearchSink(Extractor):
         config = info["config"]
         connector_class = config.get("connector.class")
         if connector_class and "ElasticsearchSinkConnector" in connector_class:
-            index = config.get("transforms.changeTopic.replacement")
-            if index:
+
+            connector = KafkaConnector(
+                name=connector_name,
+                config=config,
+                type=KafkaConnectorTypesEnum.SINK,
+            )
+            indices = connector.get_routes()
+            for index in indices:
                 self.sinks.append(
                     Sink(
                         name=index,
@@ -27,11 +33,5 @@ class ElasticsearchSink(Extractor):
                         source=connector_name,
                     )
                 )
-            return KafkaConnector(
-                name=connector_name,
-                config=config,
-                type=KafkaConnectorTypesEnum.SINK,
-                topics=Extractor.split_topics(config.get("topics")),
-                error_topic=config.get("errors.deadletterqueue.topic.name"),
-            )
+            return connector
         return None

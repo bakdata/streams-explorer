@@ -1,12 +1,7 @@
 {{- if .Values.ingress.enabled -}}
 {{- $fullName := include "streams-explorer.fullname" . -}}
 {{- $ingressPath := .Values.ingress.path -}}
-{{- $sslRedirect := .Values.ingress.sslRedirect -}}
-{{- if .Capabilities.APIVersions.Has "networking.k8s.io/v1beta1" }}
-apiVersion: networking.k8s.io/v1beta1
-{{- else }}
-apiVersion: extensions/v1beta1
-{{- end }}
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ $fullName }}
@@ -35,18 +30,21 @@ spec:
 {{- end }}
   rules:
   {{- range .Values.ingress.hosts }}
-    - host: {{ . | quote }}
+    - host: {{ .host | quote }}
       http:
         paths:
-        {{- if $sslRedirect }}
-          - path: /*
+          {{- range .paths }}
+          - path: {{ .path }}
+            pathType: {{ .pathType | default "ImplementationSpecific" | quote }}
             backend:
-              serviceName: ssl-redirect
-              servicePort: use-annotation
-        {{- end }}
-          - path: {{ $ingressPath }}
-            backend:
-              serviceName: {{ $fullName }}
-              servicePort: http
+              service:
+                name: {{ .serviceName | default $fullName | quote }}
+                port:
+                  {{- if and (.servicePort) (regexMatch "^[0-9]+$" (.servicePort | toString)) }}
+                  number: {{ .servicePort }}
+                  {{- else }}
+                  name: {{ .servicePort | default "http" | quote }}
+                  {{- end }}
+          {{- end }}
   {{- end }}
 {{- end }}

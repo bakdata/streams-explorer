@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Set
 
 import pytest
 from kubernetes.client import V1beta1CronJob
@@ -114,6 +114,10 @@ class TestStreamsExplorer:
                         "connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
                         "test": "test_value",
                         "topics": "output-topic1,output-topic2",
+                        "transforms": "changeTopic",
+                        "transforms.changeTopic.type": "org.apache.kafka.connect.transforms.RegexRouter",
+                        "transforms.changeTopic.regex": ".*",
+                        "transforms.changeTopic.replacement": "fake-index",
                         "errors.deadletterqueue.topic.name": "es-sink-connector-dead-letter-topic",
                     },
                     "type": KafkaConnectorTypesEnum.SINK,
@@ -139,6 +143,9 @@ class TestStreamsExplorer:
                 return {i: _ for i in range(5)}
             return None
 
+        def get_all_topic_names(_) -> Set[str]:
+            return set()
+
         mocker.patch(
             "streams_explorer.core.services.kafkaconnect.KafkaConnect.get_connectors",
             get_connectors,
@@ -152,12 +159,16 @@ class TestStreamsExplorer:
             lambda config: config,
         )
         mocker.patch(
-            "streams_explorer.core.services.kafka.Kafka.get_topic_config",
+            "streams_explorer.core.services.kafka_admin_client.KafkaAdminClient.get_topic_config",
             get_topic_config,
         )
         mocker.patch(
-            "streams_explorer.core.services.kafka.Kafka.get_topic_partitions",
+            "streams_explorer.core.services.kafka_admin_client.KafkaAdminClient.get_topic_partitions",
             get_topic_partitions,
+        )
+        mocker.patch(
+            "streams_explorer.core.services.kafka_admin_client.KafkaAdminClient.get_all_topic_names",
+            get_all_topic_names,
         )
 
         return explorer
@@ -392,8 +403,8 @@ class TestStreamsExplorer:
         await streams_explorer.update()
         json_graph = streams_explorer.data_flow.json_graph
         assert json_graph
-        assert len(json_graph["nodes"]) == 15
-        assert len(json_graph["edges"]) == 12
+        assert len(json_graph["nodes"]) == 16
+        assert len(json_graph["edges"]) == 13
 
         streams_explorer.data_flow.reset()
         assert not streams_explorer.data_flow.json_graph

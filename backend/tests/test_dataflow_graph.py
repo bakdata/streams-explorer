@@ -1,11 +1,15 @@
+from typing import Set
+
 import pytest
 
 from streams_explorer.core.config import settings
 from streams_explorer.core.k8s_app import ATTR_PIPELINE, K8sApp
 from streams_explorer.core.services.dataflow_graph import DataFlowGraph
+from streams_explorer.core.services.kafka_admin_client import KafkaAdminClient
 from streams_explorer.core.services.metric_providers import MetricProvider
 from streams_explorer.models.kafka_connector import (
     KafkaConnector,
+    KafkaConnectorConfig,
     KafkaConnectorTypesEnum,
 )
 from streams_explorer.models.sink import Sink
@@ -18,7 +22,11 @@ settings.k8s.pipeline.label = "pipeline"
 class TestDataFlowGraph:
     @pytest.fixture()
     def df(self) -> DataFlowGraph:
-        return DataFlowGraph(metric_provider=MetricProvider)
+        return DataFlowGraph(metric_provider=MetricProvider, kafka=KafkaAdminClient())
+
+    @pytest.mark.asyncio
+    async def test_metric_provider_before_setup(self, df: DataFlowGraph):
+        assert await df.get_metrics() == []
 
     @pytest.mark.asyncio
     async def test_positioned_pipeline_graph_not_found(self, df: DataFlowGraph):
@@ -62,20 +70,193 @@ class TestDataFlowGraph:
         assert df.graph.has_edge("test-app", "extra-output1")
         assert df.graph.has_edge("test-app", "extra-output2")
 
+    def test_resolve_input_pattern(self, df: DataFlowGraph):
+        df.add_streaming_app(
+            K8sApp.factory(
+                get_streaming_app_deployment(error_topic="fake-dead-letter-topic")
+            )
+        )
+
+        assert len(df.graph.nodes) == 4
+
+        settings.graph.resolve.input_pattern_topics.all = True
+        df.add_streaming_app(
+            K8sApp.factory(
+                get_streaming_app_deployment(
+                    name="test-app2",
+                    input_topics=None,
+                    output_topic="output-topic2",
+                    error_topic="fake2-dead-letter-topic",
+                    input_pattern=".*-dead-letter-topic",
+                )
+            )
+        )
+        df.apply_input_pattern_edges()
+        assert len(df.graph.nodes) == 7
+        assert df.graph.has_edge("fake-dead-letter-topic", "test-app2")
+        assert df.graph.has_edge(
+            "fake2-dead-letter-topic", "test-app2"
+        ), "Should match on app's own error topic"
+        assert df.graph.has_edge("test-app2", "output-topic2")
+        assert df.graph.has_edge("test-app2", "fake2-dead-letter-topic")
+
+    def test_resolve_input_patterns_for_topics_in_kafka(self, monkeypatch):
+        kafka = KafkaAdminClient()
+        kafka._enabled = True
+
+        def get_all_topic_names() -> Set[str]:
+            return {"another-dead-letter-topic", "another-non-matching-topic"}
+
+        monkeypatch.setattr(kafka, "get_all_topic_names", get_all_topic_names)
+        df = DataFlowGraph(metric_provider=MetricProvider, kafka=kafka)
+
+        settings.graph.resolve.input_pattern_topics.all = True
+        df.add_streaming_app(
+            K8sApp.factory(
+                get_streaming_app_deployment(
+                    name="test-app2",
+                    input_topics=None,
+                    output_topic="output-topic2",
+                    error_topic="fake2-dead-letter-topic",
+                    input_pattern=".*-dead-letter-topic",
+                )
+            )
+        )
+        df.apply_input_pattern_edges()
+        assert len(df.graph.nodes) == 4
+        assert df.graph.has_edge("another-dead-letter-topic", "test-app2")
+        assert df.graph.has_edge("fake2-dead-letter-topic", "test-app2")
+        assert df.graph.has_node("another-dead-letter-topic")
+        assert not df.graph.has_node("another-non-matching-topic")
+
+    def test_no_resolve_input_pattern(self, df: DataFlowGraph):
+        df.add_streaming_app(
+            K8sApp.factory(
+                get_streaming_app_deployment(error_topic="fake-dead-letter-topic")
+            )
+        )
+
+        assert len(df.graph.nodes) == 4
+
+        settings.graph.resolve.input_pattern_topics.all = False
+        df.add_streaming_app(
+            K8sApp.factory(
+                get_streaming_app_deployment(
+                    name="test-app2",
+                    input_topics=None,
+                    output_topic="output-topic2",
+                    error_topic="fake2-dead-letter-topic",
+                    input_pattern=".*-dead-letter-topic",
+                )
+            )
+        )
+        df.apply_input_pattern_edges()
+        assert len(df.graph.nodes) == 8
+        assert df.graph.has_edge(".*-dead-letter-topic", "test-app2")
+        assert not df.graph.has_edge("fake2-dead-letter-topic", "test-app2")
+        assert df.graph.has_edge("test-app2", "output-topic2")
+        assert df.graph.has_edge("test-app2", "fake2-dead-letter-topic")
+
+    def test_resolve_extra_input_patterns(self, df: DataFlowGraph):
+        df.add_streaming_app(
+            K8sApp.factory(
+                get_streaming_app_deployment(
+                    multiple_outputs="out=output-non-match-topic",
+                    error_topic="fake-dead-letter-topic",
+                )
+            )
+        )
+
+        assert len(df.graph.nodes) == 5
+        assert df.graph.has_edge("input-topic", "test-app")
+        assert df.graph.has_edge("test-app", "output-topic")
+        assert df.graph.has_edge("test-app", "fake-dead-letter-topic")
+
+        settings.graph.resolve.input_pattern_topics.all = True
+        df.add_streaming_app(
+            K8sApp.factory(
+                get_streaming_app_deployment(
+                    name="test-app2",
+                    input_topics="output-topic",
+                    output_topic="another-topic",
+                    error_topic="fake2-dead-letter-topic",
+                    extra_input_patterns="fake1=.*-dead-letter-topic,fake2=.*-output-topic",
+                )
+            )
+        )
+        df.apply_input_pattern_edges()
+        assert len(df.graph.nodes) == 8
+        assert df.graph.has_edge("fake-dead-letter-topic", "test-app2")
+        assert df.graph.has_edge(
+            "fake2-dead-letter-topic", "test-app2"
+        ), "Should match on app's own error topic"
+        assert not df.graph.has_edge("another-topic", "test-app2")
+        assert df.graph.has_edge("fake-dead-letter-topic", "test-app2")
+
+    def test_no_resolve_extra_input_patterns(self, df: DataFlowGraph):
+        settings.graph.resolve.input_pattern_topics.all = False
+        df.add_streaming_app(
+            K8sApp.factory(
+                get_streaming_app_deployment(
+                    multiple_outputs="out=output-non-match-topic",
+                    error_topic="fake-dead-letter-topic",
+                )
+            )
+        )
+
+        df.add_streaming_app(
+            K8sApp.factory(
+                get_streaming_app_deployment(
+                    name="test-app2",
+                    input_topics="output-topic",
+                    output_topic="output-topic2",
+                    error_topic="fake2-dead-letter-topic",
+                    extra_input_patterns="fake1=.*-dead-letter-topic,fake2=.*output-topic",
+                )
+            )
+        )
+        df.apply_input_pattern_edges()
+        assert len(df.graph.nodes) == 10
+        assert df.graph.has_edge(".*-dead-letter-topic", "test-app2")
+        assert df.graph.has_edge(".*output-topic", "test-app2")
+
     def test_add_connector(self, df: DataFlowGraph):
         sink_connector = KafkaConnector(
             name="test-sink-connector",
             type=KafkaConnectorTypesEnum.SINK,
-            topics=["output-topic"],
-            config={},
+            config=KafkaConnectorConfig(topics="output-topic"),
             error_topic="dead-letter-topic",
         )
         source_connector = KafkaConnector(
             name="test-source-connector",
             type=KafkaConnectorTypesEnum.SOURCE,
-            topics=["input-topic", "input-topic2"],
-            config={},
+            config=KafkaConnectorConfig(topics="input-topic,input-topic2"),
         )
+        df.add_streaming_app(K8sApp.factory(get_streaming_app_deployment()))
+        df.add_connector(sink_connector)
+        df.add_connector(source_connector)
+        assert len(df.graph.nodes) == 8
+        assert df.graph.has_edge("output-topic", "test-sink-connector")
+        assert df.graph.has_edge("test-sink-connector", "dead-letter-topic")
+        assert df.graph.has_edge("test-source-connector", "input-topic")
+        assert df.graph.has_edge("test-source-connector", "input-topic2")
+        assert len(df.pipelines) == 0
+
+    def test_deprecated_connector(self, df: DataFlowGraph):
+        sink_connector = KafkaConnector(
+            name="test-sink-connector",
+            type=KafkaConnectorTypesEnum.SINK,
+            config=KafkaConnectorConfig(topics="output-topic"),
+            error_topic="dead-letter-topic",
+            topics=["output-topic"],
+        )
+        source_connector = KafkaConnector(
+            name="test-source-connector",
+            type=KafkaConnectorTypesEnum.SOURCE,
+            config=KafkaConnectorConfig(topics="input-topic,input-topic2"),
+            topics=["input-topic", "input-topic2"],
+        )
+
         df.add_streaming_app(K8sApp.factory(get_streaming_app_deployment()))
         df.add_connector(sink_connector)
         df.add_connector(source_connector)
@@ -188,8 +369,7 @@ class TestDataFlowGraph:
         source_connector = KafkaConnector(
             name="test-source-connector",
             type=KafkaConnectorTypesEnum.SOURCE,
-            topics=["input-topic2", "source-topic"],
-            config={},
+            config=KafkaConnectorConfig(topics="input-topic2,source-topic"),
         )
         df.add_connector(source_connector)
         assert "test-source-connector" in pipeline2.nodes
@@ -268,8 +448,7 @@ class TestDataFlowGraph:
         sink_connector = KafkaConnector(
             name="test-sink-connector",
             type=KafkaConnectorTypesEnum.SINK,
-            topics=["output-topic1", "output-topic2"],
-            config={},
+            config=KafkaConnectorConfig(topics="output-topic1,output-topic2"),
         )
         df.add_connector(sink_connector)
         assert "test-sink-connector" in df.graph.nodes
@@ -284,8 +463,7 @@ class TestDataFlowGraph:
         source_connector = KafkaConnector(
             name="test-source-connector",
             type=KafkaConnectorTypesEnum.SOURCE,
-            topics=["input-topic1", "input-topic2"],
-            config={},
+            config=KafkaConnectorConfig(topics="input-topic1,input-topic2"),
         )
         df.add_connector(source_connector)
         assert "test-source-connector" in df.graph.nodes
@@ -300,8 +478,7 @@ class TestDataFlowGraph:
         unrelated_sink_connector = KafkaConnector(
             name="unrelated-sink-connector",
             type=KafkaConnectorTypesEnum.SINK,
-            topics=["input-topic1"],
-            config={},
+            config=KafkaConnectorConfig(topics="input-topic1"),
         )
         df.add_connector(unrelated_sink_connector)
         assert "unrelated-sink-connector" in df.graph.nodes
@@ -311,8 +488,7 @@ class TestDataFlowGraph:
         unrelated_source_connector = KafkaConnector(
             name="unrelated-source-connector",
             type=KafkaConnectorTypesEnum.SOURCE,
-            topics=["output-topic1"],
-            config={},
+            config=KafkaConnectorConfig(topics="output-topic1"),
         )
         df.add_connector(unrelated_source_connector)
         assert "unrelated-source-connector" in df.graph.nodes
@@ -346,15 +522,13 @@ class TestDataFlowGraph:
         sink_connector1 = KafkaConnector(
             name="sink-connector1",
             type=KafkaConnectorTypesEnum.SINK,
-            topics=["output-topic1"],
-            config={},
+            config=KafkaConnectorConfig(topics="output-topic1"),
         )
         df.add_connector(sink_connector1)
         sink_connector2 = KafkaConnector(
             name="sink-connector2",
             type=KafkaConnectorTypesEnum.SINK,
-            topics=["output-topic2"],
-            config={},
+            config=KafkaConnectorConfig(topics="output-topic2"),
         )
         df.add_connector(sink_connector2)
 

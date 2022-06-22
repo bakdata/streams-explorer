@@ -14,16 +14,15 @@
   "dependencies": {
     "@ant-design/icons": "^4.7.0",
     "@antv/g6": "^4.3.11",
-    "@types/react": "^17.0.35",
     "antd": "^4.16.13",
     "copy-to-clipboard": "^3.3.1",
     "millify": "^4.0.0",
-    "next": "^12.0.2",
+    "next": "^12.0.10",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-json-view": "^1.21.3",
     "react-resize-detector": "^6.7.6",
-    "restful-react": "^15.9.2",
+    "restful-react": "^15.9.3",
     "typescript": "^4.4.4"
   },
   "devDependencies": {
@@ -32,6 +31,7 @@
     "@testing-library/user-event": "^13.5.0",
     "@types/jest": "^27.0.2",
     "@types/node": "^16.3.3",
+    "@types/react": "^17.0.39",
     "@types/react-dom": "^17.0.11",
     "@types/testing-library__jest-dom": "^5.14.1",
     "babel-jest": "^27.3.1",

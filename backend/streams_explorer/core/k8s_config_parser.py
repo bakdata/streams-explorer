@@ -52,6 +52,10 @@ class StreamsBootstrapConfigParser(K8sConfigParser):
             self.config.extra_input_topics = self.parse_extra_topics(value)
         elif name == "EXTRA_OUTPUT_TOPICS":
             self.config.extra_output_topics = self.parse_extra_topics(value)
+        elif name == "INPUT_PATTERN":
+            self.config.input_pattern = value
+        elif name == "EXTRA_INPUT_PATTERNS":
+            self.config.extra_input_patterns = self.parse_extra_topics(value)
         else:
             self.config.extra[name] = value
 

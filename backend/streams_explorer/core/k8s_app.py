@@ -33,10 +33,12 @@ class K8sApp:
         self.id: str
         self.name: str
         self.input_topics: List[str] = []
+        self.input_pattern: Optional[str] = None
         self.output_topic: Optional[str] = None
         self.error_topic: Optional[str] = None
         self.extra_input_topics: List[str] = []
         self.extra_output_topics: List[str] = []
+        self.extra_input_patterns: List[str] = []
         self.attributes: Dict[str, str] = {}
         self.setup()
 
