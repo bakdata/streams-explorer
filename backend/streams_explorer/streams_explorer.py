@@ -1,3 +1,4 @@
+import re
 from asyncio.queues import Queue
 from typing import Dict, List, Optional, Type
 
@@ -46,7 +47,7 @@ class StreamsExplorer:
         self.linking_service = linking_service
         self.kubernetes = Kubernetes(self)
         self.updates: Queue[K8sApp] = Queue()
-        self.events: Queue = Queue()  # TODO: add type annotation
+        # self.events: Queue = Queue()  # TODO: add type annotation
 
     async def setup(self):
         await self.kubernetes.setup()
@@ -175,13 +176,23 @@ class StreamsExplorer:
                 self.__remove_app(app)
 
     def handle_event(self, raw_event: K8sEvent) -> None:
-        # TODO: map event to application
         event = raw_event["object"]
-        logger.info("Event: {}, Reason: {}", event["type"], event["reason"])
+
+        ### extract deployment name from pod
+        name = re.findall(r"{(.+?)}", event["regarding"]["fieldPath"])[0]
+
+        logger.info(
+            "Event: {} {}, Reason: {}",
+            event["type"],
+            name,
+            event["reason"],
+        )
         logger.debug(event)
-        if event["type"] == K8sEventType.WARNING:
-            if event["reason"] == K8sReason.BACKOFF:
-                self.events.put_nowait(event)
+
+        ### map event to application
+        if app := self.applications.get(name):
+            app.state = event["reason"]
+            self.updates.put_nowait(app)
 
     def update_connectors(self):
         extractor_container.reset_connector()

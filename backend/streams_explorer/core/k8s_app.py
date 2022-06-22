@@ -30,6 +30,7 @@ class K8sApp:
         self.metadata: V1ObjectMeta = k8s_object.metadata or V1ObjectMeta()
         self.attributes: Dict[str, str] = {}
         self.config: K8sConfig
+        self.state: str = "Unknown"
         self.setup()
 
     @property

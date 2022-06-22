@@ -56,5 +56,5 @@ class ReplicaCount(NamedTuple):
 
 class AppState(BaseModel):
     id: str
+    state: str  # TODO: K8sReason
     replicas: ReplicaCount
-    # reason: K8sReason

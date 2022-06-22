@@ -44,25 +44,29 @@ async def websocket_endpoint(
     try:
         while True:
             # TODO: enable
-            # logger.info("waiting for state update...")
-            # # block until queue has new update
-            # app: K8sApp = await streams_explorer.updates.get()
-            # logger.info("got state update")
-            # await websocket.send_json(
-            #     AppState(
-            #         id=app.id, replicas=(app.replicas_ready, app.replicas_total)
-            #     ).dict()
-            # )
+            logger.info("waiting for state update...")
+            # block until queue has new update
+            app: K8sApp = await streams_explorer.updates.get()
+            logger.info("got state update")
+            await websocket.send_json(
+                AppState(
+                    id=app.id,
+                    replicas=(app.replicas_ready, app.replicas_total),
+                    state=app.state,
+                ).dict()
+            )
 
             # HACK: simulate
-            app_id = "atm-fraud-transactionavroproducer"
-            update = AppState(id=app_id, replicas=ReplicaCount(ready=0, total=1))
-            await websocket.send_json(update.dict())
-            await asyncio.sleep(1)
+            # app_id = "atm-fraud-transactionavroproducer"
+            # update = AppState(
+            #     id=app_id, replicas=ReplicaCount(ready=0, total=1), state="Unknown"
+            # )
+            # await websocket.send_json(update.dict())
+            # await asyncio.sleep(1)
 
-            update.replicas = ReplicaCount(ready=1, total=1)
-            await websocket.send_json(update.dict())
-            await asyncio.sleep(1)
+            # update.replicas = ReplicaCount(ready=1, total=1)
+            # await websocket.send_json(update.dict())
+            # await asyncio.sleep(1)
 
     except WebSocketDisconnect:
         await websocket.close()
