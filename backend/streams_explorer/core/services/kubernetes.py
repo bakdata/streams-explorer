@@ -47,7 +47,7 @@ class Kubernetes:
         self.k8s_batch_client = kubernetes_asyncio.client.BatchV1beta1Api()
         self.k8s_events_client = kubernetes_asyncio.client.EventsV1Api()
 
-    async def watch(self):
+    async def watch_deployments(self):
         def list_deployments(namespace: str, *args, **kwargs):
             return self.k8s_app_client.list_namespaced_deployment(
                 *args, namespace=namespace, **kwargs
@@ -60,11 +60,6 @@ class Kubernetes:
 
         def list_cron_jobs(namespace: str, *args, **kwargs):
             return self.k8s_batch_client.list_namespaced_cron_job(
-                *args, namespace=namespace, **kwargs
-            )
-
-        def list_events(namespace: str, *args, **kwargs):
-            return self.k8s_events_client.list_namespaced_event(
                 *args, namespace=namespace, **kwargs
             )
 
@@ -84,11 +79,6 @@ class Kubernetes:
                 V1beta1CronJob,
                 self.streams_explorer.handle_deployment_update,
             ),
-            (
-                list_events,
-                None,  # FIXME: error in kubernetes_asyncio when casting to `EventsV1EventList`
-                self.streams_explorer.handle_event,
-            ),
         )
 
         for resource, return_type, callback in resources:
@@ -101,6 +91,23 @@ class Kubernetes:
                         callback,
                     )
                 )
+
+    async def watch_events(self):
+        def list_events(namespace: str, *args, **kwargs):
+            return self.k8s_events_client.list_namespaced_event(
+                *args, namespace=namespace, **kwargs
+            )
+
+        await asyncio.sleep(5)  # delay until initial deployments are scraped
+        for namespace in self.namespaces:
+            asyncio.create_task(
+                self.__watch_namespace(
+                    list_events,
+                    namespace,
+                    None,  # FIXME: error in kubernetes_asyncio when casting to `EventsV1EventList`
+                    self.streams_explorer.handle_event,
+                )
+            )
 
     async def __watch_namespace(
         self,

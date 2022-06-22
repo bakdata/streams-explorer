@@ -53,7 +53,8 @@ class StreamsExplorer:
         await self.kubernetes.setup()
 
     async def watch(self):
-        await self.kubernetes.watch()
+        await self.kubernetes.watch_deployments()
+        await self.kubernetes.watch_events()
 
     async def update_graph(self):
         self.data_flow.reset()
