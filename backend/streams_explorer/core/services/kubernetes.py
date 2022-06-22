@@ -4,12 +4,7 @@ from typing import TYPE_CHECKING, Callable, TypedDict
 import kubernetes_asyncio.client
 import kubernetes_asyncio.config
 import kubernetes_asyncio.watch
-from kubernetes_asyncio.client import (
-    EventsV1EventList,
-    V1beta1CronJob,
-    V1Deployment,
-    V1StatefulSet,
-)
+from kubernetes_asyncio.client import V1beta1CronJob, V1Deployment, V1StatefulSet
 from loguru import logger
 
 from streams_explorer.core.config import settings
@@ -91,7 +86,7 @@ class Kubernetes:
             ),
             (
                 list_events,
-                None,  # FIXME: `EventsV1EventList` causes error,
+                None,  # FIXME: error in kubernetes_asyncio when casting to `EventsV1EventList`
                 self.streams_explorer.handle_event,
             ),
         )
@@ -114,9 +109,7 @@ class Kubernetes:
         return_type: str | None,
         callback: Callable,
     ):
-        async with kubernetes_asyncio.watch.Watch(
-            return_type
-        ) as w:  # FIXME: kubernetes object return_type when it's not so buggy anymore
+        async with kubernetes_asyncio.watch.Watch(return_type) as w:
             async with w.stream(resource, namespace) as stream:
                 async for event in stream:
                     callback(event)
