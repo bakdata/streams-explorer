@@ -21,13 +21,13 @@ jobs:
 
       - name: Bump version
         id: bump-version
-        uses: bakdata/ci-templates/actions/python-poetry-bump-version@v1.0.0
+        uses: bakdata/ci-templates/actions/python-poetry-bump-version@v1.3.0
         with:
           release-type: "${{ github.event.inputs.release-type }}"
           working-directory: ${{ env.BACKEND_DIR }}
 
       - name: Commit and push pyproject.toml file
-        uses: bakdata/ci-templates/actions/commit-and-push@v1.0.0
+        uses: bakdata/ci-templates/actions/commit-and-push@v1.3.0
         with:
           commit-message: "Bump version ${{ steps.bump-version.outputs.old-tag }} → ${{ steps.bump-version.outputs.release-tag }}"
           github-username: ${{ secrets.GH_USERNAME }}
