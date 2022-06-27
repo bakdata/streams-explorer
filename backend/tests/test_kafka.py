@@ -6,7 +6,7 @@ from confluent_kafka.admin import ConfigEntry, ConfigResource, PartitionMetadata
 from dynaconf.validator import ValidationError
 
 from streams_explorer.core.config import settings
-from streams_explorer.core.services.kafka import Kafka
+from streams_explorer.core.services.kafka_admin_client import KafkaAdminClient
 
 test_topic = "test-topic"
 
@@ -36,12 +36,12 @@ class TestKafka:
             ConfigEntry(name="key", value="value"),
             ConfigEntry(name="sensitive", value="supersecret", is_sensitive=True),
         ]
-        assert Kafka.format_values(raw) == {"key": "value"}
-        assert Kafka.format_values([]) == {}
+        assert KafkaAdminClient.format_values(raw) == {"key": "value"}
+        assert KafkaAdminClient.format_values([]) == {}
 
     @pytest.fixture()
-    def kafka(self, monkeypatch) -> Kafka:
-        kafka = Kafka()
+    def kafka(self, monkeypatch) -> KafkaAdminClient:
+        kafka = KafkaAdminClient()
 
         def mock_get_resource(resource: ConfigResource, *_) -> List[ConfigEntry]:
             if resource == ConfigResource(ConfigResource.Type.TOPIC, test_topic):
@@ -51,7 +51,7 @@ class TestKafka:
                 ]
             return []
 
-        monkeypatch.setattr(kafka, "_Kafka__get_resource", mock_get_resource)
+        monkeypatch.setattr(kafka, "_KafkaAdminClient__get_resource", mock_get_resource)
 
         @dataclass
         class MockTopicMetadata:
@@ -65,18 +65,18 @@ class TestKafka:
                 return MockTopicMetadata(test_topic, partitions)
             return None
 
-        monkeypatch.setattr(kafka, "_Kafka__get_topic", mock_get_topic)
+        monkeypatch.setattr(kafka, "_KafkaAdminClient__get_topic", mock_get_topic)
 
         return kafka
 
-    def test_get_topic_config(self, kafka: Kafka):
+    def test_get_topic_config(self, kafka: KafkaAdminClient):
         assert kafka.get_topic_config(test_topic) == {
             "cleanup.policy": "delete",
             "retention.ms": "-1",
         }
         assert kafka.get_topic_config("doesnt-exist") == {}
 
-    def test_get_topic_partitions(self, kafka: Kafka):
+    def test_get_topic_partitions(self, kafka: KafkaAdminClient):
         partitions = kafka.get_topic_partitions(test_topic)
         assert type(partitions) is dict
         assert len(partitions) == 10

@@ -1,4 +1,4 @@
-from typing import Literal, Union
+from typing import Literal
 
 from pydantic import Field
 
@@ -142,9 +142,7 @@ class TestTransformerKafkaConnect:
                 return "example-topic"
 
         class CustomKafkaConnectorTransformer(KafkaConnector):
-            _transformers = Union[
-                CustomRouterTransformer,
-            ]
+            _transformers = CustomRouterTransformer
 
         connector = CustomKafkaConnectorTransformer(
             name="example-connector",

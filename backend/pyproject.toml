@@ -1,24 +1,25 @@
 [tool.poetry]
 name = "streams-explorer"
-version = "1.5.0"
+version = "1.6.1"
 description = "Explore Data Pipelines in Apache Kafka."
-readme = "../README.md"
+readme = "README.md"
 authors = ["bakdata"]
 repository = "https://github.com/bakdata/streams-explorer"
 license = "MIT"
 keywords = ["kafka", "kubernetes", "stream-processing", "monitoring", "pipelines"]
 classifiers = [
-    "License :: OSI Approved :: MIT License",
-    "Programming Language :: Python",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
-    "Topic :: Software Development :: Libraries :: Python Modules",
-    "Topic :: Software Development :: Libraries",
-    "Topic :: Software Development",
-    "Intended Audience :: Developers",
-    "Typing :: Typed",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Topic :: Software Development :: Libraries",
+  "Topic :: Software Development",
+  "Intended Audience :: Developers",
+  "Typing :: Typed",
 ]
 
 [tool.poetry.urls]
@@ -35,15 +36,15 @@ httpx = "^0.20.0"
 pydantic = "^1.8.2"
 fastapi-utils = "^0.2.1"
 fastapi = "^0.70.0"
-uvicorn = {extras = ["standard"], version = "^0.15.0"}
+uvicorn = { extras = ["standard"], version = "^0.15.0" }
 pygraphviz = "^1.7"
-confluent-kafka = "^1.7.0"
+confluent-kafka = "^1.9.0"
 cachetools = "^4.2.2"
 
 [tool.poetry.dev-dependencies]
 mypy = "^0.910"
 flake8 = "^4.0.1"
-black = "^21.9b0"
+black = "^22.3.0"
 isort = "^5.9.3"
 pytest = "^6.2.5"
 pre-commit = "^2.15.0"

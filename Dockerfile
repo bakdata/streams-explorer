@@ -21,6 +21,9 @@ RUN pip install -U pip poetry && \
     poetry install --no-dev --no-interaction
 COPY ./backend /app
 
+# install streams_explorer package
+RUN pip install -e .
+
 COPY --from=frontend /build/out /app/static
 
 EXPOSE 80

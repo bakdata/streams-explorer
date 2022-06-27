@@ -3,6 +3,12 @@ graph:
   update_interval: 300
   layout_arguments: "-Grankdir=LR -Gnodesep=0.8 -Gpad=10"
   pipeline_distance: 500
+  resolve:
+    input_pattern_topics:
+      # If true topics that match (extra) input pattern(s) are connected to the streaming app in the graph containing all pipelines
+      all: false
+      # If true topics that match (extra) input pattern(s) are connected to the streaming app in pipeline graphs
+      pipelines: false
 
 k8s:
   deployment:
@@ -35,17 +41,22 @@ kafka:
   displayed_information:
     - name: "Cleanup Policy"
       key: "cleanup.policy"
+  # cache for retrieving all topic names (used when input topic patterns are resolved)
+  topic_names_cache:
+    ttl: 3600
 
 node_info:
   # cache time-to-live in seconds
   cache_ttl: 3600
 
 ## (optional) configure Kafka Connect url and displayed information
-# kafkaconnect:
-#   url: "http://localhost:8083"
-#   displayed_information:
-#     - name: "Transformer"
-#       key: "transforms.changeTopic.regex"
+#  kafkaconnect:
+#    url: "http://localhost:8083"
+#    displayed_information:
+#      - name: "Transformer"
+#        key: "transforms.changeTopic.regex"
+#      - name: "Type"
+#        key: "transforms.changeTopic.type"
 
 ## (optional) configure Schema Registry for topic information (supports Karapace and Confluent Schema Registry)
 # schemaregistry:

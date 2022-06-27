@@ -1,6 +1,6 @@
 import { AutoComplete, Space } from "antd";
-import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
+import React, { useEffect, useState } from "react";
 import { Node as GraphNode } from "./api/fetchers";
 import Node from "./Node";
 
@@ -57,8 +57,7 @@ const Search = (props: SearchProps) => {
         minWidth: ICON_SIZE + width,
       }}
       filterOption={(inputValue, option) =>
-        option?.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
-      }
+        option?.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1}
       defaultValue={props.focusedNode ? props.focusedNode.label : undefined}
       onSelect={(nodeId, option) => {
         const node = option.node as Node;

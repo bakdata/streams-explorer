@@ -22,6 +22,12 @@ class GenericSink(Extractor):
 
 
 class GenericSourceConnector(KafkaConnector):
+    def __init__(self, **kwargs):
+        super().__init__(
+            **kwargs,
+            type=KafkaConnectorTypesEnum.SOURCE,
+        )
+
     def get_topics(self) -> List[str]:
         return []
 
@@ -31,9 +37,5 @@ class GenericSource(Extractor):
         self, info: dict, connector_name: str
     ) -> Optional[KafkaConnector]:
         if info["type"] == KafkaConnectorTypesEnum.SOURCE:
-            return GenericSourceConnector(
-                name=connector_name,
-                config=info["config"],
-                type=KafkaConnectorTypesEnum.SOURCE,
-            )
+            return GenericSourceConnector(name=connector_name, config=info["config"])
         return None

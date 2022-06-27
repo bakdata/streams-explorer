@@ -1,7 +1,7 @@
-import style from "./Settings.module.css";
-import React, { useState, useEffect } from "react";
-import { Modal, Button, Tooltip, Switch, Row, Col } from "antd";
 import { SettingOutlined } from "@ant-design/icons";
+import { Button, Col, Modal, Row, Switch, Tooltip } from "antd";
+import React, { useEffect, useState } from "react";
+import style from "./Settings.module.css";
 
 const ANIMATE = "animate";
 
