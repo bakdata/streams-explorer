@@ -20,12 +20,9 @@ jobs:
 
       - name: Docker meta
         id: meta
-        uses: docker/metadata-action@v3
+        uses: docker/metadata-action@v4
         with:
           images: ${{ env.image }}
-          tags: |
-            event=pr,type=sha
-            event=tag,type=semver,pattern=v{{version}}
 
       - name: Login to DockerHub
         uses: docker/login-action@v1
@@ -36,7 +33,7 @@ jobs:
       - name: Build & Push
         uses: docker/build-push-action@v2
         with:
-          # context: "{{defaultContext}}:backend"
+          context: ${{ env.image }}
           push: false # TODO: enable
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
