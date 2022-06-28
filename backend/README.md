@@ -62,13 +62,13 @@ Once the container is started visit <http://localhost:3000>
 1. Add the Helm chart repository
 
 ```sh
-helm repo add streams-explorer https://raw.githubusercontent.com/bakdata/streams-explorer/master/helm-chart/
+helm repo add streams-explorer https://raw.githubusercontent.com/bakdata/streams-explorer/main/helm-chart/
 ```
 
 2. Install
 
 ```sh
-helm upgrade --install --values helm-chart/values.yaml streams-explorer
+helm upgrade --install --values helm-chart/values.yaml streams-explorer streams-explorer/streams-explorer
 ```
 
 ### Standalone

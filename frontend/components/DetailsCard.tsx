@@ -15,9 +15,9 @@ const DetailsCard = ({ node }: DetailsCardProps) => {
   return (
     <div ref={ref} className={style.details}>
       <Card
-        title={
-          node ? `${node.label} - Details` : "Click on Node  to see Details"
-        }
+        title={node
+          ? `${node.label} - Details`
+          : "Click on Node  to see Details"}
         bodyStyle={{}}
         style={{ width: width }}
         headStyle={{ backgroundColor: "#383838", color: "white" }}

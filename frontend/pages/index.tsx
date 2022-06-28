@@ -1,7 +1,7 @@
 import "antd/dist/antd.css";
 import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
 import Head from "next/head";
+import { useEffect, useState } from "react";
 
 const App = dynamic(() => import("../components/App"), { ssr: false });
 
