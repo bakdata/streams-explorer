@@ -11,8 +11,8 @@ jobs:
   backend:
     name: Backend
     runs-on: ubuntu-latest
-    container:
-      image: bakdata/streams-explorer-base
+    # container:
+    #   image: bakdata/streams-explorer-base
     env:
       working-directory: ./backend
     strategy:
