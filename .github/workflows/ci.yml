@@ -33,6 +33,7 @@ jobs:
         run: |
           python3 -m pip install --user pipx
           python3 -m pipx ensurepath
+          exec $SHELL
 
       - name: Set up Poetry
         uses: bakdata/ci-templates/actions/python-setup-poetry@v1.3.0
