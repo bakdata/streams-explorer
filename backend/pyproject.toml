@@ -42,10 +42,10 @@ cachetools = "^4.2.2"
 kubernetes-asyncio = "21.7.1"
 
 [tool.poetry.dev-dependencies]
-mypy = "^0.910"
+mypy = "^0.961"
 flake8 = "^4.0.1"
-black = "^22.3.0"
-isort = "^5.9.3"
+black = "^22.6.0"
+isort = "^5.10.1"
 pytest = "^6.2.5"
 pre-commit = "^2.15.0"
 pytest-asyncio = "^0.15.1"
