@@ -11,6 +11,8 @@ jobs:
   backend:
     name: Backend
     runs-on: ubuntu-latest
+    container:
+      image: bakdata/streams-explorer-base
     env:
       working-directory: ./backend
     strategy:
@@ -24,8 +26,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Install packages
-        run: sudo apt-get -y install python3-dev graphviz libgraphviz-dev pkg-config python3-wheel
+      # - name: Install packages
+      #   run: sudo apt-get -y install python3-dev graphviz libgraphviz-dev pkg-config python3-wheel
 
       - name: Set up Poetry
         uses: bakdata/ci-templates/actions/python-setup-poetry@v1.3.0
