@@ -1,7 +1,8 @@
-name: Docker base image
+name: Update Docker base image
 
 on:
   workflow_dispatch:
+  push:
 
 jobs:
   build-push:
@@ -23,6 +24,7 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: ${{ env.image }}
+          flavor: latest=auto
 
       - name: Login to DockerHub
         uses: docker/login-action@v1
@@ -31,9 +33,8 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build & Push
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
-          context: ${{ env.image }}
           push: false # TODO: enable
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
