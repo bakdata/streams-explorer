@@ -105,10 +105,10 @@ export function updateNodeMetrics(
       `${
         typeof metric.replicas === "number"
           ? `REPLICAS ${
-              typeof metric.replicas_available === "number"
-                ? `${metric.replicas_available}/`
-                : ""
-            }${metric.replicas}`
+            typeof metric.replicas_available === "number"
+              ? `${metric.replicas_available}/`
+              : ""
+          }${metric.replicas}`
           : ""
       }`,
       `${
@@ -147,8 +147,8 @@ export function updateNodeMetrics(
         } else if (metric.replicas === 0) {
           unavailableStreamingApps.push(node);
         } else if (
-          nodeType === "streaming-app" &&
-          metric.consumer_read_rate === 0
+          nodeType === "streaming-app"
+          && metric.consumer_read_rate === 0
         ) {
           // do not animate incoming edges on streaming apps with read rate 0
           setEdgeActivity(graph, node.getInEdges(), false);
@@ -203,8 +203,9 @@ const GraphVisualization = ({
     if (isBrowser) {
       const hostname = window.location.hostname;
       const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-      const port =
-        process.env.NODE_ENV === "development" ? "8000" : window.location.port;
+      const port = process.env.NODE_ENV === "development"
+        ? "8000"
+        : window.location.port;
       const url = `${protocol}//${hostname}:${port}/api/graph/ws`;
       return new WebSocket(url);
     }
@@ -293,19 +294,19 @@ const GraphVisualization = ({
   graph?.on("nodeselectchange", selectCallback);
 
   if (ws && graph) {
-    ws.onopen = function () {
+    ws.onopen = function() {
       console.log("WebSocket opened");
     };
 
-    ws.onclose = function () {
+    ws.onclose = function() {
       console.log("WebSocket closed");
     };
 
-    ws.onerror = function (event) {
+    ws.onerror = function(event) {
       console.log("WebSocket error", event);
     };
 
-    ws.onmessage = function (event) {
+    ws.onmessage = function(event) {
       console.log(event.data);
       try {
         const data = JSON.parse(event.data);

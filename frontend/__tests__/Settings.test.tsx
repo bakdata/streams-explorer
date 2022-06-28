@@ -1,5 +1,5 @@
-import React, { useState } from "react";
 import { fireEvent, render } from "@testing-library/react";
+import React, { useState } from "react";
 import Settings from "../components/Settings";
 
 const StateDisplay = ({ id, state }: { id: string; state: any }) => {

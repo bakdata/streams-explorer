@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "streams-explorer"
-version = "1.6.0"
+version = "1.6.1"
 description = "Explore Data Pipelines in Apache Kafka."
 readme = "README.md"
 authors = ["bakdata"]
@@ -14,6 +14,7 @@ classifiers = [
   "Programming Language :: Python :: 3 :: Only",
   "Programming Language :: Python :: 3.8",
   "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
   "Topic :: Software Development :: Libraries :: Python Modules",
   "Topic :: Software Development :: Libraries",
   "Topic :: Software Development",
@@ -36,14 +37,14 @@ fastapi-utils = "^0.2.1"
 fastapi = "^0.70.0"
 uvicorn = { extras = ["standard"], version = "^0.15.0" }
 pygraphviz = "^1.7"
-confluent-kafka = "^1.7.0"
+confluent-kafka = "^1.9.0"
 cachetools = "^4.2.2"
 kubernetes-asyncio = "21.7.1"
 
 [tool.poetry.dev-dependencies]
 mypy = "^0.910"
 flake8 = "^4.0.1"
-black = "^21.9b0"
+black = "^22.3.0"
 isort = "^5.9.3"
 pytest = "^6.2.5"
 pre-commit = "^2.15.0"

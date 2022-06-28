@@ -14,8 +14,7 @@ const readyStates = {
 
 const GraphStates = (props: Props) => {
   const ws = useMemo(
-    () =>
-      isBrowser ? new WebSocket("ws://localhost:8000/api/graph/ws") : null,
+    () => isBrowser ? new WebSocket("ws://localhost:8000/api/graph/ws") : null,
     []
   );
 
@@ -26,19 +25,19 @@ const GraphStates = (props: Props) => {
   }, [ws?.readyState]);
 
   if (ws) {
-    ws.onopen = function () {
+    ws.onopen = function() {
       console.log("WebSocket opened");
     };
 
-    ws.onclose = function () {
+    ws.onclose = function() {
       console.log("WebSocket closed");
     };
 
-    ws.onerror = function (event) {
+    ws.onerror = function(event) {
       console.log("WebSocket error", event);
     };
 
-    ws.onmessage = function (event) {
+    ws.onmessage = function(event) {
       const messages = document.getElementById("messages");
       const message = document.createElement("li");
       const content = document.createTextNode(

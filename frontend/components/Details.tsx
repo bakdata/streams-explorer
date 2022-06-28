@@ -8,8 +8,8 @@ import {
   useGetLinkingApiNodeLinkingNodeIdGet,
   useGetNodeInfoApiNodeNodeIdGet,
 } from "./api/fetchers";
-import Schema from "./Schema";
 import style from "./Details.module.css";
+import Schema from "./Schema";
 
 interface DetailsProps {
   nodeId: string;
@@ -61,18 +61,18 @@ interface NodeInfoDetailProps {
 const NodeInfoDetail = ({ infoListItem, nodeId }: NodeInfoDetailProps) => {
   switch (infoListItem.type) {
     case "json":
-      return infoListItem.name === "Schema" ? (
-        <Schema nodeId={nodeId} />
-      ) : (
-        <div className={style.jsonDetail}>
-          <ReactJson
-            name={false}
-            src={infoListItem.value as object}
-            displayDataTypes={false}
-            collapsed={false}
-          />
-        </div>
-      );
+      return infoListItem.name === "Schema"
+        ? <Schema nodeId={nodeId} />
+        : (
+          <div className={style.jsonDetail}>
+            <ReactJson
+              name={false}
+              src={infoListItem.value as object}
+              displayDataTypes={false}
+              collapsed={false}
+            />
+          </div>
+        );
 
     case "link":
       return <LinkInfo nodeId={nodeId} infoListItem={infoListItem} />;
