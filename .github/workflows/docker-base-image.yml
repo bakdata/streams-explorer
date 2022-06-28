@@ -25,6 +25,6 @@ jobs:
         with:
           context: "{{defaultContext}}:backend"
           push: false # TODO: enable
-          labels: ${{ env.image }}:latest
+          tags: ${{ env.image }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
