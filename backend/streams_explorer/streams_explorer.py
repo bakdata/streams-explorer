@@ -179,6 +179,7 @@ class StreamsExplorer:
         event = raw_event["object"]
 
         # extract deployment name from pod
+        # or from event["regarding"]["name"]
         name = re.findall(r"{(.+?)}", event["regarding"]["fieldPath"])[0]
 
         logger.info(
