@@ -122,11 +122,10 @@ jobs:
       - name: Build & Push
         uses: docker/build-push-action@v3
         with:
-          context: .
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          # cache-from: type=gha
+          cache-from: type=gha
           cache-to: type=gha,mode=max
 
   publish:
