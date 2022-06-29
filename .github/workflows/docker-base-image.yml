@@ -2,6 +2,7 @@ name: Update Docker base image
 
 on:
   workflow_dispatch:
+  push:
 
 jobs:
   build-push:
