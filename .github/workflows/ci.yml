@@ -11,8 +11,8 @@ jobs:
   backend:
     name: Backend
     runs-on: ubuntu-latest
-    # container:
-    #   image: bakdata/streams-explorer-base
+    container:
+      image: bakdata/streams-explorer-base
     env:
       working-directory: ./backend
     strategy:
@@ -26,11 +26,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Install packages
-        run: sudo apt-get -y install python3-dev graphviz libgraphviz-dev pkg-config python3-wheel
+      # - name: Install packages
+      #   run: sudo apt-get -y install python3-dev graphviz libgraphviz-dev pkg-config python3-wheel
 
       - name: Set up Poetry
-        uses: bakdata/ci-templates/actions/python-setup-poetry@v1.3.0
+        uses: bakdata/ci-templates/actions/python-setup-poetry@fix/poetry-setup-custom-image
         with:
           python-version: ${{ matrix.python-version }}
           working-directory: ${{ env.working-directory }}
@@ -127,7 +127,6 @@ jobs:
       - name: Build & Push
         uses: docker/build-push-action@v3
         with:
-          context: .
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
