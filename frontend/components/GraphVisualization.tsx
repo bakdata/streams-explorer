@@ -315,18 +315,13 @@ const GraphVisualization = ({
           if (!data.replicas[0]) {
             graph.updateItem(node, {
               style: {
-                fill: "#AAAAAA",
-                // stroke: "grey",
+                fill: "#AAAAAA", // grey
               },
               labelCfg: {
                 style: {
                   fill: "grey",
                 },
               },
-              // icon: {
-              //   fill: "red",
-              // },
-              // metric: "disabled",
             });
           } else {
             const defaultLabelCfg = config?.defaultNode?.labelCfg;
@@ -337,7 +332,6 @@ const GraphVisualization = ({
               labelCfg: defaultLabelCfg as any,
             });
           }
-          // graph.refreshItem(node);
         }
       } catch (error) {}
     };
