@@ -24,7 +24,7 @@ from streams_explorer.core.services.kubernetes import (
 from streams_explorer.core.services.linking_services import LinkingService
 from streams_explorer.core.services.metric_providers import MetricProvider
 from streams_explorer.extractors import extractor_container
-from streams_explorer.models.graph import Metric
+from streams_explorer.models.graph import AppState, Metric
 from streams_explorer.models.k8s import K8sDeploymentUpdateType
 from streams_explorer.models.kafka_connector import KafkaConnector
 from streams_explorer.models.node_information import (
@@ -46,7 +46,7 @@ class StreamsExplorer:
         )
         self.linking_service = linking_service
         self.kubernetes = Kubernetes(self)
-        self.updates: Queue[K8sApp] = Queue(maxsize=1000)
+        self.updates: Queue[AppState] = Queue(maxsize=1000)
 
     async def setup(self):
         await self.kubernetes.setup()
@@ -204,7 +204,7 @@ class StreamsExplorer:
 
     async def _populate_state_update(self, app: K8sApp):
         logger.info("storing state update for {}", app.id)
-        await self.updates.put(app)
+        await self.updates.put(app.to_state_update())
 
     async def __add_app(self, app: K8sApp):
         if app.is_streams_app():
