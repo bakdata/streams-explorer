@@ -78,7 +78,7 @@ class TestApplication:
                 event = K8sDeploymentUpdate(
                     type=K8sDeploymentUpdateType.ADDED, object=deployment
                 )
-                self.handle_event(event)
+                await self.handle_deployment_update(event)
 
         monkeypatch.setattr(StreamsExplorer, "setup", mock_setup)
         monkeypatch.setattr(StreamsExplorer, "watch", watch)
@@ -148,10 +148,10 @@ class TestApplication:
             assert len(nodes) == 15
 
             # destroy a deployment
-            event = K8sDeploymentUpdate(
+            update = K8sDeploymentUpdate(
                 type=K8sDeploymentUpdateType.DELETED, object=APP3
             )
-            app.state.streams_explorer.handle_event(event)
+            await app.state.streams_explorer.handle_deployment_update(update)
 
             await asyncio.sleep(1)  # update graph
             nodes = fetch_graph()

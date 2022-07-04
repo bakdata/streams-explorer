@@ -60,9 +60,7 @@ class TestStreamsExplorer:
     @pytest.fixture()
     def cron_jobs(self):
         return [
-            get_streaming_app_cronjob(
-                "non-streams-app-cronjob", input_topics=None, output_topic=None
-            ),
+            get_streaming_app_cronjob("non-streams-app-cronjob", output_topic=None),
             get_streaming_app_cronjob(),
         ]
 
@@ -182,11 +180,11 @@ class TestStreamsExplorer:
 
     @pytest.mark.asyncio
     async def test_update(self, streams_explorer: StreamsExplorer):
-        assert len(streams_explorer.applications) == 3
         assert "streaming-app1" in streams_explorer.applications
         assert "streaming-app2" in streams_explorer.applications
         assert "streaming-app3" in streams_explorer.applications
         assert "non-streams-app-deployment" not in streams_explorer.applications
+        assert len(streams_explorer.applications) == 3
         assert len(streams_explorer.kafka_connectors) == 2
 
     @pytest.mark.asyncio
