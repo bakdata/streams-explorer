@@ -40,12 +40,12 @@ class StreamsExplorer:
     ):
         self.applications: Dict[str, K8sApp] = {}
         self.kafka_connectors: List[KafkaConnector] = []
+        self.kubernetes = Kubernetes(self)
         self.kafka = KafkaAdminClient()
         self.data_flow = DataFlowGraph(
             metric_provider=metric_provider, kafka=self.kafka
         )
         self.linking_service = linking_service
-        self.kubernetes = Kubernetes(self)
         self.updates: Queue[AppState] = Queue(maxsize=1000)
         self.modified: bool = True
 
