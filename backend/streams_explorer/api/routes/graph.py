@@ -45,4 +45,6 @@ async def websocket_endpoint(
             await websocket.receive_text()
 
     except WebSocketDisconnect:
+        return
+    finally:
         await streams_explorer.client_manager.disconnect(websocket)
