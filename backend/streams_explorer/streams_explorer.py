@@ -184,7 +184,7 @@ class StreamsExplorer:
         # extract deployment name from pod
         if "fieldPath" not in event["regarding"]:
             return
-        # or from event["regarding"]["name"]
+        # NOTE: alternative is event["regarding"]["name"]
         name = re.findall(r"{(.+?)}", event["regarding"]["fieldPath"])[0]
 
         logger.info(
