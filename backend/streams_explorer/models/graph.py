@@ -2,8 +2,6 @@ from typing import Any, List, NamedTuple, Optional, Tuple
 
 from pydantic import BaseModel, Field
 
-from streams_explorer.models.k8s import K8sReason
-
 GraphNode = Tuple[str, dict]
 GraphEdge = Tuple[str, str]
 
