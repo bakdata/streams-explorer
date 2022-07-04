@@ -15,9 +15,9 @@ def find(element: str, json: dict):
     return key_value
 
 
-def get_info(key: str, config: dict) -> Optional[object]:
-    if config.get(key):
-        return config.get(key)
+def get_info(key: str, config: dict):
+    if value := config.get(key):
+        return value
     else:
         try:
             return find(key, config)
@@ -38,7 +38,7 @@ def get_displayed_info(
     for item in displayed_info_settings:
         name: Optional[str] = item.get("name")
         key: Optional[str] = item.get("key")
-        if key is None:
+        if not key or not name:
             continue
         value = get_info(key, config)
 

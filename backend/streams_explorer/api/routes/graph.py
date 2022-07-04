@@ -51,7 +51,7 @@ async def websocket_endpoint(
             await websocket.send_json(
                 AppState(
                     id=app.id,
-                    replicas=(app.replicas_ready, app.replicas_total),
+                    replicas=ReplicaCount(app.replicas_ready, app.replicas_total),
                     state=app.state,
                 ).dict()
             )

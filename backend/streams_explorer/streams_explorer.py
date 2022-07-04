@@ -96,7 +96,7 @@ class StreamsExplorer:
                     info.append(
                         NodeInfoListItem(
                             name="Partitions",
-                            value=len(partitions),
+                            value=str(len(partitions)),
                             type=NodeInfoType.BASIC,
                         )
                     )

@@ -173,7 +173,7 @@ class DataFlowGraph:
             return await self.metric_provider.get()
         return []
 
-    def get_node_type(self, id: str) -> str:
+    def get_node_type(self, id: str) -> NodeTypesEnum:
         try:
             return self.graph.nodes[id][NodeDataFields.NODE_TYPE]
         except KeyError:

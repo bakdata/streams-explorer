@@ -224,7 +224,7 @@ class TestStreamsExplorer:
                 ),
                 NodeInfoListItem(
                     name="Partitions",
-                    value=5,
+                    value=str(5),
                     type=NodeInfoType.BASIC,
                 ),
                 NodeInfoListItem(

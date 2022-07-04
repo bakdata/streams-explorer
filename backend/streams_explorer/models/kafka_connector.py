@@ -18,8 +18,8 @@ class KafkaConnectorTypesEnum(str, Enum):
 
 
 class KafkaConnectorConfig(BaseModel):
-    topics: Optional[str]
-    transforms: Optional[str]
+    topics: Optional[str] = Field(default=None)
+    transforms: Optional[str] = Field(default=None)
     error_topic: Optional[str] = Field(
         default=None, alias="errors.deadletterqueue.topic.name"
     )
@@ -37,10 +37,10 @@ class KafkaConnector(BaseModel):
     name: str
     type: KafkaConnectorTypesEnum
     config: KafkaConnectorConfig
-    error_topic: Optional[str]
-    topics: Optional[
-        List[str]
-    ]  # Deprecated please override get_topics for your kafka connector.
+    error_topic: Optional[str] = Field(default=None)
+    topics: Optional[List[str]] = Field(
+        default=None
+    )  # Deprecated please override get_topics for your kafka connector.
 
     # Do not change order here. The fallback GenericTransformerConfig should always be the last element
     _transformers = Union[
