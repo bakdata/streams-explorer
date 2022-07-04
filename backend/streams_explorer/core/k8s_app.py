@@ -1,6 +1,12 @@
 from __future__ import annotations
 
-from typing import Dict, Optional, Set, Type, TypeAlias, Union
+from typing import Dict, Optional, Set, Type, Union
+
+try:
+    from typing import TypeAlias  # type: ignore[attr-defined]
+except ImportError:
+    # Python <3.10
+    from typing_extensions import TypeAlias
 
 from kubernetes_asyncio.client import (
     V1beta1CronJob,
@@ -82,8 +88,7 @@ class K8sApp:
     def replicas_ready(self) -> int | None:
         if not self.k8s_object.status:
             return None
-        return self.k8s_object.status.ready_replicas
-        # return self.k8s_object.status.available_replicas
+        return self.k8s_object.status.ready_replicas  # NOTE: or available_replicas
 
     @property
     def replicas_total(self) -> int | None:
