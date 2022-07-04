@@ -123,4 +123,4 @@ class Kubernetes:
         async with kubernetes_asyncio.watch.Watch(return_type) as w:
             async with w.stream(resource, namespace) as stream:
                 async for event in stream:
-                    callback(event)
+                    await callback(event)

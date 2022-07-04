@@ -46,8 +46,7 @@ class StreamsExplorer:
         )
         self.linking_service = linking_service
         self.kubernetes = Kubernetes(self)
-        self.updates: Queue[K8sApp] = Queue()
-        # self.events: Queue = Queue()  # TODO: add type annotation
+        self.updates: Queue[K8sApp] = Queue(maxsize=1000)
 
     async def setup(self):
         await self.kubernetes.setup()
@@ -145,25 +144,25 @@ class StreamsExplorer:
         if node_type in self.linking_service.sink_source_redirects:
             return self.linking_service.get_sink_source_redirects(node_type, node_id)
 
-    def handle_deployment_update(self, update: K8sDeploymentUpdate) -> None:
+    async def handle_deployment_update(self, update: K8sDeploymentUpdate) -> None:
         item = update["object"]
         logger.info(
             f"{item.metadata.namespace} {item.__class__.__name__} {update['type']}: {item.metadata.name}"  # pyright: ignore[reportOptionalMemberAccess]
         )
 
         if isinstance(item, V1beta1CronJob):
-            self._handle_cron_job_update(update, item)
+            await self._handle_cron_job_update(update, item)
             return
         app = K8sApp.factory(item)
         if update["type"] in (
             K8sDeploymentUpdateType.ADDED,
             K8sDeploymentUpdateType.MODIFIED,
         ):
-            self.__add_app(app)
+            await self.__add_app(app)
         elif update["type"] == K8sDeploymentUpdateType.DELETED:
             self.__remove_app(app)
 
-    def _handle_cron_job_update(
+    async def _handle_cron_job_update(
         self, update: K8sDeploymentUpdate, cron_job: V1beta1CronJob
     ) -> None:
         if app := extractor_container.on_cron_job(cron_job):
@@ -171,11 +170,11 @@ class StreamsExplorer:
                 K8sDeploymentUpdateType.ADDED,
                 K8sDeploymentUpdateType.MODIFIED,
             ):
-                self.__add_app(app)
+                await self.__add_app(app)
             elif update["type"] == K8sDeploymentUpdateType.DELETED:
                 self.__remove_app(app)
 
-    def handle_event(self, raw_event: K8sEvent) -> None:
+    async def handle_event(self, raw_event: K8sEvent) -> None:
         event = raw_event["object"]
 
         # extract deployment name from pod
@@ -196,22 +195,22 @@ class StreamsExplorer:
         # map event to application
         if app := self.applications.get(name):
             app.state = event["reason"]
-            self._populate_state_update(app)
+            await self._populate_state_update(app)
 
     def update_connectors(self):
         extractor_container.reset_connector()
         logger.info("Retrieve Kafka connectors")
         self.kafka_connectors = KafkaConnect.connectors()
 
-    def _populate_state_update(self, app: K8sApp):
+    async def _populate_state_update(self, app: K8sApp):
         logger.info("storing state update for {}", app.id)
-        self.updates.put_nowait(app)
+        await self.updates.put(app)
 
-    def __add_app(self, app: K8sApp):
+    async def __add_app(self, app: K8sApp):
         if app.is_streams_app():
             self.applications[app.id] = app
             extractor_container.on_streaming_app_add(app.config)
-            self._populate_state_update(app)
+            await self._populate_state_update(app)
 
     def __remove_app(self, app: K8sApp):
         if app.is_streams_app():

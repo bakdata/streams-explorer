@@ -105,7 +105,7 @@ class TestStreamsExplorer:
                 event = K8sDeploymentUpdate(
                     type=K8sDeploymentUpdateType.ADDED, object=deployment
                 )
-                explorer.handle_deployment_update(event)
+                await explorer.handle_deployment_update(event)
 
         def get_connectors():
             return ["es-sink-connector", "generic-source-connector"]
@@ -332,7 +332,7 @@ class TestStreamsExplorer:
         assert len(sinks) == 1
 
         # deleting app deployment should remove source
-        streams_explorer.handle_deployment_update(
+        await streams_explorer.handle_deployment_update(
             K8sDeploymentUpdate(type=K8sDeploymentUpdateType.DELETED, object=APP1)
         )
         sources, sinks = extractor_container.get_sources_sinks()
@@ -341,7 +341,7 @@ class TestStreamsExplorer:
 
     @pytest.mark.asyncio
     async def test_delete_non_streams_app(self, streams_explorer: StreamsExplorer):
-        streams_explorer.handle_deployment_update(
+        await streams_explorer.handle_deployment_update(
             K8sDeploymentUpdate(
                 type=K8sDeploymentUpdateType.DELETED, object=NON_STREAMS_APP
             )
