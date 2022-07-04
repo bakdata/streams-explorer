@@ -38,14 +38,11 @@ async def websocket_endpoint(
 
     try:
         # bring client up to date by sending all current states
-        for app in streams_explorer.applications.values():
-            await streams_explorer.clients.send(websocket, app.to_state_update())
+        await streams_explorer.update_client_full(websocket)
 
         # continuously update
         while True:
-            # block until queue has new update
-            state = await streams_explorer.updates.get()
-            await streams_explorer.clients.broadcast(state)
+            await streams_explorer.update_clients_delta()
 
     except WebSocketDisconnect:
         await streams_explorer.clients.disconnect(websocket)

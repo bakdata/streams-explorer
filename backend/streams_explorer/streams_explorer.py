@@ -252,6 +252,14 @@ class StreamsExplorer:
         self.kafka_connectors = KafkaConnect.connectors()
         self.modified = True
 
+    async def update_client_full(self, client: WebSocket):
+        for app in self.applications.values():
+            await self.clients.send(client, app.to_state_update())
+
+    async def update_clients_delta(self):
+        state = await self.updates.get()  # blocks until queue has new update
+        await self.clients.broadcast(state)
+
     async def _populate_state_update(self, app: K8sApp):
         if self.clients:
             logger.info("storing state update for {}", app.id)
