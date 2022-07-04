@@ -47,6 +47,7 @@ class StreamsExplorer:
         self.linking_service = linking_service
         self.kubernetes = Kubernetes(self)
         self.updates: Queue[AppState] = Queue(maxsize=1000)
+        self.modified: bool = True
 
     async def setup(self):
         await self.kubernetes.setup()
@@ -55,8 +56,11 @@ class StreamsExplorer:
         await self.kubernetes.watch()
 
     async def update_graph(self):
+        if not self.modified:  # skip unnecessary re-render
+            return
         self.data_flow.reset()
         self.__create_graph()
+        self.modified = False
         self.data_flow.setup_metric_provider()
         await self.data_flow.store_json_graph()
 
@@ -201,6 +205,7 @@ class StreamsExplorer:
         extractor_container.reset_connector()
         logger.info("Retrieve Kafka connectors")
         self.kafka_connectors = KafkaConnect.connectors()
+        self.modified = True
 
     async def _populate_state_update(self, app: K8sApp):
         logger.info("storing state update for {}", app.id)
@@ -209,12 +214,14 @@ class StreamsExplorer:
     async def __add_app(self, app: K8sApp):
         if app.is_streams_app():
             self.applications[app.id] = app
+            self.modified = True
             extractor_container.on_streaming_app_add(app.config)
             await self._populate_state_update(app)
 
     def __remove_app(self, app: K8sApp):
         if app.is_streams_app():
             self.applications.pop(app.id)
+            self.modified = True
             extractor_container.on_streaming_app_delete(app.config)
 
     def __create_graph(self):
