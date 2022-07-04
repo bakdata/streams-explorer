@@ -1,6 +1,5 @@
 import uvicorn as uvicorn
 from fastapi_utils.tasks import repeat_every
-from loguru import logger
 
 from streams_explorer.application import get_application
 from streams_explorer.core.config import settings
@@ -19,9 +18,7 @@ async def watch():
 @app.on_event("startup")
 @repeat_every(seconds=settings.graph.update_interval)
 async def update_graph():
-    logger.info("Update graph")
     await app.state.streams_explorer.update_graph()
-    logger.info("Update graph completed")
 
 
 @app.on_event("startup")

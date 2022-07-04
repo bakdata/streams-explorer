@@ -58,11 +58,13 @@ class StreamsExplorer:
     async def update_graph(self):
         if not self.modified:  # skip unnecessary re-render
             return
+        logger.info("Update graph")
         self.data_flow.reset()
         self.__create_graph()
         self.modified = False
         self.data_flow.setup_metric_provider()
         await self.data_flow.store_json_graph()
+        logger.info("Update graph completed")
 
     def get_positioned_json_graph(self) -> dict:
         return self.data_flow.json_graph
