@@ -2,7 +2,6 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, WebSocket
 from fastapi.exceptions import HTTPException
-from loguru import logger
 from starlette.websockets import WebSocketDisconnect
 
 from streams_explorer.api.dependencies.streams_explorer import get_streams_explorer
@@ -35,20 +34,18 @@ async def websocket_endpoint(
     streams_explorer: StreamsExplorer = Depends(get_streams_explorer),
 ):
     """Send application state updates through WebSocket."""
-    logger.info("Waiting for WebSocket client...")
-    await websocket.accept()
-    logger.info("WebSocket client connected")
+    await streams_explorer.clients.connect(websocket)
 
     try:
         # bring client up to date by sending all current states
-        for state in streams_explorer.applications.values():
-            await websocket.send_json(state.to_state_update().dict())
+        for app in streams_explorer.applications.values():
+            await streams_explorer.clients.send(websocket, app.to_state_update())
 
         # continuously update
         while True:
             # block until queue has new update
             state = await streams_explorer.updates.get()
-            await websocket.send_json(state.dict())
+            await streams_explorer.clients.broadcast(state)
 
     except WebSocketDisconnect:
-        await websocket.close()
+        await streams_explorer.clients.disconnect(websocket)
