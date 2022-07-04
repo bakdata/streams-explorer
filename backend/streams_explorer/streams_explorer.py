@@ -54,8 +54,9 @@ class ClientManager:
         await websocket.send_json(obj.dict())
 
     async def broadcast(self, obj: BaseModel):
+        data = obj.dict()
         for client in self._clients:
-            await client.send_json(obj.dict())
+            await client.send_json(data)
 
     @property
     def clients(self) -> List[WebSocket]:
