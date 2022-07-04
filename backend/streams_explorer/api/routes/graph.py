@@ -38,14 +38,13 @@ async def websocket_endpoint(
     logger.info("Waiting for WebSocket client...")
     await websocket.accept()
     logger.info("WebSocket client connected")
-    await websocket.send_text("Connected")  # TODO: remove
 
-    # send all states
-    for state in streams_explorer.applications.values():
-        await websocket.send_json(state.to_state_update().dict())
-
-    # continuous update
     try:
+        # bring client up to date by sending all current states
+        for state in streams_explorer.applications.values():
+            await websocket.send_json(state.to_state_update().dict())
+
+        # continuously update
         while True:
             # block until queue has new update
             state = await streams_explorer.updates.get()
