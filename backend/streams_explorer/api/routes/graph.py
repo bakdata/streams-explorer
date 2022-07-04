@@ -37,12 +37,12 @@ async def websocket_endpoint(
     await streams_explorer.client_manager.connect(websocket)
 
     try:
-        # bring client up to date by sending all current states
+        # bring client up to date
         await streams_explorer.update_client_full(websocket)
 
-        # continuously update
+        # keep websocket open, allows continuous update
         while True:
-            await streams_explorer.update_clients_delta()
+            await websocket.receive_text()
 
     except WebSocketDisconnect:
         await streams_explorer.client_manager.disconnect(websocket)

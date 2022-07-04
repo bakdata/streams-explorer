@@ -1,8 +1,6 @@
 import re
-from asyncio import QueueEmpty
-from asyncio.queues import Queue
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Type, TypeVar
+from typing import Dict, List, Optional, Type
 
 from cachetools.func import ttl_cache
 from fastapi import WebSocket
@@ -28,7 +26,7 @@ from streams_explorer.core.services.kubernetes import (
 from streams_explorer.core.services.linking_services import LinkingService
 from streams_explorer.core.services.metric_providers import MetricProvider
 from streams_explorer.extractors import extractor_container
-from streams_explorer.models.graph import AppState, Metric
+from streams_explorer.models.graph import Metric
 from streams_explorer.models.k8s import K8sDeploymentUpdateType
 from streams_explorer.models.kafka_connector import KafkaConnector
 from streams_explorer.models.node_information import (
@@ -37,25 +35,12 @@ from streams_explorer.models.node_information import (
     NodeInfoType,
 )
 
-T = TypeVar("T")
-
-
-class StateStore(Queue[T]):
-    def clear(self):
-        for _ in range(self.qsize()):
-            try:
-                self.get_nowait()
-            except QueueEmpty:
-                pass
-            self.task_done()
-
 
 @dataclass
 class ClientManager:
     _clients: List[WebSocket] = field(default_factory=list)
 
     async def connect(self, websocket: WebSocket):
-        logger.info("Waiting for WebSocket client...")
         await websocket.accept()
         logger.info("WebSocket client {} connected", websocket.client.host)
         self._clients.append(websocket)
@@ -90,7 +75,6 @@ class StreamsExplorer:
         )
         self.linking_service = linking_service
         self.client_manager = ClientManager()
-        self.updates: StateStore[AppState] = StateStore()
         self.modified: bool = True
 
     async def setup(self):
@@ -245,7 +229,7 @@ class StreamsExplorer:
         # map event to application
         if app := self.applications.get(name):
             app.state = event["reason"]
-            await self._populate_state_update(app)
+            await self._update_clients_delta(app)
 
     def update_connectors(self):
         extractor_container.reset_connector()
@@ -254,24 +238,19 @@ class StreamsExplorer:
         self.modified = True
 
     async def update_client_full(self, client: WebSocket):
+        """Send all current application states to client."""
         for app in self.applications.values():
             await self.client_manager.send(client, app.to_state_update())
 
-    async def update_clients_delta(self):
-        state = await self.updates.get()  # blocks until queue has new update
-        await self.client_manager.broadcast(state)
-
-    async def _populate_state_update(self, app: K8sApp):
-        if self.client_manager.clients:
-            logger.info("storing state update for {}", app.id)
-            await self.updates.put(app.to_state_update())
+    async def _update_clients_delta(self, app: K8sApp):
+        await self.client_manager.broadcast(app.to_state_update())
 
     async def __add_app(self, app: K8sApp):
         if app.is_streams_app():
             self.applications[app.id] = app
             self.modified = True
             extractor_container.on_streaming_app_add(app.config)
-            await self._populate_state_update(app)
+            await self._update_clients_delta(app)
 
     def __remove_app(self, app: K8sApp):
         if app.is_streams_app():
