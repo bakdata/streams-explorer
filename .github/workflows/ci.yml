@@ -5,113 +5,105 @@ on:
     branches: [main]
     tags: ["v[0-9]+.[0-9]+.[0-9]+"]
   pull_request:
+    branches: [main]
 
 jobs:
-  # backend:
-  #   name: Backend
-  #   runs-on: ubuntu-latest
-  #   env:
-  #     working-directory: ./backend
-  #     poetry-version: 1.1.12
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       python-version: ["3.8", "3.9"]
-  #   defaults:
-  #     run:
-  #       working-directory: ${{ env.working-directory }}
+  backend:
+    name: Backend
+    runs-on: ubuntu-latest
+    env:
+      working-directory: ./backend
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.8", "3.9", "3.10"]
+    defaults:
+      run:
+        working-directory: ${{ env.working-directory }}
 
-  #   steps:
-  #     - uses: actions/checkout@v3
+    steps:
+      - uses: actions/checkout@v3
 
-  #     - name: Install packages
-  #       run: sudo apt-get -y install python3-dev graphviz libgraphviz-dev pkg-config python3-wheel
+      - name: Install packages
+        run: sudo apt-get -y install python3-dev graphviz libgraphviz-dev pkg-config python3-wheel
 
-  #     - name: Set up Poetry ${{ env.poetry-version }}
-  #       uses: bakdata/ci-templates/actions/python-setup-poetry@v1.0.0
-  #       with:
-  #         python-version: ${{ matrix.python-version }}
-  #         poetry-version: ${{ env.poetry-version }}
-  #         working-directory: ${{ env.working-directory }}
+      - name: Set up Poetry
+        uses: bakdata/ci-templates/actions/python-setup-poetry@v1.3.0
+        with:
+          python-version: ${{ matrix.python-version }}
+          working-directory: ${{ env.working-directory }}
 
-  #     - name: Install dependencies
-  #       run: poetry install --no-interaction
+      - name: Install dependencies
+        run: poetry install --no-interaction
 
-  #     - name: Lint (flake8)
-  #       run: poetry run pre-commit run flake8 --all-files --show-diff-on-failure
+      - name: Lint (flake8)
+        run: poetry run pre-commit run flake8 --all-files --show-diff-on-failure
 
-  #     - name: Order of imports (isort)
-  #       run: poetry run pre-commit run isort --all-files --show-diff-on-failure
+      - name: Order of imports (isort)
+        run: poetry run pre-commit run isort --all-files --show-diff-on-failure
 
-  #     - name: Formatting (black)
-  #       run: poetry run pre-commit run black --all-files --show-diff-on-failure
+      - name: Formatting (black)
+        run: poetry run pre-commit run black --all-files --show-diff-on-failure
 
-  #     - name: Typing (mypy)
-  #       run: poetry run pre-commit run mypy --all-files
+      - name: Typing (mypy)
+        run: poetry run pre-commit run mypy --all-files
 
-  #     - name: Test
-  #       run: poetry run pytest tests
+      - name: Test
+        run: poetry run pytest tests
 
-  # frontend:
-  #   name: Frontend
-  #   runs-on: ubuntu-latest
-  #   env:
-  #     working-directory: ./frontend
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       node-version: ["16"]
-  #   defaults:
-  #     run:
-  #       working-directory: ${{ env.working-directory }}
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-latest
+    env:
+      working-directory: ./frontend
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: ["16"]
+    defaults:
+      run:
+        working-directory: ${{ env.working-directory }}
 
-  #   steps:
-  #     - uses: actions/checkout@v3
+    steps:
+      - uses: actions/checkout@v3
 
-  #     - uses: actions/setup-node@v2
-  #       with:
-  #         node-version: ${{ matrix.node-version }}
-  #         cache: npm
-  #         cache-dependency-path: ${{ env.working-directory }}/package-lock.json
+      - uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+          cache-dependency-path: ${{ env.working-directory }}/package-lock.json
 
-  #     - name: Install dependencies
-  #       run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-  #     - name: Lint
-  #       run: npm run lint
+      - name: Lint
+        run: npm run lint
 
-  #     - name: Set up Python
-  #       uses: actions/setup-python@v2
-  #       with:
-  #         python-version: "3.9"
+      - name: Install pre-commit
+        run: pipx install pre-commit
 
-  #     - name: Install pre-commit
-  #       run: python -m pip install pre-commit
+      - name: Formatting (dprint)
+        run: pre-commit run dprint --all-files
 
-  #     - name: Formatting (prettier)
-  #       run: pre-commit run prettier --all-files
+      - name: Fetchers
+        run: pre-commit run generate-fetchers --all-files
 
-  #     - name: Fetchers
-  #       run: pre-commit run generate-fetchers --all-files
-
-  #     - name: Run Tests
-  #       run: npm run test:ci
+      - name: Run Tests
+        run: npm run test:ci
 
   docker:
     name: Docker
-    # needs: [backend, frontend]
+    needs: [backend, frontend]
     runs-on: ubuntu-latest
     env:
       image: bakdata/streams-explorer
     steps:
-      - uses: actions/checkout@v3
-
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v2
 
       - name: Docker meta
         id: meta
-        uses: docker/metadata-action@v3
+        uses: docker/metadata-action@v4
         with:
           images: ${{ env.image }}
           tags: |
@@ -120,15 +112,14 @@ jobs:
             event=tag,type=semver,pattern=v{{version}}
 
       - name: Login to DockerHub
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build & Push
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
-          context: .
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
