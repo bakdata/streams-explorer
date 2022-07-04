@@ -34,7 +34,7 @@ async def websocket_endpoint(
     streams_explorer: StreamsExplorer = Depends(get_streams_explorer),
 ):
     """Send application state updates through WebSocket."""
-    await streams_explorer.clients.connect(websocket)
+    await streams_explorer.client_manager.connect(websocket)
 
     try:
         # bring client up to date by sending all current states
@@ -45,4 +45,4 @@ async def websocket_endpoint(
             await streams_explorer.update_clients_delta()
 
     except WebSocketDisconnect:
-        await streams_explorer.clients.disconnect(websocket)
+        await streams_explorer.client_manager.disconnect(websocket)

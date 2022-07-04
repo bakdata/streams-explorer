@@ -72,8 +72,9 @@ class ClientManager:
         for client in self._clients:
             await client.send_json(obj.dict())
 
-    def __bool__(self) -> bool:
-        return bool(self._clients)
+    @property
+    def clients(self) -> List[WebSocket]:
+        return self._clients
 
 
 class StreamsExplorer:
@@ -88,7 +89,7 @@ class StreamsExplorer:
             metric_provider=metric_provider, kafka=self.kafka
         )
         self.linking_service = linking_service
-        self.clients = ClientManager()
+        self.client_manager = ClientManager()
         self.updates: StateStore[AppState] = StateStore()
         self.modified: bool = True
 
@@ -254,14 +255,14 @@ class StreamsExplorer:
 
     async def update_client_full(self, client: WebSocket):
         for app in self.applications.values():
-            await self.clients.send(client, app.to_state_update())
+            await self.client_manager.send(client, app.to_state_update())
 
     async def update_clients_delta(self):
         state = await self.updates.get()  # blocks until queue has new update
-        await self.clients.broadcast(state)
+        await self.client_manager.broadcast(state)
 
     async def _populate_state_update(self, app: K8sApp):
-        if self.clients:
+        if self.client_manager.clients:
             logger.info("storing state update for {}", app.id)
             await self.updates.put(app.to_state_update())
 
