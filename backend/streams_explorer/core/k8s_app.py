@@ -15,6 +15,7 @@ from loguru import logger
 from streams_explorer.core.config import settings
 from streams_explorer.core.k8s_config_parser import K8sConfigParser
 from streams_explorer.k8s_config_parser import load_config_parser
+from streams_explorer.models.graph import AppState, ReplicaCount
 from streams_explorer.models.k8s import K8sConfig
 
 ATTR_PIPELINE = "pipeline"
@@ -111,6 +112,13 @@ class K8sApp:
         if not self.input_topics and not self.output_topic:
             return False
         return True
+
+    def to_state_update(self) -> AppState:
+        return AppState(
+            id=self.id,
+            replicas=ReplicaCount(self.replicas_ready, self.replicas_total),
+            state=self.state,
+        )
 
     @property
     def class_name(self) -> str:

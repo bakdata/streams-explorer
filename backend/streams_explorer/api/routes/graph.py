@@ -1,4 +1,3 @@
-import asyncio
 from typing import Optional
 
 from fastapi import APIRouter, Depends, WebSocket
@@ -8,7 +7,7 @@ from starlette.websockets import WebSocketDisconnect
 
 from streams_explorer.api.dependencies.streams_explorer import get_streams_explorer
 from streams_explorer.core.k8s_app import K8sApp
-from streams_explorer.models.graph import AppState, Graph, ReplicaCount
+from streams_explorer.models.graph import Graph
 from streams_explorer.streams_explorer import StreamsExplorer
 
 router = APIRouter()
@@ -41,6 +40,12 @@ async def websocket_endpoint(
     await websocket.accept()
     logger.info("WebSocket client connected")
     await websocket.send_text("Connected")  # TODO: remove
+
+    # send all states
+    for app in streams_explorer.applications.values():
+        await websocket.send_json(app.to_state_update().dict())
+
+    # continuous update
     try:
         while True:
             # TODO: enable
@@ -48,13 +53,7 @@ async def websocket_endpoint(
             # block until queue has new update
             app: K8sApp = await streams_explorer.updates.get()
             logger.info("got state update")
-            await websocket.send_json(
-                AppState(
-                    id=app.id,
-                    replicas=ReplicaCount(app.replicas_ready, app.replicas_total),
-                    state=app.state,
-                ).dict()
-            )
+            await websocket.send_json(app.to_state_update().dict())
 
             # HACK: simulate
             # app_id = "atm-fraud-transactionavroproducer"
