@@ -17,8 +17,8 @@ from streams_explorer.application import get_application
 from streams_explorer.core.client_manager import ClientManager
 from streams_explorer.core.config import API_PREFIX, settings
 from streams_explorer.core.services.kafkaconnect import KafkaConnect
-from streams_explorer.core.services.kubernetes import K8sDeploymentUpdate
-from streams_explorer.models.k8s import K8sDeploymentUpdateType
+from streams_explorer.core.services.kubernetes import K8sDeploymentUpdate, K8sEvent
+from streams_explorer.models.k8s import K8sDeploymentUpdateType, K8sEventType
 from streams_explorer.streams_explorer import StreamsExplorer
 from tests.utils import get_streaming_app_deployment
 
@@ -231,16 +231,26 @@ class TestApplication:
                     type=K8sDeploymentUpdateType.ADDED, object=deployment
                 )
                 await self.handle_deployment_update(event)
-            # object = {
-            #     "type": K8sEventType.NORMAL,
-            #     "reason": "Starting",
-            #     "regarding": {
-            #         "fieldPath": "spec.containers{atm-fraud-transactionavroproducer}",
-            #         "namespace": "test-namespace",
-            #     },
-            # }
-            # event = K8sEvent(type=K8sEventType.NORMAL, object=object)
-            # await self.handle_event(event)
+            object = {
+                "type": K8sEventType.NORMAL,
+                "reason": "Starting",
+                "regarding": {
+                    "fieldPath": "spec.containers{streaming-app2}",
+                    "namespace": "test-namespace",
+                },
+            }
+            event = K8sEvent(type=K8sEventType.NORMAL, object=object)
+            await self.handle_event(event)
+            object = {
+                "type": K8sEventType.NORMAL,
+                "reason": "BackOff",
+                "regarding": {
+                    "fieldPath": "spec.containers{streaming-app3}",
+                    "namespace": "test-namespace",
+                },
+            }
+            event = K8sEvent(type=K8sEventType.WARNING, object=object)
+            await self.handle_event(event)
 
         monkeypatch.setattr(StreamsExplorer, "setup", mock_setup)
         monkeypatch.setattr(StreamsExplorer, "watch", watch)
@@ -263,12 +273,12 @@ class TestApplication:
                 assert data == {
                     "id": "streaming-app2",
                     "replicas": [None, None],
-                    "state": "Unknown",
+                    "state": "Starting",
                 }
                 data = websocket.receive_json()
                 assert data == {
                     "id": "streaming-app3",
                     "replicas": [None, None],
-                    "state": "Unknown",
+                    "state": "BackOff",
                 }
                 websocket.close()
