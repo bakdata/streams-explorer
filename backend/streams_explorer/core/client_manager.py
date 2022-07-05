@@ -6,9 +6,9 @@ from loguru import logger
 from pydantic import BaseModel
 
 
-@dataclass(init=False)
+@dataclass(frozen=True)
 class ClientManager:
-    _clients: List[WebSocket] = field(default_factory=list)
+    _clients: List[WebSocket] = field(init=False, default_factory=list)
 
     async def connect(self, websocket: WebSocket):
         await websocket.accept()
