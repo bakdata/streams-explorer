@@ -49,8 +49,8 @@ class Kubernetes:
             else:
                 logger.info("Setup K8s environment")
                 await kubernetes_asyncio.config.load_kube_config(context=self.context)
-        except kubernetes_asyncio.config.ConfigException:
-            raise Exception("Could not load K8s environment configuration")
+        except kubernetes_asyncio.config.ConfigException as e:
+            raise Exception("Could not load K8s environment configuration") from e
 
         self.k8s_app_client = kubernetes_asyncio.client.AppsV1Api()
         self.k8s_batch_client = kubernetes_asyncio.client.BatchV1beta1Api()
