@@ -230,7 +230,7 @@ class TestApplication:
                 await self.handle_deployment_update(event)
             object = {
                 "type": K8sEventType.NORMAL,
-                "reason": K8sReason.STARTING,
+                "reason": K8sReason.STARTED,
                 "regarding": {
                     "fieldPath": "spec.containers{streaming-app2}",
                     "namespace": "test-namespace",
@@ -270,7 +270,7 @@ class TestApplication:
                 assert data == {
                     "id": "streaming-app2",
                     "replicas": [None, None],
-                    "state": K8sReason.STARTING,
+                    "state": K8sReason.STARTED,
                 }
                 data = websocket.receive_json()
                 assert data == {

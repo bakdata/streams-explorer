@@ -26,7 +26,7 @@ from streams_explorer.core.services.linking_services import LinkingService
 from streams_explorer.core.services.metric_providers import MetricProvider
 from streams_explorer.extractors import extractor_container
 from streams_explorer.models.graph import Metric
-from streams_explorer.models.k8s import K8sDeploymentUpdateType
+from streams_explorer.models.k8s import K8sDeploymentUpdateType, K8sReason
 from streams_explorer.models.kafka_connector import KafkaConnector
 from streams_explorer.models.node_information import (
     NodeInfoListItem,
@@ -160,6 +160,7 @@ class StreamsExplorer:
         if isinstance(item, V1beta1CronJob):
             await self._handle_cron_job_update(update, item)
             return
+
         app = K8sApp.factory(item)
         if update["type"] in (
             K8sDeploymentUpdateType.ADDED,
@@ -201,7 +202,7 @@ class StreamsExplorer:
 
         # map event to application
         if app := self.applications.get(name):
-            app.state = event["reason"]
+            app.state = K8sReason.from_str(event["reason"])
             await self._update_clients_delta(app)
 
     def update_connectors(self):

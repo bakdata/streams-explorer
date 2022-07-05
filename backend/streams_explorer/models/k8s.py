@@ -30,6 +30,25 @@ class K8sEventType(str, Enum):
 
 class K8sReason(str, Enum):
     UNKNOWN = "Unknown"
+
+    # Container event reason list
+    CREATED = "Created"
+    STARTED = "Started"
+    FAILED = "Failed"
+    KILLING = "Killing"
+    PREEMPTING = "Preempting"
     BACKOFF = "BackOff"
-    STARTING = "Starting"
-    # TODO: SuccessfulCreate | Pulled | ScalingReplicaSet | ...
+    EXCEEDEDGRACEPERIOD = "ExceededGracePeriod"
+
+    # Image event reason list
+    PULLING = "Pulling"
+    PULLED = "Pulled"
+
+    # TODO:? SuccessfulCreate | ScalingReplicaSet | ...
+
+    @staticmethod
+    def from_str(reason: str):
+        try:
+            return K8sReason[reason.upper()]
+        except KeyError:
+            raise NotImplementedError(f"Kubernetes event reason '{reason}' is unknown")
