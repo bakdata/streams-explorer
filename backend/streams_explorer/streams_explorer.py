@@ -203,6 +203,7 @@ class StreamsExplorer:
         # map event to application
         if app := self.applications.get(name):
             app.state = K8sReason.from_str(event["reason"])
+            # app.note = event["note"] # TODO
             await self._update_clients_delta(app)
 
     def update_connectors(self):

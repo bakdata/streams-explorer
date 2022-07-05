@@ -23,6 +23,7 @@ class K8sDeploymentUpdateType(str, Enum):
     DELETED = "DELETED"
 
 
+# Documentation: https://github.com/tomplus/kubernetes_asyncio/blob/11c3eb4d50ae822545572aa7b8c15f7153f65a1c/kubernetes_asyncio/docs/EventsV1Event.md
 class K8sEventType(str, Enum):
     NORMAL = "Normal"
     WARNING = "Warning"
