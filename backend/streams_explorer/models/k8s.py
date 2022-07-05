@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Dict, List, Optional
@@ -48,7 +50,7 @@ class K8sReason(str, Enum):
     # TODO:? SuccessfulCreate | ScalingReplicaSet | ...
 
     @staticmethod
-    def from_str(reason: str):
+    def from_str(reason: str) -> K8sReason:
         try:
             return K8sReason[reason.upper()]
         except KeyError:
