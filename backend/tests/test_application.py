@@ -10,8 +10,11 @@ from kubernetes_asyncio.client import (
     V1ObjectMeta,
     V1StatefulSet,
 )
+from pytest import MonkeyPatch
+from pytest_mock import MockerFixture
 
 from streams_explorer.application import get_application
+from streams_explorer.core.client_manager import ClientManager
 from streams_explorer.core.config import API_PREFIX, settings
 from streams_explorer.core.services.kafkaconnect import KafkaConnect
 from streams_explorer.core.services.kubernetes import K8sDeploymentUpdate
@@ -210,3 +213,62 @@ class TestApplication:
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
         assert response.json()["detail"] == "Pipeline 'doesnt-exist' not found"
+
+    def test_websocket(
+        self,
+        monkeypatch: MonkeyPatch,
+        mocker: MockerFixture,
+        deployments,
+        stateful_sets,
+        cron_jobs,
+    ):
+        settings.graph.update_interval = 1
+        settings.kafkaconnect.update_interval = 1
+
+        async def watch(self: StreamsExplorer):
+            for deployment in deployments + stateful_sets + cron_jobs:
+                event = K8sDeploymentUpdate(
+                    type=K8sDeploymentUpdateType.ADDED, object=deployment
+                )
+                await self.handle_deployment_update(event)
+            # object = {
+            #     "type": K8sEventType.NORMAL,
+            #     "reason": "Starting",
+            #     "regarding": {
+            #         "fieldPath": "spec.containers{atm-fraud-transactionavroproducer}",
+            #         "namespace": "test-namespace",
+            #     },
+            # }
+            # event = K8sEvent(type=K8sEventType.NORMAL, object=object)
+            # await self.handle_event(event)
+
+        monkeypatch.setattr(StreamsExplorer, "setup", mock_setup)
+        monkeypatch.setattr(StreamsExplorer, "watch", watch)
+
+        from main import app
+
+        update_client_full = mocker.spy(StreamsExplorer, "update_client_full")
+        connect = mocker.spy(ClientManager, "connect")
+        with TestClient(app) as client:
+            with client.websocket_connect("/api/graph/ws") as websocket:
+                connect.assert_called_once()
+                data = websocket.receive_json()
+                update_client_full.assert_called_once()
+                assert data == {
+                    "id": "streaming-app1",
+                    "replicas": [None, None],
+                    "state": "Unknown",
+                }
+                data = websocket.receive_json()
+                assert data == {
+                    "id": "streaming-app2",
+                    "replicas": [None, None],
+                    "state": "Unknown",
+                }
+                data = websocket.receive_json()
+                assert data == {
+                    "id": "streaming-app3",
+                    "replicas": [None, None],
+                    "state": "Unknown",
+                }
+                websocket.close()
