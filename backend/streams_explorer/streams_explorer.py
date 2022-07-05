@@ -216,6 +216,7 @@ class StreamsExplorer:
             await self.client_manager.send(client, app.to_state_update())
 
     async def _update_clients_delta(self, app: K8sApp):
+        """Broadcast a new application state to clients."""
         await self.client_manager.broadcast(app.to_state_update())
 
     async def __add_app(self, app: K8sApp):
