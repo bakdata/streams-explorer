@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 from loguru import logger
 
@@ -36,12 +36,12 @@ def get_displayed_info(
 ) -> List[NodeInfoListItem]:
     node_infos = []
     for item in displayed_info_settings:
-        name: Optional[str] = item.get("name")
-        key: Optional[str] = item.get("key")
-        if not key or not name:
+        name = item.get("name")
+        key = item.get("key")
+        if not name or not key:
             continue
-        value = get_info(key, config)
 
+        value = get_info(key, config)
         if value is None:
             logger.warning(f'Could not find key "{key}"')
         else:
