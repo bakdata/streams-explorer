@@ -18,7 +18,7 @@ from streams_explorer.core.client_manager import ClientManager
 from streams_explorer.core.config import API_PREFIX, settings
 from streams_explorer.core.services.kafkaconnect import KafkaConnect
 from streams_explorer.core.services.kubernetes import K8sDeploymentUpdate, K8sEvent
-from streams_explorer.models.k8s import K8sDeploymentUpdateType, K8sEventType
+from streams_explorer.models.k8s import K8sDeploymentUpdateType, K8sEventType, K8sReason
 from streams_explorer.streams_explorer import StreamsExplorer
 from tests.utils import get_streaming_app_deployment
 
@@ -222,9 +222,6 @@ class TestApplication:
         stateful_sets,
         cron_jobs,
     ):
-        settings.graph.update_interval = 1
-        settings.kafkaconnect.update_interval = 1
-
         async def watch(self: StreamsExplorer):
             for deployment in deployments + stateful_sets + cron_jobs:
                 event = K8sDeploymentUpdate(
@@ -233,7 +230,7 @@ class TestApplication:
                 await self.handle_deployment_update(event)
             object = {
                 "type": K8sEventType.NORMAL,
-                "reason": "Starting",
+                "reason": K8sReason.STARTING,
                 "regarding": {
                     "fieldPath": "spec.containers{streaming-app2}",
                     "namespace": "test-namespace",
@@ -243,7 +240,7 @@ class TestApplication:
             await self.handle_event(event)
             object = {
                 "type": K8sEventType.NORMAL,
-                "reason": "BackOff",
+                "reason": K8sReason.BACKOFF,
                 "regarding": {
                     "fieldPath": "spec.containers{streaming-app3}",
                     "namespace": "test-namespace",
@@ -267,18 +264,18 @@ class TestApplication:
                 assert data == {
                     "id": "streaming-app1",
                     "replicas": [None, None],
-                    "state": "Unknown",
+                    "state": K8sReason.UNKNOWN,
                 }
                 data = websocket.receive_json()
                 assert data == {
                     "id": "streaming-app2",
                     "replicas": [None, None],
-                    "state": "Starting",
+                    "state": K8sReason.STARTING,
                 }
                 data = websocket.receive_json()
                 assert data == {
                     "id": "streaming-app3",
                     "replicas": [None, None],
-                    "state": "BackOff",
+                    "state": K8sReason.BACKOFF,
                 }
                 websocket.close()

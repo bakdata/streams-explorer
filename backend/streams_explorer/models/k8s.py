@@ -29,5 +29,7 @@ class K8sEventType(str, Enum):
 
 
 class K8sReason(str, Enum):
+    UNKNOWN = "Unknown"
     BACKOFF = "BackOff"
+    STARTING = "Starting"
     # TODO: SuccessfulCreate | Pulled | ScalingReplicaSet | ...

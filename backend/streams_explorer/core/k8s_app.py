@@ -22,7 +22,7 @@ from streams_explorer.core.config import settings
 from streams_explorer.core.k8s_config_parser import K8sConfigParser
 from streams_explorer.k8s_config_parser import load_config_parser
 from streams_explorer.models.graph import AppState, ReplicaCount
-from streams_explorer.models.k8s import K8sConfig
+from streams_explorer.models.k8s import K8sConfig, K8sReason
 
 ATTR_PIPELINE = "pipeline"
 
@@ -37,7 +37,7 @@ class K8sApp:
         self.metadata: V1ObjectMeta = k8s_object.metadata or V1ObjectMeta()
         self.attributes: Dict[str, str] = {}
         self.config: K8sConfig
-        self.state: str = "Unknown"
+        self.state: K8sReason = K8sReason.UNKNOWN
         self.setup()
 
     @property
