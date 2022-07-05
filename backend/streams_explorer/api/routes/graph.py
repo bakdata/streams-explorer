@@ -41,7 +41,7 @@ async def websocket_endpoint(
         await streams_explorer.update_client_full(websocket)
 
         # keep websocket open, allows continuous update
-        while True:
+        while websocket:
             await websocket.receive_text()
 
     except WebSocketDisconnect:
