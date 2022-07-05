@@ -110,13 +110,13 @@ class K8sApp:
     def extract_config(self) -> None:
         self.config = config_parser(self).parse()
 
-    def to_dict(self) -> dict:
-        return self.k8s_object.to_dict()
-
     def is_streams_app(self) -> bool:
         if not self.input_topics and not self.output_topic:
             return False
         return True
+
+    def to_dict(self) -> dict:
+        return self.k8s_object.to_dict()
 
     def to_state_update(self) -> AppState:
         return AppState(
