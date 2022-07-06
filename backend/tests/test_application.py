@@ -267,7 +267,7 @@ class TestApplication:
 
         with TestClient(app) as client:
             with client.websocket_connect("/api/graph/ws") as websocket:
-                connect.assert_called_once()
+                assert connect.call_count == 1
                 assert update_clients_delta.call_count == 5
                 data = websocket.receive_json()
                 assert update_client_full.call_count == 1
