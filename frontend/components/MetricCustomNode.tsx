@@ -1,82 +1,68 @@
-import GGroup from "@antv/g-canvas/lib/group";
-import { IGroup, IShape } from "@antv/g-canvas/lib/interfaces";
-import G6, {
-  Global,
+import { IGroup, IShape } from "@antv/g-base";
+import {
   Item,
   ModelConfig,
   NodeConfig,
-  ShapeOptions,
+  registerNode,
   ShapeStyle,
-} from "@antv/g6";
-import deepMix from "@antv/util/lib/deep-mix";
+  UpdateType,
+} from "@antv/g6-core";
+import { deepMix } from "@antv/util";
 
 /* Custom G6 node to display metrics
  * based on builtin circle node
  * https://github.com/antvis/G6/blob/master/packages/element/src/nodes/circle.ts
  */
 
-G6.registerNode(
+registerNode(
   "MetricCustomNode",
   {
     options: {
-      size: Global.defaultNode.size,
       style: {
         x: 0,
         y: 0,
         stroke: undefined,
-        fill: Global.defaultNode.style.fill,
-        lineWidth: Global.defaultNode.style.lineWidth,
+        fill: "#F0F2F5",
+        lineWidth: 0,
       },
       labelCfg: {
         style: {
-          fill: "#595959",
+          fill: "#000000",
+          fontSize: 14,
         },
-      },
-      linkPoints: {
-        top: false,
-        right: false,
-        bottom: false,
-        left: false,
-        size: 10,
-        lineWidth: 1,
-        fill: "#72CC4A",
-        stroke: "#72CC4A",
+        position: "bottom",
       },
       icon: {
-        show: false,
-        img: "",
-        width: 16,
-        height: 16,
+        width: 36,
+        height: 36,
       },
     },
     shapeType: "circle",
     labelPosition: "center",
-    drawShape(cfg: ModelConfig | undefined, group: IGroup | undefined): IShape {
-      const { icon: defaultIcon = {} } = (this as any).getOptions(
-        cfg
-      ) as NodeConfig;
+    drawShape(cfg?: ModelConfig, group?: IGroup): IShape {
       const style = (this as any).getShapeStyle!(cfg);
-      const icon = deepMix({}, defaultIcon, cfg!.icon);
+      const name = `${(this as any).type}-keyShape`;
       const keyShape: IShape = group!.addShape("circle", {
         attrs: style,
-        className: `${(this as any).type}-keyShape`,
+        className: name,
+        name,
         draggable: true,
       });
 
-      const { width, height, show } = icon;
-      if (show) {
-        const iconName = `${(this as any).type}-icon`;
-        group!.addShape("image", {
-          attrs: {
-            x: -width / 2,
-            y: -height / 2,
-            ...icon,
-          },
-          className: iconName,
-          name: iconName,
-          draggable: true,
-        });
-      }
+      const icon = (this as any).options.icon;
+      const iconName = `${(this as any).type}-icon`;
+      const iconImg = cfg!.node_type + ".svg";
+      group!.addShape("image", {
+        attrs: {
+          x: -icon.width / 2,
+          y: -icon.height / 2,
+          img: iconImg,
+          ...icon,
+        },
+        className: iconName,
+        name: iconName,
+        draggable: true,
+      });
 
       // metrics text
       group!.addShape("text", {
@@ -92,83 +78,7 @@ G6.registerNode(
         name: "metric",
       });
 
-      (this as any).drawLinkPoints(cfg, group);
-
       return keyShape;
-    },
-    drawLinkPoints(cfg: NodeConfig, group: GGroup) {
-      const { linkPoints = {} } = (this as any).getOptions(cfg) as NodeConfig;
-
-      const {
-        top,
-        left,
-        right,
-        bottom,
-        size: markSize,
-        r: markR,
-        ...markStyle
-      } = linkPoints;
-      const size = (this as any).getSize!(cfg);
-      const r = size[0] / 2;
-      if (left) {
-        // left circle
-        group.addShape("circle", {
-          attrs: {
-            ...markStyle,
-            x: -r,
-            y: 0,
-            r: (this as any).markSize / 2 || markR || 5,
-          },
-          className: "link-point-left",
-          name: "link-point-left",
-          isAnchorPoint: true,
-        });
-      }
-
-      if (right) {
-        // right circle
-        group.addShape("circle", {
-          attrs: {
-            ...markStyle,
-            x: r,
-            y: 0,
-            r: (this as any).markSize / 2 || markR || 5,
-          },
-          className: "link-point-right",
-          name: "link-point-right",
-          isAnchorPoint: true,
-        });
-      }
-
-      if (top) {
-        // top circle
-        group.addShape("circle", {
-          attrs: {
-            ...markStyle,
-            x: 0,
-            y: -r,
-            r: (this as any).markSize / 2 || markR || 5,
-          },
-          className: "link-point-top",
-          name: "link-point-top",
-          isAnchorPoint: true,
-        });
-      }
-
-      if (bottom) {
-        // bottom circle
-        group.addShape("circle", {
-          attrs: {
-            ...markStyle,
-            x: 0,
-            y: r,
-            r: (this as any).markSize / 2 || markR || 5,
-          },
-          className: "link-point-bottom",
-          name: "link-point-bottom",
-          isAnchorPoint: true,
-        });
-      }
     },
     getShapeStyle(cfg: NodeConfig): ShapeStyle {
       const { style: defaultStyle } = (this as any).getOptions(
@@ -178,26 +88,24 @@ G6.registerNode(
         stroke: cfg.color,
       };
       const style = deepMix({}, defaultStyle, strokeStyle);
-      const size = (this as ShapeOptions).getSize!(cfg);
-      const r = size[0] / 2;
       const styles = {
         x: 0,
         y: 0,
-        r,
+        r: 14,
         ...style,
       };
       return styles;
     },
-    update(cfg: ModelConfig, item: Item) {
+    update(cfg: ModelConfig, item: Item, updateType?: UpdateType) {
       const group = item.getContainer();
-      const metricLabel = group.get("children")[2]; // Get the shape which contains our label
+      const metricLabel = group.get("children")[2]; // get shape containing our metric label
       const metric = metricLabel.attr();
       metric.text = cfg.metric;
-      metricLabel.attr(metric); // Update metric label
+      metricLabel.attr(metric); // update metric label
 
       // update other styles
       const style = { ...cfg.style };
-      (this as any).updateShape(cfg, item, style, true);
+      (this as any).updateShape(cfg, item, style, true, updateType);
     },
   },
   "single-node"

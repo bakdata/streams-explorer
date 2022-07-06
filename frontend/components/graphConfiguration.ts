@@ -11,23 +11,6 @@ export const graphConfig: GraphOptions = {
   },
   defaultNode: {
     type: "MetricCustomNode",
-    size: [28, 28],
-    style: {
-      fill: "#F0F2F5",
-      lineWidth: 0,
-    },
-    labelCfg: {
-      style: {
-        fill: "#000000",
-        fontSize: 14,
-      },
-      position: "bottom",
-    },
-    icon: {
-      show: true,
-      width: 36,
-      height: 36,
-    },
   },
   defaultEdge: {
     type: "cubic-horizontal",

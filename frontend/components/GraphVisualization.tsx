@@ -6,7 +6,6 @@ import G6, {
   IEdge,
   IG6GraphEvent,
   INode,
-  NodeConfig,
 } from "@antv/g6";
 import { message } from "antd";
 import { millify } from "millify";
@@ -17,7 +16,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { Graph as Data, Icon as IIcon, Metric } from "./api/fetchers";
+import { Graph as Data, Metric } from "./api/fetchers";
 import "./DashedEdge";
 import "./MetricCustomNode";
 import Node from "./Node";
@@ -39,20 +38,6 @@ interface GraphVisualizationProps {
 interface ReplicaCount {
   id: string;
   replicas: number[];
-}
-
-class Icon implements IIcon {
-  img: string;
-  show: boolean;
-  width: number;
-  height: number;
-
-  constructor(img: string, width: number, height: number) {
-    this.show = true;
-    this.img = img;
-    this.width = width;
-    this.height = height;
-  }
 }
 
 function createNodeFromGraphNode(graphNode: INode): Node {
@@ -341,18 +326,12 @@ const GraphVisualization = ({
     if (graph) graph.destroy();
     config.container = ref.current as HTMLDivElement;
     const currentGraph = new G6.Graph(config);
-    const defaultIconConfig = config?.defaultNode?.icon as NodeConfig["icon"];
     let nodes = data["nodes"];
 
     nodes?.forEach((node: any) => {
-      if (!node.icon) {
-        let icon: Icon = new Icon(
-          node.img || node.node_type + ".svg",
-          defaultIconConfig?.width as number,
-          defaultIconConfig?.height as number
-        );
-        node.icon = icon;
-      }
+      node.type = node.node_type.includes("topic")
+        ? "MetricCustomNode"
+        : "modelRect";
     });
 
     currentGraph.data(data as GraphData);
