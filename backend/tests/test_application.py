@@ -16,6 +16,7 @@ from pytest_mock import MockerFixture
 from streams_explorer.application import get_application
 from streams_explorer.core.client_manager import ClientManager
 from streams_explorer.core.config import API_PREFIX, settings
+from streams_explorer.core.k8s_app import K8sObject
 from streams_explorer.core.services.kafkaconnect import KafkaConnect
 from streams_explorer.core.services.kubernetes import K8sDeploymentUpdate, K8sEvent
 from streams_explorer.models.k8s import K8sDeploymentUpdateType, K8sEventType, K8sReason
@@ -71,7 +72,12 @@ class TestApplication:
 
     @pytest.mark.asyncio
     async def test_update_every_x_seconds(
-        self, mocker, monkeypatch, deployments, stateful_sets, cron_jobs
+        self,
+        mocker,
+        monkeypatch,
+        deployments: List[K8sObject],
+        stateful_sets: List[K8sObject],
+        cron_jobs: List[K8sObject],
     ):
         settings.graph.update_interval = 1
         settings.kafkaconnect.update_interval = 1
@@ -219,9 +225,9 @@ class TestApplication:
         self,
         monkeypatch: MonkeyPatch,
         mocker: MockerFixture,
-        deployments,
-        stateful_sets,
-        cron_jobs,
+        deployments: List[K8sObject],
+        stateful_sets: List[K8sObject],
+        cron_jobs: List[K8sObject],
     ):
         async def watch(self: StreamsExplorer):
             for deployment in deployments + stateful_sets + cron_jobs:
