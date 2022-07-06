@@ -57,8 +57,8 @@ class StreamsExplorer:
         await self.kubernetes.watch()
 
     async def update_graph(self):
-        if not self.modified:  # skip unnecessary re-render
-            return
+        if not self.modified:
+            return  # skip unnecessary re-render
         logger.info("Update graph")
         self.data_flow.reset()
         self.__create_graph()

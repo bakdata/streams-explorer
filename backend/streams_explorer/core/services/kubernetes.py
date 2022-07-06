@@ -97,7 +97,7 @@ class Kubernetes:
                 list_events,
                 None,  # FIXME: error in kubernetes_asyncio when casting to `EventsV1EventList`
                 self.streams_explorer.handle_event,
-                5,
+                delay=5,
             ),
         )
 
