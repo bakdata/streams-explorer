@@ -21,7 +21,6 @@ import {
 } from "./api/fetchers";
 import DetailsCard from "./DetailsCard";
 import { graphConfig } from "./graphConfiguration";
-import GraphStates from "./GraphStates";
 import GraphVisualization from "./GraphVisualization";
 import Node from "./Node";
 import Search from "./Search";
