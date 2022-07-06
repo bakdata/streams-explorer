@@ -291,8 +291,9 @@ class TestApplication:
 
                 # scale replicas
                 deployment = APP1
-                deployment.status.replicas = 10  # type: ignore
-                deployment.status.ready_replicas = 0  # type: ignore
+                assert deployment.status
+                deployment.status.replicas = 10
+                deployment.status.ready_replicas = 0
                 event = K8sDeploymentUpdate(
                     type=K8sDeploymentUpdateType.MODIFIED, object=deployment
                 )
