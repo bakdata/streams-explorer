@@ -131,6 +131,7 @@ class TestApplication:
         from main import app
 
         with TestClient(app) as client:
+            streams_explorer: StreamsExplorer = app.state.streams_explorer
 
             def fetch_graph() -> List[str]:
                 response = client.get(f"{API_PREFIX}/graph")
@@ -160,7 +161,7 @@ class TestApplication:
             update = K8sDeploymentUpdate(
                 type=K8sDeploymentUpdateType.DELETED, object=APP3
             )
-            await app.state.streams_explorer.handle_deployment_update(update)
+            await streams_explorer.handle_deployment_update(update)
 
             await asyncio.sleep(1)  # update graph
             nodes = fetch_graph()
@@ -186,8 +187,8 @@ class TestApplication:
             assert KafkaConnect.get_connectors() == connectors
 
             await asyncio.sleep(2)  # update connectors
-            assert len(app.state.streams_explorer.kafka_connectors) == 1
-            assert app.state.streams_explorer.kafka_connectors[0].name == "connector1"
+            assert len(streams_explorer.kafka_connectors) == 1
+            assert streams_explorer.kafka_connectors[0].name == "connector1"
 
             await asyncio.sleep(1)  # update graph
             nodes = fetch_graph()
@@ -268,6 +269,7 @@ class TestApplication:
         connect = mocker.spy(ClientManager, "connect")
 
         with TestClient(app) as client:
+            streams_explorer: StreamsExplorer = app.state.streams_explorer
             with client.websocket_connect(ENDPOINT) as ws1:
                 assert connect.call_count == 1
                 assert update_clients_delta.call_count == 5
@@ -302,7 +304,7 @@ class TestApplication:
                     event = K8sDeploymentUpdate(
                         type=K8sDeploymentUpdateType.MODIFIED, object=deployment
                     )
-                    await app.state.streams_explorer.handle_deployment_update(event)
+                    await streams_explorer.handle_deployment_update(event)
                     assert update_clients_delta.call_count == 6
                     assert (
                         ws1.receive_json()
@@ -324,7 +326,7 @@ class TestApplication:
                         },
                     }
                     event = K8sEvent(type=K8sEventType.WARNING, object=object)
-                    await app.state.streams_explorer.handle_event(event)
+                    await streams_explorer.handle_event(event)
                     assert update_clients_delta.call_count == 7
                     assert (
                         ws1.receive_json()
