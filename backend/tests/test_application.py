@@ -214,7 +214,8 @@ class TestApplication:
         assert response.status_code == status.HTTP_404_NOT_FOUND
         assert response.json()["detail"] == "Pipeline 'doesnt-exist' not found"
 
-    def test_websocket(
+    @pytest.mark.asyncio
+    async def test_websocket(
         self,
         monkeypatch: MonkeyPatch,
         mocker: MockerFixture,
@@ -239,7 +240,7 @@ class TestApplication:
             event = K8sEvent(type=K8sEventType.NORMAL, object=object)
             await self.handle_event(event)
             object = {
-                "type": K8sEventType.NORMAL,
+                "type": K8sEventType.WARNING,
                 "reason": K8sReason.BACKOFF,
                 "regarding": {
                     "fieldPath": "spec.containers{streaming-app3}",
@@ -255,12 +256,15 @@ class TestApplication:
         from main import app
 
         update_client_full = mocker.spy(StreamsExplorer, "update_client_full")
+        update_clients_delta = mocker.spy(StreamsExplorer, "_update_clients_delta")
         connect = mocker.spy(ClientManager, "connect")
+
         with TestClient(app) as client:
             with client.websocket_connect("/api/graph/ws") as websocket:
                 connect.assert_called_once()
                 data = websocket.receive_json()
-                update_client_full.assert_called_once()
+                assert update_client_full.call_count == 1
+                assert update_clients_delta.call_count == 5
                 assert data == {
                     "id": "streaming-app1",
                     "replicas": [None, None],
@@ -278,4 +282,24 @@ class TestApplication:
                     "replicas": [None, None],
                     "state": K8sReason.BACKOFF,
                 }
+
+                # send another event
+                object = {
+                    "type": K8sEventType.NORMAL,
+                    "reason": K8sReason.STARTED,
+                    "regarding": {
+                        "fieldPath": "spec.containers{streaming-app3}",
+                        "namespace": "test-namespace",
+                    },
+                }
+                event = K8sEvent(type=K8sEventType.WARNING, object=object)
+                await app.state.streams_explorer.handle_event(event)
+                assert update_clients_delta.call_count == 6
+                data = websocket.receive_json()
+                assert data == {
+                    "id": "streaming-app3",
+                    "replicas": [None, None],
+                    "state": K8sReason.STARTED,
+                }
+
                 websocket.close()
