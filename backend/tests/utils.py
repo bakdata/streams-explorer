@@ -8,6 +8,7 @@ from kubernetes_asyncio.client import (
     V1Container,
     V1Deployment,
     V1DeploymentSpec,
+    V1DeploymentStatus,
     V1EnvVar,
     V1JobSpec,
     V1LabelSelector,
@@ -56,7 +57,8 @@ def get_streaming_app_deployment(
     )
     spec = V1DeploymentSpec(template=template, selector=V1LabelSelector())
     metadata = get_metadata(name, pipeline=pipeline)
-    return V1Deployment(metadata=metadata, spec=spec)
+    status = V1DeploymentStatus(ready_replicas=None, replicas=1)
+    return V1Deployment(metadata=metadata, spec=spec, status=status)
 
 
 def get_streaming_app_stateful_set(

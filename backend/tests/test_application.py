@@ -262,28 +262,44 @@ class TestApplication:
         with TestClient(app) as client:
             with client.websocket_connect("/api/graph/ws") as websocket:
                 connect.assert_called_once()
+                assert update_clients_delta.call_count == 5
                 data = websocket.receive_json()
                 assert update_client_full.call_count == 1
-                assert update_clients_delta.call_count == 5
                 assert data == {
                     "id": "streaming-app1",
-                    "replicas": [None, None],
+                    "replicas": [None, 1],
                     "state": K8sReason.UNKNOWN,
                 }
                 data = websocket.receive_json()
                 assert data == {
                     "id": "streaming-app2",
-                    "replicas": [None, None],
+                    "replicas": [None, 1],
                     "state": K8sReason.STARTED,
                 }
                 data = websocket.receive_json()
                 assert data == {
                     "id": "streaming-app3",
-                    "replicas": [None, None],
+                    "replicas": [None, 1],
                     "state": K8sReason.BACKOFF,
                 }
 
-                # send another event
+                # scale replicas
+                deployment = APP1
+                deployment.status.replicas = 10  # type: ignore
+                deployment.status.ready_replicas = 0  # type: ignore
+                event = K8sDeploymentUpdate(
+                    type=K8sDeploymentUpdateType.MODIFIED, object=deployment
+                )
+                await app.state.streams_explorer.handle_deployment_update(event)
+                assert update_clients_delta.call_count == 6
+                data = websocket.receive_json()
+                assert data == {
+                    "id": "streaming-app1",
+                    "replicas": [0, 10],
+                    "state": K8sReason.UNKNOWN,
+                }
+
+                # pod restarting
                 object = {
                     "type": K8sEventType.NORMAL,
                     "reason": K8sReason.STARTED,
@@ -294,11 +310,11 @@ class TestApplication:
                 }
                 event = K8sEvent(type=K8sEventType.WARNING, object=object)
                 await app.state.streams_explorer.handle_event(event)
-                assert update_clients_delta.call_count == 6
+                assert update_clients_delta.call_count == 7
                 data = websocket.receive_json()
                 assert data == {
                     "id": "streaming-app3",
-                    "replicas": [None, None],
+                    "replicas": [None, 1],
                     "state": K8sReason.STARTED,
                 }
 
