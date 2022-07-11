@@ -21,14 +21,14 @@ G6.registerNode(
       size: [120, 50],
       style: {
         radius: 5,
-        stroke: "#000000", // border
-        fill: "#ffffff",
+        stroke: "#000", // border
+        fill: "#fff",
         lineWidth: Global.defaultNode.style.lineWidth,
         fillOpacity: 1,
       },
       labelCfg: {
         style: {
-          fill: "#000000",
+          fill: "#000",
           fontSize: 14,
           fontFamily: Global.windowFontFamily,
         },
@@ -48,9 +48,9 @@ G6.registerNode(
         y: 0,
         img:
           "https://gw.alipayobjects.com/zos/basement_prod/4f81893c-1806-4de4-aff3-9a6b266bc8a2.svg",
-        width: 16,
-        height: 16,
-        offset: 0,
+        width: 36,
+        height: 36,
+        offset: 4,
       },
       stateIcon: {
         show: true,
@@ -62,11 +62,6 @@ G6.registerNode(
         height: 16,
         offset: -5,
       },
-      // anchorPoints: [{ x: 0, y: 0.5 }, { x: 1, y: 0.5 }]
-      anchorPoints: [
-        [0, 0.5],
-        [1, 0.5],
-      ],
     },
     shapeType: "modelRect",
     labelPosition: "center", // TODO
@@ -81,11 +76,25 @@ G6.registerNode(
       });
       group["shapeMap"][`${this.type}-keyShape`] = keyShape;
 
-      // TODO: enable
-      // (this as any).drawLogoIcon(cfg, group);
-      // (this as any).drawStateIcon(cfg, group);
+      (this as any).drawLogoIcon(cfg, group);
+      (this as any).drawStateIcon(cfg, group);
+      (this as any).drawMetricsLabel(cfg, group);
 
       return keyShape;
+    },
+    drawMetricsLabel(cfg: NodeConfig, group: IGroup) {
+      group["shapeMap"]["metric-label"] = group.addShape("text", {
+        attrs: {
+          textBaseline: "top",
+          y: 50,
+          lineHeight: 20,
+          text: "",
+          fill: "#333",
+          fontStyle: "italic",
+          textAlign: "center",
+        },
+        name: "metric",
+      });
     },
     drawLogoIcon(cfg: NodeConfig, group: IGroup) {
       const { logoIcon = {} } = this.mergeStyle
@@ -96,36 +105,20 @@ G6.registerNode(
       if (logoIcon.show) {
         const { width: w, height: h, x, y, offset, text, ...logoIconStyle } =
           logoIcon;
-        if (text) {
-          group["shapeMap"]["rect-logo-icon"] = group.addShape("text", {
-            attrs: {
-              x: 0,
-              y: 0,
-              fontSize: 12,
-              fill: "#000",
-              stroke: "#000",
-              textBaseline: "middle",
-              textAlign: "center",
-              ...logoIconStyle,
-            },
-            className: "rect-logo-icon",
-            name: "rect-logo-icon",
-            draggable: true,
-          });
-        } else {
-          group["shapeMap"]["rect-logo-icon"] = group.addShape("image", {
-            attrs: {
-              ...logoIconStyle,
-              x: x || -width / 2 + (w as number) + (offset as number),
-              y: y || -(h as number) / 2,
-              width: w,
-              height: h,
-            },
-            className: "rect-logo-icon",
-            name: "rect-logo-icon",
-            draggable: true,
-          });
-        }
+        const iconImg = cfg!.node_type + ".svg";
+        group["shapeMap"]["rect-logo-icon"] = group.addShape("image", {
+          attrs: {
+            ...logoIconStyle,
+            x: -width / 2 + (offset as number),
+            y: -(h as number) / 2,
+            width: w,
+            height: h,
+            img: iconImg,
+          },
+          className: "rect-logo-icon",
+          name: "rect-logo-icon",
+          draggable: true,
+        });
       }
     },
     drawStateIcon(cfg: NodeConfig, group: IGroup) {
@@ -273,6 +266,15 @@ G6.registerNode(
 
       const group = item.getContainer();
 
+      // update metric
+      const metricLabelShape = group["shapeMap"]["metric-label"]
+        || group.find(
+          (element) => element.get("className") === "metric-label"
+        );
+      const metric = metricLabelShape.attr();
+      metric.text = cfg.metric;
+      metricLabelShape.attr(metric);
+
       const logoIconShape = group["shapeMap"]["rect-logo-icon"]
         || group.find((element) =>
           element.get("className") === "rect-logo-icon"
@@ -300,7 +302,7 @@ G6.registerNode(
         || group.find((element) =>
           element.get("className") === "rect-description"
         );
-      if (cfg.label) {
+      /* if (cfg.label) {
         if (!label) {
           group["shapeMap"]["node-label"] = group.addShape("text", {
             attrs: {
@@ -329,8 +331,8 @@ G6.registerNode(
           label.resetMatrix();
           label.attr(labelStyle);
         }
-      }
-      if (isString(cfg.description)) {
+      } */
+      /* if (isString(cfg.description)) {
         const { paddingTop } = descriptionCfg;
         if (!description) {
           group["shapeMap"]["rect-description"] = group.addShape("text", {
@@ -358,21 +360,9 @@ G6.registerNode(
             y: 17 + ((paddingTop as any) || 0),
           });
         }
-      }
+      } */
 
-      const preRectShape = group["shapeMap"]["pre-rect"]
-        || group.find((element) => element.get("className") === "pre-rect");
-      if (preRectShape && !preRectShape.destroyed) {
-        const preRect = mix({}, preRectShape.attr(), cfg.preRect);
-        preRectShape.attr({
-          ...preRect,
-          x: -width / 2,
-          y: -height / 2,
-          height,
-        });
-      }
-
-      if (logoIconShape && !logoIconShape.destroyed) {
+      /* if (logoIconShape && !logoIconShape.destroyed) {
         if (!show && show !== undefined) {
           logoIconShape.remove();
           delete group["shapeMap"]["pre-rect"];
@@ -395,7 +385,7 @@ G6.registerNode(
         }
       } else if (show) {
         (this as any).drawLogoIcon(cfg, group);
-      }
+      } */
 
       const stateIconShape = group["shapeMap"]["rect-state-icon"] || group.find(
         (element) => element.get("className") === "rect-state-icon"

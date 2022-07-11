@@ -23,7 +23,7 @@ G6.registerNode(
         x: 0,
         y: 0,
         stroke: undefined,
-        fill: "#F0F2F5",
+        fill: "#f0f2f5",
         lineWidth: 0,
       },
       labelCfg: {

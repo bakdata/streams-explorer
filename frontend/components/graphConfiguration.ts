@@ -15,7 +15,7 @@ export const graphConfig: GraphOptions = {
   defaultEdge: {
     type: "cubic-horizontal",
     style: {
-      stroke: "#000000",
+      stroke: "#000",
       endArrow: true,
     },
     labelCfg: {
@@ -29,7 +29,8 @@ export const graphConfig: GraphOptions = {
       fill: "lightsteelblue",
     },
     click: {
-      fill: "#FFF",
+      fill: "#fff",
+      lineWidth: 2,
     },
   },
 };
