@@ -86,56 +86,57 @@ class StreamsExplorer:
     def get_node_information(self, node_id: str) -> NodeInformation | None:
         node_type = self.data_flow.get_node_type(node_id)
 
-        if node_type == NodeTypesEnum.CONNECTOR:
-            config = KafkaConnect.get_connector_config(node_id)
-            return NodeInformation(
-                node_id=node_id,
-                node_type=node_type,
-                info=self.linking_service.connector_info
-                + get_displayed_information_connector(config),
-            )
-
-        elif node_type == NodeTypesEnum.TOPIC or node_type == NodeTypesEnum.ERROR_TOPIC:
-            info = self.linking_service.topic_info
-            if self.kafka.enabled:
-                partitions = self.kafka.get_topic_partitions(node_id)
-                if partitions is not None:
-                    info.append(
-                        NodeInfoListItem(
-                            name="Partitions",
-                            value=str(len(partitions)),
-                            type=NodeInfoType.BASIC,
-                        )
-                    )
-                config = self.kafka.get_topic_config(node_id)
-                info += get_displayed_information_topic(config)
-            info.append(
-                NodeInfoListItem(
-                    name="Schema",
-                    value={},
-                    type=NodeInfoType.JSON,
+        match node_type:
+            case NodeTypesEnum.CONNECTOR:
+                config = KafkaConnect.get_connector_config(node_id)
+                return NodeInformation(
+                    node_id=node_id,
+                    node_type=node_type,
+                    info=self.linking_service.connector_info
+                    + get_displayed_information_connector(config),
                 )
-            )
-            return NodeInformation(
-                node_id=node_id,
-                node_type=node_type,
-                info=info,
-            )
 
-        elif node_type == NodeTypesEnum.STREAMING_APP:
-            info = get_displayed_information_deployment(self.applications[node_id])
-            return NodeInformation(
-                node_id=node_id,
-                node_type=node_type,
-                info=self.linking_service.streaming_app_info + info,
-            )
+            case NodeTypesEnum.TOPIC | NodeTypesEnum.ERROR_TOPIC:
+                info = self.linking_service.topic_info
+                if self.kafka.enabled:
+                    partitions = self.kafka.get_topic_partitions(node_id)
+                    if partitions is not None:
+                        info.append(
+                            NodeInfoListItem(
+                                name="Partitions",
+                                value=str(len(partitions)),
+                                type=NodeInfoType.BASIC,
+                            )
+                        )
+                    config = self.kafka.get_topic_config(node_id)
+                    info += get_displayed_information_topic(config)
+                info.append(
+                    NodeInfoListItem(
+                        name="Schema",
+                        value={},
+                        type=NodeInfoType.JSON,
+                    )
+                )
+                return NodeInformation(
+                    node_id=node_id,
+                    node_type=node_type,
+                    info=info,
+                )
 
-        elif node_type in self.linking_service.sink_source_info:
-            return NodeInformation(
-                node_id=node_id,
-                node_type=NodeTypesEnum.SINK_SOURCE,
-                info=self.linking_service.sink_source_info[node_type],
-            )
+            case NodeTypesEnum.STREAMING_APP:
+                info = get_displayed_information_deployment(self.applications[node_id])
+                return NodeInformation(
+                    node_id=node_id,
+                    node_type=node_type,
+                    info=self.linking_service.streaming_app_info + info,
+                )
+
+            case sink_source if sink_source in self.linking_service.sink_source_info:
+                return NodeInformation(
+                    node_id=node_id,
+                    node_type=NodeTypesEnum.SINK_SOURCE,
+                    info=self.linking_service.sink_source_info[node_type],
+                )
 
     def get_link(self, node_id: str, link_type: str | None):
         node_type = self.data_flow.get_node_type(node_id)
