@@ -21,6 +21,7 @@ from streams_explorer.models.node_information import (
     NodeInformation,
     NodeInfoType,
 )
+from streams_explorer.models.sink import Sink
 from streams_explorer.models.source import Source
 from streams_explorer.streams_explorer import StreamsExplorer
 from tests.utils import get_streaming_app_cronjob, get_streaming_app_deployment
@@ -244,6 +245,14 @@ class TestStreamsExplorer:
                 )
             ],
         )
+
+        assert streams_explorer.linking_service.sink_source_info
+        assert streams_explorer.get_node_information("fake-index") == NodeInformation(
+            node_id="fake-index",
+            node_type=NodeTypesEnum.SINK_SOURCE,
+            info=[NodeInfoListItem(name="Kibana", value="", type=NodeInfoType.LINK)],
+        )
+
         result = NodeInformation(
             node_id="es-sink-connector-dead-letter-topic",
             node_type=NodeTypesEnum.ERROR_TOPIC,
@@ -321,7 +330,11 @@ class TestStreamsExplorer:
         sources, sinks = extractor_container.get_sources_sinks()
         assert len(sources) == 3
         assert len(sinks) == 1
-        assert sinks[0].node_type == "elasticsearch-index"
+        assert sinks[0] == Sink(
+            name="fake-index",
+            source="es-sink-connector",
+            node_type="elasticsearch-index",
+        )
 
         # updating connectors should only clear sinks & sources added from connectors
         streams_explorer.update_connectors()
