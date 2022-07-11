@@ -298,16 +298,34 @@ const GraphVisualization = ({
         const data = JSON.parse(event.data);
         const node = graph?.findById(data.id) as INode;
         if (node) {
-          if (!data.replicas[0]) {
+          if (data.state !== "Unknown") {
+            graph.updateItem(node, {
+              style: {
+                fill: "#ffe5e4",
+                // fill: "#f3b5ba", // red
+                stroke: "#ff2825",
+              },
+              stateIcon: {
+                img: "state-error.svg",
+              },
+            });
+          } else if (!data.replicas[0]) {
             graph.updateItem(node, {
               style: {
                 fill: "#e2e5ee", // grey
+              },
+              stateIcon: {
+                img: "state-paused.svg",
               },
             });
           } else {
             graph.updateItem(node, {
               style: {
+                stroke: "#52c41a",
                 fill: "#fff",
+              },
+              stateIcon: {
+                img: "state-running.svg",
               },
             });
           }
