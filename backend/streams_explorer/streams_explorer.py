@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 import re
-from typing import Dict, List, Optional, Type
 
 from cachetools.func import ttl_cache
 from fastapi import WebSocket
@@ -37,10 +38,10 @@ from streams_explorer.models.node_information import (
 
 class StreamsExplorer:
     def __init__(
-        self, linking_service: LinkingService, metric_provider: Type[MetricProvider]
+        self, linking_service: LinkingService, metric_provider: type[MetricProvider]
     ):
-        self.applications: Dict[str, K8sApp] = {}
-        self.kafka_connectors: List[KafkaConnector] = []
+        self.applications: dict[str, K8sApp] = {}
+        self.kafka_connectors: list[KafkaConnector] = []
         self.kubernetes = Kubernetes(self)
         self.kafka = KafkaAdminClient()
         self.data_flow = DataFlowGraph(
@@ -72,13 +73,13 @@ class StreamsExplorer:
 
     async def get_positioned_pipeline_json_graph(
         self, pipeline_name: str
-    ) -> Optional[dict]:
+    ) -> dict | None:
         return await self.data_flow.get_positioned_pipeline_graph(pipeline_name)
 
-    def get_pipeline_names(self) -> List[str]:
+    def get_pipeline_names(self) -> list[str]:
         return list(self.data_flow.pipelines.keys())
 
-    async def get_metrics(self) -> List[Metric]:
+    async def get_metrics(self) -> list[Metric]:
         return await self.data_flow.get_metrics()
 
     @ttl_cache(ttl=settings.node_info.cache_ttl)
@@ -136,7 +137,7 @@ class StreamsExplorer:
                 info=self.linking_service.sink_source_info[node_type],
             )
 
-    def get_link(self, node_id: str, link_type: Optional[str]):
+    def get_link(self, node_id: str, link_type: str | None):
         node_type = self.data_flow.get_node_type(node_id)
         if node_type == NodeTypesEnum.CONNECTOR:
             config = KafkaConnect.get_connector_config(node_id)

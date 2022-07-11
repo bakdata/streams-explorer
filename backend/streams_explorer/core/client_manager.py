@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 from dataclasses import dataclass, field
-from typing import List
 
 from fastapi import WebSocket
 from loguru import logger
@@ -8,7 +9,7 @@ from pydantic import BaseModel
 
 @dataclass(frozen=True)
 class ClientManager:
-    _clients: List[WebSocket] = field(init=False, default_factory=list)
+    _clients: list[WebSocket] = field(init=False, default_factory=list)
 
     async def connect(self, websocket: WebSocket):
         await websocket.accept()
@@ -29,5 +30,5 @@ class ClientManager:
             await client.send_json(data)
 
     @property
-    def clients(self) -> List[WebSocket]:
+    def clients(self) -> list[WebSocket]:
         return self._clients

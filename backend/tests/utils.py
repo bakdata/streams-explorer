@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 from enum import Enum
-from typing import Dict, List, Optional
 
 from kubernetes_asyncio.client import (
     V1beta1CronJob,
@@ -29,17 +30,17 @@ class ConfigType(str, Enum):
 
 def get_streaming_app_deployment(
     name: str = "test-app",
-    input_topics: Optional[str] = "input-topic",
-    output_topic: Optional[str] = "output-topic",
-    error_topic: Optional[str] = "error-topic",
-    input_pattern: Optional[str] = None,
-    multiple_inputs: Optional[str] = None,
-    multiple_outputs: Optional[str] = None,
-    extra_input_patterns: Optional[str] = None,
-    extra: Dict[str, str] = {},
+    input_topics: str | None = "input-topic",
+    output_topic: str | None = "output-topic",
+    error_topic: str | None = "error-topic",
+    input_pattern: str | None = None,
+    multiple_inputs: str | None = None,
+    multiple_outputs: str | None = None,
+    extra_input_patterns: str | None = None,
+    extra: dict[str, str] = {},
     env_prefix: str = "APP_",
-    pipeline: Optional[str] = None,
-    consumer_group: Optional[str] = None,
+    pipeline: str | None = None,
+    consumer_group: str | None = None,
     config_type: ConfigType = ConfigType.ENV,
 ) -> V1Deployment:
     template = get_template(
@@ -66,14 +67,14 @@ def get_streaming_app_stateful_set(
     input_topics: str = "input-topic",
     output_topic: str = "output-topic",
     error_topic: str = "error-topic",
-    input_pattern: Optional[str] = None,
-    multiple_inputs: Optional[str] = None,
-    multiple_outputs: Optional[str] = None,
-    extra_input_patterns: Optional[str] = None,
-    extra: Dict[str, str] = {},
+    input_pattern: str | None = None,
+    multiple_inputs: str | None = None,
+    multiple_outputs: str | None = None,
+    extra_input_patterns: str | None = None,
+    extra: dict[str, str] = {},
     env_prefix: str = "APP_",
-    pipeline: Optional[str] = None,
-    consumer_group: Optional[str] = None,
+    pipeline: str | None = None,
+    consumer_group: str | None = None,
     service_name: str = "test-service",
     config_type: ConfigType = ConfigType.ENV,
 ) -> V1StatefulSet:
@@ -102,11 +103,11 @@ def get_streaming_app_stateful_set(
 
 def get_streaming_app_cronjob(
     name: str = "test-cronjob",
-    input_topics: Optional[str] = None,
-    output_topic: Optional[str] = "output-topic",
-    error_topic: Optional[str] = "error-topic",
+    input_topics: str | None = None,
+    output_topic: str | None = "output-topic",
+    error_topic: str | None = "error-topic",
     env_prefix: str = "APP_",
-    pipeline: Optional[str] = None,
+    pipeline: str | None = None,
 ) -> V1beta1CronJob:
     env = get_env(
         input_topics,
@@ -145,16 +146,16 @@ def get_metadata(name, pipeline=None) -> V1ObjectMeta:
 
 
 def get_env(
-    input_topics: Optional[str],
-    output_topic: Optional[str],
-    error_topic: Optional[str],
-    input_pattern: Optional[str] = None,
-    multiple_inputs: Optional[str] = None,
-    multiple_outputs: Optional[str] = None,
-    extra_input_patterns: Optional[str] = None,
-    extra: Dict[str, str] = {},
+    input_topics: str | None,
+    output_topic: str | None,
+    error_topic: str | None,
+    input_pattern: str | None = None,
+    multiple_inputs: str | None = None,
+    multiple_outputs: str | None = None,
+    extra_input_patterns: str | None = None,
+    extra: dict[str, str] = {},
     env_prefix: str = "APP_",
-) -> List[V1EnvVar]:
+) -> list[V1EnvVar]:
     env = [V1EnvVar(name="ENV_PREFIX", value=env_prefix)]
     if input_topics:
         env.append(V1EnvVar(name=env_prefix + "INPUT_TOPICS", value=input_topics))
@@ -189,14 +190,14 @@ def _create_arg(name: str, value: str) -> str:
 
 
 def get_args(
-    input_topics: Optional[str],
-    output_topic: Optional[str],
-    error_topic: Optional[str],
-    multiple_inputs: Optional[str],
-    multiple_outputs: Optional[str],
-    extra_input_patterns: Optional[str],
-    extra: Dict[str, str],
-) -> List[str]:
+    input_topics: str | None,
+    output_topic: str | None,
+    error_topic: str | None,
+    multiple_inputs: str | None,
+    multiple_outputs: str | None,
+    extra_input_patterns: str | None,
+    extra: dict[str, str],
+) -> list[str]:
     args = []
     if input_topics:
         args.append(_create_arg("input-topics", input_topics))
@@ -217,16 +218,16 @@ def get_args(
 
 
 def get_template(
-    input_topics: Optional[str],
-    output_topic: Optional[str],
-    error_topic: Optional[str],
-    input_pattern: Optional[str],
-    multiple_inputs: Optional[str],
-    multiple_outputs: Optional[str],
-    extra_input_patterns: Optional[str],
-    extra: Dict[str, str],
+    input_topics: str | None,
+    output_topic: str | None,
+    error_topic: str | None,
+    input_pattern: str | None,
+    multiple_inputs: str | None,
+    multiple_outputs: str | None,
+    extra_input_patterns: str | None,
+    extra: dict[str, str],
     env_prefix: str = "APP_",
-    consumer_group: Optional[str] = None,
+    consumer_group: str | None = None,
     config_type: ConfigType = ConfigType.ENV,
 ) -> V1PodTemplateSpec:
     env = None

@@ -1,4 +1,4 @@
-from typing import Optional
+from __future__ import annotations
 
 from streams_explorer.core.extractor.extractor import Extractor
 from streams_explorer.models.kafka_connector import (
@@ -11,7 +11,7 @@ from streams_explorer.models.sink import Sink
 class ElasticsearchSink(Extractor):
     def on_connector_info_parsing(
         self, info: dict, connector_name: str
-    ) -> Optional[KafkaConnector]:
+    ) -> KafkaConnector | None:
         config = info["config"]
         connector_class = config.get("connector.class")
         if connector_class and "ElasticsearchSinkConnector" in connector_class:

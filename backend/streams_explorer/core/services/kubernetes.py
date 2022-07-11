@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING, Callable, NamedTuple, Type, TypedDict
+from typing import TYPE_CHECKING, Callable, NamedTuple, TypedDict
 
 import kubernetes_asyncio.client
 import kubernetes_asyncio.config
@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 
 class K8sResource(NamedTuple):
     resource: Callable
-    return_type: Type
+    return_type: type
     callback: Callable
     delay: int = 0
 

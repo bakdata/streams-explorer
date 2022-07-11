@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Set
+from __future__ import annotations
 
 import httpx
 from loguru import logger
@@ -8,7 +8,7 @@ from streams_explorer.extractors import extractor_container
 from streams_explorer.models.kafka_connector import KafkaConnector
 
 url = settings.kafkaconnect.url
-protected_keys: Dict[str, Set[str]] = {}
+protected_keys: dict[str, set[str]] = {}
 
 
 class KafkaConnect:
@@ -72,15 +72,15 @@ class KafkaConnect:
         return config
 
     @staticmethod
-    def connectors() -> List[KafkaConnector]:
+    def connectors() -> list[KafkaConnector]:
         protected_keys.clear()
         connectors = KafkaConnect.get_connectors()
         out = []
         for name in connectors:
             info = KafkaConnect.get_connector_info(name)
-            connector: Optional[
+            connector: None | (
                 KafkaConnector
-            ] = extractor_container.on_connector_info_parsing(info, name)
+            ) = extractor_container.on_connector_info_parsing(info, name)
             if connector:
                 out.append(connector)
             else:

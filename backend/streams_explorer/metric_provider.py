@@ -1,4 +1,4 @@
-from typing import Type
+from __future__ import annotations
 
 from loguru import logger
 
@@ -9,7 +9,7 @@ from streams_explorer.core.services.metric_providers import (
 from streams_explorer.plugins import load_plugin
 
 
-def load_metric_provider() -> Type[MetricProvider]:
+def load_metric_provider() -> type[MetricProvider]:
     metric_provider = load_plugin(MetricProvider)
     if (
         not metric_provider

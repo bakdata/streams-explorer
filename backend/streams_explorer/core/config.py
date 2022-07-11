@@ -1,4 +1,6 @@
-from typing import Any, Dict, List
+from __future__ import annotations
+
+from typing import Any
 
 from dynaconf import Dynaconf, Validator
 
@@ -61,7 +63,7 @@ settings: Any = Dynaconf(
 )
 
 
-def sort_displayed_information(list: List[Dict[str, str]]) -> List[Dict[str, str]]:
+def sort_displayed_information(list: list[dict[str, str]]) -> list[dict[str, str]]:
     return sorted(list, key=lambda k: str.casefold(k["name"]))
 
 

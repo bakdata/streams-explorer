@@ -1,4 +1,4 @@
-from typing import Type
+from __future__ import annotations
 
 from loguru import logger
 
@@ -9,7 +9,7 @@ from streams_explorer.core.k8s_config_parser import (
 from streams_explorer.plugins import load_plugin
 
 
-def load_config_parser() -> Type[K8sConfigParser]:
+def load_config_parser() -> type[K8sConfigParser]:
     parser = load_plugin(K8sConfigParser)
     if (
         not parser

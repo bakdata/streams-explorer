@@ -1,4 +1,4 @@
-from typing import Optional
+from __future__ import annotations
 
 from streams_explorer.core.config import settings
 from streams_explorer.core.k8s_app import K8sApp
@@ -50,9 +50,7 @@ class DefaultLinker(LinkingService):
         if settings.loki.enable:
             self.add_logging_provider("loki")
 
-    def get_redirect_connector(
-        self, config: dict, link_type: Optional[str]
-    ) -> Optional[str]:
+    def get_redirect_connector(self, config: dict, link_type: str | None) -> str | None:
         if connector_name := config.get("name"):
             consumer_group = f"connect-{connector_name}"
             if link_type == "grafana":
@@ -64,9 +62,7 @@ class DefaultLinker(LinkingService):
             elif link_type == "kowl":
                 return f"{settings.kowl.url}/groups/{consumer_group}"
 
-    def get_redirect_topic(
-        self, topic_name: str, link_type: Optional[str]
-    ) -> Optional[str]:
+    def get_redirect_topic(self, topic_name: str, link_type: str | None) -> str | None:
         if link_type == "grafana":
             return f"{settings.grafana.url}/d/{settings.grafana.dashboards.topics}?var-topics={topic_name}"
         elif link_type == "akhq":
@@ -75,8 +71,8 @@ class DefaultLinker(LinkingService):
             return f"{settings.kowl.url}/topics/{topic_name}"
 
     def get_redirect_streaming_app(
-        self, k8s_app: K8sApp, link_type: Optional[str]
-    ) -> Optional[str]:
+        self, k8s_app: K8sApp, link_type: str | None
+    ) -> str | None:
         if link_type == "kibanalogs":
             return f"{settings.kibanalogs.url}/app/discover#/?_a=(columns:!(message),query:(language:lucene,query:'kubernetes.labels.app: \"{k8s_app.name}\"'))"
         elif link_type == "loki":

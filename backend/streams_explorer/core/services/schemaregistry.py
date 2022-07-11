@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 import json
-from typing import List
 
 import httpx
 from loguru import logger
@@ -25,7 +26,7 @@ def default_return(default):
 class SchemaRegistry:
     @staticmethod
     @default_return([])
-    def get_versions(topic: str) -> List[int]:
+    def get_versions(topic: str) -> list[int]:
         logger.info(f"Fetch schema versions for topic {topic}")
         response = httpx.get(f"{url}/subjects/{topic}-value/versions/")
         if response.status_code == 200:

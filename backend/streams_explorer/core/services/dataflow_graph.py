@@ -3,7 +3,6 @@ from __future__ import annotations
 import re
 from collections import defaultdict
 from enum import Enum
-from typing import Dict, List, Optional, Set, Type
 
 import networkx as nx
 from loguru import logger
@@ -34,16 +33,16 @@ class NodeDataFields(str, Enum):
 
 
 class DataFlowGraph:
-    def __init__(self, metric_provider: Type[MetricProvider], kafka: KafkaAdminClient):
+    def __init__(self, metric_provider: type[MetricProvider], kafka: KafkaAdminClient):
         self.graph = nx.DiGraph()
         self.json_graph: dict = {}
-        self.pipelines: Dict[str, nx.DiGraph] = {}
-        self.json_pipelines: Dict[str, dict] = {}
+        self.pipelines: dict[str, nx.DiGraph] = {}
+        self.json_pipelines: dict[str, dict] = {}
         self.metric_provider_class = metric_provider
         self.metric_provider: MetricProvider | None = None
         self.kafka = kafka
 
-        self._topic_pattern_queue: Dict[str, Set[str]] = defaultdict(
+        self._topic_pattern_queue: dict[str, set[str]] = defaultdict(
             set
         )  # topic pattern -> set of target node ids
 
@@ -91,7 +90,7 @@ class DataFlowGraph:
         for extra_pattern in app.extra_input_patterns:
             self._enqueue_input_pattern(extra_pattern, app.id)
 
-    def add_connector(self, connector: KafkaConnector, pipeline: Optional[str] = None):
+    def add_connector(self, connector: KafkaConnector, pipeline: str | None = None):
         graph = self.graph
         if pipeline is not None:
             graph = self.pipelines[pipeline]
@@ -155,7 +154,7 @@ class DataFlowGraph:
                 self.pipelines[pipeline].add_node(node_name, **node_data)
                 self.pipelines[pipeline].add_edge(*edge)
 
-    async def get_positioned_pipeline_graph(self, pipeline_name: str) -> Optional[dict]:
+    async def get_positioned_pipeline_graph(self, pipeline_name: str) -> dict | None:
         if pipeline_name not in self.pipelines:
             return None  # TODO: raise exception instead of return
         # caching
@@ -168,7 +167,7 @@ class DataFlowGraph:
     async def get_positioned_graph(self) -> dict:
         return await self.__get_positioned_json_graph(self.graph)
 
-    async def get_metrics(self) -> List[Metric]:
+    async def get_metrics(self) -> list[Metric]:
         if self.metric_provider is not None:
             return await self.metric_provider.get()
         return []
@@ -181,7 +180,7 @@ class DataFlowGraph:
 
     def find_associated_pipelines(
         self, node_name: str, reverse: bool = False, radius: int = 3
-    ) -> Set[str]:
+    ) -> set[str]:
         """
         Search neighborhood of connected successor nodes for pipeline label (used for sources).
         With reverse=True the neighborhood of predecessor nodes is searched instead (used for sinks).
@@ -202,7 +201,7 @@ class DataFlowGraph:
         graph.add_node(name, label=name, node_type=NodeTypesEnum.TOPIC)
 
     @staticmethod
-    def _filter_topic_node_ids(graph: nx.DiGraph) -> Set[str]:
+    def _filter_topic_node_ids(graph: nx.DiGraph) -> set[str]:
         return {
             node_id
             for node_id, data in graph.nodes(data=True)
@@ -263,7 +262,7 @@ class DataFlowGraph:
 
     def handle_matching_topics(
         self,
-        matching_unknown_kafka_topics: Set[str],
+        matching_unknown_kafka_topics: set[str],
         node_id: str,
         pattern: str,
         pipeline: str | None,
@@ -333,9 +332,9 @@ class DataFlowGraph:
         return json_graph
 
     @staticmethod
-    def __extract_independent_graph_components(graph: nx.Graph) -> List[nx.Graph]:
+    def __extract_independent_graph_components(graph: nx.Graph) -> list[nx.Graph]:
         independent_graphs = list(nx.connected_components(graph.to_undirected()))
-        subgraphs: List[nx.Graph] = []
+        subgraphs: list[nx.Graph] = []
         for pipeline in independent_graphs:
             subgraph: nx.Graph = graph.subgraph(pipeline)
             subgraphs.append(subgraph)

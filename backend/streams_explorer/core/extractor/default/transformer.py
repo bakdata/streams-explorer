@@ -1,19 +1,21 @@
+from __future__ import annotations
+
 import re
 from abc import ABC, abstractmethod
-from typing import List, Literal, Optional, Pattern
+from typing import Literal, Pattern
 
 from pydantic import BaseConfig, BaseModel, Extra, Field, PrivateAttr
 
 
 class RouterTransformerConfig(BaseModel, ABC):
     _type: str = Field(..., alias="type")
-    topics: List[str]
+    topics: list[str]
 
     @abstractmethod
     def transform_topic(self, topic: str) -> str:
         ...
 
-    def get_routes(self) -> List[str]:
+    def get_routes(self) -> list[str]:
         return [self.transform_topic(topic) for topic in self.topics]
 
 
@@ -21,7 +23,7 @@ class RegexRouterTransformerConfig(RouterTransformerConfig):
     _type: Literal["org.apache.kafka.connect.transforms.RegexRouter"] = Field(
         ..., alias="type"
     )
-    regex: Optional[str] = None
+    regex: str | None = None
     replacement: str
 
     _rx: Pattern = PrivateAttr()
@@ -32,7 +34,7 @@ class RegexRouterTransformerConfig(RouterTransformerConfig):
             self._rx = re.compile(self.regex)
         self.replacement = self.replacement.replace("$", "\\")
 
-    def get_routes(self) -> List[str]:
+    def get_routes(self) -> list[str]:
         if self.regex is not None:
             return [self.transform_topic(topic) for topic in self.topics]
         return [self.replacement]

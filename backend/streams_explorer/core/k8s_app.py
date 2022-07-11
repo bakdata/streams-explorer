@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Dict, Optional, Set, Type, Union
+from typing import Union
 
 try:
     from typing import TypeAlias  # type: ignore[attr-defined]
@@ -28,14 +28,14 @@ ATTR_PIPELINE = "pipeline"
 
 K8sObject: TypeAlias = Union[V1Deployment, V1StatefulSet, V1beta1CronJob]
 
-config_parser: Type[K8sConfigParser] = load_config_parser()
+config_parser: type[K8sConfigParser] = load_config_parser()
 
 
 class K8sApp:
     def __init__(self, k8s_object: K8sObject):
         self.k8s_object = k8s_object
         self.metadata: V1ObjectMeta = k8s_object.metadata or V1ObjectMeta()
-        self.attributes: Dict[str, str] = {}
+        self.attributes: dict[str, str] = {}
         self.config: K8sConfig
         self.state: K8sReason = K8sReason.UNKNOWN
         self.setup()
@@ -174,8 +174,8 @@ class K8sApp:
 
     @staticmethod
     def get_app_container(
-        spec: V1PodSpec | None, ignore_containers: Set[str] = set()
-    ) -> Optional[V1Container]:
+        spec: V1PodSpec | None, ignore_containers: set[str] = set()
+    ) -> V1Container | None:
         if spec and spec.containers:
             for container in spec.containers:
                 if container.name not in ignore_containers:
@@ -183,11 +183,11 @@ class K8sApp:
         return None
 
     @staticmethod
-    def get_ignore_containers() -> Set[str]:
+    def get_ignore_containers() -> set[str]:
         return {container["name"] for container in settings.k8s.containers.ignore}
 
     @staticmethod
-    def _labels_to_use() -> Set[str]:
+    def _labels_to_use() -> set[str]:
         return set(settings.k8s.labels)
 
 

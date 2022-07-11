@@ -1,4 +1,4 @@
-from typing import Set
+from __future__ import annotations
 
 import pytest
 
@@ -104,7 +104,7 @@ class TestDataFlowGraph:
         kafka = KafkaAdminClient()
         kafka._enabled = True
 
-        def get_all_topic_names() -> Set[str]:
+        def get_all_topic_names() -> set[str]:
             return {"another-dead-letter-topic", "another-non-matching-topic"}
 
         monkeypatch.setattr(kafka, "get_all_topic_names", get_all_topic_names)

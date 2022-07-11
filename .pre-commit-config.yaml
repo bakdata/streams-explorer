@@ -41,3 +41,9 @@ repos:
         entry: hooks/hook_generate-fetchers.sh
         language: script
         pass_filenames: false
+  - repo: https://github.com/cdce8p/python-typing-update
+    rev: v0.4.2
+    hooks:
+      - id: python-typing-update
+        stages: [manual]
+        args: ["--py310-plus"]

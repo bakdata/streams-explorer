@@ -1,16 +1,17 @@
+from __future__ import annotations
+
 import importlib
 import sys
 from inspect import isclass
 from pathlib import Path
 from types import ModuleType
-from typing import List, Optional, Union
 
 from loguru import logger
 
 from streams_explorer.core.config import settings
 
 
-def load_plugin(base_class: type, all: bool = False) -> Union[type, List[type], None]:
+def load_plugin(base_class: type, all: bool = False) -> type | list[type] | None:
     if not settings.plugins.path:
         return None
     path = Path(settings.plugins.path)
@@ -19,7 +20,7 @@ def load_plugin(base_class: type, all: bool = False) -> Union[type, List[type], 
     modules = []
     for file in path.glob("*.py"):
         module = importlib.import_module(file.stem)
-        plugin_class: Optional[type] = get_class(module, base_class)
+        plugin_class: type | None = get_class(module, base_class)
         if plugin_class is None:
             continue
         logger.info(f"Found {plugin_class} {file}")
@@ -29,7 +30,7 @@ def load_plugin(base_class: type, all: bool = False) -> Union[type, List[type], 
     return modules
 
 
-def get_class(module: ModuleType, base_class: type) -> Optional[type]:
+def get_class(module: ModuleType, base_class: type) -> type | None:
     for name in dir(module):
         attribute = getattr(module, name)
         if (

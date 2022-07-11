@@ -1,39 +1,33 @@
-from typing import Any, List, NamedTuple, Optional, Tuple
+from __future__ import annotations
+
+from typing import Any, NamedTuple
 
 from pydantic import BaseModel, Field
 
 from streams_explorer.models.k8s import K8sReason
 
-GraphNode = Tuple[str, dict]
-GraphEdge = Tuple[str, str]
-
-
-class Icon(BaseModel):
-    img: str
-    show: bool
-    width: int
-    height: int
+GraphNode = tuple[str, dict]
+GraphEdge = tuple[str, str]
 
 
 class Node(BaseModel):
     id: str
     label: str
     node_type: str
-    icon: Optional[Icon]
-    x: Optional[int]
-    y: Optional[int]
+    x: int | None = Field(default=None)
+    y: int | None = Field(default=None)
 
 
 class Metric(BaseModel):
     node_id: str
-    messages_in: Optional[float] = Field(default=None)
-    messages_out: Optional[float] = Field(default=None)
-    consumer_lag: Optional[int] = Field(default=None)
-    consumer_read_rate: Optional[float] = Field(default=None)
-    topic_size: Optional[int] = Field(default=None)
-    replicas: Optional[int] = Field(default=None)
-    replicas_available: Optional[int] = Field(default=None)
-    connector_tasks: Optional[int] = Field(default=None)
+    messages_in: float | None = Field(default=None)
+    messages_out: float | None = Field(default=None)
+    consumer_lag: int | None = Field(default=None)
+    consumer_read_rate: float | None = Field(default=None)
+    topic_size: int | None = Field(default=None)
+    replicas: int | None = Field(default=None)
+    replicas_available: int | None = Field(default=None)
+    connector_tasks: int | None = Field(default=None)
 
 
 class Edge(BaseModel):
@@ -45,13 +39,13 @@ class Graph(BaseModel):
     directed: bool
     multigraph: bool
     graph: Any
-    nodes: List[Node]
-    edges: List[Edge]
+    nodes: list[Node]
+    edges: list[Edge]
 
 
 class ReplicaCount(NamedTuple):
-    ready: Optional[int]
-    total: Optional[int]
+    ready: int | None
+    total: int | None
 
 
 class AppState(BaseModel):

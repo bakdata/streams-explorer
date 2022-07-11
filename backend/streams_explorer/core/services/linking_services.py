@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 from collections import defaultdict
-from typing import Dict, List, Optional, Set
 
 from streams_explorer.core.k8s_app import K8sApp
 from streams_explorer.models.node_information import NodeInfoListItem
@@ -7,11 +8,11 @@ from streams_explorer.models.node_information import NodeInfoListItem
 
 class LinkingService:
     def __init__(self):
-        self.sink_source_redirects: Set[str] = set()
-        self._connector_info: List[NodeInfoListItem] = []
-        self._streaming_app_info: List[NodeInfoListItem] = []
-        self._topic_info: List[NodeInfoListItem] = []
-        self._sink_source_info: Dict[str, List[NodeInfoListItem]] = defaultdict(list)
+        self.sink_source_redirects: set[str] = set()
+        self._connector_info: list[NodeInfoListItem] = []
+        self._streaming_app_info: list[NodeInfoListItem] = []
+        self._topic_info: list[NodeInfoListItem] = []
+        self._sink_source_info: dict[str, list[NodeInfoListItem]] = defaultdict(list)
 
     @property
     def connector_info(self):
@@ -45,19 +46,15 @@ class LinkingService:
     def sink_source_info(self, sink_source_info):
         self._sink_source_info = sink_source_info
 
-    def get_redirect_connector(
-        self, config: dict, link_type: Optional[str]
-    ) -> Optional[str]:
+    def get_redirect_connector(self, config: dict, link_type: str | None) -> str | None:
         pass
 
-    def get_redirect_topic(
-        self, topic_name: str, link_type: Optional[str]
-    ) -> Optional[str]:
+    def get_redirect_topic(self, topic_name: str, link_type: str | None) -> str | None:
         pass
 
     def get_redirect_streaming_app(
-        self, k8s_app: K8sApp, link_type: Optional[str]
-    ) -> Optional[str]:
+        self, k8s_app: K8sApp, link_type: str | None
+    ) -> str | None:
         pass
 
     def get_sink_source_redirects(self, node_type: str, sink_source_name: str):

@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 import asyncio
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Callable, Dict, List, Optional
+from typing import Callable
 
 import httpx
 from loguru import logger
@@ -71,7 +73,7 @@ class PrometheusMetric(Enum):
         return {d["metric"][self._k]: self._v(d["value"][-1]) for d in data}
 
 
-def sort_topics_first(nodes: List[GraphNode]) -> List[GraphNode]:
+def sort_topics_first(nodes: list[GraphNode]) -> list[GraphNode]:
     return sorted(nodes, key=is_topic, reverse=True)
 
 
@@ -81,10 +83,10 @@ def is_topic(node: GraphNode) -> bool:
 
 
 class MetricProvider:
-    def __init__(self, nodes: List[GraphNode]):
-        self._nodes: List[GraphNode] = sort_topics_first(nodes)
-        self._metrics: List[Metric] = []
-        self._data: Dict[str, dict] = {}
+    def __init__(self, nodes: list[GraphNode]):
+        self._nodes: list[GraphNode] = sort_topics_first(nodes)
+        self._metrics: list[Metric] = []
+        self._data: dict[str, dict] = {}
         self._last_refresh: datetime = datetime.min
         self._cache_ttl: timedelta = timedelta(0)
 
@@ -92,7 +94,7 @@ class MetricProvider:
         pass
 
     @staticmethod
-    def get_consumer_group(node_id: str, node: dict) -> Optional[str]:
+    def get_consumer_group(node_id: str, node: dict) -> str | None:
         node_type: NodeTypesEnum = node["node_type"]
         if node_type == NodeTypesEnum.CONNECTOR:
             return f"connect-{node_id}"
@@ -120,7 +122,7 @@ class MetricProvider:
             if node_id
         ]
 
-    async def get(self) -> List[Metric]:
+    async def get(self) -> list[Metric]:
         now = datetime.utcnow()
         cache_age = now - self._last_refresh
         if cache_age > self._cache_ttl:
@@ -136,7 +138,7 @@ class PrometheusException(Exception):
 
 
 class PrometheusMetricProvider(MetricProvider):
-    def __init__(self, nodes: List[GraphNode]):
+    def __init__(self, nodes: list[GraphNode]):
         super().__init__(nodes)
         self._api_base = f"{settings.prometheus.url}/api/v1"
         # min refresh interval (set by the frontend) is 10s, intermediate requests should be cached

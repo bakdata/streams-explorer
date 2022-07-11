@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 from pathlib import Path
-from typing import List
 
 import pytest
 from dynaconf.validator import ValidationError
@@ -52,7 +53,7 @@ def test_load_plugin_linker():
         settings.plugins.path = "./plugins"
 
 
-def get_info_providers(info_list: List[NodeInfoListItem]):
+def get_info_providers(info_list: list[NodeInfoListItem]):
     return [info_item.value for info_item in info_list]
 
 

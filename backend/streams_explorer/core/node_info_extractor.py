@@ -1,4 +1,4 @@
-from typing import Dict, List
+from __future__ import annotations
 
 from loguru import logger
 
@@ -32,8 +32,8 @@ def get_type(value):
 
 
 def get_displayed_info(
-    displayed_info_settings: List[Dict[str, str]], config: dict
-) -> List[NodeInfoListItem]:
+    displayed_info_settings: list[dict[str, str]], config: dict
+) -> list[NodeInfoListItem]:
     node_infos = []
     for item in displayed_info_settings:
         name = item.get("name")
@@ -52,16 +52,16 @@ def get_displayed_info(
     return node_infos
 
 
-def get_displayed_information_connector(config: dict) -> List[NodeInfoListItem]:
+def get_displayed_information_connector(config: dict) -> list[NodeInfoListItem]:
     connector_settings = settings.kafkaconnect.displayed_information
     return get_displayed_info(connector_settings, config)
 
 
-def get_displayed_information_deployment(k8s: K8sApp) -> List[NodeInfoListItem]:
+def get_displayed_information_deployment(k8s: K8sApp) -> list[NodeInfoListItem]:
     k8s_settings = settings.k8s.displayed_information
     return get_displayed_info(k8s_settings, k8s.to_dict())
 
 
-def get_displayed_information_topic(config: dict) -> List[NodeInfoListItem]:
+def get_displayed_information_topic(config: dict) -> list[NodeInfoListItem]:
     kafka_settings = settings.kafka.displayed_information
     return get_displayed_info(kafka_settings, config)

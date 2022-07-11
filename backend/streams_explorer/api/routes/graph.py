@@ -1,4 +1,4 @@
-from typing import Optional
+from __future__ import annotations
 
 from fastapi import APIRouter, Depends, WebSocket
 from fastapi.exceptions import HTTPException
@@ -13,7 +13,7 @@ router = APIRouter()
 
 @router.get("", response_model=Graph)
 async def get_positioned_graph(
-    pipeline_name: Optional[str] = None,
+    pipeline_name: str | None = None,
     streams_explorer: StreamsExplorer = Depends(get_streams_explorer),
 ):
     if pipeline_name:

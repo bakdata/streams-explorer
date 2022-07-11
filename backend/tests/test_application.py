@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 import asyncio
-from typing import List
 
 import pytest
 from fastapi import status
@@ -59,15 +60,15 @@ class TestApplication:
         assert response.content.decode() == ""
 
     @pytest.fixture()
-    def deployments(self) -> List[V1Deployment]:
+    def deployments(self) -> list[V1Deployment]:
         return [APP1, APP2, APP3]
 
     @pytest.fixture()
-    def stateful_sets(self) -> List[V1StatefulSet]:
+    def stateful_sets(self) -> list[V1StatefulSet]:
         return []
 
     @pytest.fixture()
-    def cron_jobs(self) -> List[V1beta1CronJob]:
+    def cron_jobs(self) -> list[V1beta1CronJob]:
         return [V1beta1CronJob(metadata=V1ObjectMeta(name="test"))]
 
     @pytest.mark.asyncio
@@ -75,9 +76,9 @@ class TestApplication:
         self,
         mocker,
         monkeypatch,
-        deployments: List[K8sObject],
-        stateful_sets: List[K8sObject],
-        cron_jobs: List[K8sObject],
+        deployments: list[K8sObject],
+        stateful_sets: list[K8sObject],
+        cron_jobs: list[K8sObject],
     ):
         settings.graph.update_interval = 1
         settings.kafkaconnect.update_interval = 1
@@ -133,7 +134,7 @@ class TestApplication:
         with TestClient(app) as client:
             streams_explorer: StreamsExplorer = app.state.streams_explorer
 
-            def fetch_graph() -> List[str]:
+            def fetch_graph() -> list[str]:
                 response = client.get(f"{API_PREFIX}/graph")
                 return [node["id"] for node in response.json()["nodes"]]
 
@@ -226,9 +227,9 @@ class TestApplication:
         self,
         monkeypatch: MonkeyPatch,
         mocker: MockerFixture,
-        deployments: List[K8sObject],
-        stateful_sets: List[K8sObject],
-        cron_jobs: List[K8sObject],
+        deployments: list[K8sObject],
+        stateful_sets: list[K8sObject],
+        cron_jobs: list[K8sObject],
     ):
         ENDPOINT = "/api/graph/ws"
 

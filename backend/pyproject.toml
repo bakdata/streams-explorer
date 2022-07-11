@@ -26,15 +26,15 @@ classifiers = [
 "Bug Tracker" = "https://github.com/bakdata/streams-explorer/issues"
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.10"
 loguru = "^0.5.3"
 matplotlib = "^3.4.3"
 networkx = "^2.6.3"
 dynaconf = "^3.1.7"
 httpx = "^0.20.0"
-pydantic = "^1.8.2"
+pydantic = "^1.9.1"
 fastapi-utils = "^0.2.1"
-fastapi = "^0.70.0"
+fastapi = "^0.78.0"
 uvicorn = { extras = ["standard"], version = "^0.15.0" }
 pygraphviz = "^1.7"
 confluent-kafka = "^1.9.0"

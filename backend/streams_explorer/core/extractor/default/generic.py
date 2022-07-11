@@ -1,4 +1,4 @@
-from typing import List, Optional
+from __future__ import annotations
 
 from streams_explorer.core.extractor.extractor import Extractor
 from streams_explorer.models.kafka_connector import (
@@ -10,7 +10,7 @@ from streams_explorer.models.kafka_connector import (
 class GenericSink(Extractor):
     def on_connector_info_parsing(
         self, info: dict, connector_name: str
-    ) -> Optional[KafkaConnector]:
+    ) -> KafkaConnector | None:
         if info["type"] == KafkaConnectorTypesEnum.SINK:
             config = info["config"]
             return KafkaConnector(
@@ -31,14 +31,14 @@ class GenericSourceConnector(KafkaConnector):
             type=KafkaConnectorTypesEnum.SOURCE,
         )
 
-    def get_topics(self) -> List[str]:
+    def get_topics(self) -> list[str]:
         return []
 
 
 class GenericSource(Extractor):
     def on_connector_info_parsing(
         self, info: dict, connector_name: str
-    ) -> Optional[KafkaConnector]:
+    ) -> KafkaConnector | None:
         if info["type"] == KafkaConnectorTypesEnum.SOURCE:
             return GenericSourceConnector(name=connector_name, config=info["config"])
         return None

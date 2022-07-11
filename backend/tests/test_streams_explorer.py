@@ -1,4 +1,4 @@
-from typing import Optional, Set
+from __future__ import annotations
 
 import pytest
 from kubernetes_asyncio.client import V1beta1CronJob
@@ -139,12 +139,12 @@ class TestStreamsExplorer:
                 }
             return {}
 
-        def get_topic_partitions(_, topic) -> Optional[dict]:
+        def get_topic_partitions(_, topic) -> dict | None:
             if topic == "input-topic1":
                 return {i: _ for i in range(5)}
             return None
 
-        def get_all_topic_names(_) -> Set[str]:
+        def get_all_topic_names(_) -> set[str]:
             return set()
 
         monkeypatch.setattr(

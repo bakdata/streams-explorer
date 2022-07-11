@@ -1,4 +1,4 @@
-from typing import Type
+from __future__ import annotations
 
 from loguru import logger
 
@@ -7,7 +7,7 @@ from streams_explorer.defaultlinker import DefaultLinker
 from streams_explorer.plugins import load_plugin
 
 
-def load_linker() -> Type[LinkingService]:
+def load_linker() -> type[LinkingService]:
     linker = load_plugin(LinkingService)
     if (
         not linker
