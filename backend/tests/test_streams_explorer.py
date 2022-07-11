@@ -88,6 +88,10 @@ class TestStreamsExplorer:
         self, monkeypatch, deployments, cron_jobs, fake_linker
     ):
         monkeypatch.setattr(settings.kafka, "enable", True)
+        monkeypatch.setattr(
+            "streams_explorer.core.services.kafka_admin_client.KafkaAdminClient._KafkaAdminClient__connect",
+            lambda _: _,
+        )
 
         explorer = StreamsExplorer(
             linking_service=fake_linker, metric_provider=MetricProvider
