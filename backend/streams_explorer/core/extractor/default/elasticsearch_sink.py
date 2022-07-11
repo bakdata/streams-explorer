@@ -13,7 +13,7 @@ class ElasticsearchSink(Extractor):
         self, info: dict, connector_name: str
     ) -> KafkaConnector | None:
         config = info["config"]
-        connector_class = config.get("connector.class")
+        connector_class: str | None = config.get("connector.class")
         if connector_class and "ElasticsearchSinkConnector" in connector_class:
 
             connector = KafkaConnector(
