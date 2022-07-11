@@ -83,7 +83,7 @@ class StreamsExplorer:
         return await self.data_flow.get_metrics()
 
     @ttl_cache(ttl=settings.node_info.cache_ttl)
-    def get_node_information(self, node_id: str):
+    def get_node_information(self, node_id: str) -> NodeInformation | None:
         node_type = self.data_flow.get_node_type(node_id)
 
         if node_type == NodeTypesEnum.CONNECTOR:
