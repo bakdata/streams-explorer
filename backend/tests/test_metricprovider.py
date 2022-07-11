@@ -3,6 +3,8 @@ from datetime import timedelta
 from pathlib import Path
 
 import pytest
+from pytest import MonkeyPatch
+from pytest_mock import MockerFixture
 
 from streams_explorer.core.config import settings
 from streams_explorer.core.services.metric_providers import (
@@ -66,7 +68,9 @@ class TestPrometheusMetricProvider:
         assert MetricProvider.get_consumer_group(node_id, node) == "connect-demo-sink"
 
     @pytest.mark.asyncio
-    async def test_empty_query(self, monkeypatch, metric_provider):
+    async def test_empty_query(
+        self, monkeypatch: MonkeyPatch, metric_provider: MetricProvider
+    ):
         async def mock_query(*_):
             return []
 
@@ -89,7 +93,9 @@ class TestPrometheusMetricProvider:
         ]
 
     @pytest.mark.asyncio
-    async def test_update(self, monkeypatch, metric_provider):
+    async def test_update(
+        self, monkeypatch: MonkeyPatch, metric_provider: MetricProvider
+    ):
         async def mock_pull_metric(_, metric: PrometheusMetric):
             return prometheus_data[metric.metric]
 
@@ -125,7 +131,10 @@ class TestPrometheusMetricProvider:
 
     @pytest.mark.asyncio
     async def test_caching(
-        self, monkeypatch, mocker, metric_provider: PrometheusMetricProvider
+        self,
+        monkeypatch: MonkeyPatch,
+        mocker: MockerFixture,
+        metric_provider: MetricProvider,
     ):
         async def mock_pull_metric(_, metric: PrometheusMetric):
             return prometheus_data[metric.metric]

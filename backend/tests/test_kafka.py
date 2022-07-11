@@ -5,6 +5,7 @@ from dataclasses import dataclass
 import pytest
 from confluent_kafka.admin import ConfigEntry, ConfigResource, PartitionMetadata
 from dynaconf.validator import ValidationError
+from pytest import MonkeyPatch
 
 from streams_explorer.core.config import settings
 from streams_explorer.core.services.kafka_admin_client import KafkaAdminClient
@@ -41,7 +42,7 @@ class TestKafka:
         assert KafkaAdminClient.format_values([]) == {}
 
     @pytest.fixture()
-    def kafka(self, monkeypatch) -> KafkaAdminClient:
+    def kafka(self, monkeypatch: MonkeyPatch) -> KafkaAdminClient:
         kafka = KafkaAdminClient()
 
         def mock_get_resource(resource: ConfigResource, *_) -> list[ConfigEntry]:

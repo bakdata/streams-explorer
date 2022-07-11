@@ -2,15 +2,18 @@ from __future__ import annotations
 
 import pytest
 from kubernetes_asyncio.client import V1beta1CronJob
+from pytest import MonkeyPatch
+from pytest_mock import MockerFixture
 
 from streams_explorer.core.config import settings
 from streams_explorer.core.extractor.default.elasticsearch_sink import ElasticsearchSink
 from streams_explorer.core.extractor.default.generic import GenericSink, GenericSource
 from streams_explorer.core.extractor.extractor import Extractor
-from streams_explorer.core.k8s_app import K8sAppCronJob
+from streams_explorer.core.k8s_app import K8sAppCronJob, K8sObject
 from streams_explorer.core.services import schemaregistry
 from streams_explorer.core.services.dataflow_graph import NodeTypesEnum
 from streams_explorer.core.services.kubernetes import K8sDeploymentUpdate
+from streams_explorer.core.services.linking_services import LinkingService
 from streams_explorer.core.services.metric_providers import MetricProvider
 from streams_explorer.defaultlinker import DefaultLinker
 from streams_explorer.extractors import extractor_container
@@ -85,7 +88,11 @@ class TestStreamsExplorer:
     @pytest.fixture()
     @pytest.mark.asyncio
     async def streams_explorer(  # noqa: C901
-        self, monkeypatch, deployments, cron_jobs, fake_linker
+        self,
+        monkeypatch: MonkeyPatch,
+        deployments: list[K8sObject],
+        cron_jobs: list[K8sObject],
+        fake_linker: LinkingService,
     ):
         monkeypatch.setattr(settings.kafka, "enable", True)
         monkeypatch.setattr(
@@ -198,7 +205,7 @@ class TestStreamsExplorer:
 
     @pytest.mark.asyncio
     async def test_get_node_information(
-        self, streams_explorer: StreamsExplorer, monkeypatch
+        self, monkeypatch: MonkeyPatch, streams_explorer: StreamsExplorer
     ):
         monkeypatch.setattr(
             settings.kafkaconnect,
@@ -465,7 +472,7 @@ class TestStreamsExplorer:
 
     @pytest.mark.asyncio
     async def test_pipeline_graph_caching(
-        self, mocker, streams_explorer: StreamsExplorer
+        self, mocker: MockerFixture, streams_explorer: StreamsExplorer
     ):
         await streams_explorer.watch()
         assert streams_explorer.data_flow.json_pipelines == {}

@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import pytest
+from pytest_mock import MockerFixture
 
 from streams_explorer.core.config import settings
 from streams_explorer.core.services.kafkaconnect import KafkaConnect
@@ -115,7 +116,8 @@ class TestExtractors:
         assert "GenericSink" in extractor_classes
         assert "GenericSource" in extractor_classes
 
-    def test_generic_extractors_fallback(self, mocker):
+    def test_generic_extractors_fallback(self, mocker: MockerFixture):
+
         settings.plugins.extractors.default = True
 
         mocker.patch(
@@ -154,7 +156,7 @@ class TestExtractors:
         assert connectors[1].get_topics() == []
         assert connectors[1].get_error_topic() is None
 
-    def test_extractors_topics_none(self, mocker):
+    def test_extractors_topics_none(self, mocker: MockerFixture):
         mocker.patch(
             "streams_explorer.core.services.kafkaconnect.KafkaConnect.get_connector_info",
             lambda _: EMPTY_CONNECTOR_INFO,

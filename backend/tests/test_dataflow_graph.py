@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import pytest
+from pytest import MonkeyPatch
 
 from streams_explorer.core.config import settings
 from streams_explorer.core.k8s_app import ATTR_PIPELINE, K8sApp
@@ -100,7 +101,7 @@ class TestDataFlowGraph:
         assert df.graph.has_edge("test-app2", "output-topic2")
         assert df.graph.has_edge("test-app2", "fake2-dead-letter-topic")
 
-    def test_resolve_input_patterns_for_topics_in_kafka(self, monkeypatch):
+    def test_resolve_input_patterns_for_topics_in_kafka(self, monkeypatch: MonkeyPatch):
         kafka = KafkaAdminClient()
         kafka._enabled = True
 

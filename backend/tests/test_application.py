@@ -74,8 +74,8 @@ class TestApplication:
     @pytest.mark.asyncio
     async def test_update_every_x_seconds(
         self,
-        mocker,
-        monkeypatch,
+        mocker: MockerFixture,
+        monkeypatch: MonkeyPatch,
         deployments: list[K8sObject],
         stateful_sets: list[K8sObject],
         cron_jobs: list[K8sObject],
@@ -209,7 +209,7 @@ class TestApplication:
             assert len(nodes) == 9
 
     @pytest.mark.asyncio
-    async def test_pipeline_not_found(self, monkeypatch):
+    async def test_pipeline_not_found(self, monkeypatch: MonkeyPatch):
         from main import app
 
         monkeypatch.setattr(StreamsExplorer, "setup", mock_setup)
