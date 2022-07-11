@@ -301,21 +301,14 @@ const GraphVisualization = ({
           if (!data.replicas[0]) {
             graph.updateItem(node, {
               style: {
-                fill: "#AAAAAA", // grey
-              },
-              labelCfg: {
-                style: {
-                  fill: "grey",
-                },
+                fill: "#e2e5ee", // grey
               },
             });
           } else {
-            const defaultLabelCfg = config?.defaultNode?.labelCfg;
             graph.updateItem(node, {
               style: {
-                fill: Global.defaultNode.style.fill,
+                fill: "#fff",
               },
-              labelCfg: defaultLabelCfg as any,
             });
           }
         }
