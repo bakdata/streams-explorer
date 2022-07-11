@@ -19,6 +19,7 @@ import React, {
 import { Graph as Data, Metric } from "./api/fetchers";
 import Node from "./Node";
 import "./TopicNode";
+import "./AppNode";
 import "./DashedEdge";
 
 export const isBrowser = typeof window !== "undefined"; // disable SSR
@@ -329,9 +330,29 @@ const GraphVisualization = ({
     let nodes = data["nodes"];
 
     nodes?.forEach((node: any) => {
-      node.type = node.node_type.includes("topic")
+      // variant 1
+      node.type = node.node_type === "streaming-app"
+        ? "AppNode"
+        : "TopicNode";
+
+      // variant 2
+      /* node.type = node.node_type.includes("topic")
         ? "TopicNode"
-        : "modelRect";
+        : "AppNode"; */
+
+      // variant 3 (complex)
+      /* switch (node.node_type) {
+        case "topic" || "error-topic":
+          node.type = "TopicNode";
+          break;
+
+        case "streaming-app":
+          node.type = "AppNode";
+          break;
+
+        default:
+          break;
+      } */
     });
 
     currentGraph.data(data as GraphData);

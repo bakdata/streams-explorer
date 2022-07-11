@@ -1,0 +1,431 @@
+import { IGroup, IShape } from "@antv/g-base";
+import G6 from "@antv/g6";
+import {
+  BaseGlobal as Global,
+  Item,
+  NodeConfig,
+  ShapeOptions,
+  ShapeStyle,
+} from "@antv/g6-core";
+import { isString, mix } from "@antv/util";
+
+/* Custom G6 node to display applications
+ * based on builtin modelRect node
+ * https://github.com/antvis/G6/blob/4.6.15/packages/element/src/nodes/modelRect.ts
+ */
+
+G6.registerNode(
+  "AppNode",
+  {
+    options: {
+      size: [120, 50],
+      style: {
+        radius: 5,
+        stroke: "#000000", // border
+        fill: "#ffffff",
+        lineWidth: Global.defaultNode.style.lineWidth,
+        fillOpacity: 1,
+      },
+      labelCfg: {
+        style: {
+          fill: "#000000",
+          fontSize: 14,
+          fontFamily: Global.windowFontFamily,
+        },
+        offset: 0,
+      },
+      descriptionCfg: {
+        style: {
+          fontSize: 12,
+          fill: "#bfbfbf",
+          fontFamily: Global.windowFontFamily,
+        },
+        paddingTop: 0,
+      },
+      logoIcon: {
+        show: true,
+        x: 0,
+        y: 0,
+        img:
+          "https://gw.alipayobjects.com/zos/basement_prod/4f81893c-1806-4de4-aff3-9a6b266bc8a2.svg",
+        width: 16,
+        height: 16,
+        offset: 0,
+      },
+      stateIcon: {
+        show: true,
+        x: 0,
+        y: 0,
+        img:
+          "https://gw.alipayobjects.com/zos/basement_prod/300a2523-67e0-4cbf-9d4a-67c077b40395.svg",
+        width: 16,
+        height: 16,
+        offset: -5,
+      },
+      // anchorPoints: [{ x: 0, y: 0.5 }, { x: 1, y: 0.5 }]
+      anchorPoints: [
+        [0, 0.5],
+        [1, 0.5],
+      ],
+    },
+    shapeType: "modelRect",
+    labelPosition: "center", // TODO
+    drawShape(cfg: NodeConfig, group: IGroup): IShape {
+      const style = this.getShapeStyle!(cfg);
+
+      const keyShape = group.addShape("rect", {
+        attrs: style,
+        className: `${this.type}-keyShape`,
+        name: `${this.type}-keyShape`,
+        draggable: true,
+      });
+      group["shapeMap"][`${this.type}-keyShape`] = keyShape;
+
+      // TODO: enable
+      // (this as any).drawLogoIcon(cfg, group);
+      // (this as any).drawStateIcon(cfg, group);
+
+      return keyShape;
+    },
+    drawLogoIcon(cfg: NodeConfig, group: IGroup) {
+      const { logoIcon = {} } = this.mergeStyle
+        || this.getOptions(cfg) as NodeConfig;
+      const size = (this as ShapeOptions).getSize!(cfg);
+      const width = size[0];
+
+      if (logoIcon.show) {
+        const { width: w, height: h, x, y, offset, text, ...logoIconStyle } =
+          logoIcon;
+        if (text) {
+          group["shapeMap"]["rect-logo-icon"] = group.addShape("text", {
+            attrs: {
+              x: 0,
+              y: 0,
+              fontSize: 12,
+              fill: "#000",
+              stroke: "#000",
+              textBaseline: "middle",
+              textAlign: "center",
+              ...logoIconStyle,
+            },
+            className: "rect-logo-icon",
+            name: "rect-logo-icon",
+            draggable: true,
+          });
+        } else {
+          group["shapeMap"]["rect-logo-icon"] = group.addShape("image", {
+            attrs: {
+              ...logoIconStyle,
+              x: x || -width / 2 + (w as number) + (offset as number),
+              y: y || -(h as number) / 2,
+              width: w,
+              height: h,
+            },
+            className: "rect-logo-icon",
+            name: "rect-logo-icon",
+            draggable: true,
+          });
+        }
+      }
+    },
+    drawStateIcon(cfg: NodeConfig, group: IGroup) {
+      const { stateIcon = {} } = this.mergeStyle
+        || this.getOptions(cfg) as NodeConfig;
+      const size = (this as ShapeOptions).getSize!(cfg);
+      const width = size[0];
+
+      if (stateIcon.show) {
+        const { width: w, height: h, x, y, offset, text, ...iconStyle } =
+          stateIcon;
+        if (text) {
+          group["shapeMap"]["rect-state-icon"] = group.addShape("text", {
+            attrs: {
+              x: 0,
+              y: 0,
+              fontSize: 12,
+              fill: "#000",
+              stroke: "#000",
+              textBaseline: "middle",
+              textAlign: "center",
+              ...iconStyle,
+            },
+            className: "rect-state-icon",
+            name: "rect-state-icon",
+            draggable: true,
+          });
+        } else {
+          group["shapeMap"]["rect-state-icon"] = group.addShape("image", {
+            attrs: {
+              ...iconStyle,
+              x: x || width / 2 - (w as number) + (offset as number),
+              y: y || -(h as number) / 2,
+              width: w,
+              height: h,
+            },
+            className: "rect-state-icon",
+            name: "rect-state-icon",
+            draggable: true,
+          });
+        }
+      }
+    },
+    drawLabel(cfg: NodeConfig, group: IGroup): IShape {
+      const { labelCfg = {}, logoIcon = {}, descriptionCfg = {} } = this
+        .getOptions(
+          cfg
+        ) as NodeConfig;
+
+      let label = null;
+
+      const size = (this as ShapeOptions).getSize!(cfg);
+      const width = size[0];
+      const height = size[1];
+
+      const { show, width: w } = logoIcon;
+      let offsetX = -width / 2 + labelCfg.offset;
+
+      if (show) {
+        offsetX += w as number;
+      }
+
+      const { style: fontStyle } = labelCfg;
+      const { style: descriptionStyle, paddingTop: descriptionPaddingTop } =
+        descriptionCfg;
+
+      if (isString(cfg.description)) {
+        label = group.addShape("text", {
+          attrs: {
+            ...fontStyle,
+            x: offsetX,
+            y: -5,
+            text: cfg.label,
+          },
+          className: "text-shape",
+          name: "text-shape",
+          draggable: true,
+          labelRelated: true,
+        });
+        group["shapeMap"]["text-shape"] = label;
+
+        group["shapeMap"]["rect-description"] = group.addShape("text", {
+          attrs: {
+            ...descriptionStyle,
+            x: offsetX,
+            y: 17 + ((descriptionPaddingTop as any) || 0),
+            text: cfg.description,
+          },
+          className: "rect-description",
+          name: "rect-description",
+          draggable: true,
+          labelRelated: true,
+        });
+      } else {
+        label = group.addShape("text", {
+          attrs: {
+            ...fontStyle,
+            // x: offsetX,
+            y: height / 2 + 18,
+            text: cfg.label,
+            textAlign: "center",
+          },
+          className: "text-shape",
+          name: "text-shape",
+          draggable: true,
+          labelRelated: true,
+        });
+        group["shapeMap"]["text-shape"] = label;
+      }
+      return label;
+    },
+    getShapeStyle(cfg: NodeConfig) {
+      const { style: defaultStyle } = this.mergeStyle
+        || this.getOptions(cfg) as NodeConfig;
+      const strokeStyle: ShapeStyle = {
+        stroke: cfg.color,
+      };
+      const style: ShapeStyle = mix({}, defaultStyle, strokeStyle);
+      const size = (this as ShapeOptions).getSize!(cfg);
+      const width = style.width || size[0];
+      const height = style.height || size[1];
+      const styles = {
+        x: -width / 2,
+        y: -height / 2,
+        width,
+        height,
+        ...style,
+      };
+      return styles;
+    },
+    update(cfg: NodeConfig, item: Item) {
+      const { style = {}, labelCfg = {}, descriptionCfg = {} } = this.mergeStyle
+        || this.getOptions(cfg) as NodeConfig;
+      const size = (this as ShapeOptions).getSize!(cfg);
+      const width = size[0];
+      const height = size[1];
+      const keyShape = item.get("keyShape");
+      keyShape.attr({
+        ...style,
+        x: -width / 2,
+        y: -height / 2,
+        width,
+        height,
+      });
+
+      const group = item.getContainer();
+
+      const logoIconShape = group["shapeMap"]["rect-logo-icon"]
+        || group.find((element) =>
+          element.get("className") === "rect-logo-icon"
+        );
+      const currentLogoIconAttr = logoIconShape ? logoIconShape.attr() : {};
+
+      const logoIcon = mix({}, currentLogoIconAttr, cfg.logoIcon);
+
+      let { width: w } = logoIcon;
+      if (w === undefined) {
+        w = (this as any).options.logoIcon.width;
+      }
+      const show = cfg.logoIcon ? cfg.logoIcon.show : undefined;
+
+      const { offset } = labelCfg;
+      let offsetX = -width / 2 + w + offset;
+
+      if (!show && show !== undefined) {
+        offsetX = -width / 2 + offset;
+      }
+
+      const label = group["shapeMap"]["node-label"]
+        || group.find((element) => element.get("className") === "node-label");
+      const description = group["shapeMap"]["rect-description"]
+        || group.find((element) =>
+          element.get("className") === "rect-description"
+        );
+      if (cfg.label) {
+        if (!label) {
+          group["shapeMap"]["node-label"] = group.addShape("text", {
+            attrs: {
+              ...labelCfg.style,
+              x: offsetX,
+              y: cfg.description ? -5 : 7,
+              text: cfg.label,
+            },
+            className: "node-label",
+            name: "node-label",
+            draggable: true,
+            labelRelated: true,
+          });
+        } else {
+          const cfgStyle = cfg.labelCfg ? cfg.labelCfg.style : {};
+          const labelStyle = mix({}, label.attr(), cfgStyle);
+          if (cfg.label) labelStyle.text = cfg.label;
+          labelStyle.x = offsetX;
+          if (isString(cfg.description)) labelStyle.y = -5;
+          if (description) {
+            description.resetMatrix();
+            description.attr({
+              x: offsetX,
+            });
+          }
+          label.resetMatrix();
+          label.attr(labelStyle);
+        }
+      }
+      if (isString(cfg.description)) {
+        const { paddingTop } = descriptionCfg;
+        if (!description) {
+          group["shapeMap"]["rect-description"] = group.addShape("text", {
+            attrs: {
+              ...descriptionCfg.style,
+              x: offsetX,
+              y: 17 + ((paddingTop as any) || 0),
+              text: cfg.description,
+            },
+            className: "rect-description",
+            name: "rect-description",
+            draggable: true,
+            labelRelated: true,
+          });
+        } else {
+          const cfgStyle = cfg.descriptionCfg ? cfg.descriptionCfg.style : {};
+          const descriptionStyle = mix({}, description.attr(), cfgStyle);
+          if (isString(cfg.description)) {
+            descriptionStyle.text = cfg.description;
+          }
+          descriptionStyle.x = offsetX;
+          description.resetMatrix();
+          description.attr({
+            ...descriptionStyle,
+            y: 17 + ((paddingTop as any) || 0),
+          });
+        }
+      }
+
+      const preRectShape = group["shapeMap"]["pre-rect"]
+        || group.find((element) => element.get("className") === "pre-rect");
+      if (preRectShape && !preRectShape.destroyed) {
+        const preRect = mix({}, preRectShape.attr(), cfg.preRect);
+        preRectShape.attr({
+          ...preRect,
+          x: -width / 2,
+          y: -height / 2,
+          height,
+        });
+      }
+
+      if (logoIconShape && !logoIconShape.destroyed) {
+        if (!show && show !== undefined) {
+          logoIconShape.remove();
+          delete group["shapeMap"]["pre-rect"];
+        } else {
+          const {
+            width: logoW,
+            height: h,
+            x,
+            y,
+            offset: logoOffset,
+            ...logoIconStyle
+          } = logoIcon;
+          logoIconShape.attr({
+            ...logoIconStyle,
+            x: x || -width / 2 + logoW + logoOffset,
+            y: y || -h / 2,
+            width: logoW,
+            height: h,
+          });
+        }
+      } else if (show) {
+        (this as any).drawLogoIcon(cfg, group);
+      }
+
+      const stateIconShape = group["shapeMap"]["rect-state-icon"] || group.find(
+        (element) => element.get("className") === "rect-state-icon"
+      );
+      const currentStateIconAttr = stateIconShape ? stateIconShape.attr() : {};
+      const stateIcon = mix({}, currentStateIconAttr, cfg.stateIcon);
+      if (stateIconShape) {
+        if (!stateIcon.show && stateIcon.show !== undefined) {
+          stateIconShape.remove();
+          delete group["shapeMap"]["rect-state-icon"];
+        }
+        const {
+          width: stateW,
+          height: h,
+          x,
+          y,
+          offset: stateOffset,
+          ...stateIconStyle
+        } = stateIcon;
+        stateIconShape.attr({
+          ...stateIconStyle,
+          x: x || width / 2 - stateW + stateOffset,
+          y: y || -h / 2,
+          width: stateW,
+          height: h,
+        });
+      } else if (stateIcon.show) {
+        (this as any).drawStateIcon(cfg, group);
+      }
+    },
+  },
+  "single-node"
+);
