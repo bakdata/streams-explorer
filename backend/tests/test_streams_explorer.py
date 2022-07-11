@@ -117,7 +117,7 @@ class TestStreamsExplorer:
                         "topics": "output-topic1,output-topic2",
                         "transforms": "changeTopic",
                         "transforms.changeTopic.type": "org.apache.kafka.connect.transforms.RegexRouter",
-                        "transforms.changeTopic.regex": ".*",
+                        "transforms.changeTopic.regex": "^.*",
                         "transforms.changeTopic.replacement": "fake-index",
                         "errors.deadletterqueue.topic.name": "es-sink-connector-dead-letter-topic",
                     },
