@@ -78,10 +78,7 @@ class KafkaConnect:
         out = []
         for name in connectors:
             info = KafkaConnect.get_connector_info(name)
-            connector: None | (
-                KafkaConnector
-            ) = extractor_container.on_connector_info_parsing(info, name)
-            if connector:
+            if connector := extractor_container.on_connector_info_parsing(info, name):
                 out.append(connector)
             else:
                 logger.warning("Failed to parse connector {}", name)
