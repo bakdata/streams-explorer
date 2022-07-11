@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 
 class K8sResource(NamedTuple):
     resource: Callable
-    return_type: type
+    return_type: type | None
     callback: Callable
     delay: int = 0
 

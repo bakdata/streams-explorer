@@ -13,12 +13,12 @@ class ClientManager:
 
     async def connect(self, websocket: WebSocket):
         await websocket.accept()
-        logger.info("WebSocket client {} connected", websocket.client.host)
+        logger.info("WebSocket client {} connected", websocket.client)
         self._clients.append(websocket)
 
     async def disconnect(self, websocket: WebSocket):
         await websocket.close()
-        logger.info("WebSocket client {} disconnected", websocket.client.host)
+        logger.info("WebSocket client {} disconnected", websocket.client)
         self._clients.remove(websocket)
 
     async def send(self, websocket: WebSocket, obj: BaseModel):
