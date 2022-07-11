@@ -1,9 +1,10 @@
 import { IGroup, IShape } from "@antv/g-base";
+import G6 from "@antv/g6";
 import {
   Item,
   ModelConfig,
   NodeConfig,
-  registerNode,
+  ShapeOptions,
   ShapeStyle,
   UpdateType,
 } from "@antv/g6-core";
@@ -14,7 +15,7 @@ import { deepMix } from "@antv/util";
  * https://github.com/antvis/G6/blob/master/packages/element/src/nodes/circle.ts
  */
 
-registerNode(
+G6.registerNode(
   "MetricCustomNode",
   {
     options: {
@@ -41,7 +42,7 @@ registerNode(
     labelPosition: "center",
     drawShape(cfg?: ModelConfig, group?: IGroup): IShape {
       const style = (this as any).getShapeStyle!(cfg);
-      const name = `${(this as any).type}-keyShape`;
+      const name = `${(this as ShapeOptions).type}-keyShape`;
       const keyShape: IShape = group!.addShape("circle", {
         attrs: style,
         className: name,
@@ -49,13 +50,14 @@ registerNode(
         draggable: true,
       });
 
-      const icon = (this as any).options.icon;
-      const iconName = `${(this as any).type}-icon`;
+      const options = (this as ShapeOptions).options!;
+      const icon = (options as NodeConfig).icon!;
+      const iconName = `${(this as ShapeOptions).type}-icon`;
       const iconImg = cfg!.node_type + ".svg";
       group!.addShape("image", {
         attrs: {
-          x: -icon.width / 2,
-          y: -icon.height / 2,
+          x: -icon.width! / 2,
+          y: -icon.height! / 2,
           img: iconImg,
           ...icon,
         },
