@@ -17,9 +17,9 @@ import React, {
   useState,
 } from "react";
 import { Graph as Data, Metric } from "./api/fetchers";
-import "./DashedEdge";
-import "./MetricCustomNode";
 import Node from "./Node";
+import "./TopicNode";
+import "./DashedEdge";
 
 export const isBrowser = typeof window !== "undefined"; // disable SSR
 
@@ -330,7 +330,7 @@ const GraphVisualization = ({
 
     nodes?.forEach((node: any) => {
       node.type = node.node_type.includes("topic")
-        ? "MetricCustomNode"
+        ? "TopicNode"
         : "modelRect";
     });
 

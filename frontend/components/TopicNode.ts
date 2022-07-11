@@ -10,13 +10,13 @@ import {
 } from "@antv/g6-core";
 import { deepMix } from "@antv/util";
 
-/* Custom G6 node to display metrics
+/* Custom G6 node to display topics
  * based on builtin circle node
- * https://github.com/antvis/G6/blob/master/packages/element/src/nodes/circle.ts
+ * https://github.com/antvis/G6/blob/4.6.15/packages/element/src/nodes/circle.ts
  */
 
 G6.registerNode(
-  "MetricCustomNode",
+  "TopicNode",
   {
     options: {
       style: {
