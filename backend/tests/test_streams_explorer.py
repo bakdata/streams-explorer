@@ -490,7 +490,7 @@ class TestStreamsExplorer:
             "pipeline2"
         )
         # verify caching works, pipeline graph is only calculated once
-        calc_function.assert_called_once()
+        assert calc_function.call_count == 1
 
         streams_explorer.data_flow.reset()
         assert not streams_explorer.data_flow.json_pipelines

@@ -170,7 +170,7 @@ class TestExtractors:
             extractor_container, "on_connector_info_parsing"
         )
         KafkaConnect.connectors()
-        on_connector_info_parsing.assert_called_once()
+        assert on_connector_info_parsing.call_count == 1
 
     def test_elasticsearch_sink(self):
         from streams_explorer.core.extractor.default.elasticsearch_sink import (
