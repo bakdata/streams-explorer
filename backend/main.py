@@ -1,6 +1,9 @@
 import uvicorn as uvicorn
 from fastapi_utils.tasks import repeat_every
 
+from streams_explorer.api.dependencies.streams_explorer import (
+    get_streams_explorer_from_state,
+)
 from streams_explorer.application import get_application
 from streams_explorer.core.config import settings
 from streams_explorer.default import setup_default
@@ -12,20 +15,23 @@ app.add_event_handler("startup", setup_default(app))
 
 @app.on_event("startup")
 async def watch():
-    await app.state.streams_explorer.watch()
+    streams_explorer = get_streams_explorer_from_state(app)
+    await streams_explorer.watch()
 
 
 @app.on_event("startup")
 @repeat_every(seconds=settings.graph.update_interval)
 async def update_graph():
-    await app.state.streams_explorer.update_graph()
+    streams_explorer = get_streams_explorer_from_state(app)
+    await streams_explorer.update_graph()
 
 
 @app.on_event("startup")
 @repeat_every(seconds=settings.kafkaconnect.update_interval)
 async def update_connectors():
     if settings.kafkaconnect.url:
-        app.state.streams_explorer.update_connectors()
+        streams_explorer = get_streams_explorer_from_state(app)
+        streams_explorer.update_connectors()
 
 
 def start():
