@@ -3,6 +3,7 @@ import G6 from "@antv/g6";
 import {
   BaseGlobal as Global,
   Item,
+  ModelConfig,
   NodeConfig,
   ShapeOptions,
   ShapeStyle,
@@ -63,25 +64,26 @@ G6.registerNode(
     },
     shapeType: "modelRect",
     labelPosition: "center", // TODO
-    drawShape(cfg: NodeConfig, group: IGroup): IShape {
-      const style = this.getShapeStyle!(cfg);
+    drawShape(cfg?: ModelConfig, group?: IGroup): IShape {
+      const style = (this as any).getShapeStyle!(cfg);
+      const name = `${(this as ShapeOptions).type}-keyShape`;
 
-      const keyShape = group.addShape("rect", {
+      const keyShape = group!.addShape("rect", {
         attrs: style,
-        className: `${this.type}-keyShape`,
-        name: `${this.type}-keyShape`,
+        className: name,
+        name: name,
         draggable: true,
       });
-      group["shapeMap"][`${this.type}-keyShape`] = keyShape;
+      (group as any)["shapeMap"][name] = keyShape;
 
       (this as any).drawLogoIcon(cfg, group);
       (this as any).drawStateIcon(cfg, group);
-      (this as any).drawMetricsLabel(cfg, group);
+      (this as any).drawMetricsLabel(group);
 
       return keyShape;
     },
-    drawMetricsLabel(cfg: NodeConfig, group: IGroup) {
-      group["shapeMap"]["metric-label"] = group.addShape("text", {
+    drawMetricsLabel(group: IGroup) {
+      (group as any)["shapeMap"]["metric-label"] = group.addShape("text", {
         attrs: {
           textBaseline: "top",
           y: 50,
@@ -95,8 +97,8 @@ G6.registerNode(
       });
     },
     drawLogoIcon(cfg: NodeConfig, group: IGroup) {
-      const { logoIcon = {} } = this.mergeStyle
-        || this.getOptions(cfg) as NodeConfig;
+      const { logoIcon = {} } = (this as any).mergeStyle
+        || (this as any).getOptions(cfg) as NodeConfig;
       const size = (this as ShapeOptions).getSize!(cfg);
       const width = size[0];
 
@@ -104,7 +106,7 @@ G6.registerNode(
         const { width: w, height: h, x, y, offset, text, ...logoIconStyle } =
           logoIcon;
         const iconImg = cfg!.node_type + ".svg";
-        group["shapeMap"]["rect-logo-icon"] = group.addShape("image", {
+        (group as any)["shapeMap"]["rect-logo-icon"] = group.addShape("image", {
           attrs: {
             ...logoIconStyle,
             x: -width / 2 + (offset as number),
@@ -120,8 +122,8 @@ G6.registerNode(
       }
     },
     drawStateIcon(cfg: NodeConfig, group: IGroup) {
-      const { stateIcon = {} } = this.mergeStyle
-        || this.getOptions(cfg) as NodeConfig;
+      const { stateIcon = {} } = (this as any).mergeStyle
+        || (this as any).getOptions(cfg) as NodeConfig;
       const size = (this as ShapeOptions).getSize!(cfg);
       const width = size[0];
 
@@ -129,42 +131,49 @@ G6.registerNode(
         const { width: w, height: h, x, y, offset, text, ...iconStyle } =
           stateIcon;
         if (text) {
-          group["shapeMap"]["rect-state-icon"] = group.addShape("text", {
-            attrs: {
-              x: 0,
-              y: 0,
-              fontSize: 12,
-              fill: "#000",
-              stroke: "#000",
-              textBaseline: "middle",
-              textAlign: "center",
-              ...iconStyle,
-            },
-            className: "rect-state-icon",
-            name: "rect-state-icon",
-            draggable: true,
-          });
+          (group as any)["shapeMap"]["rect-state-icon"] = group.addShape(
+            "text",
+            {
+              attrs: {
+                x: 0,
+                y: 0,
+                fontSize: 12,
+                fill: "#000",
+                stroke: "#000",
+                textBaseline: "middle",
+                textAlign: "center",
+                ...iconStyle,
+              },
+              className: "rect-state-icon",
+              name: "rect-state-icon",
+              draggable: true,
+            }
+          );
         } else {
-          group["shapeMap"]["rect-state-icon"] = group.addShape("image", {
-            attrs: {
-              ...iconStyle,
-              x: x || width / 2 - (w as number) + (offset as number),
-              y: y || -(h as number) / 2,
-              width: w,
-              height: h,
-            },
-            className: "rect-state-icon",
-            name: "rect-state-icon",
-            draggable: true,
-          });
+          (group as any)["shapeMap"]["rect-state-icon"] = group.addShape(
+            "image",
+            {
+              attrs: {
+                ...iconStyle,
+                x: x || width / 2 - (w as number) + (offset as number),
+                y: y || -(h as number) / 2,
+                width: w,
+                height: h,
+              },
+              className: "rect-state-icon",
+              name: "rect-state-icon",
+              draggable: true,
+            }
+          );
         }
       }
     },
-    drawLabel(cfg: NodeConfig, group: IGroup): IShape {
-      const { labelCfg = {}, logoIcon = {}, descriptionCfg = {} } = this
-        .getOptions(
-          cfg
-        ) as NodeConfig;
+    drawLabel(cfg: ModelConfig, group: IGroup): IShape {
+      const { labelCfg = {}, logoIcon = {}, descriptionCfg = {} } =
+        (this as any)
+          .getOptions(
+            cfg
+          ) as NodeConfig;
 
       let label = null;
 
@@ -173,7 +182,7 @@ G6.registerNode(
       const height = size[1];
 
       const { show, width: w } = logoIcon;
-      let offsetX = -width / 2 + labelCfg.offset;
+      let offsetX = -width / 2 + labelCfg.offset!;
 
       if (show) {
         offsetX += w as number;
@@ -196,20 +205,23 @@ G6.registerNode(
           draggable: true,
           labelRelated: true,
         });
-        group["shapeMap"]["text-shape"] = label;
+        (group as any)["shapeMap"]["text-shape"] = label;
 
-        group["shapeMap"]["rect-description"] = group.addShape("text", {
-          attrs: {
-            ...descriptionStyle,
-            x: offsetX,
-            y: 17 + ((descriptionPaddingTop as any) || 0),
-            text: cfg.description,
-          },
-          className: "rect-description",
-          name: "rect-description",
-          draggable: true,
-          labelRelated: true,
-        });
+        (group as any)["shapeMap"]["rect-description"] = group.addShape(
+          "text",
+          {
+            attrs: {
+              ...descriptionStyle,
+              x: offsetX,
+              y: 17 + ((descriptionPaddingTop as any) || 0),
+              text: cfg.description,
+            },
+            className: "rect-description",
+            name: "rect-description",
+            draggable: true,
+            labelRelated: true,
+          }
+        );
       } else {
         label = group.addShape("text", {
           attrs: {
@@ -224,13 +236,13 @@ G6.registerNode(
           draggable: true,
           labelRelated: true,
         });
-        group["shapeMap"]["text-shape"] = label;
+        (group as any)["shapeMap"]["text-shape"] = label;
       }
       return label;
     },
     getShapeStyle(cfg: NodeConfig) {
-      const { style: defaultStyle } = this.mergeStyle
-        || this.getOptions(cfg) as NodeConfig;
+      const { style: defaultStyle } = (this as any).mergeStyle
+        || (this as any).getOptions(cfg) as NodeConfig;
       const strokeStyle: ShapeStyle = {
         stroke: cfg.color,
       };
@@ -247,9 +259,10 @@ G6.registerNode(
       };
       return styles;
     },
-    update(cfg: NodeConfig, item: Item) {
-      const { style = {}, labelCfg = {}, descriptionCfg = {} } = this.mergeStyle
-        || this.getOptions(cfg) as NodeConfig;
+    update(cfg: ModelConfig, item: Item) {
+      const { style = {}, labelCfg = {}, descriptionCfg = {} } =
+        (this as any).mergeStyle
+        || (this as any).getOptions(cfg) as NodeConfig;
       const size = (this as ShapeOptions).getSize!(cfg);
       const width = size[0];
       const height = size[1];
@@ -265,7 +278,7 @@ G6.registerNode(
       const group = item.getContainer();
 
       // update metric
-      const metricLabelShape = group["shapeMap"]["metric-label"]
+      const metricLabelShape = (group as any)["shapeMap"]["metric-label"]
         || group.find(
           (element) => element.get("className") === "metric-label"
         );
@@ -273,7 +286,7 @@ G6.registerNode(
       metric.text = cfg.metric;
       metricLabelShape.attr(metric);
 
-      const logoIconShape = group["shapeMap"]["rect-logo-icon"]
+      const logoIconShape = (group as any)["shapeMap"]["rect-logo-icon"]
         || group.find((element) =>
           element.get("className") === "rect-logo-icon"
         );
@@ -285,7 +298,7 @@ G6.registerNode(
       if (w === undefined) {
         w = (this as any).options.logoIcon.width;
       }
-      const show = cfg.logoIcon ? cfg.logoIcon.show : undefined;
+      const show = cfg.logoIcon ? (cfg as any).logoIcon.show : undefined;
 
       const { offset } = labelCfg;
       let offsetX = -width / 2 + w + offset;
@@ -294,9 +307,9 @@ G6.registerNode(
         offsetX = -width / 2 + offset;
       }
 
-      const label = group["shapeMap"]["node-label"]
+      const label = (group as any)["shapeMap"]["node-label"]
         || group.find((element) => element.get("className") === "node-label");
-      const description = group["shapeMap"]["rect-description"]
+      const description = (group as any)["shapeMap"]["rect-description"]
         || group.find((element) =>
           element.get("className") === "rect-description"
         );
@@ -385,15 +398,16 @@ G6.registerNode(
         (this as any).drawLogoIcon(cfg, group);
       } */
 
-      const stateIconShape = group["shapeMap"]["rect-state-icon"] || group.find(
-        (element) => element.get("className") === "rect-state-icon"
-      );
+      const stateIconShape = (group as any)["shapeMap"]["rect-state-icon"]
+        || group.find(
+          (element) => element.get("className") === "rect-state-icon"
+        );
       const currentStateIconAttr = stateIconShape ? stateIconShape.attr() : {};
       const stateIcon = mix({}, currentStateIconAttr, cfg.stateIcon);
       if (stateIconShape) {
         if (!stateIcon.show && stateIcon.show !== undefined) {
           stateIconShape.remove();
-          delete group["shapeMap"]["rect-state-icon"];
+          delete (group as any)["shapeMap"]["rect-state-icon"];
         }
         const {
           width: stateW,
