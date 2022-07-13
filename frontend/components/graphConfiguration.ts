@@ -27,6 +27,7 @@ export const graphConfig: GraphOptions = {
     // highlight Nodes on hover and when selected
     hover: {
       fill: "lightsteelblue",
+      fillOpacity: 1,
     },
     click: {
       fill: "#fff",
