@@ -301,9 +301,9 @@ const GraphVisualization = ({
           if (data.state !== "Unknown") {
             graph.updateItem(node, {
               style: {
+                stroke: "#ff2825",
                 fill: "#ffe5e4",
                 // fill: "#f3b5ba", // red
-                stroke: "#ff2825",
               },
               stateIcon: {
                 img: "state-error.svg",
@@ -312,6 +312,7 @@ const GraphVisualization = ({
           } else if (!data.replicas[0]) {
             graph.updateItem(node, {
               style: {
+                stroke: "#000",
                 fill: "#e2e5ee", // grey
               },
               stateIcon: {
