@@ -10,7 +10,7 @@ export const graphConfig: GraphOptions = {
     default: ["drag-canvas", "zoom-canvas", "click-select"],
   },
   defaultNode: {
-    type: "TopicNode",
+    type: "GenericNode",
   },
   defaultEdge: {
     type: "cubic-horizontal",

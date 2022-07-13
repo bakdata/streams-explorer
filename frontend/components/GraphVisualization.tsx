@@ -343,10 +343,6 @@ const GraphVisualization = ({
         case "streaming-app":
           node.type = "AppNode";
           break;
-
-        default:
-          node.type = "GenericNode";
-          break;
       }
     });
 
