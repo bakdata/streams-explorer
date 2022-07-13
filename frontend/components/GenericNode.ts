@@ -9,13 +9,13 @@ import G6, {
 } from "@antv/g6";
 import { deepMix } from "@antv/util";
 
-/* Custom G6 node to display topics
- * based on builtin rectangle node
- * https://github.com/antvis/G6/blob/4.6.15/packages/element/src/nodes/rect.ts
+/* Custom G6 node to display other types of nodes
+ * based on builtin circle node
+ * https://github.com/antvis/G6/blob/4.6.15/packages/element/src/nodes/circle.ts
  */
 
 G6.registerNode(
-  "TopicNode",
+  "GenericNode",
   {
     options: {
       style: {
@@ -38,11 +38,12 @@ G6.registerNode(
         height: 36,
       },
     },
-    shapeType: "rect",
+    shapeType: "circle",
     drawShape(cfg?: ModelConfig, group?: IGroup): IShape {
       const style = (this as any).getShapeStyle!(cfg);
       const name = `${(this as ShapeOptions).type}-keyShape`;
-      const keyShape = group!.addShape("rect", {
+      const type = cfg!.node_type as string;
+      const keyShape = group!.addShape("circle", {
         attrs: style,
         className: name,
         name: name,
@@ -52,7 +53,7 @@ G6.registerNode(
       const options = (this as ShapeOptions).options!;
       const icon = (options as NodeConfig).icon!;
       const iconName = `${(this as ShapeOptions).type}-icon`;
-      const iconImg = cfg!.node_type + ".svg";
+      const iconImg = type + ".svg";
       group!.addShape("image", {
         attrs: {
           x: -icon.width! / 2,
@@ -89,13 +90,10 @@ G6.registerNode(
         stroke: cfg.color,
       };
       const style = deepMix({}, defaultStyle, strokeStyle);
-      const width = style.width;
-      const height = style.height;
       const styles = {
-        x: -width / 2,
-        y: -height / 2,
-        width,
-        height,
+        x: 0,
+        y: 0,
+        r: 14,
         ...style,
       };
 

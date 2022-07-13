@@ -11,6 +11,7 @@ import React, {
 import { Graph as Data, Metric } from "./api/fetchers";
 import { graphConfig as config } from "./graphConfiguration";
 import Node from "./Node";
+import "./GenericNode";
 import "./TopicNode";
 import "./AppNode";
 import "./DashedEdge";
@@ -333,19 +334,9 @@ const GraphVisualization = ({
     let nodes = data["nodes"];
 
     nodes?.forEach((node: any) => {
-      // variant 1
-      node.type = node.node_type === "streaming-app"
-        ? "AppNode"
-        : "TopicNode";
-
-      // variant 2
-      /* node.type = node.node_type.includes("topic")
-        ? "TopicNode"
-        : "AppNode"; */
-
-      // variant 3 (complex)
-      /* switch (node.node_type) {
-        case "topic" || "error-topic":
+      switch (node.node_type) {
+        case "topic":
+        case "error-topic":
           node.type = "TopicNode";
           break;
 
@@ -354,8 +345,9 @@ const GraphVisualization = ({
           break;
 
         default:
+          node.type = "GenericNode";
           break;
-      } */
+      }
     });
 
     currentGraph.data(data as GraphData);
