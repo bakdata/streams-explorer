@@ -36,8 +36,9 @@ interface GraphVisualizationProps {
   animate: boolean;
 }
 
-interface ReplicaCount {
+interface AppState {
   id: string;
+  state: string;
   replicas: number[];
 }
 
@@ -294,7 +295,7 @@ const GraphVisualization = ({
     ws.onmessage = function(event) {
       console.log(event.data);
       try {
-        const data = JSON.parse(event.data);
+        const data = JSON.parse(event.data) as AppState;
         const node = graph.findById(data.id) as INode;
         if (node) {
           if (data.state === "Failed" || data.state === "BackOff") {
