@@ -46,8 +46,7 @@ G6.registerNode(
         show: true,
         x: 0,
         y: 0,
-        img:
-          "https://gw.alipayobjects.com/zos/basement_prod/4f81893c-1806-4de4-aff3-9a6b266bc8a2.svg",
+        img: "",
         width: 36,
         height: 36,
         offset: 4,
@@ -56,8 +55,7 @@ G6.registerNode(
         show: true,
         x: 0,
         y: 0,
-        img:
-          "https://gw.alipayobjects.com/zos/basement_prod/300a2523-67e0-4cbf-9d4a-67c077b40395.svg",
+        img: "",
         width: 20,
         height: 20,
         offset: -5,
