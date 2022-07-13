@@ -302,7 +302,7 @@ const GraphVisualization = ({
             graph.updateItem(node, {
               style: {
                 stroke: "#ff2825",
-                fill: "#ffe5e4",
+                fill: "#ff2825",
               },
               stateIcon: {
                 img: "state-error.svg",
@@ -312,7 +312,7 @@ const GraphVisualization = ({
             graph.updateItem(node, {
               style: {
                 stroke: "#7e7f84",
-                fill: "#e2e5ee",
+                fill: "#7e7f84",
               },
               stateIcon: {
                 img: "state-paused.svg",
@@ -322,7 +322,7 @@ const GraphVisualization = ({
             graph.updateItem(node, {
               style: {
                 stroke: "#52c41a",
-                fill: "#fff",
+                fill: "#52c41a",
               },
               stateIcon: {
                 img: "state-running.svg",

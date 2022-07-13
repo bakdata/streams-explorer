@@ -25,7 +25,7 @@ G6.registerNode(
         stroke: "#000", // border
         fill: "#fff",
         lineWidth: Global.defaultNode.style.lineWidth,
-        fillOpacity: 1,
+        fillOpacity: 0.05,
       },
       labelCfg: {
         style: {
