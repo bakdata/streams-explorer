@@ -1,12 +1,11 @@
 import { IGroup, IShape } from "@antv/g-base";
-import G6 from "@antv/g6";
-import {
+import G6, {
   Item,
   ModelConfig,
   NodeConfig,
   ShapeOptions,
   ShapeStyle,
-} from "@antv/g6-core";
+} from "@antv/g6";
 import { mix } from "@antv/util";
 
 /* Custom G6 node to display applications

@@ -1,12 +1,4 @@
-import G6, {
-  Global,
-  Graph,
-  GraphData,
-  GraphOptions,
-  IEdge,
-  IG6GraphEvent,
-  INode,
-} from "@antv/g6";
+import G6, { Graph, GraphData, IEdge, IG6GraphEvent, INode } from "@antv/g6";
 import { message } from "antd";
 import { millify } from "millify";
 import React, {
