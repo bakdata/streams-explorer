@@ -20,8 +20,9 @@ G6.registerNode(
   {
     options: {
       style: {
-        x: 0,
-        y: 0,
+        radius: 5,
+        width: 22,
+        height: 28,
         stroke: undefined,
         fill: "#f0f2f5",
         lineWidth: 0,
@@ -38,14 +39,14 @@ G6.registerNode(
         height: 36,
       },
     },
-    shapeType: "circle",
+    shapeType: "rect",
     drawShape(cfg?: ModelConfig, group?: IGroup): IShape {
       const style = (this as any).getShapeStyle!(cfg);
       const name = `${(this as ShapeOptions).type}-keyShape`;
-      const keyShape: IShape = group!.addShape("circle", {
+      const keyShape = group!.addShape("rect", {
         attrs: style,
         className: name,
-        name,
+        name: name,
         draggable: true,
       });
 
@@ -89,12 +90,16 @@ G6.registerNode(
         stroke: cfg.color,
       };
       const style = deepMix({}, defaultStyle, strokeStyle);
+      const width = style.width;
+      const height = style.height;
       const styles = {
-        x: 0,
-        y: 0,
-        r: 14,
+        x: -width / 2,
+        y: -height / 2,
+        width,
+        height,
         ...style,
       };
+
       return styles;
     },
     update(cfg: ModelConfig, item: Item, updateType?: UpdateType) {
