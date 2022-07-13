@@ -75,7 +75,7 @@ export interface Pipelines {
 }
 
 export interface ValidationError {
-  loc: string[];
+  loc: (string | number)[];
   msg: string;
   type: string;
 }
