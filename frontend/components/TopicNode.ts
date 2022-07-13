@@ -28,10 +28,10 @@ G6.registerNode(
       },
       labelCfg: {
         style: {
-          fill: "#000000",
-          fontSize: 14,
+          fill: "#000",
         },
         position: "bottom",
+        offset: 10,
       },
       icon: {
         width: 36,
@@ -39,7 +39,6 @@ G6.registerNode(
       },
     },
     shapeType: "circle",
-    labelPosition: "center",
     drawShape(cfg?: ModelConfig, group?: IGroup): IShape {
       const style = (this as any).getShapeStyle!(cfg);
       const name = `${(this as ShapeOptions).type}-keyShape`;
@@ -99,11 +98,12 @@ G6.registerNode(
       return styles;
     },
     update(cfg: ModelConfig, item: Item, updateType?: UpdateType) {
+      // update metric
       const group = item.getContainer();
-      const metricLabel = group.get("children")[2]; // get shape containing our metric label
+      const metricLabel = group.get("children")[2];
       const metric = metricLabel.attr();
       metric.text = cfg.metric;
-      metricLabel.attr(metric); // update metric label
+      metricLabel.attr(metric);
 
       // update other styles
       const style = { ...cfg.style };

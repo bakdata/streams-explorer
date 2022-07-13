@@ -296,14 +296,13 @@ const GraphVisualization = ({
       console.log(event.data);
       try {
         const data = JSON.parse(event.data);
-        const node = graph?.findById(data.id) as INode;
+        const node = graph.findById(data.id) as INode;
         if (node) {
           if (data.state !== "Unknown") {
             graph.updateItem(node, {
               style: {
                 stroke: "#ff2825",
                 fill: "#ffe5e4",
-                // fill: "#f3b5ba", // red
               },
               stateIcon: {
                 img: "state-error.svg",
@@ -312,8 +311,8 @@ const GraphVisualization = ({
           } else if (!data.replicas[0]) {
             graph.updateItem(node, {
               style: {
-                stroke: "#000",
-                fill: "#e2e5ee", // grey
+                stroke: "#7e7f84",
+                fill: "#e2e5ee",
               },
               stateIcon: {
                 img: "state-paused.svg",

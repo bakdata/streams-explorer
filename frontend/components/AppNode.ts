@@ -30,8 +30,6 @@ G6.registerNode(
       labelCfg: {
         style: {
           fill: "#000",
-          fontSize: 14,
-          fontFamily: Global.windowFontFamily,
         },
       },
       logoIcon: {
@@ -54,7 +52,6 @@ G6.registerNode(
       },
     },
     shapeType: "modelRect",
-    labelPosition: "center", // TODO
     drawShape(cfg?: ModelConfig, group?: IGroup): IShape {
       const style = (this as any).getShapeStyle!(cfg);
       const name = `${(this as ShapeOptions).type}-keyShape`;
@@ -165,35 +162,23 @@ G6.registerNode(
           cfg
         ) as NodeConfig;
 
-      let label = null;
-
-      const size = (this as ShapeOptions).getSize!(cfg);
-      const width = size[0];
-      const height = size[1];
-
-      const { show, width: w } = logoIcon;
-      let offsetX = -width / 2 + labelCfg.offset!;
-
-      if (show) {
-        offsetX += w as number;
-      }
-
       const { style: fontStyle } = labelCfg;
+      const height = (this as ShapeOptions).getSize!(cfg)[1];
 
-      if (isString(cfg.description)) {
-        label = group.addShape("text", {
-          attrs: {
-            ...fontStyle,
-            x: offsetX,
-            y: -5,
-            text: cfg.label,
-          },
-          className: "text-shape",
-          name: "text-shape",
-          draggable: true,
-          labelRelated: true,
-        });
-        (group as any)["shapeMap"]["text-shape"] = label;
+      const label = group.addShape("text", {
+        attrs: {
+          ...fontStyle,
+          y: height / 2 + 22,
+          text: cfg.label,
+          textAlign: "center",
+        },
+        className: "text-shape",
+        name: "text-shape",
+        draggable: true,
+        labelRelated: true,
+      });
+
+      (group as any)["shapeMap"]["text-shape"] = label;
 
       return label;
     },
@@ -217,7 +202,7 @@ G6.registerNode(
       return styles;
     },
     update(cfg: ModelConfig, item: Item) {
-      const { style = {}, labelCfg = {} } = (this as any).mergeStyle
+      const { style = {} } = (this as any).mergeStyle
         || (this as any).getOptions(cfg) as NodeConfig;
       const size = (this as ShapeOptions).getSize!(cfg);
       const width = size[0];
@@ -253,14 +238,6 @@ G6.registerNode(
       let { width: w } = logoIcon;
       if (w === undefined) {
         w = (this as any).options.logoIcon.width;
-      }
-      const show = cfg.logoIcon ? (cfg as any).logoIcon.show : undefined;
-
-      const { offset } = labelCfg;
-      let offsetX = -width / 2 + w + offset;
-
-      if (!show && show !== undefined) {
-        offsetX = -width / 2 + offset;
       }
 
       const stateIconShape = (group as any)["shapeMap"]["rect-state-icon"]
