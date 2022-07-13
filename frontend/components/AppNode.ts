@@ -20,7 +20,7 @@ G6.registerNode(
       size: [120, 50],
       style: {
         radius: 5,
-        stroke: "#000", // border
+        stroke: "#4f4f4f",
         fill: "#fff",
         lineWidth: 2,
         fillOpacity: 0.05,
