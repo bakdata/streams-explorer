@@ -1,7 +1,6 @@
 import { IGroup, IShape } from "@antv/g-base";
 import G6 from "@antv/g6";
 import {
-  BaseGlobal as Global,
   Item,
   ModelConfig,
   NodeConfig,
@@ -24,7 +23,7 @@ G6.registerNode(
         radius: 5,
         stroke: "#000", // border
         fill: "#fff",
-        lineWidth: Global.defaultNode.style.lineWidth,
+        lineWidth: 2,
         fillOpacity: 0.05,
       },
       labelCfg: {

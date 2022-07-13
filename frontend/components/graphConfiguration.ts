@@ -30,7 +30,8 @@ export const graphConfig: GraphOptions = {
     },
     click: {
       fill: "#fff",
-      lineWidth: 2,
+      lineWidth: 2.5,
+      fillOpacity: 1,
     },
   },
 };
