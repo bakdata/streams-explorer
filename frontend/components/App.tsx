@@ -20,7 +20,6 @@ import {
   useGetPositionedGraphApiGraphGet,
 } from "./api/fetchers";
 import DetailsCard from "./DetailsCard";
-import { graphConfig } from "./graphConfiguration";
 import GraphVisualization from "./GraphVisualization";
 import Node from "./Node";
 import Search from "./Search";
@@ -306,7 +305,6 @@ const App: React.FC = () => {
                   <GraphVisualization
                     data-testid="graph"
                     data={graph}
-                    config={graphConfig}
                     metrics={metrics}
                     refetchMetrics={() => refetchMetrics()}
                     onClickNode={(node: Node) => setDetailNode(node)}

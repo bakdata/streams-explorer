@@ -17,6 +17,7 @@ import React, {
   useState,
 } from "react";
 import { Graph as Data, Metric } from "./api/fetchers";
+import { graphConfig as config } from "./graphConfiguration";
 import Node from "./Node";
 import "./TopicNode";
 import "./AppNode";
@@ -26,7 +27,6 @@ export const isBrowser = typeof window !== "undefined"; // disable SSR
 
 interface GraphVisualizationProps {
   data: Data | GraphData;
-  config: GraphOptions;
   metrics: Metric[] | null;
   refetchMetrics: Function;
   onClickNode: Function;
@@ -177,7 +177,6 @@ function setFocusedNode(graph: Graph, focusedNode: Node) {
 
 const GraphVisualization = ({
   data,
-  config,
   metrics,
   onClickNode,
   width,
@@ -371,7 +370,7 @@ const GraphVisualization = ({
 
     setGraph(currentGraph);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [config, data]);
+  }, [data]);
 
   return <div ref={ref}></div>;
 };
