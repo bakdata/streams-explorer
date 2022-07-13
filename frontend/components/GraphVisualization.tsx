@@ -311,8 +311,8 @@ const GraphVisualization = ({
           } else if (!data.replicas[0]) {
             graph.updateItem(node, {
               style: {
-                stroke: "#7e7f84",
-                fill: "#7e7f84",
+                stroke: "#9f9f9f",
+                fill: "#000",
               },
               stateIcon: {
                 img: "state-paused.svg",
