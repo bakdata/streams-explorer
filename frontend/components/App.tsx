@@ -129,7 +129,7 @@ const App: React.FC = () => {
         setFocusedNode(node);
       }
     }
-  }, [graph, query]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [graph, query]);
 
   useEffect(() => {
     if (graphError) {

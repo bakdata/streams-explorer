@@ -190,7 +190,7 @@ const GraphVisualization = ({
   }, []);
   const ref = useRef<HTMLDivElement>(null);
 
-  const [graph, setGraph] = useState<Graph | null>(null);
+  const [graph, setGraph] = useState<Graph>();
   if (graph) {
     graph.changeSize(width, height);
   }
@@ -199,7 +199,7 @@ const GraphVisualization = ({
     if (graph && focusedNode) {
       setFocusedNode(graph, focusedNode);
     }
-  }, [graph, focusedNode]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [graph, focusedNode]);
 
   useEffect(() => {
     if (graph && !animate) {
@@ -212,7 +212,7 @@ const GraphVisualization = ({
     if (graph && metrics) {
       updateNodeMetrics(graph, metrics, animate);
     }
-  }, [graph, metrics, animate]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [graph, metrics, animate]);
 
   const mouseEnterCallback = useCallback(
     (e: IG6GraphEvent) => {
