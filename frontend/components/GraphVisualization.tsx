@@ -298,7 +298,7 @@ const GraphVisualization = ({
         const data = JSON.parse(event.data);
         const node = graph.findById(data.id) as INode;
         if (node) {
-          if (data.state !== "Unknown") {
+          if (data.state === "Failed" || data.state === "BackOff") {
             graph.updateItem(node, {
               style: {
                 stroke: "#ff2825",
