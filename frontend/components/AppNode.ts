@@ -8,7 +8,7 @@ import {
   ShapeOptions,
   ShapeStyle,
 } from "@antv/g6-core";
-import { isString, mix } from "@antv/util";
+import { mix } from "@antv/util";
 
 /* Custom G6 node to display applications
  * based on builtin modelRect node
@@ -33,15 +33,6 @@ G6.registerNode(
           fontSize: 14,
           fontFamily: Global.windowFontFamily,
         },
-        offset: 0,
-      },
-      descriptionCfg: {
-        style: {
-          fontSize: 12,
-          fill: "#bfbfbf",
-          fontFamily: Global.windowFontFamily,
-        },
-        paddingTop: 0,
       },
       logoIcon: {
         show: true,
@@ -169,11 +160,10 @@ G6.registerNode(
       }
     },
     drawLabel(cfg: ModelConfig, group: IGroup): IShape {
-      const { labelCfg = {}, logoIcon = {}, descriptionCfg = {} } =
-        (this as any)
-          .getOptions(
-            cfg
-          ) as NodeConfig;
+      const { labelCfg = {} } = (this as any)
+        .getOptions(
+          cfg
+        ) as NodeConfig;
 
       let label = null;
 
@@ -189,8 +179,6 @@ G6.registerNode(
       }
 
       const { style: fontStyle } = labelCfg;
-      const { style: descriptionStyle, paddingTop: descriptionPaddingTop } =
-        descriptionCfg;
 
       if (isString(cfg.description)) {
         label = group.addShape("text", {
@@ -207,37 +195,6 @@ G6.registerNode(
         });
         (group as any)["shapeMap"]["text-shape"] = label;
 
-        (group as any)["shapeMap"]["rect-description"] = group.addShape(
-          "text",
-          {
-            attrs: {
-              ...descriptionStyle,
-              x: offsetX,
-              y: 17 + ((descriptionPaddingTop as any) || 0),
-              text: cfg.description,
-            },
-            className: "rect-description",
-            name: "rect-description",
-            draggable: true,
-            labelRelated: true,
-          }
-        );
-      } else {
-        label = group.addShape("text", {
-          attrs: {
-            ...fontStyle,
-            // x: offsetX,
-            y: height / 2 + 18,
-            text: cfg.label,
-            textAlign: "center",
-          },
-          className: "text-shape",
-          name: "text-shape",
-          draggable: true,
-          labelRelated: true,
-        });
-        (group as any)["shapeMap"]["text-shape"] = label;
-      }
       return label;
     },
     getShapeStyle(cfg: NodeConfig) {
@@ -260,8 +217,7 @@ G6.registerNode(
       return styles;
     },
     update(cfg: ModelConfig, item: Item) {
-      const { style = {}, labelCfg = {}, descriptionCfg = {} } =
-        (this as any).mergeStyle
+      const { style = {}, labelCfg = {} } = (this as any).mergeStyle
         || (this as any).getOptions(cfg) as NodeConfig;
       const size = (this as ShapeOptions).getSize!(cfg);
       const width = size[0];
@@ -306,97 +262,6 @@ G6.registerNode(
       if (!show && show !== undefined) {
         offsetX = -width / 2 + offset;
       }
-
-      const label = (group as any)["shapeMap"]["node-label"]
-        || group.find((element) => element.get("className") === "node-label");
-      const description = (group as any)["shapeMap"]["rect-description"]
-        || group.find((element) =>
-          element.get("className") === "rect-description"
-        );
-      /* if (cfg.label) {
-        if (!label) {
-          group["shapeMap"]["node-label"] = group.addShape("text", {
-            attrs: {
-              ...labelCfg.style,
-              x: offsetX,
-              y: cfg.description ? -5 : 7,
-              text: cfg.label,
-            },
-            className: "node-label",
-            name: "node-label",
-            draggable: true,
-            labelRelated: true,
-          });
-        } else {
-          const cfgStyle = cfg.labelCfg ? cfg.labelCfg.style : {};
-          const labelStyle = mix({}, label.attr(), cfgStyle);
-          if (cfg.label) labelStyle.text = cfg.label;
-          labelStyle.x = offsetX;
-          if (isString(cfg.description)) labelStyle.y = -5;
-          if (description) {
-            description.resetMatrix();
-            description.attr({
-              x: offsetX,
-            });
-          }
-          label.resetMatrix();
-          label.attr(labelStyle);
-        }
-      } */
-      /* if (isString(cfg.description)) {
-        const { paddingTop } = descriptionCfg;
-        if (!description) {
-          group["shapeMap"]["rect-description"] = group.addShape("text", {
-            attrs: {
-              ...descriptionCfg.style,
-              x: offsetX,
-              y: 17 + ((paddingTop as any) || 0),
-              text: cfg.description,
-            },
-            className: "rect-description",
-            name: "rect-description",
-            draggable: true,
-            labelRelated: true,
-          });
-        } else {
-          const cfgStyle = cfg.descriptionCfg ? cfg.descriptionCfg.style : {};
-          const descriptionStyle = mix({}, description.attr(), cfgStyle);
-          if (isString(cfg.description)) {
-            descriptionStyle.text = cfg.description;
-          }
-          descriptionStyle.x = offsetX;
-          description.resetMatrix();
-          description.attr({
-            ...descriptionStyle,
-            y: 17 + ((paddingTop as any) || 0),
-          });
-        }
-      } */
-
-      /* if (logoIconShape && !logoIconShape.destroyed) {
-        if (!show && show !== undefined) {
-          logoIconShape.remove();
-          delete group["shapeMap"]["pre-rect"];
-        } else {
-          const {
-            width: logoW,
-            height: h,
-            x,
-            y,
-            offset: logoOffset,
-            ...logoIconStyle
-          } = logoIcon;
-          logoIconShape.attr({
-            ...logoIconStyle,
-            x: x || -width / 2 + logoW + logoOffset,
-            y: y || -h / 2,
-            width: logoW,
-            height: h,
-          });
-        }
-      } else if (show) {
-        (this as any).drawLogoIcon(cfg, group);
-      } */
 
       const stateIconShape = (group as any)["shapeMap"]["rect-state-icon"]
         || group.find(
