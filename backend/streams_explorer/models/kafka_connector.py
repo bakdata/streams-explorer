@@ -10,6 +10,7 @@ from pydantic import BaseConfig, BaseModel, Extra, Field, ValidationError
 from streams_explorer.core.extractor.default.transformer import (
     GenericTransformerConfig,
     RegexRouterTransformerConfig,
+    RouterTransformerConfig,
     TimestampRouterTransformerConfig,
 )
 
@@ -91,7 +92,11 @@ class KafkaConnector(BaseModel):
         }
         transformer_config["topics"] = indices
         try:
-            transformer = pydantic.parse_obj_as(self._transformers, transformer_config)
+            transformer: RouterTransformerConfig = pydantic.parse_obj_as(
+                # HACK: https://github.com/samuelcolvin/pydantic/issues/1847
+                self._transformers,  # type: ignore[arg-type]
+                transformer_config,
+            )
             return transformer.get_routes()
         except ValidationError as e:
             logger.exception(
