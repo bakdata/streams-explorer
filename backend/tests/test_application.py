@@ -235,10 +235,10 @@ class TestApplication:
 
         async def watch(self: StreamsExplorer):
             for deployment in deployments + stateful_sets + cron_jobs:
-                event = K8sDeploymentUpdate(
+                update = K8sDeploymentUpdate(
                     type=K8sDeploymentUpdateType.ADDED, object=deployment
                 )
-                await self.handle_deployment_update(event)
+                await self.handle_deployment_update(update)
             object = {
                 "type": K8sEventType.NORMAL,
                 "reason": K8sReason.STARTED,
@@ -302,10 +302,10 @@ class TestApplication:
                     assert deployment.status
                     deployment.status.replicas = 10
                     deployment.status.ready_replicas = 0
-                    event = K8sDeploymentUpdate(
+                    update = K8sDeploymentUpdate(
                         type=K8sDeploymentUpdateType.MODIFIED, object=deployment
                     )
-                    await streams_explorer.handle_deployment_update(event)
+                    await streams_explorer.handle_deployment_update(update)
                     assert update_clients_delta.call_count == 6
                     assert (
                         ws1.receive_json()
