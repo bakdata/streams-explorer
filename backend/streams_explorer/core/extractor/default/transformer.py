@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 from abc import ABC, abstractmethod
-from typing import Literal, Pattern
+from typing import Literal
 
 from pydantic import BaseConfig, BaseModel, Extra, Field, PrivateAttr
 
@@ -26,7 +26,7 @@ class RegexRouterTransformerConfig(RouterTransformerConfig):
     regex: str | None = None
     replacement: str
 
-    _rx: Pattern = PrivateAttr()
+    _rx: re.Pattern = PrivateAttr()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
