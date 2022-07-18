@@ -188,23 +188,27 @@ class StreamsExplorer:
         event = raw_event["object"]
 
         # extract deployment name from pod
-        if "fieldPath" not in event["regarding"]:
+        if (
+            not event.reason
+            or not event.regarding
+            or not hasattr(event.regarding, "fieldPath")
+        ):
             return
         # NOTE: alternative is event["regarding"]["name"]
-        name = re.findall(r"{(.+?)}", event["regarding"]["fieldPath"])[0]
+        name = re.findall(r"{(.+?)}", event.regarding.fieldPath)[0]
 
         logger.info(
             "{} {} {} ({})",
-            event["regarding"]["namespace"],
+            event.regarding.namespace,
             name,
-            event["reason"],
-            event["type"],
+            event.reason,
+            event.type,
         )
         logger.debug(event)
 
         # map event to application
         if app := self.applications.get(name):
-            app.state = K8sReason.from_str(event["reason"])
+            app.state = K8sReason.from_str(event.reason)
             # app.note = event["note"] # TODO
             await self._update_clients_delta(app)
 

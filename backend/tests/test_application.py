@@ -6,9 +6,11 @@ import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
 from kubernetes_asyncio.client import (
+    EventsV1Event,
     V1beta1CronJob,
     V1Deployment,
     V1ObjectMeta,
+    V1ObjectReference,
     V1StatefulSet,
 )
 from pytest import MonkeyPatch
@@ -242,24 +244,24 @@ class TestApplication:
                     type=K8sDeploymentUpdateType.ADDED, object=deployment
                 )
                 await self.handle_deployment_update(update)
-            object = {
-                "type": K8sEventType.NORMAL,
-                "reason": K8sReason.STARTED,
-                "regarding": {
-                    "fieldPath": "spec.containers{streaming-app2}",
-                    "namespace": "test-namespace",
-                },
-            }
+            object = EventsV1Event(
+                type=K8sEventType.NORMAL,
+                reason=K8sReason.STARTED,
+                regarding=V1ObjectReference(
+                    field_path="spec.containers{streaming-app2}",
+                    namespace="test-namespace",
+                ),
+            )
             event = K8sEvent(type=K8sEventType.NORMAL, object=object)
             await self.handle_event(event)
-            object = {
-                "type": K8sEventType.WARNING,
-                "reason": K8sReason.BACKOFF,
-                "regarding": {
-                    "fieldPath": "spec.containers{streaming-app3}",
-                    "namespace": "test-namespace",
-                },
-            }
+            object = EventsV1Event(
+                type=K8sEventType.WARNING,
+                reason=K8sReason.BACKOFF,
+                regarding=V1ObjectReference(
+                    field_path="spec.containers{streaming-app3}",
+                    namespace="test-namespace",
+                ),
+            )
             event = K8sEvent(type=K8sEventType.WARNING, object=object)
             await self.handle_event(event)
 
@@ -322,15 +324,15 @@ class TestApplication:
                     )
 
                     # pod restarting
-                    object = {
-                        "type": K8sEventType.NORMAL,
-                        "reason": K8sReason.STARTED,
-                        "regarding": {
-                            "fieldPath": "spec.containers{streaming-app3}",
-                            "namespace": "test-namespace",
-                        },
-                    }
-                    event = K8sEvent(type=K8sEventType.WARNING, object=object)
+                    object = EventsV1Event(
+                        type=K8sEventType.NORMAL,
+                        reason=K8sReason.STARTED,
+                        regarding=V1ObjectReference(
+                            field_path="spec.containers{streaming-app3}",
+                            namespace="test-namespace",
+                        ),
+                    )
+                    event = K8sEvent(type=K8sEventType.NORMAL, object=object)
                     await streams_explorer.handle_event(event)
                     assert update_clients_delta.call_count == 7
                     assert (

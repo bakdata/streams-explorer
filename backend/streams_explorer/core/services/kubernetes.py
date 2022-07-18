@@ -6,7 +6,12 @@ from typing import TYPE_CHECKING, Callable, NamedTuple, TypedDict
 import kubernetes_asyncio.client
 import kubernetes_asyncio.config
 import kubernetes_asyncio.watch
-from kubernetes_asyncio.client import V1beta1CronJob, V1Deployment, V1StatefulSet
+from kubernetes_asyncio.client import (
+    EventsV1Event,
+    V1beta1CronJob,
+    V1Deployment,
+    V1StatefulSet,
+)
 from loguru import logger
 
 from streams_explorer.core.config import settings
@@ -31,26 +36,37 @@ class K8sDeploymentUpdate(TypedDict):
 
 class K8sEvent(TypedDict):
     type: K8sEventType
-    object: dict  # FIXME: deserialize to `EventsV1EventList`
+    object: EventsV1Event
 
 
 class Kubernetes:
     context = settings.k8s.deployment.context
     namespaces = settings.k8s.deployment.namespaces
 
-    def __init__(self, streams_explorer):
-        self.streams_explorer: StreamsExplorer = streams_explorer
+    def __init__(self, streams_explorer: StreamsExplorer):
+        self.streams_explorer = streams_explorer
 
     async def setup(self):
+        conf = kubernetes_asyncio.client.Configuration()
+        conf.client_side_validation = False
+        conf = None
         try:
             if settings.k8s.deployment.cluster:
                 logger.info("Setup K8s environment in cluster")
-                kubernetes_asyncio.config.load_incluster_config()
+                kubernetes_asyncio.config.load_incluster_config(
+                    client_configuration=conf
+                )
             else:
                 logger.info("Setup K8s environment")
-                await kubernetes_asyncio.config.load_kube_config(context=self.context)
+                await kubernetes_asyncio.config.load_kube_config(
+                    context=self.context, client_configuration=conf
+                )
         except kubernetes_asyncio.config.ConfigException as e:
             raise Exception("Could not load K8s environment configuration") from e
+
+        conf = kubernetes_asyncio.client.Configuration.get_default_copy()
+        conf.client_side_validation = False
+        conf = kubernetes_asyncio.client.Configuration.set_default(conf)
 
         self.k8s_app_client = kubernetes_asyncio.client.AppsV1Api()
         self.k8s_batch_client = kubernetes_asyncio.client.BatchV1beta1Api()
@@ -95,7 +111,7 @@ class Kubernetes:
             ),
             K8sResource(
                 list_events,
-                None,  # FIXME: error in kubernetes_asyncio when casting to `EventsV1EventList`
+                EventsV1Event,
                 self.streams_explorer.handle_event,
                 delay=5,
             ),
