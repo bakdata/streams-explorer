@@ -14,6 +14,9 @@ from kubernetes_asyncio.client import (
 from pytest import MonkeyPatch
 from pytest_mock import MockerFixture
 
+from streams_explorer.api.dependencies.streams_explorer import (
+    get_streams_explorer_from_state,
+)
 from streams_explorer.application import get_application
 from streams_explorer.core.client_manager import ClientManager
 from streams_explorer.core.config import API_PREFIX, settings
@@ -132,7 +135,7 @@ class TestApplication:
         from main import app
 
         with TestClient(app) as client:
-            streams_explorer: StreamsExplorer = app.state.streams_explorer
+            streams_explorer = get_streams_explorer_from_state(app)
 
             def fetch_graph() -> list[str]:
                 response = client.get(f"{API_PREFIX}/graph")
@@ -270,7 +273,8 @@ class TestApplication:
         connect = mocker.spy(ClientManager, "connect")
 
         with TestClient(app) as client:
-            streams_explorer: StreamsExplorer = app.state.streams_explorer
+            streams_explorer = get_streams_explorer_from_state(app)
+
             with client.websocket_connect(ENDPOINT) as ws1:
                 assert connect.call_count == 1
                 assert update_clients_delta.call_count == 5
