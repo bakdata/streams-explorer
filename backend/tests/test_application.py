@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import datetime
 
 import pytest
 from fastapi import status
@@ -251,6 +252,7 @@ class TestApplication:
                     field_path="spec.containers{streaming-app2}",
                     namespace="test-namespace",
                 ),
+                event_time=datetime.datetime.now(),
             )
             event = K8sEvent(type=K8sEventType.NORMAL, object=object)
             await self.handle_event(event)
@@ -261,6 +263,7 @@ class TestApplication:
                     field_path="spec.containers{streaming-app3}",
                     namespace="test-namespace",
                 ),
+                event_time=datetime.datetime.now(),
             )
             event = K8sEvent(type=K8sEventType.WARNING, object=object)
             await self.handle_event(event)
@@ -331,6 +334,7 @@ class TestApplication:
                             field_path="spec.containers{streaming-app3}",
                             namespace="test-namespace",
                         ),
+                        event_time=datetime.datetime.now(),
                     )
                     event = K8sEvent(type=K8sEventType.NORMAL, object=object)
                     await streams_explorer.handle_event(event)

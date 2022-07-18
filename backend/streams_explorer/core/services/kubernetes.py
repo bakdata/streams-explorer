@@ -59,7 +59,7 @@ class Kubernetes:
 
         conf = kubernetes_asyncio.client.Configuration.get_default_copy()
         conf.client_side_validation = False
-        conf = kubernetes_asyncio.client.Configuration.set_default(conf)
+        kubernetes_asyncio.client.Configuration.set_default(conf)
 
         self.k8s_app_client = kubernetes_asyncio.client.AppsV1Api()
         self.k8s_batch_client = kubernetes_asyncio.client.BatchV1beta1Api()
