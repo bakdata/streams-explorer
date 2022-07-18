@@ -47,20 +47,13 @@ class Kubernetes:
         self.streams_explorer = streams_explorer
 
     async def setup(self):
-        conf = kubernetes_asyncio.client.Configuration()
-        conf.client_side_validation = False
-        conf = None
         try:
             if settings.k8s.deployment.cluster:
                 logger.info("Setup K8s environment in cluster")
-                kubernetes_asyncio.config.load_incluster_config(
-                    client_configuration=conf
-                )
+                kubernetes_asyncio.config.load_incluster_config()
             else:
                 logger.info("Setup K8s environment")
-                await kubernetes_asyncio.config.load_kube_config(
-                    context=self.context, client_configuration=conf
-                )
+                await kubernetes_asyncio.config.load_kube_config(context=self.context)
         except kubernetes_asyncio.config.ConfigException as e:
             raise Exception("Could not load K8s environment configuration") from e
 
