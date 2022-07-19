@@ -26,7 +26,7 @@ class RegexRouterTransformerConfig(RouterTransformerConfig):
     regex: str | None = None
     replacement: str
 
-    _rx: re.Pattern = PrivateAttr()
+    _rx: re.Pattern[str] = PrivateAttr()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
