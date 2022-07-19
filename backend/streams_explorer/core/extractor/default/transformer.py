@@ -35,7 +35,7 @@ class RegexRouterTransformerConfig(RouterTransformerConfig):
         self.replacement = self.replacement.replace("$", "\\")
 
     def transform_topic(self, topic: str) -> str:
-        return re.sub(self._rx, self.replacement, topic)
+        return re.sub(self._rx, self.replacement, topic, 1)
 
     def get_routes(self) -> list[str]:
         if self.regex is not None:

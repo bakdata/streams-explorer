@@ -46,23 +46,6 @@ class TestTransformerKafkaConnect:
                     ),
                     topics=["my-topic-1", "my-topic-2"],
                 ),
-                {"fake-indexfake-index"},
-                None,
-            ),
-            (
-                KafkaConnector(
-                    name="example-connector",
-                    type=KafkaConnectorTypesEnum.SINK,
-                    config=KafkaConnectorConfig(
-                        **{
-                            "transforms": "changeTopic",
-                            "transforms.changeTopic.type": "org.apache.kafka.connect.transforms.RegexRouter",
-                            "transforms.changeTopic.regex": "^.*",
-                            "transforms.changeTopic.replacement": "fake-index",
-                        }
-                    ),
-                    topics=["my-topic-1", "my-topic-2"],
-                ),
                 {"fake-index"},
                 None,
             ),
