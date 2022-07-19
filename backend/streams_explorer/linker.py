@@ -9,11 +9,7 @@ from streams_explorer.plugins import load_plugin
 
 def load_linker() -> type[LinkingService]:
     linker = load_plugin(LinkingService)
-    if (
-        not linker
-        or not isinstance(linker, type)
-        or not issubclass(linker, LinkingService)
-    ):
+    if not linker:
         logger.info("Using default LinkingService")
         return DefaultLinker
     logger.info(f"Using custom LinkingService: {linker.__name__}")
