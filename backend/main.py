@@ -1,4 +1,4 @@
-import uvicorn as uvicorn
+import uvicorn
 from fastapi_utils.tasks import repeat_every
 
 from streams_explorer.api.dependencies.streams_explorer import (
