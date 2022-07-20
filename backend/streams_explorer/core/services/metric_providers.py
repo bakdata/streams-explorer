@@ -183,3 +183,10 @@ class PrometheusMetricProvider(MetricProvider):
     async def _process_metric(self, metric: PrometheusMetric) -> None:
         data = await self._pull_metric(metric)
         self._data[metric.metric] = metric.transform(data)
+
+    async def close(self) -> None:
+        await self._client.aclose()
+
+    def __del__(self) -> None:
+        loop = asyncio.get_event_loop()
+        loop.create_task(self.close())
