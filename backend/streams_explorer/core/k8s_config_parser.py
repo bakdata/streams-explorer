@@ -29,7 +29,7 @@ class StreamsBootstrapConfigParser(K8sConfigParser):
         self.config = K8sConfig(self._id, name=self.get_name())
 
     def get_id(self) -> str:
-        name = None
+        name: str | None = None
         if self.k8s_app.metadata.labels:
             name = self.k8s_app.metadata.labels.get("app")
         if not name:
@@ -42,22 +42,23 @@ class StreamsBootstrapConfigParser(K8sConfigParser):
         return self._id
 
     def parse_config(self, name: str, value: str) -> None:
-        if name == "INPUT_TOPICS":
-            self.config.input_topics = self.parse_input_topics(value)
-        elif name == "OUTPUT_TOPIC":
-            self.config.output_topic = value
-        elif name == "ERROR_TOPIC":
-            self.config.error_topic = value
-        elif name == "EXTRA_INPUT_TOPICS":
-            self.config.extra_input_topics = self.parse_extra_topics(value)
-        elif name == "EXTRA_OUTPUT_TOPICS":
-            self.config.extra_output_topics = self.parse_extra_topics(value)
-        elif name == "INPUT_PATTERN":
-            self.config.input_pattern = value
-        elif name == "EXTRA_INPUT_PATTERNS":
-            self.config.extra_input_patterns = self.parse_extra_topics(value)
-        else:
-            self.config.extra[name] = value
+        match name:
+            case "INPUT_TOPICS":
+                self.config.input_topics = self.parse_input_topics(value)
+            case "OUTPUT_TOPIC":
+                self.config.output_topic = value
+            case "ERROR_TOPIC":
+                self.config.error_topic = value
+            case "EXTRA_INPUT_TOPICS":
+                self.config.extra_input_topics = self.parse_extra_topics(value)
+            case "EXTRA_OUTPUT_TOPICS":
+                self.config.extra_output_topics = self.parse_extra_topics(value)
+            case "INPUT_PATTERN":
+                self.config.input_pattern = value
+            case "EXTRA_INPUT_PATTERNS":
+                self.config.extra_input_patterns = self.parse_extra_topics(value)
+            case _:
+                self.config.extra[name] = value
 
     @staticmethod
     def parse_input_topics(input_topics: str) -> list[str]:
