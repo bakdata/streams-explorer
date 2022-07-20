@@ -1,14 +1,16 @@
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING, Any, Awaitable, Callable, NamedTuple, TypedDict
+from typing import TYPE_CHECKING, Awaitable, Callable, NamedTuple, TypedDict
 
 import kubernetes_asyncio.client
 import kubernetes_asyncio.config
 import kubernetes_asyncio.watch
 from kubernetes_asyncio.client import (
     EventsV1Event,
+    EventsV1EventList,
     V1beta1CronJob,
+    V1beta1CronJobList,
     V1Deployment,
     V1DeploymentList,
     V1StatefulSet,
@@ -25,7 +27,10 @@ if TYPE_CHECKING:
 
 
 class K8sResource(NamedTuple):
-    resource: Callable[..., Any]
+    func: Callable[
+        ...,
+        V1DeploymentList | V1StatefulSetList | V1beta1CronJobList | EventsV1EventList,
+    ]
     return_type: type | None
     callback: Callable[..., Awaitable[None]]
     delay: int = 0
@@ -70,7 +75,7 @@ class Kubernetes:
     async def watch(self) -> None:
         def list_deployments(namespace: str, *args, **kwargs) -> V1DeploymentList:
             return self.k8s_app_client.list_namespaced_deployment(
-                *args, namespace=namespace, **kwargs, async_req=True
+                *args, namespace=namespace, **kwargs
             )
 
         def list_stateful_sets(namespace: str, *args, **kwargs) -> V1StatefulSetList:
@@ -78,12 +83,12 @@ class Kubernetes:
                 *args, namespace=namespace, **kwargs
             )
 
-        def list_cron_jobs(namespace: str, *args, **kwargs):
+        def list_cron_jobs(namespace: str, *args, **kwargs) -> V1beta1CronJobList:
             return self.k8s_batch_client.list_namespaced_cron_job(
                 *args, namespace=namespace, **kwargs
             )
 
-        def list_events(namespace: str, *args, **kwargs):
+        def list_events(namespace: str, *args, **kwargs) -> EventsV1EventList:
             return self.k8s_events_client.list_namespaced_event(
                 *args, namespace=namespace, **kwargs
             )
@@ -129,6 +134,6 @@ class Kubernetes:
     ) -> None:
         return_type = resource.return_type.__name__ if resource.return_type else None
         async with kubernetes_asyncio.watch.Watch(return_type) as w:
-            async with w.stream(resource, namespace) as stream:
+            async with w.stream(resource.func, namespace) as stream:
                 async for event in stream:
                     await resource.callback(event)
