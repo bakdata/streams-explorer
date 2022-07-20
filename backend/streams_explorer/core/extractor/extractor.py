@@ -19,17 +19,17 @@ class Extractor:
     sources: list[Source] = field(default_factory=list)
     sinks: list[Sink] = field(default_factory=list)
 
-    def reset(self):
+    def reset(self) -> None:
         self.sources.clear()
         self.sinks.clear()
 
-    def reset_connector(self):
+    def reset_connector(self) -> None:
         ...
 
-    def on_streaming_app_add(self, config: K8sConfig):
+    def on_streaming_app_add(self, config: K8sConfig) -> None:
         ...
 
-    def on_streaming_app_delete(self, config: K8sConfig):
+    def on_streaming_app_delete(self, config: K8sConfig) -> None:
         ...
 
     def on_connector_info_parsing(

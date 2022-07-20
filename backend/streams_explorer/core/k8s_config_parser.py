@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 class K8sConfigParser:
     """Base class for parsing configuration of streaming application deployments."""
 
-    def __init__(self, k8s_app: K8sApp):
+    def __init__(self, k8s_app: K8sApp) -> None:
         self.k8s_app = k8s_app
 
     def parse(self) -> K8sConfig:
@@ -23,7 +23,7 @@ class K8sConfigParser:
 class StreamsBootstrapConfigParser(K8sConfigParser):
     """Config parser for deployments configured through streams-bootstrap."""
 
-    def __init__(self, k8s_app: K8sApp):
+    def __init__(self, k8s_app: K8sApp) -> None:
         super().__init__(k8s_app)
         self._id = self.get_id()
         self.config = K8sConfig(self._id, name=self.get_name())
@@ -41,7 +41,7 @@ class StreamsBootstrapConfigParser(K8sConfigParser):
     def get_name(self) -> str:
         return self._id
 
-    def parse_config(self, name: str, value: str):
+    def parse_config(self, name: str, value: str) -> None:
         if name == "INPUT_TOPICS":
             self.config.input_topics = self.parse_input_topics(value)
         elif name == "OUTPUT_TOPIC":
@@ -85,7 +85,7 @@ class StreamsBootstrapConfigParser(K8sConfigParser):
 class StreamsBootstrapEnvParser(StreamsBootstrapConfigParser):
     """Default parser for streams-bootstrap deployments configured through environment variables."""
 
-    def __init__(self, k8s_app: K8sApp):
+    def __init__(self, k8s_app: K8sApp) -> None:
         super().__init__(k8s_app)
         self.env_prefix = self.get_env_prefix(self.k8s_app.container)
 
@@ -112,7 +112,6 @@ class StreamsBootstrapEnvParser(StreamsBootstrapConfigParser):
             for env_var in container.env:
                 if env_var.name == "ENV_PREFIX":
                     return env_var.value
-        return None
 
 
 class StreamsBootstrapArgsParser(StreamsBootstrapConfigParser):

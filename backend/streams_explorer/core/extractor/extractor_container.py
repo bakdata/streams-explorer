@@ -22,30 +22,30 @@ class SourcesSinks(NamedTuple):
 
 
 class ExtractorContainer:
-    def __init__(self, extractors: list[Extractor] | None = None):
+    def __init__(self, extractors: list[Extractor] | None = None) -> None:
         self.extractors: list[Extractor] = extractors if extractors else []
 
-    def add(self, extractor: Extractor):
+    def add(self, extractor: Extractor) -> None:
         self.extractors.append(extractor)
         logger.info("Added extractor {}", extractor.__class__.__name__)
 
-    def add_generic(self):
+    def add_generic(self) -> None:
         self.add(GenericSink())
         self.add(GenericSource())
 
-    def reset(self):
+    def reset(self) -> None:
         for extractor in self.extractors:
             extractor.reset()
 
-    def reset_connector(self):
+    def reset_connector(self) -> None:
         for extractor in self.extractors:
             extractor.reset_connector()
 
-    def on_streaming_app_add(self, config: K8sConfig):
+    def on_streaming_app_add(self, config: K8sConfig) -> None:
         for extractor in self.extractors:
             extractor.on_streaming_app_add(config)
 
-    def on_streaming_app_delete(self, config: K8sConfig):
+    def on_streaming_app_delete(self, config: K8sConfig) -> None:
         for extractor in self.extractors:
             extractor.on_streaming_app_delete(config)
 

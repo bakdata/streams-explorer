@@ -15,7 +15,7 @@ if settings.plugins.extractors.default:
     extractor_container.add(JdbcSink())
 
 
-def load_extractors():
+def load_extractors() -> None:
     extractors = load_plugin(Extractor, all=True)
     for extractor in extractors:
         extractor_container.add(extractor())

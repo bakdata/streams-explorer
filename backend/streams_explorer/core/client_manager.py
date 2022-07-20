@@ -11,20 +11,20 @@ from pydantic import BaseModel
 class ClientManager:
     _clients: list[WebSocket] = field(init=False, default_factory=list)
 
-    async def connect(self, websocket: WebSocket):
+    async def connect(self, websocket: WebSocket) -> None:
         await websocket.accept()
         logger.info("WebSocket client {} connected", websocket.client)
         self._clients.append(websocket)
 
-    async def disconnect(self, websocket: WebSocket):
+    async def disconnect(self, websocket: WebSocket) -> None:
         await websocket.close()
         logger.info("WebSocket client {} disconnected", websocket.client)
         self._clients.remove(websocket)
 
-    async def send(self, websocket: WebSocket, obj: BaseModel):
+    async def send(self, websocket: WebSocket, obj: BaseModel) -> None:
         await websocket.send_json(obj.dict())
 
-    async def broadcast(self, obj: BaseModel):
+    async def broadcast(self, obj: BaseModel) -> None:
         data = obj.dict()
         for client in self._clients:
             await client.send_json(data)

@@ -16,16 +16,16 @@ from streams_explorer.core.config import settings
 
 
 class KafkaAdminClient:
-    def __init__(self):
+    def __init__(self) -> None:
         self._enabled: bool = settings.kafka.enable
         self._client: AdminClient
         self.__connect()
 
     @property
-    def enabled(self):
+    def enabled(self) -> bool:
         return self._enabled
 
-    def __connect(self):
+    def __connect(self) -> None:
         if self.enabled:
             self._client = AdminClient(settings.kafka.config)
 

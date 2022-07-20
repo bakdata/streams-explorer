@@ -26,7 +26,7 @@ config_parser: type[K8sConfigParser] = load_config_parser()
 
 
 class K8sApp:
-    def __init__(self, k8s_object: K8sObject):
+    def __init__(self, k8s_object: K8sObject) -> None:
         self.k8s_object = k8s_object
         self.metadata: V1ObjectMeta = k8s_object.metadata or V1ObjectMeta()
         self.attributes: dict[str, str] = {}
@@ -90,7 +90,7 @@ class K8sApp:
             return None
         return self.k8s_object.status.replicas
 
-    def setup(self):
+    def setup(self) -> None:
         self.spec = self._get_pod_spec()
         self._ignore_containers = self.get_ignore_containers()
         self.container = self.get_app_container(self.spec, self._ignore_containers)
@@ -123,12 +123,12 @@ class K8sApp:
     def class_name(self) -> str:
         return self.__class__.__name__
 
-    def __set_attributes(self):
+    def __set_attributes(self) -> None:
         self._set_labels()
         self._set_pipeline()
         self._set_annotations()
 
-    def _set_labels(self):
+    def _set_labels(self) -> None:
         labels = self.metadata.labels
         if not labels:
             return
@@ -142,11 +142,11 @@ class K8sApp:
                     f"{self.class_name} {self.name} does not have a label with the name: {key}"
                 )
 
-    def _set_pipeline(self):
+    def _set_pipeline(self) -> None:
         if self.pipeline:
             self.attributes[ATTR_PIPELINE] = self.pipeline
 
-    def _set_annotations(self):
+    def _set_annotations(self) -> None:
         if (
             self.k8s_object.spec
             and self.k8s_object.spec.template.metadata
@@ -186,10 +186,10 @@ class K8sApp:
 
 
 class K8sAppCronJob(K8sApp):
-    def __init__(self, k8s_object: V1beta1CronJob):
+    def __init__(self, k8s_object: V1beta1CronJob) -> None:
         super().__init__(k8s_object)
 
-    def setup(self):
+    def setup(self) -> None:
         self.spec = self._get_pod_spec()
         self.container = self.get_app_container(self.spec)
         self.extract_config()
@@ -203,18 +203,18 @@ class K8sAppCronJob(K8sApp):
         ):
             return self.k8s_object.spec.job_template.spec.template.spec
 
-    def __set_attributes(self):
+    def __set_attributes(self) -> None:
         self._set_labels()
         self._set_pipeline()
 
 
 class K8sAppDeployment(K8sApp):
-    def __init__(self, k8s_object: V1Deployment):
+    def __init__(self, k8s_object: V1Deployment) -> None:
         super().__init__(k8s_object)
 
 
 class K8sAppStatefulSet(K8sApp):
-    def __init__(self, k8s_object: V1StatefulSet):
+    def __init__(self, k8s_object: V1StatefulSet) -> None:
         super().__init__(k8s_object)
 
     def get_service_name(self) -> str | None:

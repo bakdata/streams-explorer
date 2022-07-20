@@ -37,7 +37,9 @@ class NodeDataFields(str, Enum):
 
 
 class DataFlowGraph:
-    def __init__(self, metric_provider: type[MetricProvider], kafka: KafkaAdminClient):
+    def __init__(
+        self, metric_provider: type[MetricProvider], kafka: KafkaAdminClient
+    ) -> None:
         self.graph = nx.DiGraph()
         self.json_graph: dict = {}
         self.pipelines: dict[str, nx.DiGraph] = {}
@@ -50,15 +52,15 @@ class DataFlowGraph:
             set
         )  # topic pattern -> set of target node ids
 
-    async def store_json_graph(self):
+    async def store_json_graph(self) -> None:
         self.json_graph = await self.get_positioned_graph()
 
-    def setup_metric_provider(self):
+    def setup_metric_provider(self) -> None:
         self.metric_provider = self.metric_provider_class(
             list(self.graph.nodes(data=True))
         )
 
-    def add_streaming_app(self, app: K8sApp):
+    def add_streaming_app(self, app: K8sApp) -> None:
         pipeline = app.attributes.get(ATTR_PIPELINE)
 
         self._add_streaming_app(self.graph, app)
@@ -67,7 +69,7 @@ class DataFlowGraph:
                 self.pipelines.setdefault(pipeline, nx.DiGraph()), app
             )
 
-    def _add_streaming_app(self, graph: nx.DiGraph, app: K8sApp):
+    def _add_streaming_app(self, graph: nx.DiGraph, app: K8sApp) -> None:
         graph.add_node(
             app.id,
             label=app.name,
@@ -94,7 +96,9 @@ class DataFlowGraph:
         for extra_pattern in app.extra_input_patterns:
             self._enqueue_input_pattern(extra_pattern, app.id)
 
-    def add_connector(self, connector: KafkaConnector, pipeline: str | None = None):
+    def add_connector(
+        self, connector: KafkaConnector, pipeline: str | None = None
+    ) -> None:
         graph = self.graph
         if pipeline is not None:
             graph = self.pipelines[pipeline]
@@ -123,7 +127,7 @@ class DataFlowGraph:
                 for pipeline in pipelines:
                     self.add_connector(connector, pipeline=pipeline)
 
-    def add_source(self, source: Source):
+    def add_source(self, source: Source) -> None:
         node: GraphNode = (
             source.name,
             {
@@ -134,7 +138,7 @@ class DataFlowGraph:
         edge: GraphEdge = (source.name, source.target)
         self.add_to_graph(node, edge)
 
-    def add_sink(self, sink: Sink):
+    def add_sink(self, sink: Sink) -> None:
         node: GraphNode = (
             sink.name,
             {NodeDataFields.LABEL: sink.name, NodeDataFields.NODE_TYPE: sink.node_type},
@@ -142,7 +146,9 @@ class DataFlowGraph:
         edge: GraphEdge = (sink.source, sink.name)
         self.add_to_graph(node, edge, reverse=True)
 
-    def add_to_graph(self, node: GraphNode, edge: GraphEdge, reverse=False):
+    def add_to_graph(
+        self, node: GraphNode, edge: GraphEdge, reverse: bool = False
+    ) -> None:
         node_name, node_data = node
         self.graph.update(nodes=[node], edges=[edge])
 
@@ -201,7 +207,7 @@ class DataFlowGraph:
         return pipelines
 
     @staticmethod
-    def _add_topic(graph: nx.DiGraph, name: str):
+    def _add_topic(graph: nx.DiGraph, name: str) -> None:
         graph.add_node(name, label=name, node_type=NodeTypesEnum.TOPIC)
 
     @staticmethod
@@ -216,7 +222,7 @@ class DataFlowGraph:
         }
 
     @staticmethod
-    def _add_input_topic(graph: nx.DiGraph, app_id: str, topic_name: str):
+    def _add_input_topic(graph: nx.DiGraph, app_id: str, topic_name: str) -> None:
         graph.add_edge(topic_name, app_id)
 
     def _add_output_topic(
@@ -224,17 +230,17 @@ class DataFlowGraph:
         graph: nx.DiGraph,
         app_id: str,
         topic_name: str,
-    ):
+    ) -> None:
         self._add_topic(graph, topic_name)
         graph.add_edge(app_id, topic_name)
 
-    def _enqueue_input_pattern(self, pattern: str, node_id: str):
+    def _enqueue_input_pattern(self, pattern: str, node_id: str) -> None:
         """
         Enqueue a input topic pattern for an app or Kafka Connector
         """
         self._topic_pattern_queue[pattern].add(node_id)
 
-    def apply_input_pattern_edges(self):
+    def apply_input_pattern_edges(self) -> None:
         topics = DataFlowGraph._filter_topic_node_ids(self.graph)
         kafka_topics = self.kafka.get_all_topic_names() if self.kafka.enabled else set()
         for pattern, node_ids in self._topic_pattern_queue.items():
@@ -271,7 +277,7 @@ class DataFlowGraph:
         pattern: str,
         pipeline: str | None,
         add_topic: bool = False,
-    ):
+    ) -> None:
         for matched_topic in matching_unknown_kafka_topics:
             if add_topic:
                 self._add_topic(self.graph, matched_topic)
@@ -283,7 +289,7 @@ class DataFlowGraph:
 
     def resolve_topic_pattern_in_all_graph(
         self, matched_topic: str, node_id: str, pattern: str
-    ):
+    ) -> None:
         # resolve topic pattern in overall graph containing all pipelines
         if settings.graph.resolve.input_pattern_topics.all:
             # connect topic to graph
@@ -291,14 +297,16 @@ class DataFlowGraph:
         else:
             self.add_pattern_as_topic(self.graph, node_id, pattern)
 
-    def add_pattern_as_topic(self, graph: nx.DiGraph, node_id: str, pattern: str):
+    def add_pattern_as_topic(
+        self, graph: nx.DiGraph, node_id: str, pattern: str
+    ) -> None:
         # visualize the pattern as topic
         self._add_topic(graph, pattern)
         graph.add_edge(pattern, node_id)
 
     def resolve_topic_pattern_in_pipeline(
         self, matched_topic: str, node_id: str, pipeline: str, pattern: str
-    ):
+    ) -> None:
         # resolve topic patterns in pipelines
         if settings.graph.resolve.input_pattern_topics.pipelines:
             if matched_topic not in self.pipelines[pipeline].nodes:
@@ -313,7 +321,7 @@ class DataFlowGraph:
         graph: nx.DiGraph,
         app_id: str,
         topic_name: str,
-    ):
+    ) -> None:
         graph.add_node(
             topic_name,
             **{
@@ -323,7 +331,7 @@ class DataFlowGraph:
         )
         graph.add_edge(app_id, topic_name)
 
-    def reset(self):
+    def reset(self) -> None:
         self.graph.clear()
         self.json_graph.clear()
         self.pipelines.clear()

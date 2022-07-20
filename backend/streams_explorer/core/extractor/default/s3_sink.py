@@ -29,4 +29,3 @@ class S3Sink(Extractor):
                 config=config,
                 type=KafkaConnectorTypesEnum.SINK,
             )
-        return None

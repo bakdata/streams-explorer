@@ -29,4 +29,3 @@ class JdbcSink(Extractor):
                 config=config,
                 type=KafkaConnectorTypesEnum.SINK,
             )
-        return None

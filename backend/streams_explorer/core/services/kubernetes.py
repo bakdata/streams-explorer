@@ -10,7 +10,9 @@ from kubernetes_asyncio.client import (
     EventsV1Event,
     V1beta1CronJob,
     V1Deployment,
+    V1DeploymentList,
     V1StatefulSet,
+    V1StatefulSetList,
 )
 from loguru import logger
 
@@ -43,10 +45,10 @@ class Kubernetes:
     context = settings.k8s.deployment.context
     namespaces = settings.k8s.deployment.namespaces
 
-    def __init__(self, streams_explorer: StreamsExplorer):
+    def __init__(self, streams_explorer: StreamsExplorer) -> None:
         self.streams_explorer = streams_explorer
 
-    async def setup(self):
+    async def setup(self) -> None:
         try:
             if settings.k8s.deployment.cluster:
                 logger.info("Setup K8s environment in cluster")
@@ -65,13 +67,13 @@ class Kubernetes:
         self.k8s_batch_client = kubernetes_asyncio.client.BatchV1beta1Api()
         self.k8s_events_client = kubernetes_asyncio.client.EventsV1Api()
 
-    async def watch(self):
-        def list_deployments(namespace: str, *args, **kwargs):
+    async def watch(self) -> None:
+        def list_deployments(namespace: str, *args, **kwargs) -> V1DeploymentList:
             return self.k8s_app_client.list_namespaced_deployment(
-                *args, namespace=namespace, **kwargs
+                *args, namespace=namespace, **kwargs, async_req=True
             )
 
-        def list_stateful_sets(namespace: str, *args, **kwargs):
+        def list_stateful_sets(namespace: str, *args, **kwargs) -> V1StatefulSetList:
             return self.k8s_app_client.list_namespaced_stateful_set(
                 *args, namespace=namespace, **kwargs
             )
@@ -124,7 +126,7 @@ class Kubernetes:
         self,
         namespace: str,
         resource: K8sResource,
-    ):
+    ) -> None:
         return_type = resource.return_type.__name__ if resource.return_type else None
         async with kubernetes_asyncio.watch.Watch(return_type) as w:
             async with w.stream(resource, namespace) as stream:

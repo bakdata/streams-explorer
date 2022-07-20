@@ -1,13 +1,17 @@
 from __future__ import annotations
 
+from typing import TypeVar
+
 from loguru import logger
 
 from streams_explorer.core.config import settings
 from streams_explorer.core.k8s_app import K8sApp
 from streams_explorer.models.node_information import NodeInfoListItem, NodeInfoType
 
+V = TypeVar("V")
 
-def find(element: str, json: dict):
+
+def find(element: str, json: dict) -> dict:
     keys = element.split(".")
     key_value = json
     for key in keys:
@@ -15,18 +19,18 @@ def find(element: str, json: dict):
     return key_value
 
 
-def get_info(key: str, config: dict):
+def get_info(key: str, config: dict[str, V]) -> V | dict[str, V] | None:
     if value := config.get(key):
         return value
-    else:
-        try:
-            return find(key, config)
-        except KeyError:
-            return None
+
+    try:
+        return find(key, config)
+    except KeyError:
+        return None
 
 
-def get_type(value):
-    if type(value) is dict:
+def get_type(value) -> NodeInfoType:
+    if isinstance(value, dict):
         return NodeInfoType.JSON
     return NodeInfoType.BASIC
 

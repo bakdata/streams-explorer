@@ -43,7 +43,7 @@ from streams_explorer.models.node_information import (
 class StreamsExplorer:
     def __init__(
         self, linking_service: LinkingService, metric_provider: type[MetricProvider]
-    ):
+    ) -> None:
         self.applications: dict[str, K8sApp] = {}
         self.kafka_connectors: list[KafkaConnector] = []
         self.kubernetes = Kubernetes(self)
@@ -55,13 +55,13 @@ class StreamsExplorer:
         self.client_manager = ClientManager()
         self.modified: bool = True
 
-    async def setup(self):
+    async def setup(self) -> None:
         await self.kubernetes.setup()
 
-    async def watch(self):
+    async def watch(self) -> None:
         await self.kubernetes.watch()
 
-    async def update_graph(self):
+    async def update_graph(self) -> None:
         if not self.modified:
             return  # skip unnecessary re-render
         logger.info("Update graph")
@@ -145,7 +145,7 @@ class StreamsExplorer:
                     info=self.linking_service.sink_source_info[node_type],
                 )
 
-    def get_link(self, node_id: str, link_type: str | None):
+    def get_link(self, node_id: str, link_type: str | None) -> str | None:
         node_type = self.data_flow.get_node_type(node_id)
         if node_type == NodeTypesEnum.CONNECTOR:
             config = KafkaConnect.get_connector_config(node_id)
@@ -215,35 +215,35 @@ class StreamsExplorer:
             # app.note = event["note"] # TODO
             await self._update_clients_delta(app)
 
-    def update_connectors(self):
+    def update_connectors(self) -> None:
         extractor_container.reset_connector()
         logger.info("Retrieve Kafka connectors")
         self.kafka_connectors = KafkaConnect.connectors()
         self.modified = True
 
-    async def update_client_full(self, client: WebSocket):
+    async def update_client_full(self, client: WebSocket) -> None:
         """Send all current application states to client."""
         for app in self.applications.values():
             await self.client_manager.send(client, app.to_state_update())
 
-    async def _update_clients_delta(self, app: K8sApp):
+    async def _update_clients_delta(self, app: K8sApp) -> None:
         """Broadcast a new application state to clients."""
         await self.client_manager.broadcast(app.to_state_update())
 
-    async def __add_app(self, app: K8sApp):
+    async def __add_app(self, app: K8sApp) -> None:
         if app.is_streams_app():
             self.applications[app.id] = app
             self.modified = True
             extractor_container.on_streaming_app_add(app.config)
             await self._update_clients_delta(app)
 
-    def __remove_app(self, app: K8sApp):
+    def __remove_app(self, app: K8sApp) -> None:
         if app.is_streams_app():
             self.applications.pop(app.id)
             self.modified = True
             extractor_container.on_streaming_app_delete(app.config)
 
-    def __create_graph(self):
+    def __create_graph(self) -> None:
         logger.info("Setup pipeline graph")
         for _, app in self.applications.items():
             self.data_flow.add_streaming_app(app)

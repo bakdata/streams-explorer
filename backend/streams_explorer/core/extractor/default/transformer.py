@@ -28,7 +28,7 @@ class RegexRouterTransformerConfig(RouterTransformerConfig):
 
     _rx: re.Pattern[str] = PrivateAttr()
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
         if self.regex is not None:
             self._rx = re.compile(self.regex)

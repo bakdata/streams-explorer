@@ -7,7 +7,7 @@ from streams_explorer.models.node_information import NodeInfoListItem, NodeInfoT
 
 
 class DefaultLinker(LinkingService):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.sink_source_redirects = {"elasticsearch-index"}
         self.sink_source_info = {
@@ -85,11 +85,13 @@ class DefaultLinker(LinkingService):
             elif link_type == "kowl":
                 return f"{settings.kowl.url}/groups/{consumer_group}"
 
-    def get_sink_source_redirects(self, node_type: str, sink_source_name: str):
+    def get_sink_source_redirects(
+        self, node_type: str, sink_source_name: str
+    ) -> str | None:
         if node_type == "elasticsearch-index":
             return settings.esindex.url
 
-    def add_message_provider(self, value: str):
+    def add_message_provider(self, value: str) -> None:
         self.add_topic_info_item(
             NodeInfoListItem(name="Message Viewer", value=value, type=NodeInfoType.LINK)
         )
@@ -99,7 +101,7 @@ class DefaultLinker(LinkingService):
         self.add_streaming_app_info_item(consumer_link)
         self.add_connector_info_item(consumer_link)
 
-    def add_logging_provider(self, value: str):
+    def add_logging_provider(self, value: str) -> None:
         self.add_streaming_app_info_item(
             NodeInfoListItem(name="Logs", value=value, type=NodeInfoType.LINK),
         )

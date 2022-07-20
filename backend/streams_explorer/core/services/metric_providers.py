@@ -20,7 +20,7 @@ class PrometheusMetric(Enum):
         query: str,
         key: str,
         value_transformer: Callable[[str], float],
-    ):
+    ) -> None:
         self.metric: str = metric
         self.query: str = query
         self._k: str = key
@@ -89,14 +89,14 @@ def is_topic(node: GraphNode) -> bool:
 
 
 class MetricProvider:
-    def __init__(self, nodes: list[GraphNode]):
+    def __init__(self, nodes: list[GraphNode]) -> None:
         self._nodes: list[GraphNode] = sort_topics_first(nodes)
         self._metrics: list[Metric] = []
         self._data: dict[str, dict] = {}
         self._last_refresh: datetime = datetime.min
         self._cache_ttl: timedelta = timedelta(0)
 
-    async def refresh_data(self):
+    async def refresh_data(self) -> None:
         pass
 
     @staticmethod
@@ -106,7 +106,7 @@ class MetricProvider:
             return f"connect-{node_id}"
         return node.get(settings.k8s.consumer_group_annotation)
 
-    async def update(self):
+    async def update(self) -> None:
         await self.refresh_data()
         self._metrics = [
             Metric(
@@ -144,7 +144,7 @@ class PrometheusException(Exception):
 
 
 class PrometheusMetricProvider(MetricProvider):
-    def __init__(self, nodes: list[GraphNode]):
+    def __init__(self, nodes: list[GraphNode]) -> None:
         super().__init__(nodes)
         self._api_base = f"{settings.prometheus.url}/api/v1"
         # min refresh interval (set by the frontend) is 10s, intermediate requests should be cached
@@ -169,13 +169,13 @@ class PrometheusMetricProvider(MetricProvider):
                 logger.warning("Prometheus query '{}' timed out", query)
         raise PrometheusException
 
-    async def refresh_data(self):
+    async def refresh_data(self) -> None:
         logger.debug("Pulling metrics from Prometheus")
         tasks = []
         for metric in PrometheusMetric:
             tasks.append(asyncio.create_task(self._process_metric(metric)))
         await asyncio.gather(*tasks)
 
-    async def _process_metric(self, metric: PrometheusMetric):
+    async def _process_metric(self, metric: PrometheusMetric) -> None:
         data = await self._pull_metric(metric)
         self._data[metric.metric] = metric.transform(data)
