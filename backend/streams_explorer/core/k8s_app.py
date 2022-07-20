@@ -1,12 +1,6 @@
 from __future__ import annotations
 
-from typing import Union
-
-try:
-    from typing import TypeAlias  # type: ignore[attr-defined]
-except ImportError:
-    # Python <3.10
-    from typing_extensions import TypeAlias
+from typing import TypeAlias
 
 from kubernetes_asyncio.client import (
     V1beta1CronJob,
@@ -26,7 +20,7 @@ from streams_explorer.models.k8s import K8sConfig, K8sReason
 
 ATTR_PIPELINE = "pipeline"
 
-K8sObject: TypeAlias = Union[V1Deployment, V1StatefulSet, V1beta1CronJob]
+K8sObject: TypeAlias = V1Deployment | V1StatefulSet | V1beta1CronJob
 
 config_parser: type[K8sConfigParser] = load_config_parser()
 
