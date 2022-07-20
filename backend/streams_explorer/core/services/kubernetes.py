@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING, Callable, NamedTuple, TypedDict
+from typing import TYPE_CHECKING, Any, Awaitable, Callable, NamedTuple, TypedDict
 
 import kubernetes_asyncio.client
 import kubernetes_asyncio.config
@@ -23,9 +23,9 @@ if TYPE_CHECKING:
 
 
 class K8sResource(NamedTuple):
-    resource: Callable
+    resource: Callable[..., Any]
     return_type: type | None
-    callback: Callable
+    callback: Callable[..., Awaitable[None]]
     delay: int = 0
 
 
@@ -110,26 +110,23 @@ class Kubernetes:
             ),
         )
 
-        for resource, return_type, callback, delay in resources:
-            await asyncio.sleep(delay)
+        for resource in resources:
+            await asyncio.sleep(resource.delay)
             for namespace in self.namespaces:
                 asyncio.create_task(
                     self.__watch_namespace(
-                        resource,
                         namespace,
-                        return_type.__name__ if return_type else None,
-                        callback,
+                        resource,
                     )
                 )
 
     async def __watch_namespace(
         self,
-        resource: Callable,
         namespace: str,
-        return_type: str | None,
-        callback: Callable,
+        resource: K8sResource,
     ):
+        return_type = resource.return_type.__name__ if resource.return_type else None
         async with kubernetes_asyncio.watch.Watch(return_type) as w:
             async with w.stream(resource, namespace) as stream:
                 async for event in stream:
-                    await callback(event)
+                    await resource.callback(event)

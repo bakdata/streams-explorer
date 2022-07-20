@@ -14,11 +14,17 @@ from streams_explorer.models.node_types import NodeTypesEnum
 
 
 class PrometheusMetric(Enum):
-    def __init__(self, metric: str, query: str, key: str, value_transformer: Callable):
+    def __init__(
+        self,
+        metric: str,
+        query: str,
+        key: str,
+        value_transformer: Callable[[str], float],
+    ):
         self.metric: str = metric
         self.query: str = query
         self._k: str = key
-        self._v: Callable = value_transformer
+        self._v: Callable[[str], float] = value_transformer
 
     MESSAGES_IN = (
         "messages_in",
