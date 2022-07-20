@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from fastapi import APIRouter, Depends, HTTPException
 from loguru import logger
 from starlette import status

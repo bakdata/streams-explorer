@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from streams_explorer.core.config import settings
 from streams_explorer.core.k8s_app import K8sApp
 from streams_explorer.core.services.linking_services import LinkingService

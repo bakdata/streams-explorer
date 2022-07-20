@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from fastapi import APIRouter, Depends, WebSocket
 from fastapi.exceptions import HTTPException
 from starlette.websockets import WebSocketDisconnect

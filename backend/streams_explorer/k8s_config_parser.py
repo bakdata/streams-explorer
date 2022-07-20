@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from loguru import logger
 
 from streams_explorer.core.k8s_config_parser import (

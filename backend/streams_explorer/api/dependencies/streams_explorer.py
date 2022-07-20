@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from fastapi import FastAPI
 from starlette.requests import Request
 from starlette.websockets import WebSocket

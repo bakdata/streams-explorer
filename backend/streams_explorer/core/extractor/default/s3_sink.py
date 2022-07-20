@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from streams_explorer.core.extractor.extractor import Extractor
 from streams_explorer.models.kafka_connector import (
     KafkaConnector,

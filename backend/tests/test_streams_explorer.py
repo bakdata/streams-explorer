@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import pytest
 from kubernetes_asyncio.client import V1beta1CronJob
 from pytest import MonkeyPatch

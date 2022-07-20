@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from collections import defaultdict
 
 from streams_explorer.core.k8s_app import K8sApp

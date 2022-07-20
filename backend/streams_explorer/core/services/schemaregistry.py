@@ -1,8 +1,6 @@
-from __future__ import annotations
-
 import json
 from functools import wraps
-from typing import Callable, Concatenate, ParamSpec, TypeVar
+from typing import Callable, ParamSpec, TypeVar
 
 import httpx
 from loguru import logger
