@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import json
-from typing import Callable, ParamSpec, TypeVar
+from functools import wraps
+from typing import Callable, Concatenate, ParamSpec, TypeVar
 
 import httpx
 from loguru import logger
@@ -15,24 +16,22 @@ T = TypeVar("T")
 P = ParamSpec("P")
 
 
-def default_return():
-    """Returns an empty instance of the functions return type if Schema Registry is disabled."""
+def default_return(func: Callable[P, T]) -> Callable[P, T]:
+    """Decorator which returns an empty instance of the function's return type, if Schema Registry is disabled."""
 
-    def decorator(func: Callable[P, T]) -> Callable[P, T]:
-        def inner(*args: P.args, **kw: P.kwargs) -> T:
-            if url is None:
-                ret: type[T] = eval(func.__annotations__["return"])
-                return ret()
-            return func(*args, **kw)
+    @wraps(func)
+    def inner(*args: P.args, **kwargs: P.kwargs) -> T:
+        if url is None:
+            ret: type[T] = eval(func.__annotations__["return"])
+            return ret()
+        return func(*args, **kwargs)
 
-        return inner
-
-    return decorator
+    return inner
 
 
 class SchemaRegistry:
     @staticmethod
-    @default_return()
+    @default_return
     def get_versions(topic: str) -> list[int]:
         logger.info(f"Fetch schema versions for topic {topic}")
         response = httpx.get(f"{url}/subjects/{topic}-value/versions/")
@@ -43,7 +42,7 @@ class SchemaRegistry:
         return []
 
     @staticmethod
-    @default_return()
+    @default_return
     def get_schema(topic: str, version: int = 1) -> dict:
         try:
             logger.info(f"Fetch schema version {version} for {topic}")
