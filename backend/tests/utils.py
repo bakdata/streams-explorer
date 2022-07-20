@@ -232,28 +232,29 @@ def get_template(
 ) -> V1PodTemplateSpec:
     env = None
     args = None
-    if config_type == ConfigType.ENV:
-        env = get_env(
-            input_topics,
-            output_topic,
-            error_topic,
-            input_pattern,
-            multiple_inputs,
-            multiple_outputs,
-            extra_input_patterns=extra_input_patterns,
-            env_prefix=env_prefix,
-            extra=extra,
-        )
-    elif config_type == ConfigType.ARGS:
-        args = get_args(
-            input_topics,
-            output_topic,
-            error_topic,
-            multiple_inputs,
-            multiple_outputs,
-            extra_input_patterns,
-            extra,
-        )
+    match config_type:
+        case ConfigType.ENV:
+            env = get_env(
+                input_topics,
+                output_topic,
+                error_topic,
+                input_pattern,
+                multiple_inputs,
+                multiple_outputs,
+                extra_input_patterns=extra_input_patterns,
+                env_prefix=env_prefix,
+                extra=extra,
+            )
+        case ConfigType.ARGS:
+            args = get_args(
+                input_topics,
+                output_topic,
+                error_topic,
+                multiple_inputs,
+                multiple_outputs,
+                extra_input_patterns,
+                extra,
+            )
     container = V1Container(name="test-container", env=env, args=args)
     pod_spec = V1PodSpec(containers=[container])
     spec_metadata = None

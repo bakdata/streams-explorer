@@ -138,16 +138,16 @@ class StreamsExplorer:
 
     def get_link(self, node_id: str, link_type: str) -> str | None:
         node_type = self.data_flow.get_node_type(node_id)
-        if node_type == NodeTypesEnum.CONNECTOR:
-            config = KafkaConnect.get_connector_config(node_id)
-            return self.linking_service.get_redirect_connector(config, link_type)
-        if node_type == NodeTypesEnum.TOPIC or node_type == NodeTypesEnum.ERROR_TOPIC:
-            return self.linking_service.get_redirect_topic(node_id, link_type)
-        if node_type == NodeTypesEnum.STREAMING_APP:
-            return self.linking_service.get_redirect_streaming_app(
-                self.applications[node_id], link_type
-            )
-
+        match node_type:
+            case NodeTypesEnum.CONNECTOR:
+                config = KafkaConnect.get_connector_config(node_id)
+                return self.linking_service.get_redirect_connector(config, link_type)
+            case NodeTypesEnum.TOPIC | NodeTypesEnum.ERROR_TOPIC:
+                return self.linking_service.get_redirect_topic(node_id, link_type)
+            case NodeTypesEnum.STREAMING_APP:
+                return self.linking_service.get_redirect_streaming_app(
+                    self.applications[node_id], link_type
+                )
         if node_type in self.linking_service.sink_source_redirects:
             return self.linking_service.get_sink_source_redirects(node_type, node_id)
 
@@ -157,29 +157,21 @@ class StreamsExplorer:
             f"{item.metadata.namespace} {item.__class__.__name__} {update['type']}: {item.metadata.name}"  # pyright: ignore[reportOptionalMemberAccess]
         )
 
+        app: K8sApp | None = None
         if isinstance(item, V1beta1CronJob):
-            await self._handle_cron_job_update(update, item)
-            return
+            app = extractor_container.on_cron_job(item)
+        else:
+            app = K8sApp.factory(item)
+        if app:
+            await self._handle_app_update(update["type"], app)
 
-        app = K8sApp.factory(item)
-        if update["type"] in (
-            K8sDeploymentUpdateType.ADDED,
-            K8sDeploymentUpdateType.MODIFIED,
-        ):
-            await self.__add_app(app)
-        elif update["type"] == K8sDeploymentUpdateType.DELETED:
-            self.__remove_app(app)
-
-    async def _handle_cron_job_update(
-        self, update: K8sDeploymentUpdate, cron_job: V1beta1CronJob
+    async def _handle_app_update(
+        self, type: K8sDeploymentUpdateType, app: K8sApp
     ) -> None:
-        if app := extractor_container.on_cron_job(cron_job):
-            if update["type"] in (
-                K8sDeploymentUpdateType.ADDED,
-                K8sDeploymentUpdateType.MODIFIED,
-            ):
+        match type:
+            case K8sDeploymentUpdateType.ADDED | K8sDeploymentUpdateType.MODIFIED:
                 await self.__add_app(app)
-            elif update["type"] == K8sDeploymentUpdateType.DELETED:
+            case K8sDeploymentUpdateType.DELETED:
                 self.__remove_app(app)
 
     async def handle_event(self, raw_event: K8sEvent) -> None:
