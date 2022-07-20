@@ -162,8 +162,9 @@ class PrometheusMetricProvider(MetricProvider):
             r = await self._client.get("/query", params={"query": query})
             r.raise_for_status()
             data: dict = r.json()
-            if data and "data" in data and "result" in data["data"]:
-                return data["data"]["result"]
+            return data["data"]["result"]
+        except KeyError:
+            pass
         except httpx.ReadTimeout:
             logger.warning("Prometheus query '{}' timed out", query)
         except httpx.ConnectError:
