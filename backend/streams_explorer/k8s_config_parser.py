@@ -11,11 +11,7 @@ from streams_explorer.plugins import load_plugin
 
 def load_config_parser() -> type[K8sConfigParser]:
     parser = load_plugin(K8sConfigParser)
-    if (
-        not parser
-        or not isinstance(parser, type)
-        or not issubclass(parser, K8sConfigParser)
-    ):
+    if not parser:
         logger.info("Using default K8sConfigParser")
         return StreamsBootstrapEnvParser
     logger.info(f"Using custom K8sConfigParser: {parser.__name__}")
