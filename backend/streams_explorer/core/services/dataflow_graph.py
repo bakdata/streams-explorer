@@ -42,7 +42,7 @@ class DataFlowGraph:
         self.metric_provider: MetricProvider | None = None
         self.kafka = kafka
 
-        self._topic_pattern_queue: dict[str, set[str]] = defaultdict(
+        self._topic_pattern_queue: defaultdict[str, set[str]] = defaultdict(
             set
         )  # topic pattern -> set of target node ids
 

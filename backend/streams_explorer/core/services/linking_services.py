@@ -12,7 +12,9 @@ class LinkingService:
         self._connector_info: list[NodeInfoListItem] = []
         self._streaming_app_info: list[NodeInfoListItem] = []
         self._topic_info: list[NodeInfoListItem] = []
-        self._sink_source_info: dict[str, list[NodeInfoListItem]] = defaultdict(list)
+        self._sink_source_info: defaultdict[str, list[NodeInfoListItem]] = defaultdict(
+            list
+        )
 
     @property
     def connector_info(self):
