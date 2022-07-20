@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 from functools import wraps
 from typing import Callable, ParamSpec, TypeVar
@@ -20,8 +22,11 @@ def default_return(func: Callable[P, T]) -> Callable[P, T]:
     @wraps(func)
     def inner(*args: P.args, **kwargs: P.kwargs) -> T:
         if url is None:
-            ret: type[T] = eval(func.__annotations__["return"])
-            return ret()
+            try:
+                typ = eval(func.__annotations__["return"])
+                return typ()
+            except KeyError:
+                raise Exception(f"'{func.__name__}' is missing return type annotation")
         return func(*args, **kwargs)
 
     return inner
