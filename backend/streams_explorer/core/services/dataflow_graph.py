@@ -147,9 +147,9 @@ class DataFlowGraph:
         self.graph.update(nodes=[node], edges=[edge])
 
         if pipelines := self.find_associated_pipelines(node_name, reverse=reverse):
+            target = (set(edge) - {node_name}).pop()
             for pipeline in pipelines:
                 # verify target exists in pipeline graph
-                target = (set(edge) - {node_name}).pop()
                 if not self.pipelines[pipeline].has_node(target):
                     logger.debug(
                         f"'{node_name}' doesn't belong to pipeline '{pipeline}', '{target}' is not a member of graph"
