@@ -15,7 +15,11 @@ from streams_explorer.core.node_info_extractor import (
     get_displayed_information_deployment,
     get_displayed_information_topic,
 )
-from streams_explorer.core.services.dataflow_graph import DataFlowGraph, NodeTypesEnum
+from streams_explorer.core.services.dataflow_graph import (
+    DataFlowGraph,
+    NodeTypesEnum,
+    PipelineNotFound,
+)
 from streams_explorer.core.services.kafka_admin_client import KafkaAdminClient
 from streams_explorer.core.services.kafkaconnect import KafkaConnect
 from streams_explorer.core.services.kubernetes import (
@@ -74,7 +78,10 @@ class StreamsExplorer:
     async def get_positioned_pipeline_json_graph(
         self, pipeline_name: str
     ) -> dict | None:
-        return await self.data_flow.get_positioned_pipeline_graph(pipeline_name)
+        try:
+            return await self.data_flow.get_positioned_pipeline_graph(pipeline_name)
+        except PipelineNotFound:
+            return None
 
     def get_pipeline_names(self) -> list[str]:
         return list(self.data_flow.pipelines.keys())

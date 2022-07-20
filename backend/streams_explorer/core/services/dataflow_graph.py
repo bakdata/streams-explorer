@@ -27,6 +27,10 @@ class NodeNotFound(Exception):
     pass
 
 
+class PipelineNotFound(Exception):
+    pass
+
+
 class NodeDataFields(str, Enum):
     NODE_TYPE = "node_type"
     LABEL = "label"
@@ -154,9 +158,9 @@ class DataFlowGraph:
                 self.pipelines[pipeline].add_node(node_name, **node_data)
                 self.pipelines[pipeline].add_edge(*edge)
 
-    async def get_positioned_pipeline_graph(self, pipeline_name: str) -> dict | None:
+    async def get_positioned_pipeline_graph(self, pipeline_name: str) -> dict:
         if pipeline_name not in self.pipelines:
-            return None  # TODO: raise exception instead of return
+            raise PipelineNotFound()
         # caching
         if pipeline_name not in self.json_pipelines:
             self.json_pipelines[pipeline_name] = await self.__get_positioned_json_graph(
