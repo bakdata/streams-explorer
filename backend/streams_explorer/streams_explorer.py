@@ -136,7 +136,7 @@ class StreamsExplorer:
                     info=self.linking_service.sink_source_info[node_type],
                 )
 
-    def get_link(self, node_id: str, link_type: str | None) -> str | None:
+    def get_link(self, node_id: str, link_type: str) -> str | None:
         node_type = self.data_flow.get_node_type(node_id)
         if node_type == NodeTypesEnum.CONNECTOR:
             config = KafkaConnect.get_connector_config(node_id)

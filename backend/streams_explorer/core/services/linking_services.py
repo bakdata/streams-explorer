@@ -50,15 +50,13 @@ class LinkingService:
     ) -> None:
         self._sink_source_info = defaultdict(list, sink_source_info)
 
-    def get_redirect_connector(self, config: dict, link_type: str | None) -> str | None:
+    def get_redirect_connector(self, config: dict, link_type: str) -> str | None:
         pass
 
-    def get_redirect_topic(self, topic_name: str, link_type: str | None) -> str | None:
+    def get_redirect_topic(self, topic_name: str, link_type: str) -> str | None:
         pass
 
-    def get_redirect_streaming_app(
-        self, k8s_app: K8sApp, link_type: str | None
-    ) -> str | None:
+    def get_redirect_streaming_app(self, k8s_app: K8sApp, link_type: str) -> str | None:
         pass
 
     def get_sink_source_redirects(

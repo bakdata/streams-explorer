@@ -221,7 +221,7 @@ export const useGetNodeSchemaApiNodeNodeIdSchemaVersionGet = ({node_id, version,
 
 
 export interface GetLinkingApiNodeLinkingNodeIdGetQueryParams {
-  link_type?: string;
+  link_type: string;
 }
 
 export interface GetLinkingApiNodeLinkingNodeIdGetPathParams {

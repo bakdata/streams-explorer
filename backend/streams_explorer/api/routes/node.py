@@ -39,7 +39,7 @@ async def get_node_schema(node_id: str, version: int):
 @router.get("/linking/{node_id}", response_model=str)
 def get_linking(
     node_id: str,
-    link_type: str | None = None,
+    link_type: str,
     streams_explorer: StreamsExplorer = Depends(get_streams_explorer),
 ):
     url = streams_explorer.get_link(node_id, link_type)
