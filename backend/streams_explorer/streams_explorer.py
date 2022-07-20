@@ -15,11 +15,7 @@ from streams_explorer.core.node_info_extractor import (
     get_displayed_information_deployment,
     get_displayed_information_topic,
 )
-from streams_explorer.core.services.dataflow_graph import (
-    DataFlowGraph,
-    NodeTypesEnum,
-    PipelineNotFound,
-)
+from streams_explorer.core.services.dataflow_graph import DataFlowGraph, NodeTypesEnum
 from streams_explorer.core.services.kafka_admin_client import KafkaAdminClient
 from streams_explorer.core.services.kafkaconnect import KafkaConnect
 from streams_explorer.core.services.kubernetes import (
