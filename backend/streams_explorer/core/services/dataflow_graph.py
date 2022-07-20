@@ -124,22 +124,22 @@ class DataFlowGraph:
                     self.add_connector(connector, pipeline=pipeline)
 
     def add_source(self, source: Source):
-        node = (
+        node: GraphNode = (
             source.name,
             {
                 NodeDataFields.LABEL: source.name,
                 NodeDataFields.NODE_TYPE: source.node_type,
             },
         )
-        edge = (source.name, source.target)
+        edge: GraphEdge = (source.name, source.target)
         self.add_to_graph(node, edge)
 
     def add_sink(self, sink: Sink):
-        node = (
+        node: GraphNode = (
             sink.name,
             {NodeDataFields.LABEL: sink.name, NodeDataFields.NODE_TYPE: sink.node_type},
         )
-        edge = (sink.source, sink.name)
+        edge: GraphEdge = (sink.source, sink.name)
         self.add_to_graph(node, edge, reverse=True)
 
     def add_to_graph(self, node: GraphNode, edge: GraphEdge, reverse=False):
