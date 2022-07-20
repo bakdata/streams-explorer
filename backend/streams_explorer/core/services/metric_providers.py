@@ -144,27 +144,33 @@ class PrometheusException(Exception):
 class PrometheusMetricProvider(MetricProvider):
     def __init__(self, nodes: list[GraphNode]) -> None:
         super().__init__(nodes)
-        self._api_base = f"{settings.prometheus.url}/api/v1"
+        self._client = httpx.AsyncClient(
+            base_url=f"{settings.prometheus.url}/api/v1",
+        )
         # min refresh interval (set by the frontend) is 10s, intermediate requests should be cached
         self._cache_ttl = timedelta(seconds=9)
 
     async def _pull_metric(self, metric: PrometheusMetric) -> list:
         try:
             return await self._query(metric.query)
-        except PrometheusException as e:
-            logger.error(f"Error pulling {metric}: {e}")
-        return []
+        except PrometheusException:
+            logger.error("Error pulling {}", metric)
+            return []
 
     async def _query(self, query: str) -> list:
-        async with httpx.AsyncClient(base_url=self._api_base) as client:
-            try:
-                r = await client.get("/query", params={"query": query})
-                if r.status_code == httpx.codes.OK:
-                    data = r.json()
-                    if data and "data" in data and "result" in data["data"]:
-                        return data["data"]["result"]
-            except httpx.ReadTimeout:
-                logger.warning("Prometheus query '{}' timed out", query)
+        try:
+            r = await self._client.get("/query", params={"query": query})
+            r.raise_for_status()
+            data: dict = r.json()
+            if data and "data" in data and "result" in data["data"]:
+                return data["data"]["result"]
+        except httpx.ReadTimeout:
+            logger.warning("Prometheus query '{}' timed out", query)
+        except httpx.ConnectError:
+            logger.error("Prometheus connection failed")
+        except httpx.HTTPError as e:
+            raise PrometheusException from e
+
         raise PrometheusException
 
     async def refresh_data(self) -> None:
