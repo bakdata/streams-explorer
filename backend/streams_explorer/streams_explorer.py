@@ -75,13 +75,8 @@ class StreamsExplorer:
     def get_positioned_json_graph(self) -> dict:
         return self.data_flow.json_graph
 
-    async def get_positioned_pipeline_json_graph(
-        self, pipeline_name: str
-    ) -> dict | None:
-        try:
-            return await self.data_flow.get_positioned_pipeline_graph(pipeline_name)
-        except PipelineNotFound:
-            return None
+    async def get_positioned_pipeline_json_graph(self, pipeline_name: str) -> dict:
+        return await self.data_flow.get_positioned_pipeline_graph(pipeline_name)
 
     def get_pipeline_names(self) -> list[str]:
         return list(self.data_flow.pipelines.keys())
