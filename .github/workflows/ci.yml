@@ -53,6 +53,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           working-directory: ${{ env.working-directory }}
+          venv-path: ${{ env.working-directory }}/.venv
 
       - name: Test
         run: poetry run pytest tests
