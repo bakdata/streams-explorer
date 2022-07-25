@@ -48,6 +48,12 @@ jobs:
       - name: Typing (mypy)
         run: poetry run pre-commit run mypy --all-files
 
+      - name: Typing (pyright)
+        uses: jakebailey/pyright-action@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+          working-directory: ${{ env.working-directory }}
+
       - name: Test
         run: poetry run pytest tests
 
