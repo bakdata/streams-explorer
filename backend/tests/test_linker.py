@@ -9,15 +9,13 @@ from streams_explorer.defaultlinker import DefaultLinker
 from streams_explorer.linker import load_linker
 from streams_explorer.models.node_information import NodeInfoListItem
 
-fake_linker = """from typing import Optional
-
-from streams_explorer.core.services.linking_services import LinkingService
+fake_linker = """from streams_explorer.core.services.linking_services import LinkingService
 
 
 class FakeLinker(LinkingService):
     def get_redirect_topic(
-        self, topic_name: str, link_type: Optional[str]
-    ) -> Optional[str]:
+        self, topic_name: str, link_type: str
+    ) -> str | None:
         if link_type == "test":
             return f"{topic_name}-link"
         return None

@@ -48,7 +48,7 @@ class DefaultLinker(LinkingService):
         if settings.loki.enable:
             self.add_logging_provider("loki")
 
-    def get_redirect_connector(self, config: dict, link_type: str | None) -> str | None:
+    def get_redirect_connector(self, config: dict, link_type: str) -> str | None:
         if connector_name := config.get("name"):
             consumer_group = f"connect-{connector_name}"
             match link_type:
@@ -61,7 +61,7 @@ class DefaultLinker(LinkingService):
                 case "kowl":
                     return f"{settings.kowl.url}/groups/{consumer_group}"
 
-    def get_redirect_topic(self, topic_name: str, link_type: str | None) -> str | None:
+    def get_redirect_topic(self, topic_name: str, link_type: str) -> str | None:
         match link_type:
             case "grafana":
                 return f"{settings.grafana.url}/d/{settings.grafana.dashboards.topics}?var-topics={topic_name}"
@@ -72,9 +72,7 @@ class DefaultLinker(LinkingService):
             case "kowl":
                 return f"{settings.kowl.url}/topics/{topic_name}"
 
-    def get_redirect_streaming_app(
-        self, k8s_app: K8sApp, link_type: str | None
-    ) -> str | None:
+    def get_redirect_streaming_app(self, k8s_app: K8sApp, link_type: str) -> str | None:
         consumer_group = k8s_app.consumer_group
         match link_type:
             case "kibanalogs":

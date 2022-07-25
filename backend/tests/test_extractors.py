@@ -8,20 +8,15 @@ from streams_explorer.core.services.kafkaconnect import KafkaConnect
 from streams_explorer.extractors import extractor_container, load_extractors
 from streams_explorer.models.kafka_connector import KafkaConnectorTypesEnum
 
-extractor_file_1 = """from typing import List, Optional
-
-from streams_explorer.core.extractor.extractor import Extractor
+extractor_file_1 = """from streams_explorer.core.extractor.extractor import Extractor
 from streams_explorer.models.kafka_connector import KafkaConnector
 from streams_explorer.models.sink import Sink
 
 
 class TestSinkOne(Extractor):
-    def __init__(self):
-        self.sinks: List[Sink] = []
-
     def on_connector_info_parsing(
         self, config: dict, connector_name: str
-    ) -> Optional[KafkaConnector]:
+    ) -> KafkaConnector | None:
         self.sinks.append(
             Sink(
                 name="test",
@@ -32,20 +27,15 @@ class TestSinkOne(Extractor):
         return None
 """
 
-extractor_file_2 = """from typing import List, Optional
-
-from streams_explorer.core.extractor.extractor import Extractor
+extractor_file_2 = """from streams_explorer.core.extractor.extractor import Extractor
 from streams_explorer.models.kafka_connector import KafkaConnector
 from streams_explorer.models.sink import Sink
 
 
 class TestSinkTwo(Extractor):
-    def __init__(self):
-        self.sinks: List[Sink] = []
-
     def on_connector_info_parsing(
         self, info: dict, connector_name: str
-    ) -> Optional[KafkaConnector]:
+    ) -> KafkaConnector | None:
         self.sinks.append(
             Sink(
                 name="test",
