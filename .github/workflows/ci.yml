@@ -51,9 +51,8 @@ jobs:
       - name: Typing (pyright)
         uses: jakebailey/pyright-action@v1
         with:
-          python-version: ${{ matrix.python-version }}
+          # python-version: ${{ matrix.python-version }}
           working-directory: ${{ env.working-directory }}
-          venv-path: ${{ env.working-directory }}/.venv
 
       - name: Test
         run: poetry run pytest tests
