@@ -20,6 +20,13 @@ export interface HTTPValidationError {
   detail?: ValidationError[];
 }
 
+export interface Icon {
+  img: string;
+  show: boolean;
+  width: number;
+  height: number;
+}
+
 export interface Metric {
   node_id: string;
   messages_in?: number;
@@ -36,6 +43,7 @@ export interface Node {
   id: string;
   label: string;
   node_type: string;
+  icon?: Icon;
   x?: number;
   y?: number;
 }

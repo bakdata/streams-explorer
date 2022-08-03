@@ -8,10 +8,18 @@ GraphNode = tuple[str, dict]
 GraphEdge = tuple[str, str]
 
 
+class Icon(BaseModel):
+    img: str
+    show: bool
+    width: int
+    height: int
+
+
 class Node(BaseModel):
     id: str
     label: str
     node_type: str
+    icon: Icon | None
     x: int | None = Field(default=None)
     y: int | None = Field(default=None)
 
