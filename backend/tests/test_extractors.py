@@ -24,7 +24,6 @@ class TestSinkOne(Extractor):
                 source=connector_name,
             )
         )
-        return None
 """
 
 extractor_file_2 = """from streams_explorer.core.extractor.extractor import Extractor
@@ -43,7 +42,6 @@ class TestSinkTwo(Extractor):
                 source=connector_name,
             )
         )
-        return None
 """
 
 EMPTY_CONNECTOR_INFO = {"config": {}, "type": ""}

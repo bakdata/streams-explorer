@@ -18,7 +18,6 @@ class FakeLinker(LinkingService):
     ) -> str | None:
         if link_type == "test":
             return f"{topic_name}-link"
-        return None
 """
 
 

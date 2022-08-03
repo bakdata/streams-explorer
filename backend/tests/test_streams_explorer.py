@@ -152,7 +152,6 @@ class TestStreamsExplorer:
         def get_topic_partitions(_, topic) -> dict | None:
             if topic == "input-topic1":
                 return {i: _ for i in range(5)}
-            return None
 
         def get_all_topic_names(_) -> set[str]:
             return set()

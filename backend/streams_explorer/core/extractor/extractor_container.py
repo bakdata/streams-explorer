@@ -55,13 +55,11 @@ class ExtractorContainer:
         for extractor in self.extractors:
             if connector := extractor.on_connector_info_parsing(info, connector_name):
                 return connector
-        return None
 
     def on_cron_job(self, cron_job: V1beta1CronJob) -> K8sAppCronJob | None:
         for extractor in self.extractors:
             if app := extractor.on_cron_job_parsing(cron_job):
                 return app
-        return None
 
     def get_sources_sinks(self) -> SourcesSinks:
         sources: list[Source] = []

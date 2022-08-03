@@ -174,7 +174,6 @@ class K8sApp:
             for container in spec.containers:
                 if container.name not in ignore_containers:
                     return container
-        return None
 
     @staticmethod
     def get_ignore_containers() -> set[str]:

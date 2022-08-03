@@ -38,7 +38,6 @@ class GenericSource(Extractor):
     ) -> KafkaConnector | None:
         if info["type"] == KafkaConnectorTypesEnum.SOURCE:
             return GenericSourceConnector(name=connector_name, config=info["config"])
-        return None
 
     def reset_connector(self) -> None:
         self.reset()

@@ -63,7 +63,6 @@ class TestKafka:
                 meta = PartitionMetadata()
                 partitions = {i: meta for i in range(10)}
                 return MockTopicMetadata(test_topic, partitions)
-            return None
 
         monkeypatch.setattr(kafka, "_KafkaAdminClient__get_topic", mock_get_topic)
 
