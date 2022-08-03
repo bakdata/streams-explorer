@@ -189,5 +189,13 @@ class PrometheusMetricProvider(MetricProvider):
         await self._client.aclose()
 
     def __del__(self) -> None:
-        loop = asyncio.get_event_loop()
-        loop.create_task(self.close())
+        """Clean up client resources on exit."""
+        # from aioredis: https://github.com/aio-libs/aioredis-py/blob/ff5a8fe068ebda837d14c3b3777a6182e610854a/aioredis/client.py#L1012
+        try:
+            loop = asyncio.get_event_loop_policy().get_event_loop()
+            if loop.is_running():
+                loop.create_task(self.close())
+            else:
+                loop.run_until_complete(self.close())
+        except Exception:
+            pass
