@@ -1,16 +1,17 @@
-from typing import Optional, Set
-
 import pytest
 from kubernetes_asyncio.client import V1beta1CronJob
+from pytest import MonkeyPatch
+from pytest_mock import MockerFixture
 
 from streams_explorer.core.config import settings
 from streams_explorer.core.extractor.default.elasticsearch_sink import ElasticsearchSink
 from streams_explorer.core.extractor.default.generic import GenericSink, GenericSource
 from streams_explorer.core.extractor.extractor import Extractor
-from streams_explorer.core.k8s_app import K8sAppCronJob
+from streams_explorer.core.k8s_app import K8sAppCronJob, K8sObject
 from streams_explorer.core.services import schemaregistry
 from streams_explorer.core.services.dataflow_graph import NodeTypesEnum
 from streams_explorer.core.services.kubernetes import K8sDeploymentUpdate
+from streams_explorer.core.services.linking_services import LinkingService
 from streams_explorer.core.services.metric_providers import MetricProvider
 from streams_explorer.defaultlinker import DefaultLinker
 from streams_explorer.extractors import extractor_container
@@ -21,6 +22,7 @@ from streams_explorer.models.node_information import (
     NodeInformation,
     NodeInfoType,
 )
+from streams_explorer.models.sink import Sink
 from streams_explorer.models.source import Source
 from streams_explorer.streams_explorer import StreamsExplorer
 from tests.utils import get_streaming_app_cronjob, get_streaming_app_deployment
@@ -84,9 +86,17 @@ class TestStreamsExplorer:
     @pytest.fixture()
     @pytest.mark.asyncio
     async def streams_explorer(  # noqa: C901
-        self, monkeypatch, deployments, cron_jobs, fake_linker
+        self,
+        monkeypatch: MonkeyPatch,
+        deployments: list[K8sObject],
+        cron_jobs: list[K8sObject],
+        fake_linker: LinkingService,
     ):
         monkeypatch.setattr(settings.kafka, "enable", True)
+        monkeypatch.setattr(
+            "streams_explorer.core.services.kafka_admin_client.KafkaAdminClient._KafkaAdminClient__connect",
+            lambda _: _,
+        )
 
         explorer = StreamsExplorer(
             linking_service=fake_linker, metric_provider=MetricProvider
@@ -139,12 +149,11 @@ class TestStreamsExplorer:
                 }
             return {}
 
-        def get_topic_partitions(_, topic) -> Optional[dict]:
+        def get_topic_partitions(_, topic) -> dict | None:
             if topic == "input-topic1":
                 return {i: _ for i in range(5)}
-            return None
 
-        def get_all_topic_names(_) -> Set[str]:
+        def get_all_topic_names(_) -> set[str]:
             return set()
 
         monkeypatch.setattr(
@@ -193,7 +202,7 @@ class TestStreamsExplorer:
 
     @pytest.mark.asyncio
     async def test_get_node_information(
-        self, streams_explorer: StreamsExplorer, monkeypatch
+        self, monkeypatch: MonkeyPatch, streams_explorer: StreamsExplorer
     ):
         monkeypatch.setattr(
             settings.kafkaconnect,
@@ -244,6 +253,14 @@ class TestStreamsExplorer:
                 )
             ],
         )
+
+        assert streams_explorer.linking_service.sink_source_info
+        assert streams_explorer.get_node_information("fake-index") == NodeInformation(
+            node_id="fake-index",
+            node_type=NodeTypesEnum.SINK_SOURCE,
+            info=[NodeInfoListItem(name="Kibana", value="", type=NodeInfoType.LINK)],
+        )
+
         result = NodeInformation(
             node_id="es-sink-connector-dead-letter-topic",
             node_type=NodeTypesEnum.ERROR_TOPIC,
@@ -321,7 +338,11 @@ class TestStreamsExplorer:
         sources, sinks = extractor_container.get_sources_sinks()
         assert len(sources) == 3
         assert len(sinks) == 1
-        assert sinks[0].node_type == "elasticsearch-index"
+        assert sinks[0] == Sink(
+            name="fake-index",
+            source="es-sink-connector",
+            node_type="elasticsearch-index",
+        )
 
         # updating connectors should only clear sinks & sources added from connectors
         streams_explorer.update_connectors()
@@ -448,7 +469,7 @@ class TestStreamsExplorer:
 
     @pytest.mark.asyncio
     async def test_pipeline_graph_caching(
-        self, mocker, streams_explorer: StreamsExplorer
+        self, mocker: MockerFixture, streams_explorer: StreamsExplorer
     ):
         await streams_explorer.watch()
         assert streams_explorer.data_flow.json_pipelines == {}
@@ -466,7 +487,7 @@ class TestStreamsExplorer:
             "pipeline2"
         )
         # verify caching works, pipeline graph is only calculated once
-        calc_function.assert_called_once()
+        assert calc_function.call_count == 1
 
         streams_explorer.data_flow.reset()
         assert not streams_explorer.data_flow.json_pipelines

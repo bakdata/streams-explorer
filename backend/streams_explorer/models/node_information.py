@@ -1,5 +1,4 @@
 from enum import Enum
-from typing import List, Union
 
 from pydantic import BaseModel
 
@@ -14,11 +13,11 @@ class NodeInfoType(str, Enum):
 
 class NodeInfoListItem(BaseModel):
     name: str
-    value: Union[str, dict]
+    value: str | dict
     type: NodeInfoType
 
 
 class NodeInformation(BaseModel):
     node_id: str
     node_type: NodeTypesEnum
-    info: List[NodeInfoListItem]
+    info: list[NodeInfoListItem]

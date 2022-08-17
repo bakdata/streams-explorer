@@ -1,5 +1,3 @@
-from typing import Optional
-
 from streams_explorer.core.extractor.extractor import Extractor
 from streams_explorer.models.kafka_connector import (
     KafkaConnector,
@@ -11,9 +9,9 @@ from streams_explorer.models.sink import Sink
 class ElasticsearchSink(Extractor):
     def on_connector_info_parsing(
         self, info: dict, connector_name: str
-    ) -> Optional[KafkaConnector]:
+    ) -> KafkaConnector | None:
         config = info["config"]
-        connector_class = config.get("connector.class")
+        connector_class: str | None = config.get("connector.class")
         if connector_class and "ElasticsearchSinkConnector" in connector_class:
 
             connector = KafkaConnector(
@@ -31,7 +29,6 @@ class ElasticsearchSink(Extractor):
                     )
                 )
             return connector
-        return None
 
-    def reset_connector(self):
+    def reset_connector(self) -> None:
         self.reset()

@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any, TypeAlias
 
 from dynaconf import Dynaconf, Validator
 
@@ -60,18 +60,19 @@ settings: Any = Dynaconf(
     ],
 )
 
-
-def sort_displayed_information(list: List[Dict[str, str]]) -> List[Dict[str, str]]:
-    return sorted(list, key=lambda k: str.casefold(k["name"]))
+InfoList: TypeAlias = list[dict[str, str]]
 
 
-settings.kafkaconnect.displayed_information = sort_displayed_information(
-    settings.kafkaconnect.displayed_information
-)
+def sort_displayed_information(lst: InfoList) -> InfoList:
+    return sorted(lst, key=lambda k: str.casefold(k["name"]))
+
+
 settings.k8s.displayed_information = sort_displayed_information(
     settings.k8s.displayed_information
 )
-
 settings.kafka.displayed_information = sort_displayed_information(
     settings.kafka.displayed_information
+)
+settings.kafkaconnect.displayed_information = sort_displayed_information(
+    settings.kafkaconnect.displayed_information
 )

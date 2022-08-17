@@ -12,8 +12,6 @@ classifiers = [
   "Programming Language :: Python",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3 :: Only",
-  "Programming Language :: Python :: 3.8",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Topic :: Software Development :: Libraries :: Python Modules",
   "Topic :: Software Development :: Libraries",
@@ -26,20 +24,20 @@ classifiers = [
 "Bug Tracker" = "https://github.com/bakdata/streams-explorer/issues"
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.10"
 loguru = "^0.5.3"
 matplotlib = "^3.4.3"
 networkx = "^2.6.3"
 dynaconf = "^3.1.7"
 httpx = "^0.20.0"
-pydantic = "^1.8.2"
+pydantic = "^1.9.1"
 fastapi-utils = "^0.2.1"
-fastapi = "^0.70.0"
+fastapi = "^0.78.0"
 uvicorn = { extras = ["standard"], version = "^0.15.0" }
 pygraphviz = "^1.7"
 confluent-kafka = "^1.9.0"
 cachetools = "^4.2.2"
-kubernetes-asyncio = "21.7.1"
+kubernetes-asyncio = "^23.6.0"
 
 [tool.poetry.dev-dependencies]
 mypy = "^0.961"

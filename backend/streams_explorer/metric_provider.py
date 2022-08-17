@@ -1,5 +1,3 @@
-from typing import Type
-
 from loguru import logger
 
 from streams_explorer.core.services.metric_providers import (
@@ -9,13 +7,9 @@ from streams_explorer.core.services.metric_providers import (
 from streams_explorer.plugins import load_plugin
 
 
-def load_metric_provider() -> Type[MetricProvider]:
+def load_metric_provider() -> type[MetricProvider]:
     metric_provider = load_plugin(MetricProvider)
-    if (
-        not metric_provider
-        or not isinstance(metric_provider, type)
-        or not issubclass(metric_provider, MetricProvider)
-    ):
+    if not metric_provider:
         logger.info("Using default PrometheusMetricProvider")
         return PrometheusMetricProvider
     logger.info(f"Using custom MetricProvider: {metric_provider.__name__}")

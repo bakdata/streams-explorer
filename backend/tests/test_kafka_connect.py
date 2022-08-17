@@ -37,7 +37,7 @@ class TestKafkaConnect:
         )
 
     @respx.mock(base_url=kafkaconnect.url)
-    def test_sanitize_connector_config(self, respx_mock):
+    def test_sanitize_connector_config(self, respx_mock: respx.MockRouter):
         connector_config = {
             "connector.class": "ConnectorClass",
             "connection.password": "supersecret",

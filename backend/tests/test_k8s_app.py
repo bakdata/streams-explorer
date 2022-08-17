@@ -1,3 +1,5 @@
+from pytest import MonkeyPatch
+
 from streams_explorer.core.k8s_app import K8sApp, K8sAppDeployment, K8sAppStatefulSet
 from streams_explorer.core.k8s_config_parser import StreamsBootstrapArgsParser
 from tests.utils import (
@@ -36,7 +38,7 @@ class TestK8sApp:
         assert isinstance(k8s_apps[1], K8sAppStatefulSet)
         assert k8s_apps[1].get_service_name() == "test-service"
 
-    def test_parse_args(self, monkeypatch):
+    def test_parse_args(self, monkeypatch: MonkeyPatch):
         monkeypatch.setattr(
             "streams_explorer.core.k8s_app.config_parser", StreamsBootstrapArgsParser
         )

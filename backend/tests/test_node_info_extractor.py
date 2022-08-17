@@ -1,4 +1,5 @@
 import pytest
+from pytest import MonkeyPatch
 
 from streams_explorer.core.config import settings, sort_displayed_information
 from streams_explorer.core.k8s_app import K8sAppDeployment
@@ -35,7 +36,7 @@ class TestNodeInfoExtractor:
             {"name": "testlist", "key": "foo.test"},
         ]
 
-    def test_get_displayed_information_connector(self, monkeypatch):
+    def test_get_displayed_information_connector(self, monkeypatch: MonkeyPatch):
         monkeypatch.setattr(
             settings.kafkaconnect,
             "displayed_information",
@@ -80,7 +81,7 @@ class TestNodeInfoExtractor:
             in output
         )
 
-    def test_get_displayed_information_deyployment(self, monkeypatch):
+    def test_get_displayed_information_deyployment(self, monkeypatch: MonkeyPatch):
         monkeypatch.setattr(
             settings.k8s,
             "displayed_information",
@@ -106,7 +107,7 @@ class TestNodeInfoExtractor:
             name="Pipeline", value="pipeline1", type=NodeInfoType.BASIC
         )
 
-    def test_get_displayed_information_topic(self, monkeypatch):
+    def test_get_displayed_information_topic(self, monkeypatch: MonkeyPatch):
         assert get_displayed_information_topic({}) == []
 
         kafka_topic_config = {

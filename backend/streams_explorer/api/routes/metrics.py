@@ -1,5 +1,3 @@
-from typing import List
-
 from fastapi import APIRouter, Depends
 
 from streams_explorer.api.dependencies.streams_explorer import get_streams_explorer
@@ -9,7 +7,7 @@ from streams_explorer.streams_explorer import StreamsExplorer
 router = APIRouter()
 
 
-@router.get("", response_model=List[Metric])
+@router.get("", response_model=list[Metric])
 async def get_metrics(
     streams_explorer: StreamsExplorer = Depends(get_streams_explorer),
 ):

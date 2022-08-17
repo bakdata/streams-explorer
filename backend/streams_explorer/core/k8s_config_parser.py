@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 class K8sConfigParser:
     """Base class for parsing configuration of streaming application deployments."""
 
-    def __init__(self, k8s_app: K8sApp):
+    def __init__(self, k8s_app: K8sApp) -> None:
         self.k8s_app = k8s_app
 
     def parse(self) -> K8sConfig:
@@ -23,13 +23,13 @@ class K8sConfigParser:
 class StreamsBootstrapConfigParser(K8sConfigParser):
     """Config parser for deployments configured through streams-bootstrap."""
 
-    def __init__(self, k8s_app: K8sApp):
+    def __init__(self, k8s_app: K8sApp) -> None:
         super().__init__(k8s_app)
         self._id = self.get_id()
         self.config = K8sConfig(self._id, name=self.get_name())
 
     def get_id(self) -> str:
-        name = None
+        name: str | None = None
         if self.k8s_app.metadata.labels:
             name = self.k8s_app.metadata.labels.get("app")
         if not name:
@@ -41,23 +41,24 @@ class StreamsBootstrapConfigParser(K8sConfigParser):
     def get_name(self) -> str:
         return self._id
 
-    def parse_config(self, name: str, value: str):
-        if name == "INPUT_TOPICS":
-            self.config.input_topics = self.parse_input_topics(value)
-        elif name == "OUTPUT_TOPIC":
-            self.config.output_topic = value
-        elif name == "ERROR_TOPIC":
-            self.config.error_topic = value
-        elif name == "EXTRA_INPUT_TOPICS":
-            self.config.extra_input_topics = self.parse_extra_topics(value)
-        elif name == "EXTRA_OUTPUT_TOPICS":
-            self.config.extra_output_topics = self.parse_extra_topics(value)
-        elif name == "INPUT_PATTERN":
-            self.config.input_pattern = value
-        elif name == "EXTRA_INPUT_PATTERNS":
-            self.config.extra_input_patterns = self.parse_extra_topics(value)
-        else:
-            self.config.extra[name] = value
+    def parse_config(self, name: str, value: str) -> None:
+        match name:
+            case "INPUT_TOPICS":
+                self.config.input_topics = self.parse_input_topics(value)
+            case "OUTPUT_TOPIC":
+                self.config.output_topic = value
+            case "ERROR_TOPIC":
+                self.config.error_topic = value
+            case "EXTRA_INPUT_TOPICS":
+                self.config.extra_input_topics = self.parse_extra_topics(value)
+            case "EXTRA_OUTPUT_TOPICS":
+                self.config.extra_output_topics = self.parse_extra_topics(value)
+            case "INPUT_PATTERN":
+                self.config.input_pattern = value
+            case "EXTRA_INPUT_PATTERNS":
+                self.config.extra_input_patterns = self.parse_extra_topics(value)
+            case _:
+                self.config.extra[name] = value
 
     @staticmethod
     def parse_input_topics(input_topics: str) -> list[str]:
@@ -85,7 +86,7 @@ class StreamsBootstrapConfigParser(K8sConfigParser):
 class StreamsBootstrapEnvParser(StreamsBootstrapConfigParser):
     """Default parser for streams-bootstrap deployments configured through environment variables."""
 
-    def __init__(self, k8s_app: K8sApp):
+    def __init__(self, k8s_app: K8sApp) -> None:
         super().__init__(k8s_app)
         self.env_prefix = self.get_env_prefix(self.k8s_app.container)
 
@@ -112,7 +113,6 @@ class StreamsBootstrapEnvParser(StreamsBootstrapConfigParser):
             for env_var in container.env:
                 if env_var.name == "ENV_PREFIX":
                     return env_var.value
-        return None
 
 
 class StreamsBootstrapArgsParser(StreamsBootstrapConfigParser):

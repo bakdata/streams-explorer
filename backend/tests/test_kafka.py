@@ -1,9 +1,9 @@
 from dataclasses import dataclass
-from typing import Dict, List, Optional
 
 import pytest
 from confluent_kafka.admin import ConfigEntry, ConfigResource, PartitionMetadata
 from dynaconf.validator import ValidationError
+from pytest import MonkeyPatch
 
 from streams_explorer.core.config import settings
 from streams_explorer.core.services.kafka_admin_client import KafkaAdminClient
@@ -40,10 +40,10 @@ class TestKafka:
         assert KafkaAdminClient.format_values([]) == {}
 
     @pytest.fixture()
-    def kafka(self, monkeypatch) -> KafkaAdminClient:
+    def kafka(self, monkeypatch: MonkeyPatch) -> KafkaAdminClient:
         kafka = KafkaAdminClient()
 
-        def mock_get_resource(resource: ConfigResource, *_) -> List[ConfigEntry]:
+        def mock_get_resource(resource: ConfigResource, *_) -> list[ConfigEntry]:
             if resource == ConfigResource(ConfigResource.Type.TOPIC, test_topic):
                 return [
                     ConfigEntry(name="cleanup.policy", value="delete"),
@@ -56,14 +56,13 @@ class TestKafka:
         @dataclass
         class MockTopicMetadata:
             topic: str
-            partitions: Dict[int, PartitionMetadata]
+            partitions: dict[int, PartitionMetadata]
 
-        def mock_get_topic(topic: str) -> Optional[MockTopicMetadata]:
+        def mock_get_topic(topic: str) -> MockTopicMetadata | None:
             if topic == test_topic:
                 meta = PartitionMetadata()
                 partitions = {i: meta for i in range(10)}
                 return MockTopicMetadata(test_topic, partitions)
-            return None
 
         monkeypatch.setattr(kafka, "_KafkaAdminClient__get_topic", mock_get_topic)
 

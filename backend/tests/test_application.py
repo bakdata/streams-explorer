@@ -1,13 +1,15 @@
 import asyncio
-from typing import List
+import datetime
 
 import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
 from kubernetes_asyncio.client import (
+    EventsV1Event,
     V1beta1CronJob,
     V1Deployment,
     V1ObjectMeta,
+    V1ObjectReference,
     V1StatefulSet,
 )
 from pytest import MonkeyPatch
@@ -62,30 +64,30 @@ class TestApplication:
         assert response.content.decode() == ""
 
     @pytest.fixture()
-    def deployments(self) -> List[V1Deployment]:
+    def deployments(self) -> list[V1Deployment]:
         return [APP1, APP2, APP3]
 
     @pytest.fixture()
-    def stateful_sets(self) -> List[V1StatefulSet]:
+    def stateful_sets(self) -> list[V1StatefulSet]:
         return []
 
     @pytest.fixture()
-    def cron_jobs(self) -> List[V1beta1CronJob]:
+    def cron_jobs(self) -> list[V1beta1CronJob]:
         return [V1beta1CronJob(metadata=V1ObjectMeta(name="test"))]
 
     @pytest.mark.asyncio
     async def test_update_every_x_seconds(
         self,
-        mocker,
-        monkeypatch,
-        deployments: List[K8sObject],
-        stateful_sets: List[K8sObject],
-        cron_jobs: List[K8sObject],
+        mocker: MockerFixture,
+        monkeypatch: MonkeyPatch,
+        deployments: list[K8sObject],
+        stateful_sets: list[K8sObject],
+        cron_jobs: list[K8sObject],
     ):
         settings.graph.update_interval = 1
         settings.kafkaconnect.update_interval = 1
 
-        async def watch(self):
+        async def watch(self: StreamsExplorer):
             for deployment in deployments + stateful_sets + cron_jobs:
                 event = K8sDeploymentUpdate(
                     type=K8sDeploymentUpdateType.ADDED, object=deployment
@@ -136,7 +138,7 @@ class TestApplication:
         with TestClient(app) as client:
             streams_explorer = get_streams_explorer_from_state(app)
 
-            def fetch_graph() -> List[str]:
+            def fetch_graph() -> list[str]:
                 response = client.get(f"{API_PREFIX}/graph")
                 return [node["id"] for node in response.json()["nodes"]]
 
@@ -211,7 +213,7 @@ class TestApplication:
             assert len(nodes) == 9
 
     @pytest.mark.asyncio
-    async def test_pipeline_not_found(self, monkeypatch):
+    async def test_pipeline_not_found(self, monkeypatch: MonkeyPatch):
         from main import app
 
         monkeypatch.setattr(StreamsExplorer, "setup", mock_setup)
@@ -229,36 +231,38 @@ class TestApplication:
         self,
         monkeypatch: MonkeyPatch,
         mocker: MockerFixture,
-        deployments: List[K8sObject],
-        stateful_sets: List[K8sObject],
-        cron_jobs: List[K8sObject],
+        deployments: list[K8sObject],
+        stateful_sets: list[K8sObject],
+        cron_jobs: list[K8sObject],
     ):
         ENDPOINT = "/api/graph/ws"
 
         async def watch(self: StreamsExplorer):
             for deployment in deployments + stateful_sets + cron_jobs:
-                event = K8sDeploymentUpdate(
+                update = K8sDeploymentUpdate(
                     type=K8sDeploymentUpdateType.ADDED, object=deployment
                 )
-                await self.handle_deployment_update(event)
-            object = {
-                "type": K8sEventType.NORMAL,
-                "reason": K8sReason.STARTED,
-                "regarding": {
-                    "fieldPath": "spec.containers{streaming-app2}",
-                    "namespace": "test-namespace",
-                },
-            }
+                await self.handle_deployment_update(update)
+            object = EventsV1Event(
+                type=K8sEventType.NORMAL,
+                reason=K8sReason.STARTED,
+                regarding=V1ObjectReference(
+                    field_path="spec.containers{streaming-app2}",
+                    namespace="test-namespace",
+                ),
+                event_time=datetime.datetime.now(),
+            )
             event = K8sEvent(type=K8sEventType.NORMAL, object=object)
             await self.handle_event(event)
-            object = {
-                "type": K8sEventType.WARNING,
-                "reason": K8sReason.BACKOFF,
-                "regarding": {
-                    "fieldPath": "spec.containers{streaming-app3}",
-                    "namespace": "test-namespace",
-                },
-            }
+            object = EventsV1Event(
+                type=K8sEventType.WARNING,
+                reason=K8sReason.BACKOFF,
+                regarding=V1ObjectReference(
+                    field_path="spec.containers{streaming-app3}",
+                    namespace="test-namespace",
+                ),
+                event_time=datetime.datetime.now(),
+            )
             event = K8sEvent(type=K8sEventType.WARNING, object=object)
             await self.handle_event(event)
 
@@ -305,10 +309,10 @@ class TestApplication:
                     assert deployment.status
                     deployment.status.replicas = 10
                     deployment.status.ready_replicas = 0
-                    event = K8sDeploymentUpdate(
+                    update = K8sDeploymentUpdate(
                         type=K8sDeploymentUpdateType.MODIFIED, object=deployment
                     )
-                    await streams_explorer.handle_deployment_update(event)
+                    await streams_explorer.handle_deployment_update(update)
                     assert update_clients_delta.call_count == 6
                     assert (
                         ws1.receive_json()
@@ -321,15 +325,16 @@ class TestApplication:
                     )
 
                     # pod restarting
-                    object = {
-                        "type": K8sEventType.NORMAL,
-                        "reason": K8sReason.STARTED,
-                        "regarding": {
-                            "fieldPath": "spec.containers{streaming-app3}",
-                            "namespace": "test-namespace",
-                        },
-                    }
-                    event = K8sEvent(type=K8sEventType.WARNING, object=object)
+                    object = EventsV1Event(
+                        type=K8sEventType.NORMAL,
+                        reason=K8sReason.STARTED,
+                        regarding=V1ObjectReference(
+                            field_path="spec.containers{streaming-app3}",
+                            namespace="test-namespace",
+                        ),
+                        event_time=datetime.datetime.now(),
+                    )
+                    event = K8sEvent(type=K8sEventType.NORMAL, object=object)
                     await streams_explorer.handle_event(event)
                     assert update_clients_delta.call_count == 7
                     assert (

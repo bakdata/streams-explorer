@@ -1,26 +1,22 @@
 from pathlib import Path
 
 import pytest
+from pytest_mock import MockerFixture
 
 from streams_explorer.core.config import settings
 from streams_explorer.core.services.kafkaconnect import KafkaConnect
 from streams_explorer.extractors import extractor_container, load_extractors
 from streams_explorer.models.kafka_connector import KafkaConnectorTypesEnum
 
-extractor_file_1 = """from typing import List, Optional
-
-from streams_explorer.core.extractor.extractor import Extractor
+extractor_file_1 = """from streams_explorer.core.extractor.extractor import Extractor
 from streams_explorer.models.kafka_connector import KafkaConnector
 from streams_explorer.models.sink import Sink
 
 
 class TestSinkOne(Extractor):
-    def __init__(self):
-        self.sinks: List[Sink] = []
-
     def on_connector_info_parsing(
         self, config: dict, connector_name: str
-    ) -> Optional[KafkaConnector]:
+    ) -> KafkaConnector | None:
         self.sinks.append(
             Sink(
                 name="test",
@@ -28,23 +24,17 @@ class TestSinkOne(Extractor):
                 source=connector_name,
             )
         )
-        return None
 """
 
-extractor_file_2 = """from typing import List, Optional
-
-from streams_explorer.core.extractor.extractor import Extractor
+extractor_file_2 = """from streams_explorer.core.extractor.extractor import Extractor
 from streams_explorer.models.kafka_connector import KafkaConnector
 from streams_explorer.models.sink import Sink
 
 
 class TestSinkTwo(Extractor):
-    def __init__(self):
-        self.sinks: List[Sink] = []
-
     def on_connector_info_parsing(
         self, info: dict, connector_name: str
-    ) -> Optional[KafkaConnector]:
+    ) -> KafkaConnector | None:
         self.sinks.append(
             Sink(
                 name="test",
@@ -52,7 +42,6 @@ class TestSinkTwo(Extractor):
                 source=connector_name,
             )
         )
-        return None
 """
 
 EMPTY_CONNECTOR_INFO = {"config": {}, "type": ""}
@@ -115,7 +104,8 @@ class TestExtractors:
         assert "GenericSink" in extractor_classes
         assert "GenericSource" in extractor_classes
 
-    def test_generic_extractors_fallback(self, mocker):
+    def test_generic_extractors_fallback(self, mocker: MockerFixture):
+
         settings.plugins.extractors.default = True
 
         mocker.patch(
@@ -154,7 +144,7 @@ class TestExtractors:
         assert connectors[1].get_topics() == []
         assert connectors[1].get_error_topic() is None
 
-    def test_extractors_topics_none(self, mocker):
+    def test_extractors_topics_none(self, mocker: MockerFixture):
         mocker.patch(
             "streams_explorer.core.services.kafkaconnect.KafkaConnect.get_connector_info",
             lambda _: EMPTY_CONNECTOR_INFO,
@@ -168,7 +158,7 @@ class TestExtractors:
             extractor_container, "on_connector_info_parsing"
         )
         KafkaConnect.connectors()
-        on_connector_info_parsing.assert_called_once()
+        assert on_connector_info_parsing.call_count == 1
 
     def test_elasticsearch_sink(self):
         from streams_explorer.core.extractor.default.elasticsearch_sink import (

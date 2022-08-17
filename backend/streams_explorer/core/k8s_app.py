@@ -1,12 +1,6 @@
 from __future__ import annotations
 
-from typing import Dict, Optional, Set, Type, Union
-
-try:
-    from typing import TypeAlias  # type: ignore[attr-defined]
-except ImportError:
-    # Python <3.10
-    from typing_extensions import TypeAlias
+from typing import TypeAlias
 
 from kubernetes_asyncio.client import (
     V1beta1CronJob,
@@ -26,16 +20,16 @@ from streams_explorer.models.k8s import K8sConfig, K8sReason
 
 ATTR_PIPELINE = "pipeline"
 
-K8sObject: TypeAlias = Union[V1Deployment, V1StatefulSet, V1beta1CronJob]
+K8sObject: TypeAlias = V1Deployment | V1StatefulSet | V1beta1CronJob
 
-config_parser: Type[K8sConfigParser] = load_config_parser()
+config_parser: type[K8sConfigParser] = load_config_parser()
 
 
 class K8sApp:
-    def __init__(self, k8s_object: K8sObject):
+    def __init__(self, k8s_object: K8sObject) -> None:
         self.k8s_object = k8s_object
         self.metadata: V1ObjectMeta = k8s_object.metadata or V1ObjectMeta()
-        self.attributes: Dict[str, str] = {}
+        self.attributes: dict[str, str] = {}
         self.config: K8sConfig
         self.state: K8sReason = K8sReason.UNKNOWN
         self.setup()
@@ -96,7 +90,7 @@ class K8sApp:
             return None
         return self.k8s_object.status.replicas
 
-    def setup(self):
+    def setup(self) -> None:
         self.spec = self._get_pod_spec()
         self._ignore_containers = self.get_ignore_containers()
         self.container = self.get_app_container(self.spec, self._ignore_containers)
@@ -129,12 +123,12 @@ class K8sApp:
     def class_name(self) -> str:
         return self.__class__.__name__
 
-    def __set_attributes(self):
+    def __set_attributes(self) -> None:
         self._set_labels()
         self._set_pipeline()
         self._set_annotations()
 
-    def _set_labels(self):
+    def _set_labels(self) -> None:
         labels = self.metadata.labels
         if not labels:
             return
@@ -148,11 +142,11 @@ class K8sApp:
                     f"{self.class_name} {self.name} does not have a label with the name: {key}"
                 )
 
-    def _set_pipeline(self):
+    def _set_pipeline(self) -> None:
         if self.pipeline:
             self.attributes[ATTR_PIPELINE] = self.pipeline
 
-    def _set_annotations(self):
+    def _set_annotations(self) -> None:
         if (
             self.k8s_object.spec
             and self.k8s_object.spec.template.metadata
@@ -174,28 +168,27 @@ class K8sApp:
 
     @staticmethod
     def get_app_container(
-        spec: V1PodSpec | None, ignore_containers: Set[str] = set()
-    ) -> Optional[V1Container]:
+        spec: V1PodSpec | None, ignore_containers: set[str] = set()
+    ) -> V1Container | None:
         if spec and spec.containers:
             for container in spec.containers:
                 if container.name not in ignore_containers:
                     return container
-        return None
 
     @staticmethod
-    def get_ignore_containers() -> Set[str]:
+    def get_ignore_containers() -> set[str]:
         return {container["name"] for container in settings.k8s.containers.ignore}
 
     @staticmethod
-    def _labels_to_use() -> Set[str]:
+    def _labels_to_use() -> set[str]:
         return set(settings.k8s.labels)
 
 
 class K8sAppCronJob(K8sApp):
-    def __init__(self, k8s_object: V1beta1CronJob):
+    def __init__(self, k8s_object: V1beta1CronJob) -> None:
         super().__init__(k8s_object)
 
-    def setup(self):
+    def setup(self) -> None:
         self.spec = self._get_pod_spec()
         self.container = self.get_app_container(self.spec)
         self.extract_config()
@@ -209,18 +202,18 @@ class K8sAppCronJob(K8sApp):
         ):
             return self.k8s_object.spec.job_template.spec.template.spec
 
-    def __set_attributes(self):
+    def __set_attributes(self) -> None:
         self._set_labels()
         self._set_pipeline()
 
 
 class K8sAppDeployment(K8sApp):
-    def __init__(self, k8s_object: V1Deployment):
+    def __init__(self, k8s_object: V1Deployment) -> None:
         super().__init__(k8s_object)
 
 
 class K8sAppStatefulSet(K8sApp):
-    def __init__(self, k8s_object: V1StatefulSet):
+    def __init__(self, k8s_object: V1StatefulSet) -> None:
         super().__init__(k8s_object)
 
     def get_service_name(self) -> str | None:
