@@ -273,20 +273,7 @@ const GraphVisualization = ({
   graph?.on("nodeselectchange", selectCallback);
 
   if (ws && graph) {
-    ws.onopen = function() {
-      console.log("WebSocket opened");
-    };
-
-    ws.onclose = function() {
-      console.log("WebSocket closed");
-    };
-
-    ws.onerror = function(event) {
-      console.log("WebSocket error", event);
-    };
-
     ws.onmessage = function(event) {
-      console.log(event.data);
       try {
         const data = JSON.parse(event.data) as AppState;
         const node = graph.findById(data.id) as INode;
