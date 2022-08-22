@@ -9,7 +9,7 @@ metadata:
     helm.sh/chart: {{ include "streams-explorer.chart" . }}
   name: {{ template "streams-explorer.roleName" . }}
 rules:
-  - apiGroups: ["apps", "batch"]
-    resources: ["deployments", "cronjobs", "statefulsets"]
+  - apiGroups: ["apps", "batch", "events"]
+    resources: ["deployments", "cronjobs", "statefulsets", "events"]
     verbs: ["get", "list", "watch"]
 {{- end }}
