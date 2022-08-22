@@ -73,7 +73,7 @@ class StreamsExplorer:
         return await self.data_flow.get_positioned_pipeline_graph(pipeline_name)
 
     def get_pipeline_names(self) -> list[str]:
-        return list(self.data_flow.pipelines.keys())
+        return list(sorted(self.data_flow.pipelines.keys()))
 
     async def get_metrics(self) -> list[Metric]:
         return await self.data_flow.get_metrics()
