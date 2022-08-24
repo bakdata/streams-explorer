@@ -7,6 +7,7 @@ import kubernetes_asyncio.client
 import kubernetes_asyncio.config
 import kubernetes_asyncio.watch
 from kubernetes_asyncio.client import (
+    ApiException,
     EventsV1Event,
     EventsV1EventList,
     V1beta1CronJob,
@@ -133,7 +134,14 @@ class Kubernetes:
         resource: K8sResource,
     ) -> None:
         return_type = resource.return_type.__name__ if resource.return_type else None
-        async with kubernetes_asyncio.watch.Watch(return_type) as w:
-            async with w.stream(resource.func, namespace) as stream:
-                async for event in stream:
-                    await resource.callback(event)
+        try:
+            async with kubernetes_asyncio.watch.Watch(return_type) as w:
+                async with w.stream(resource.func, namespace) as stream:
+                    async for event in stream:
+                        await resource.callback(event)
+        except ApiException as e:
+            if e.reason == "Expired":
+                # restart watch to get fresh resource version
+                return await self.__watch_namespace(namespace, resource)
+            else:
+                raise
