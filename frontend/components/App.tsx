@@ -20,8 +20,8 @@ import {
   useGetPositionedGraphApiGraphGet,
 } from "./api/fetchers";
 import DetailsCard from "./DetailsCard";
-import GraphVisualization from "./GraphVisualization";
-import Node from "./Node";
+import Node from "./graph/Node";
+import GraphVisualization from "./graph/Visualization";
 import Search from "./Search";
 import Settings from "./Settings";
 

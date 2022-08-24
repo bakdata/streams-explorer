@@ -3,7 +3,7 @@ import React, { useRef } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import Details from "./Details";
 import style from "./Details.module.css";
-import Node from "./Node";
+import Node from "./graph/Node";
 
 interface DetailsCardProps {
   node: Node | undefined;

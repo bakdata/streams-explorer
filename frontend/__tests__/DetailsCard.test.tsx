@@ -3,7 +3,7 @@ import nock from "nock";
 import React from "react";
 import { RestfulProvider } from "restful-react";
 import DetailsCard from "../components/DetailsCard";
-import Node from "../components/Node";
+import Node from "../components/graph/Node";
 
 describe("display card for node details", () => {
   beforeAll(() => {
