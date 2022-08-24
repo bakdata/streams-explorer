@@ -194,6 +194,14 @@ class K8sAppCronJob(K8sApp):
         self.extract_config()
         self.__set_attributes()
 
+    @property
+    def replicas_ready(self) -> None:
+        return None
+
+    @property
+    def replicas_total(self) -> None:
+        return None
+
     def _get_pod_spec(self) -> V1PodSpec | None:
         if (
             self.k8s_object.spec
