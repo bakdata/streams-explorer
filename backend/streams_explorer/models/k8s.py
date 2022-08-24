@@ -46,8 +46,6 @@ class K8sReason(str, Enum):
     PULLING = "Pulling"
     PULLED = "Pulled"
 
-    # TODO:? SuccessfulCreate | ScalingReplicaSet | ...
-
     @staticmethod
     def from_str(reason: str) -> K8sReason:
         try:

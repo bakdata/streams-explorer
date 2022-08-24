@@ -1,9 +1,15 @@
 from pytest import MonkeyPatch
 
-from streams_explorer.core.k8s_app import K8sApp, K8sAppDeployment, K8sAppStatefulSet
+from streams_explorer.core.k8s_app import (
+    K8sApp,
+    K8sAppCronJob,
+    K8sAppDeployment,
+    K8sAppStatefulSet,
+)
 from streams_explorer.core.k8s_config_parser import StreamsBootstrapArgsParser
 from tests.utils import (
     ConfigType,
+    get_streaming_app_cronjob,
     get_streaming_app_deployment,
     get_streaming_app_stateful_set,
 )
@@ -172,3 +178,13 @@ class TestK8sApp:
         )
         assert k8s_app.attributes["pipeline"] == "pipeline1"
         assert len(k8s_app.attributes) == 1
+
+    def test_replicas(self):
+        k8s_app = K8sAppDeployment(get_streaming_app_deployment())
+        assert k8s_app.replicas_total == 1
+        assert k8s_app.replicas_ready is None
+
+        k8s_app = K8sAppCronJob(get_streaming_app_cronjob())
+        assert not k8s_app.k8s_object.status
+        assert k8s_app.replicas_total is None
+        assert k8s_app.replicas_ready is None

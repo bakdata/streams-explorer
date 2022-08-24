@@ -82,7 +82,7 @@ class K8sApp:
     def replicas_ready(self) -> int | None:
         if not self.k8s_object.status:
             return None
-        return self.k8s_object.status.ready_replicas  # NOTE: or available_replicas
+        return self.k8s_object.status.ready_replicas
 
     @property
     def replicas_total(self) -> int | None:
@@ -193,14 +193,6 @@ class K8sAppCronJob(K8sApp):
         self.container = self.get_app_container(self.spec)
         self.extract_config()
         self.__set_attributes()
-
-    @property
-    def replicas_ready(self) -> None:
-        return None
-
-    @property
-    def replicas_total(self) -> None:
-        return None
 
     def _get_pod_spec(self) -> V1PodSpec | None:
         if (

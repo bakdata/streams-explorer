@@ -178,7 +178,6 @@ class StreamsExplorer:
         # extract deployment name from pod
         if not event.reason or not event.regarding or not event.regarding.field_path:
             return
-        # NOTE: alternative is event["regarding"]["name"]
         name = re.findall(r"{(.+?)}", event.regarding.field_path)[0]
 
         logger.info(
