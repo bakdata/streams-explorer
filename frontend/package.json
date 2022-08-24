@@ -42,6 +42,7 @@
     "identity-obj-proxy": "^3.0.0",
     "jest": "^27.3.1",
     "jest-fix-undefined": "^0.1.2",
+    "mock-socket": "^9.1.5",
     "next-router-mock": "^0.6.1",
     "nock": "^13.1.4",
     "react-test-renderer": "^17.0.2",

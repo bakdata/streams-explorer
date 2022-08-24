@@ -183,6 +183,7 @@ const GraphVisualization = ({
       const hostname = window.location.hostname;
       const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
       const port = process.env.NODE_ENV === "development"
+          || process.env.NODE_ENV === "test"
         ? "8000"
         : window.location.port;
       const url = `${protocol}//${hostname}:${port}/api/graph/ws`;
