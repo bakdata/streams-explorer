@@ -134,3 +134,5 @@ jobs:
     secrets:
       pypi-token: ${{ secrets.PYPI_TOKEN }}
       test-pypi-token: ${{ secrets.TEST_PYPI_TOKEN }}
+      dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
+      dockerhub-token: ${{ secrets.DOCKERHUB_TOKEN }}

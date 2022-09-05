@@ -9,6 +9,12 @@ on:
       test-pypi-token:
         description: "The token for TestPyPI to publish the package."
         required: true
+      dockerhub-username:
+        description: "Username for Docker Hub."
+        required: true
+      dockerhub-token:
+        description: "Password or Personal Access Token for Docker Hub."
+        required: true
 
 jobs:
   pypi:
@@ -32,3 +38,16 @@ jobs:
           working-directory: ${{ env.BACKEND_DIR }}
           pypi-token: ${{ secrets.pypi-token }}
           publish-to-test: "false"
+
+  dockerhub-readme:
+    name: Docker Hub description
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Update Docker Hub readme
+        uses: peter-evans/dockerhub-description@v3
+        with:
+          repository: bakdata/streams-explorer
+          username: ${{ secrets.dockerhub-username }}
+          password: ${{ secrets.dockerhub-token }}
