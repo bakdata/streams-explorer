@@ -1,5 +1,3 @@
-from typing import List, Optional
-
 from streams_explorer.core.extractor.extractor import Extractor
 from streams_explorer.models.kafka_connector import (
     KafkaConnector,
@@ -9,12 +7,9 @@ from streams_explorer.models.sink import Sink
 
 
 class JdbcSink(Extractor):
-    def __init__(self):
-        self.sinks: List[Sink] = []
-
     def on_connector_info_parsing(
         self, info: dict, connector_name: str
-    ) -> Optional[KafkaConnector]:
+    ) -> KafkaConnector | None:
         config = info["config"]
         connector_class = config.get("connector.class")
         if connector_class and "JdbcSinkConnector" in connector_class:
@@ -32,4 +27,3 @@ class JdbcSink(Extractor):
                 config=config,
                 type=KafkaConnectorTypesEnum.SINK,
             )
-        return None

@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List, Optional, Set, Union
+from typing import Union
 
 import pydantic
 from loguru import logger
@@ -8,6 +8,7 @@ from pydantic import BaseConfig, BaseModel, Extra, Field, ValidationError
 from streams_explorer.core.extractor.default.transformer import (
     GenericTransformerConfig,
     RegexRouterTransformerConfig,
+    RouterTransformerConfig,
     TimestampRouterTransformerConfig,
 )
 
@@ -18,16 +19,16 @@ class KafkaConnectorTypesEnum(str, Enum):
 
 
 class KafkaConnectorConfig(BaseModel):
-    topics: Optional[str]
-    transforms: Optional[str]
-    error_topic: Optional[str] = Field(
+    topics: str | None = Field(default=None)
+    transforms: str | None = Field(default=None)
+    error_topic: str | None = Field(
         default=None, alias="errors.deadletterqueue.topic.name"
     )
 
     class Config(BaseConfig):
         extra = Extra.allow
 
-    def get_transforms(self) -> List[str]:
+    def get_transforms(self) -> list[str]:
         if self.transforms is not None:
             return self.transforms.split(",")
         return []
@@ -37,10 +38,10 @@ class KafkaConnector(BaseModel):
     name: str
     type: KafkaConnectorTypesEnum
     config: KafkaConnectorConfig
-    error_topic: Optional[str]
-    topics: Optional[
-        List[str]
-    ]  # Deprecated please override get_topics for your kafka connector.
+    error_topic: str | None = Field(default=None)
+    topics: list[str] | None = Field(
+        default=None
+    )  # Deprecated please override get_topics for your kafka connector.
 
     # Do not change order here. The fallback GenericTransformerConfig should always be the last element
     _transformers = Union[
@@ -49,7 +50,7 @@ class KafkaConnector(BaseModel):
         GenericTransformerConfig,
     ]
 
-    def get_topics(self) -> List[str]:
+    def get_topics(self) -> list[str]:
         """
         Override in your kafka connector. Use the config to retrieve and parse the topics.
         This implementation only ensures the support of (older) plugins that use the deprecated topics field.
@@ -64,12 +65,12 @@ class KafkaConnector(BaseModel):
         return self.error_topic
 
     @staticmethod
-    def split_topics(topics: Optional[str]) -> List[str]:
+    def split_topics(topics: str | None) -> list[str]:
         if topics:
             return topics.replace(" ", "").split(",")
         return []
 
-    def get_routes(self) -> Set[str]:
+    def get_routes(self) -> set[str]:
         """
         Applies the single message transformers to get target routes (e.g. for the ElasticSearchSinkConnector)
         """
@@ -79,7 +80,7 @@ class KafkaConnector(BaseModel):
             routes = self.apply_transformer(routes, transformer_name)
         return set(routes)
 
-    def apply_transformer(self, indices: List[str], transformer_name: str) -> List[str]:
+    def apply_transformer(self, indices: list[str], transformer_name: str) -> list[str]:
         transformer_prefix = KafkaConnector.get_transformer_prefix(transformer_name)
         # transformer config without transformer_prefix
         transformer_config = {
@@ -89,7 +90,11 @@ class KafkaConnector(BaseModel):
         }
         transformer_config["topics"] = indices
         try:
-            transformer = pydantic.parse_obj_as(self._transformers, transformer_config)
+            transformer: RouterTransformerConfig = pydantic.parse_obj_as(
+                # HACK: https://github.com/samuelcolvin/pydantic/issues/1847
+                self._transformers,  # type: ignore[arg-type]
+                transformer_config,
+            )
             return transformer.get_routes()
         except ValidationError as e:
             logger.exception(

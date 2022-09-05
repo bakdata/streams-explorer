@@ -119,7 +119,7 @@ The following configuration options are available:
 
 #### General
 
-- `graph.update_interval` Update the graph every X seconds (int, **required**, default: `300`)
+- `graph.update_interval` Render the graph every x seconds (int, **required**, default: `300`)
 - `graph.layout_arguments` Arguments passed to graphviz layout (string, **required**, default: `-Grankdir=LR -Gnodesep=0.8 -Gpad=10`)
 - `graph.pipeline_distance` Increase/decrease vertical space between pipeline graphs by X pixels (int, **required**, default: `500`)
 - `graph.resolve.input_pattern_topics.all` If true topics that match (extra) input pattern(s) are connected to the streaming app in the graph containing all pipelines (bool, **required**, default: `false`)
@@ -135,6 +135,7 @@ The following configuration options are available:
 #### Kafka Connect
 
 - `kafkaconnect.url` URL of Kafka Connect server (string, default: None)
+- `kafkaconnect.update_interval` Fetch connectors every x seconds (int, default: `300`)
 - `kafkaconnect.displayed_information` Configuration options of Kafka connectors displayed in the frontend (list of dict)
 
 #### Kubernetes
@@ -234,14 +235,14 @@ For other setups a custom config parser plugin can be created by inheriting from
 import httpx
 
 from streams_explorer.core.k8s_config_parser import K8sConfigParser
-from streams_explorer.models.k8s_config import K8sConfig
+from streams_explorer.models.k8s import K8sConfig
 
 
 class CustomConfigParser(K8sConfigParser):
     def get_name(self) -> str:
         name = self.k8s_app.metadata.name
         if not name:
-            raise TypeError(f"Name is required for {self.k8s_app.get_class_name()}")
+            raise TypeError(f"Name is required for {self.k8s_app.class_name}")
         return name
 
     def parse(self) -> K8sConfig:

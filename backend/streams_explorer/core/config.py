@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any, TypeAlias
 
 from dynaconf import Dynaconf, Validator
 
@@ -42,6 +42,7 @@ settings: Any = Dynaconf(
         Validator("kafka.topic_names_cache.ttl", is_type_of=int, default=3600),
         Validator("node_info.cache_ttl", must_exist=True, is_type_of=int),
         Validator("kafkaconnect.url", default=None),
+        Validator("kafkaconnect.update_interval", is_type_of=int, default=300),
         Validator("kafkaconnect.displayed_information", is_type_of=list, default=[]),
         Validator("schemaregistry.url", default=None),
         Validator("prometheus.url", must_exist=True, is_type_of=str),
@@ -59,18 +60,19 @@ settings: Any = Dynaconf(
     ],
 )
 
-
-def sort_displayed_information(list: List[Dict[str, str]]) -> List[Dict[str, str]]:
-    return sorted(list, key=lambda k: str.casefold(k["name"]))
+InfoList: TypeAlias = list[dict[str, str]]
 
 
-settings.kafkaconnect.displayed_information = sort_displayed_information(
-    settings.kafkaconnect.displayed_information
-)
+def sort_displayed_information(lst: InfoList) -> InfoList:
+    return sorted(lst, key=lambda k: str.casefold(k["name"]))
+
+
 settings.k8s.displayed_information = sort_displayed_information(
     settings.k8s.displayed_information
 )
-
 settings.kafka.displayed_information = sort_displayed_information(
     settings.kafka.displayed_information
+)
+settings.kafkaconnect.displayed_information = sort_displayed_information(
+    settings.kafkaconnect.displayed_information
 )

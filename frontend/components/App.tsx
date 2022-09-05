@@ -20,9 +20,8 @@ import {
   useGetPositionedGraphApiGraphGet,
 } from "./api/fetchers";
 import DetailsCard from "./DetailsCard";
-import { graphConfig } from "./graphConfiguration";
-import GraphVisualization from "./GraphVisualization";
-import Node from "./Node";
+import Node from "./graph/Node";
+import GraphVisualization from "./graph/Visualization";
 import Search from "./Search";
 import Settings from "./Settings";
 
@@ -130,7 +129,7 @@ const App: React.FC = () => {
         setFocusedNode(node);
       }
     }
-  }, [graph, query]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [graph, query]);
 
   useEffect(() => {
     if (graphError) {
@@ -306,7 +305,6 @@ const App: React.FC = () => {
                   <GraphVisualization
                     data-testid="graph"
                     data={graph}
-                    config={graphConfig}
                     metrics={metrics}
                     refetchMetrics={() => refetchMetrics()}
                     onClickNode={(node: Node) => setDetailNode(node)}

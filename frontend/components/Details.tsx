@@ -82,14 +82,10 @@ const NodeInfoDetail = ({ infoListItem, nodeId }: NodeInfoDetailProps) => {
 };
 
 const LinkInfo = ({ infoListItem, nodeId }: NodeInfoDetailProps) => {
-  let linkType =
-    infoListItem.value !== "" && typeof infoListItem.value == "string"
-      ? infoListItem.value
-      : undefined;
   const { data: linkToService, loading } = useGetLinkingApiNodeLinkingNodeIdGet(
     {
       node_id: nodeId,
-      queryParams: { link_type: linkType },
+      queryParams: { link_type: infoListItem.value as string },
     }
   );
 

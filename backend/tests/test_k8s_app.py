@@ -1,7 +1,15 @@
-from streams_explorer.core.k8s_app import K8sApp, K8sAppDeployment, K8sAppStatefulSet
+from pytest import MonkeyPatch
+
+from streams_explorer.core.k8s_app import (
+    K8sApp,
+    K8sAppCronJob,
+    K8sAppDeployment,
+    K8sAppStatefulSet,
+)
 from streams_explorer.core.k8s_config_parser import StreamsBootstrapArgsParser
 from tests.utils import (
     ConfigType,
+    get_streaming_app_cronjob,
     get_streaming_app_deployment,
     get_streaming_app_stateful_set,
 )
@@ -36,7 +44,7 @@ class TestK8sApp:
         assert isinstance(k8s_apps[1], K8sAppStatefulSet)
         assert k8s_apps[1].get_service_name() == "test-service"
 
-    def test_parse_args(self, monkeypatch):
+    def test_parse_args(self, monkeypatch: MonkeyPatch):
         monkeypatch.setattr(
             "streams_explorer.core.k8s_app.config_parser", StreamsBootstrapArgsParser
         )
@@ -69,7 +77,7 @@ class TestK8sApp:
         assert isinstance(k8s_apps[1], K8sAppStatefulSet)
         assert k8s_apps[1].get_service_name() == "test-service"
 
-    def test_is_streams_bootstrap_app(self):
+    def test_is_streams_app(self):
         streams_app = K8sAppDeployment(
             get_streaming_app_deployment(
                 name="test-app",
@@ -78,7 +86,7 @@ class TestK8sApp:
                 error_topic=None,
             )
         )
-        assert streams_app.is_streams_bootstrap_app()
+        assert streams_app.is_streams_app()
 
         non_streams_app = K8sAppDeployment(
             get_streaming_app_deployment(
@@ -88,7 +96,7 @@ class TestK8sApp:
                 error_topic=None,
             )
         )
-        assert not non_streams_app.is_streams_bootstrap_app()
+        assert not non_streams_app.is_streams_app()
 
     def test_error_topic_undefined(self):
         k8s_app = K8sAppDeployment(
@@ -170,3 +178,13 @@ class TestK8sApp:
         )
         assert k8s_app.attributes["pipeline"] == "pipeline1"
         assert len(k8s_app.attributes) == 1
+
+    def test_replicas(self):
+        k8s_app = K8sAppDeployment(get_streaming_app_deployment())
+        assert k8s_app.replicas_total == 1
+        assert k8s_app.replicas_ready is None
+
+        k8s_app = K8sAppCronJob(get_streaming_app_cronjob())
+        assert not k8s_app.k8s_object.status
+        assert k8s_app.replicas_total is None
+        assert k8s_app.replicas_ready is None

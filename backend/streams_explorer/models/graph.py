@@ -1,37 +1,31 @@
-from typing import Any, List, Optional, Tuple
+from typing import Any, NamedTuple
 
-from pydantic.main import BaseModel
+from pydantic import BaseModel, Field
 
-GraphNode = Tuple[str, dict]
-GraphEdge = Tuple[str, str]
+from streams_explorer.models.k8s import K8sReason
 
-
-class Icon(BaseModel):
-    img: str
-    show: bool
-    width: int
-    height: int
+GraphNode = tuple[str, dict]
+GraphEdge = tuple[str, str]
 
 
 class Node(BaseModel):
     id: str
     label: str
     node_type: str
-    icon: Optional[Icon]
-    x: Optional[int]
-    y: Optional[int]
+    x: int | None = Field(default=None)
+    y: int | None = Field(default=None)
 
 
 class Metric(BaseModel):
     node_id: str
-    messages_in: Optional[float]
-    messages_out: Optional[float]
-    consumer_lag: Optional[int]
-    consumer_read_rate: Optional[float]
-    topic_size: Optional[int]
-    replicas: Optional[int]
-    replicas_available: Optional[int]
-    connector_tasks: Optional[int]
+    messages_in: float | None = Field(default=None)
+    messages_out: float | None = Field(default=None)
+    consumer_lag: int | None = Field(default=None)
+    consumer_read_rate: float | None = Field(default=None)
+    topic_size: int | None = Field(default=None)
+    replicas: int | None = Field(default=None)
+    replicas_available: int | None = Field(default=None)
+    connector_tasks: int | None = Field(default=None)
 
 
 class Edge(BaseModel):
@@ -43,5 +37,16 @@ class Graph(BaseModel):
     directed: bool
     multigraph: bool
     graph: Any
-    nodes: List[Node]
-    edges: List[Edge]
+    nodes: list[Node]
+    edges: list[Edge]
+
+
+class ReplicaCount(NamedTuple):
+    ready: int | None
+    total: int | None
+
+
+class AppState(BaseModel):
+    id: str
+    state: K8sReason
+    replicas: ReplicaCount

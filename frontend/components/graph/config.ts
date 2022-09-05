@@ -10,29 +10,12 @@ export const graphConfig: GraphOptions = {
     default: ["drag-canvas", "zoom-canvas", "click-select"],
   },
   defaultNode: {
-    type: "MetricCustomNode",
-    size: [28, 28],
-    style: {
-      fill: "#F0F2F5",
-      lineWidth: 0,
-    },
-    labelCfg: {
-      style: {
-        fill: "#000000",
-        fontSize: 14,
-      },
-      position: "bottom",
-    },
-    icon: {
-      show: true,
-      width: 36,
-      height: 36,
-    },
+    type: "GenericNode",
   },
   defaultEdge: {
     type: "cubic-horizontal",
     style: {
-      stroke: "#000000",
+      stroke: "#000",
       endArrow: true,
     },
     labelCfg: {
@@ -44,9 +27,12 @@ export const graphConfig: GraphOptions = {
     // highlight Nodes on hover and when selected
     hover: {
       fill: "lightsteelblue",
+      fillOpacity: 1,
     },
     click: {
-      fill: "#FFF",
+      fill: "#fff",
+      lineWidth: 2.5,
+      fillOpacity: 1,
     },
   },
 };

@@ -12,8 +12,6 @@ classifiers = [
   "Programming Language :: Python",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3 :: Only",
-  "Programming Language :: Python :: 3.8",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Topic :: Software Development :: Libraries :: Python Modules",
   "Topic :: Software Development :: Libraries",
@@ -26,34 +24,34 @@ classifiers = [
 "Bug Tracker" = "https://github.com/bakdata/streams-explorer/issues"
 
 [tool.poetry.dependencies]
-python = "^3.8"
-kubernetes = "^18.20.0"
+python = "^3.10"
 loguru = "^0.5.3"
 matplotlib = "^3.4.3"
 networkx = "^2.6.3"
 dynaconf = "^3.1.7"
 httpx = "^0.20.0"
-pydantic = "^1.8.2"
+pydantic = "^1.9.1"
 fastapi-utils = "^0.2.1"
-fastapi = "^0.70.0"
+fastapi = "^0.78.0"
 uvicorn = { extras = ["standard"], version = "^0.15.0" }
 pygraphviz = "^1.7"
 confluent-kafka = "^1.9.0"
 cachetools = "^4.2.2"
+kubernetes-asyncio = "^23.6.0"
 
 [tool.poetry.dev-dependencies]
-mypy = "^0.910"
+mypy = "^0.961"
 flake8 = "^4.0.1"
-black = "^22.3.0"
-isort = "^5.9.3"
+black = "^22.6.0"
+isort = "^5.10.1"
 pytest = "^6.2.5"
 pre-commit = "^2.15.0"
 pytest-asyncio = "^0.15.1"
 pytest-clarity = "^1.0.1"
 pytest-cov = "^3.0.0"
 pytest-mock = "^3.6.1"
-nest-asyncio = "^1.5.1"
 respx = "^0.18.0"
+requests = "^2.27.1"
 
 [tool.poetry.scripts]
 start = "main:start"

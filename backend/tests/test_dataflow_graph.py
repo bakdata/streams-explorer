@@ -1,10 +1,12 @@
-from typing import Set
-
 import pytest
+from pytest import MonkeyPatch
 
 from streams_explorer.core.config import settings
 from streams_explorer.core.k8s_app import ATTR_PIPELINE, K8sApp
-from streams_explorer.core.services.dataflow_graph import DataFlowGraph
+from streams_explorer.core.services.dataflow_graph import (
+    DataFlowGraph,
+    PipelineNotFound,
+)
 from streams_explorer.core.services.kafka_admin_client import KafkaAdminClient
 from streams_explorer.core.services.metric_providers import MetricProvider
 from streams_explorer.models.kafka_connector import (
@@ -30,7 +32,8 @@ class TestDataFlowGraph:
 
     @pytest.mark.asyncio
     async def test_positioned_pipeline_graph_not_found(self, df: DataFlowGraph):
-        assert await df.get_positioned_pipeline_graph("doesnt-exist") is None
+        with pytest.raises(PipelineNotFound):
+            await df.get_positioned_pipeline_graph("doesnt-exist")
 
     def test_add_streaming_app(self, df: DataFlowGraph):
         df.add_streaming_app(K8sApp.factory(get_streaming_app_deployment()))
@@ -100,11 +103,11 @@ class TestDataFlowGraph:
         assert df.graph.has_edge("test-app2", "output-topic2")
         assert df.graph.has_edge("test-app2", "fake2-dead-letter-topic")
 
-    def test_resolve_input_patterns_for_topics_in_kafka(self, monkeypatch):
+    def test_resolve_input_patterns_for_topics_in_kafka(self, monkeypatch: MonkeyPatch):
         kafka = KafkaAdminClient()
         kafka._enabled = True
 
-        def get_all_topic_names() -> Set[str]:
+        def get_all_topic_names() -> set[str]:
             return {"another-dead-letter-topic", "another-non-matching-topic"}
 
         monkeypatch.setattr(kafka, "get_all_topic_names", get_all_topic_names)
@@ -297,6 +300,7 @@ class TestDataFlowGraph:
         await df.get_positioned_graph()
         nodes = df.graph.nodes(data=True)
         for _, data in iter(nodes):
+            assert data is not None
             assert data.get("x") is not None
             assert data.get("y") is not None
 

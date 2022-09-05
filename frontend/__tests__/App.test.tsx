@@ -14,8 +14,8 @@ import App from "../components/App";
 jest.mock("next/router", () => require("next-router-mock"));
 
 // -- Mock GraphVisualization
-jest.mock("../components/GraphVisualization", () => {
-  return function DummyGraphVisualization() {
+jest.mock("../components/graph/Visualization", () => {
+  return function StubGraphVisualization() {
     return <div data-testid="graph"></div>;
   };
 });

@@ -10,7 +10,7 @@ COPY ./frontend /build
 RUN npm run build
 
 # build stage 2: backend
-FROM python:3.9-slim
+FROM python:3.10-slim
 
 RUN apt-get -y update && \
     apt-get --no-install-recommends -y install gcc python3-dev graphviz libgraphviz-dev pkg-config && \

@@ -1,6 +1,8 @@
 import G6 from "@antv/g6";
-import { graphConfig } from "../components/graphConfiguration";
-import { updateNodeMetrics } from "../components/GraphVisualization";
+import { waitFor } from "@testing-library/react";
+import { Server } from "mock-socket";
+import { graphConfig } from "../components/graph/config";
+import { updateNodeMetrics } from "../components/graph/Visualization";
 
 describe("visualize node metrics", () => {
   it("should differentiate node id and label", () => {
@@ -397,5 +399,51 @@ describe("visualize node metrics", () => {
     expect(graph.findById("in-edge-sink4").getModel().type).toEqual(
       "cubic-horizontal"
     );
+  });
+});
+
+describe("visualize application states", () => {
+  it.skip("should update node style", async () => {
+    const websocket = new Server("ws://localhost:8000/api/graph/ws");
+    document.body.innerHTML = '<div id="testGraph"></div>';
+    graphConfig.container = "testGraph";
+    const graph = new G6.Graph(graphConfig);
+
+    graph.data({
+      nodes: [
+        { id: "streaming-app1", label: "app1", node_type: "streaming-app" },
+        { id: "topic1", label: "topic1", node_type: "topic" },
+      ],
+      edges: [],
+    });
+
+    websocket.on("connection", (socket) => {
+      console.log("client connected");
+
+      const json = {
+        "id": "streaming-app1",
+        "replicas": [0, 0],
+        state: "Unknown",
+      };
+      socket.send(JSON.stringify(json));
+    });
+
+    graph.render();
+
+    await waitFor(() => {
+      expect(websocket.clients()).toHaveLength(1);
+      expect(graph.findById("streaming-app1").getModel().type).toEqual(
+        "AppNode"
+      );
+      expect(graph.findById("topic1").getModel().type).toEqual(
+        "TopicNode"
+      );
+      expect(graph.findById("streaming-app1").getModel().stateIcon).toEqual(
+        "state-paused.svg"
+      );
+      expect(graph.findById("streaming-app1").getModel().style?.stroke).toEqual(
+        "#9f9f9f"
+      );
+    });
   });
 });

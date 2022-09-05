@@ -1,12 +1,8 @@
-from typing import List, Optional
-
 from fastapi import APIRouter, Depends, HTTPException
 from loguru import logger
 from starlette import status
 
-from streams_explorer.api.dependencies.streams_explorer import (
-    get_streams_explorer_from_request,
-)
+from streams_explorer.api.dependencies.streams_explorer import get_streams_explorer
 from streams_explorer.core.services.schemaregistry import SchemaRegistry
 from streams_explorer.models.node_information import NodeInformation
 from streams_explorer.streams_explorer import StreamsExplorer
@@ -17,7 +13,7 @@ router = APIRouter()
 @router.get("/{node_id}", response_model=NodeInformation)
 async def get_node_info(
     node_id: str,
-    streams_explorer: StreamsExplorer = Depends(get_streams_explorer_from_request),
+    streams_explorer: StreamsExplorer = Depends(get_streams_explorer),
 ):
     try:
         return streams_explorer.get_node_information(node_id)
@@ -28,7 +24,7 @@ async def get_node_info(
         )
 
 
-@router.get("/{node_id}/schema", response_model=List[int])
+@router.get("/{node_id}/schema", response_model=list[int])
 async def get_node_schema_versions(node_id: str):
     return SchemaRegistry.get_versions(node_id)
 
@@ -41,8 +37,8 @@ async def get_node_schema(node_id: str, version: int):
 @router.get("/linking/{node_id}", response_model=str)
 def get_linking(
     node_id: str,
-    link_type: Optional[str] = None,
-    streams_explorer: StreamsExplorer = Depends(get_streams_explorer_from_request),
+    link_type: str,
+    streams_explorer: StreamsExplorer = Depends(get_streams_explorer),
 ):
     url = streams_explorer.get_link(node_id, link_type)
     logger.info(f"Redirecting to {url}")

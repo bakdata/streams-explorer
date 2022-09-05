@@ -1,7 +1,6 @@
 import respx
 from httpx import Response
 
-from streams_explorer.core.config import settings
 from streams_explorer.core.services import kafkaconnect
 from streams_explorer.core.services.kafkaconnect import KafkaConnect
 
@@ -38,7 +37,7 @@ class TestKafkaConnect:
         )
 
     @respx.mock(base_url=kafkaconnect.url)
-    def test_sanitize_connector_config(self, respx_mock):
+    def test_sanitize_connector_config(self, respx_mock: respx.MockRouter):
         connector_config = {
             "connector.class": "ConnectorClass",
             "connection.password": "supersecret",
@@ -52,7 +51,3 @@ class TestKafkaConnect:
                 "connection.password": "[hidden]",
             }
         assert mock_route.call_count == 1  # Verify caching works
-
-    def test_without_kafka_connect(self):
-        settings.kafkaconnect.url = None
-        assert KafkaConnect.connectors() == []

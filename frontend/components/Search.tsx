@@ -2,7 +2,7 @@ import { AutoComplete, Space } from "antd";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { Node as GraphNode } from "./api/fetchers";
-import Node from "./Node";
+import Node from "./graph/Node";
 
 const ICON_SIZE = 18;
 

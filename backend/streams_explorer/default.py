@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Awaitable, Callable
 
 from fastapi import FastAPI
 
@@ -8,7 +8,7 @@ from streams_explorer.metric_provider import load_metric_provider
 from streams_explorer.streams_explorer import StreamsExplorer
 
 
-def setup_default(app: FastAPI) -> Callable:
+def setup_default(app: FastAPI) -> Callable[[], Awaitable[None]]:
     async def setup() -> None:
         load_extractors()
         linking_service = load_linker()
@@ -16,6 +16,6 @@ def setup_default(app: FastAPI) -> Callable:
         app.state.streams_explorer = StreamsExplorer(
             linking_service=linking_service(), metric_provider=metric_provider
         )
-        app.state.streams_explorer.setup()
+        await app.state.streams_explorer.setup()
 
     return setup

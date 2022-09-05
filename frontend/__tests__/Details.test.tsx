@@ -83,7 +83,7 @@ describe("display node information", () => {
         node_id: "atm-fraud-transactionavroproducer",
         node_type: "streaming-app",
         info: [
-          { name: "Kibana Logs", value: "", type: "link" },
+          { name: "Kibana Logs", value: "kibana", type: "link" },
           {
             name: "Labels",
             value: {
@@ -99,7 +99,8 @@ describe("display node information", () => {
       });
 
     const nockLinking = nock("http://localhost")
-      .get("/api/node/linking/atm-fraud-transactionavroproducer?")
+      .get("/api/node/linking/atm-fraud-transactionavroproducer")
+      .query({ link_type: "kibana" })
       .reply(
         200,
         "http://localhost:5601/app/kibana#/discover?_a=(columns:!(_source),query:(language:lucene,query:'kubernetes.labels.app:%20%22atm-fraud-transactionavroproducer%22'))"

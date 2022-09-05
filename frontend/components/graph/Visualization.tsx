@@ -1,23 +1,25 @@
-import G6, {
-  Graph,
-  GraphData,
-  GraphOptions,
-  IEdge,
-  IG6GraphEvent,
-  INode,
-  NodeConfig,
-} from "@antv/g6";
+import G6, { Graph, GraphData, IEdge, IG6GraphEvent, INode } from "@antv/g6";
 import { message } from "antd";
 import { millify } from "millify";
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Graph as Data, Icon as IIcon, Metric } from "./api/fetchers";
-import "./DashedEdge";
-import "./MetricCustomNode";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { Graph as Data, Metric } from "../api/fetchers";
+import { graphConfig as config } from "./config";
 import Node from "./Node";
+import "./GenericNode";
+import "./TopicNode";
+import "./AppNode";
+import "./DashedEdge";
+
+export const isBrowser = typeof window !== "undefined"; // disable SSR
 
 interface GraphVisualizationProps {
   data: Data | GraphData;
-  config: GraphOptions;
   metrics: Metric[] | null;
   refetchMetrics: Function;
   onClickNode: Function;
@@ -27,18 +29,10 @@ interface GraphVisualizationProps {
   animate: boolean;
 }
 
-class Icon implements IIcon {
-  img: string;
-  show: boolean;
-  width: number;
-  height: number;
-
-  constructor(img: string, width: number, height: number) {
-    this.show = true;
-    this.img = img;
-    this.width = width;
-    this.height = height;
-  }
+interface AppState {
+  id: string;
+  state: string;
+  replicas: number[];
 }
 
 function createNodeFromGraphNode(graphNode: INode): Node {
@@ -177,7 +171,6 @@ function setFocusedNode(graph: Graph, focusedNode: Node) {
 
 const GraphVisualization = ({
   data,
-  config,
   metrics,
   onClickNode,
   width,
@@ -185,9 +178,21 @@ const GraphVisualization = ({
   focusedNode,
   animate,
 }: GraphVisualizationProps) => {
+  const ws = useMemo(() => {
+    if (isBrowser) {
+      const hostname = window.location.hostname;
+      const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+      const port = process.env.NODE_ENV === "development"
+          || process.env.NODE_ENV === "test"
+        ? "8000"
+        : window.location.port;
+      const url = `${protocol}//${hostname}:${port}/api/graph/ws`;
+      return new WebSocket(url);
+    }
+  }, []);
   const ref = useRef<HTMLDivElement>(null);
 
-  const [graph, setGraph] = useState<Graph | null>(null);
+  const [graph, setGraph] = useState<Graph>();
   if (graph) {
     graph.changeSize(width, height);
   }
@@ -196,7 +201,7 @@ const GraphVisualization = ({
     if (graph && focusedNode) {
       setFocusedNode(graph, focusedNode);
     }
-  }, [graph, focusedNode]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [graph, focusedNode]);
 
   useEffect(() => {
     if (graph && !animate) {
@@ -209,7 +214,7 @@ const GraphVisualization = ({
     if (graph && metrics) {
       updateNodeMetrics(graph, metrics, animate);
     }
-  }, [graph, metrics, animate]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [graph, metrics, animate]);
 
   const mouseEnterCallback = useCallback(
     (e: IG6GraphEvent) => {
@@ -268,21 +273,64 @@ const GraphVisualization = ({
   graph?.on("node:touchstart", touchCallback);
   graph?.on("nodeselectchange", selectCallback);
 
+  if (ws && graph) {
+    ws.onmessage = function(event) {
+      try {
+        const data = JSON.parse(event.data) as AppState;
+        const node = graph.findById(data.id) as INode;
+        if (node) {
+          if (data.state === "Failed" || data.state === "BackOff") {
+            graph.updateItem(node, {
+              style: {
+                stroke: "#ff2825",
+                fill: "#ff2825",
+              },
+              stateIcon: {
+                img: "state-error.svg",
+              },
+            });
+          } else if (!data.replicas[0]) {
+            graph.updateItem(node, {
+              style: {
+                stroke: "#9f9f9f",
+                fill: "#000",
+              },
+              stateIcon: {
+                img: "state-paused.svg",
+              },
+            });
+          } else {
+            graph.updateItem(node, {
+              style: {
+                stroke: "#52c41a",
+                fill: "#52c41a",
+              },
+              stateIcon: {
+                img: "state-running.svg",
+              },
+            });
+          }
+        }
+      } catch (error) {}
+    };
+  }
+
   useEffect(() => {
     if (graph) graph.destroy();
     config.container = ref.current as HTMLDivElement;
     const currentGraph = new G6.Graph(config);
-    const defaultIconConfig = config?.defaultNode?.icon as NodeConfig["icon"];
     let nodes = data["nodes"];
 
     nodes?.forEach((node: any) => {
-      if (!node.icon) {
-        let icon: Icon = new Icon(
-          node.img || node.node_type + ".svg",
-          defaultIconConfig?.width as number,
-          defaultIconConfig?.height as number
-        );
-        node.icon = icon;
+      switch (node.node_type) {
+        case "topic":
+        case "error-topic":
+          node.type = "TopicNode";
+          break;
+
+        case "streaming-app":
+          node.type = "AppNode";
+          break;
       }
     });
 
@@ -291,7 +339,7 @@ const GraphVisualization = ({
 
     setGraph(currentGraph);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [config, data]);
+  }, [data]);
 
   return <div ref={ref}></div>;
 };

@@ -11,7 +11,7 @@ topic = "test-topic"
 
 
 @respx.mock(base_url=schemaregistry.url)
-def test_schemaregistry_versions(respx_mock: respx):
+def test_schemaregistry_versions(respx_mock: respx.MockRouter):
     mock_route = respx_mock.get(
         f"/subjects/{topic}-value/versions/",
     ).mock(return_value=Response(404))
@@ -23,7 +23,7 @@ def test_schemaregistry_versions(respx_mock: respx):
 
 
 @respx.mock(base_url=schemaregistry.url)
-def test_schemaregistry_schema(respx_mock: respx):
+def test_schemaregistry_schema(respx_mock: respx.MockRouter):
     version = 1
     respx_mock.get(f"/subjects/{topic}-value/versions/{version}").mock(
         return_value=Response(
