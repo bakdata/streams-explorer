@@ -1,0 +1,18 @@
+name: Docker Hub description test
+
+on:
+  push:
+
+jobs:
+  dockerhub-readme:
+    name: Docker Hub description
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Update Docker Hub readme
+        uses: peter-evans/dockerhub-description@v3
+        with:
+          repository: bakdata/streams-explorer
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
