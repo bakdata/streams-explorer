@@ -26,7 +26,7 @@ jobs:
         run: sudo apt-get -y install python3-dev graphviz libgraphviz-dev pkg-config python3-wheel
 
       - name: Release to PyPI
-        uses: bakdata/ci-templates/actions/python-poetry-release@v1.3.0
+        uses: bakdata/ci-templates/actions/python-poetry-release@v1.4.1
         with:
           python-version: ${{ env.python-version }}
           working-directory: ${{ env.BACKEND_DIR }}
