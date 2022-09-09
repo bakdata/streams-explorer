@@ -12,7 +12,7 @@ public class FraudDetector extends KafkaStreamsApplication {
     startApplication(new FraudDetector(), args);
   }
 
-  private static boolean isPotentiallyFraudulentTransaction(String k, JoinedTransaction joinedTransaction) {
+  private static boolean isPotentiallyFraudulentTransaction(final String k, final JoinedTransaction joinedTransaction) {
     final Transaction t1 = joinedTransaction.getTransaction1();
     final Transaction t2 = joinedTransaction.getTransaction2();
 
@@ -24,7 +24,7 @@ public class FraudDetector extends KafkaStreamsApplication {
   }
 
   @Override
-  public void buildTopology(StreamsBuilder builder) {
+  public void buildTopology(final StreamsBuilder builder) {
     final KStream<String, JoinedTransaction> inputKStream = builder.stream(this.getInputTopics());
 
     final KStream<String, JoinedTransaction> possibleFraudTransactions = inputKStream

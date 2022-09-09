@@ -16,7 +16,7 @@ public class TransactionJoiner extends KafkaStreamsApplication {
   }
 
   @Override
-  public void buildTopology(StreamsBuilder builder) {
+  public void buildTopology(final StreamsBuilder builder) {
     final KStream<String, Transaction> input = builder.stream(this.getInputTopics());
     final KStream<String, Transaction> mapped = input
         .map((k, v) -> KeyValue.pair(v.getAccountId(), v));

@@ -20,7 +20,7 @@ public class TransactionAvroProducer extends KafkaStreamsApplication {
   }
 
   @Override
-  public void buildTopology(StreamsBuilder builder) {
+  public void buildTopology(final StreamsBuilder builder) {
     final KStream<String, String> input = builder.stream(this.getInputTopics(), Consumed.with(Serdes.String(), Serdes.String()));
 
     final KStream<String, ProcessedValue<String, Transaction>> mapped =
@@ -59,7 +59,7 @@ public class TransactionAvroProducer extends KafkaStreamsApplication {
       return Transaction
           .newBuilder()
           .setAccountId(input.getString("account_id"))
-          .setTimestamp(parseDateTimeString(input.getString("timestamp")))
+          .setTimestamp(this.parseDateTimeString(input.getString("timestamp")))
           .setAtm(input.getString("atm"))
           .setAmount(input.getInt("amount"))
           .setTransactionId(input.getString("transaction_id"))
@@ -78,7 +78,7 @@ public class TransactionAvroProducer extends KafkaStreamsApplication {
       // do nothing
     }
 
-    public Instant parseDateTimeString(String dateTimeString) {
+    public Instant parseDateTimeString(final String dateTimeString) {
       final ZonedDateTime parsedDateTime = ZonedDateTime.parse(dateTimeString,
           DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss Z"));
       return parsedDateTime.toInstant();
