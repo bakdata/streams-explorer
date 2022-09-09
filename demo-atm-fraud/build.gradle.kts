@@ -46,9 +46,4 @@ dependencies {
             name = "fluent-kafka-streams-tests-junit5",
             version = "2.7.0"
     )
-    testImplementation(
-            group = "com.bakdata.fluent-kafka-streams-tests",
-            name = "schema-registry-mock",
-            version = "2.7.0"
-    )
 }
