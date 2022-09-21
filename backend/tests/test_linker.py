@@ -54,58 +54,58 @@ def get_info_providers(info_list: list[NodeInfoListItem]):
 
 def test_default_linker_akhq():
     settings.akhq.enable = True
-    settings.kowl.enable = False
+    settings.redpanda_console.enable = False
     settings.validators.validate()
 
     linking_service = DefaultLinker()
 
     topic_info = get_info_providers(linking_service.topic_info)
     assert "akhq" in topic_info
-    assert "kowl" not in topic_info
+    assert "redpanda_console" not in topic_info
 
     streaming_app_info = get_info_providers(linking_service.streaming_app_info)
     assert "akhq" in streaming_app_info
-    assert "kowl" not in streaming_app_info
+    assert "redpanda_console" not in streaming_app_info
 
     connector_info = get_info_providers(linking_service.connector_info)
     assert "akhq" in connector_info
     assert "akhq-connect" not in connector_info
-    assert "kowl" not in connector_info
+    assert "redpanda_console" not in connector_info
 
     settings.akhq.connect = "kafka-connect"
     linking_service = DefaultLinker()
     assert "akhq-connect" in get_info_providers(linking_service.connector_info)
 
 
-def test_default_linker_kowl():
+def test_default_linker_redpanda_console():
     settings.akhq.enable = False
-    settings.kowl.enable = True
+    settings.redpanda_console.enable = True
     settings.validators.validate()
 
     linking_service = DefaultLinker()
 
     topic_info = get_info_providers(linking_service.topic_info)
-    assert "kowl" in topic_info
+    assert "redpanda_console" in topic_info
     assert "akhq" not in topic_info
 
     streaming_app_info = get_info_providers(linking_service.streaming_app_info)
-    assert "kowl" in streaming_app_info
+    assert "redpanda_console" in streaming_app_info
     assert "akhq" not in streaming_app_info
 
     connector_info = get_info_providers(linking_service.connector_info)
-    assert "kowl" in connector_info
+    assert "redpanda_console" in connector_info
     assert "akhq" not in connector_info
     assert "akhq-connect" not in connector_info
 
 
-def test_default_linker_akhq_kowl():
+def test_default_linker_akhq_redpanda_console():
     settings.akhq.enable = True
-    settings.kowl.enable = True
+    settings.redpanda_console.enable = True
     with pytest.raises(ValidationError):
         settings.validators.validate()
 
     settings.akhq.enable = False
-    settings.kowl.enable = False
+    settings.redpanda_console.enable = False
     settings.validators.validate()
 
 

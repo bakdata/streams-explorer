@@ -397,23 +397,23 @@ class TestStreamsExplorer:
         )
 
     @pytest.mark.asyncio
-    async def test_get_link_kowl(self, streams_explorer: StreamsExplorer):
+    async def test_get_link_redpanda_console(self, streams_explorer: StreamsExplorer):
         # topics
         assert (
-            streams_explorer.get_link("input-topic1", "kowl")
-            == f"{settings.kowl.url}/topics/input-topic1"
+            streams_explorer.get_link("input-topic1", "redpanda_console")
+            == f"{settings.redpanda_console.url}/topics/input-topic1"
         )
 
         # apps
         assert (
-            streams_explorer.get_link("streaming-app2", "kowl")
-            == f"{settings.kowl.url}/groups/consumer-group2"
+            streams_explorer.get_link("streaming-app2", "redpanda_console")
+            == f"{settings.redpanda_console.url}/groups/consumer-group2"
         )
 
         # connectors
         assert (
-            streams_explorer.get_link("generic-source-connector", "kowl")
-            == f"{settings.kowl.url}/groups/connect-generic-source"
+            streams_explorer.get_link("generic-source-connector", "redpanda_console")
+            == f"{settings.redpanda_console.url}/groups/connect-generic-source"
         )
 
     @pytest.mark.asyncio
