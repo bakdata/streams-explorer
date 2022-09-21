@@ -34,7 +34,7 @@ class TestMetricProvider:
 
     def test_load_default_metric_provider(self):
         metric_provider = load_metric_provider()(nodes)
-        assert type(metric_provider) is PrometheusMetricProvider
+        assert isinstance(metric_provider, PrometheusMetricProvider)
 
     def test_load_metric_provider_plugin(self):
         settings.plugins.path = Path.cwd() / "plugins"
