@@ -22,7 +22,7 @@
     - [Schema Registry / Karapace](#schema-registry--karapace)
     - [Prometheus](#prometheus)
     - [AKHQ](#akhq)
-    - [Kowl](#kowl)
+    - [Redpanda Console](#redpanda-console)
     - [Grafana](#grafana)
     - [Kibana](#kibana)
     - [Elasticsearch](#elasticsearch)
@@ -37,7 +37,7 @@
 - Inspection of Avro schema from schema registry
 - Integration with [streams-bootstrap](https://github.com/bakdata/streams-bootstrap) and [faust-bootstrap](https://github.com/bakdata/faust-bootstrap), or custom streaming app config parsing from Kubernetes deployments using plugins
 - Real-time metrics from Prometheus (consumer lag & read rate, replicas, topic size, messages in & out per second, connector tasks)
-- Linking to external services for logging and analysis, such as Kibana, Grafana, Loki, AKHQ, Kowl, and Elasticsearch
+- Linking to external services for logging and analysis, such as Kibana, Grafana, Loki, AKHQ, Redpanda Console, and Elasticsearch
 - Customizable through Python plugins
 
 ## Overview
@@ -170,12 +170,12 @@ The following exporters are required to collect Kafka metrics for Prometheus:
 - `akhq.cluster` Name of cluster (string, default: `kubernetes-cluster`)
 - `akhq.connect` Name of connect (string, default: None)
 
-#### Kowl
+#### Redpanda Console
 
-Kowl can be used instead of AKHQ. (mutually exclusive)
+Redpanda Console can be used instead of AKHQ. (mutually exclusive)
 
-- `kowl.enable` Enable Kowl (bool, default: `false`)
-- `kowl.url` URL of Kowl (string, default: `http://localhost:8080`)
+- `redpanda_console.enable` Enable Redpanda Console (bool, default: `false`)
+- `redpanda_console.url` URL of Redpanda Console (string, default: `http://localhost:8080`)
 
 #### Grafana
 

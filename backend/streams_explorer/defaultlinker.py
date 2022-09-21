@@ -39,8 +39,8 @@ class DefaultLinker(LinkingService):
                     )
                 )
 
-        if settings.kowl.enable:
-            self.add_message_provider("kowl")
+        if settings.redpanda_console.enable:
+            self.add_message_provider("redpanda_console")
 
         if settings.kibanalogs.enable:
             self.add_logging_provider("kibanalogs")
@@ -58,8 +58,8 @@ class DefaultLinker(LinkingService):
                     return f"{settings.akhq.url}/ui/{settings.akhq.cluster}/group/{consumer_group}"
                 case "akhq-connect":
                     return f"{settings.akhq.url}/ui/{settings.akhq.cluster}/connect/{settings.akhq.get('connect')}/definition/{connector_name}/tasks"
-                case "kowl":
-                    return f"{settings.kowl.url}/groups/{consumer_group}"
+                case "redpanda_console":
+                    return f"{settings.redpanda_console.url}/groups/{consumer_group}"
 
     def get_redirect_topic(self, topic_name: str, link_type: str) -> str | None:
         match link_type:
@@ -69,8 +69,8 @@ class DefaultLinker(LinkingService):
                 return (
                     f"{settings.akhq.url}/ui/{settings.akhq.cluster}/topic/{topic_name}"
                 )
-            case "kowl":
-                return f"{settings.kowl.url}/topics/{topic_name}"
+            case "redpanda_console":
+                return f"{settings.redpanda_console.url}/topics/{topic_name}"
 
     def get_redirect_streaming_app(self, k8s_app: K8sApp, link_type: str) -> str | None:
         consumer_group = k8s_app.consumer_group
@@ -83,8 +83,8 @@ class DefaultLinker(LinkingService):
                 return f"{settings.grafana.url}/d/{settings.grafana.dashboards.consumergroups}?var-consumergroups={consumer_group}"
             case "akhq" if consumer_group:
                 return f"{settings.akhq.url}/ui/{settings.akhq.cluster}/group/{consumer_group}"
-            case "kowl" if consumer_group:
-                return f"{settings.kowl.url}/groups/{consumer_group}"
+            case "redpanda_console" if consumer_group:
+                return f"{settings.redpanda_console.url}/groups/{consumer_group}"
 
     def get_sink_source_redirects(
         self, node_type: str, sink_source_name: str
