@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from abc import abstractmethod
 from typing import TYPE_CHECKING
 
 from kubernetes_asyncio.client import V1Container
@@ -17,6 +18,7 @@ class K8sConfigParser(Plugin):
     def __init__(self, k8s_app: K8sApp) -> None:
         self.k8s_app = k8s_app
 
+    @abstractmethod
     def parse(self) -> K8sConfig:
         ...
 
