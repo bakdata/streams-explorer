@@ -42,9 +42,9 @@ kafka-avro-console-producer --broker-list localhost:9092 --topic atm-fraud-accou
 
 ### Generate test transactions
 
-To generate our incoming transactions (legitimate or fraudulent) we are using the [gess](https://github.com/rmoff/gess) tool. Once it's running we pipe the output from the UDP port to `kafkacat` which writes the individual messages to our input topic.
+To generate our incoming transactions (legitimate or fraudulent) we are using the [gess](https://github.com/rmoff/gess) tool. Once it's running we pipe the output from the UDP port to [kcat](https://github.com/edenhill/kcat) to write the individual messages to our input topic.
 
 ```
 ./gess.sh start
-nc -v -u -l 6900 | kafkacat -b localhost:9092 -P -t atm-fraud-raw-input-topic
+nc -v -u -l 6900 | kcat -b localhost:9092 -P -t atm-fraud-raw-input-topic
 ```
