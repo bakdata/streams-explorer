@@ -13,8 +13,7 @@ class JdbcSink(Extractor):
         config = info["config"]
         connector_class = config.get("connector.class")
         if connector_class and "JdbcSinkConnector" in connector_class:
-            name = config.get("table.name.format")
-            if name:
+            if name := config.get("table.name.format"):
                 self.sinks.append(
                     Sink(
                         name=name,

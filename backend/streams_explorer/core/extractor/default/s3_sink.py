@@ -13,8 +13,7 @@ class S3Sink(Extractor):
         config = info["config"]
         connector_class = config.get("connector.class")
         if connector_class and "S3SinkConnector" in connector_class:
-            name = config.get("s3.bucket.name")
-            if name:
+            if name := config.get("s3.bucket.name"):
                 self.sinks.append(
                     Sink(
                         name=name,
