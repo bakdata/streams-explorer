@@ -51,7 +51,7 @@ def get_class(module: ModuleType, base_class: type[T]) -> type[T] | None:
     if not members:
         return None
     if len(members) > 1:  # multiple classes found
-        # exclude members from other modules
+        # exclude classes imported from other modules
         members = [
             (name, val) for name, val in members if val.__module__ == module.__name__
         ]
