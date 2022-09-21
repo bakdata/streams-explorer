@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
@@ -15,7 +16,7 @@ if TYPE_CHECKING:
 
 
 @dataclass
-class Extractor:
+class Extractor(ABC):
     sources: list[Source] = field(default_factory=list)
     sinks: list[Sink] = field(default_factory=list)
 
@@ -25,6 +26,7 @@ class Extractor:
 
 
 class ConnectorExtractor(Extractor):
+    @abstractmethod
     def on_connector_info_parsing(
         self, info: dict, connector_name: str
     ) -> KafkaConnector | None:
@@ -32,13 +34,16 @@ class ConnectorExtractor(Extractor):
 
 
 class StreamsAppExtractor(Extractor):
+    @abstractmethod
     def on_streaming_app_add(self, config: K8sConfig) -> None:
         ...
 
+    @abstractmethod
     def on_streaming_app_delete(self, config: K8sConfig) -> None:
         ...
 
 
 class CronJobExtractor(Extractor):
+    @abstractmethod
     def on_cron_job_parsing(self, cron_job: V1beta1CronJob) -> K8sAppCronJob | None:
         ...
