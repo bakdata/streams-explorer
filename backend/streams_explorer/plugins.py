@@ -33,7 +33,7 @@ def load_plugin(
     path = Path(settings.plugins.path)
     sys.path.append(str(path))
     logger.info(f"Loading {base_class} from {path}")
-    modules = []
+    modules: list[type[T]] = []
     for file in path.glob("*.py"):
         module = importlib.import_module(file.stem)
         plugin_class = get_class(module, base_class)
