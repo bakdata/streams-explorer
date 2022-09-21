@@ -27,3 +27,6 @@ class S3Sink(Extractor):
                 config=config,
                 type=KafkaConnectorTypesEnum.SINK,
             )
+
+    def reset_connector(self) -> None:
+        self.reset()
