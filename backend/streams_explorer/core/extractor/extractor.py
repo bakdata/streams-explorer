@@ -23,23 +23,22 @@ class Extractor:
         self.sources.clear()
         self.sinks.clear()
 
+
+class ConnectorExtractor(Extractor):
+    def on_connector_info_parsing(
+        self, info: dict, connector_name: str
+    ) -> KafkaConnector | None:
+        ...
+
+
+class StreamsAppExtractor(Extractor):
     def on_streaming_app_add(self, config: K8sConfig) -> None:
         ...
 
     def on_streaming_app_delete(self, config: K8sConfig) -> None:
         ...
 
+
+class CronJobExtractor(Extractor):
     def on_cron_job_parsing(self, cron_job: V1beta1CronJob) -> K8sAppCronJob | None:
-        ...
-
-
-# TODO
-class StreamsAppExtractor(Extractor):
-    pass
-
-
-class ConnectorExtractor(Extractor):
-    def on_connector_info_parsing(
-        self, info: dict, connector_name: str
-    ) -> KafkaConnector | None:
         ...
