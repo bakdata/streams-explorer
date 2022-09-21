@@ -42,7 +42,7 @@ class ExtractorContainer:
         for extractor in self.extractors:
             extractor.reset()
 
-    def reset_connector(self) -> None:
+    def reset_connectors(self) -> None:
         for extractor in self.extractors:
             if isinstance(extractor, ConnectorExtractor):
                 extractor.reset()
