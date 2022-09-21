@@ -47,8 +47,8 @@ def load_plugin(
 
 
 def get_class(module: ModuleType, base_class: type[T]) -> type[T] | None:
-    attrs = reversed([attr for attr in dir(module) if not is_builtin(attr)])
-    for name in attrs:
+    attrs = [attr for attr in dir(module) if not is_builtin(attr)]
+    for name in reversed(attrs):
         plugin_class = getattr(module, name)
         if (
             plugin_class
