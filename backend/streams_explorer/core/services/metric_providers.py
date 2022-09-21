@@ -84,7 +84,7 @@ def sort_topics_first(nodes: list[GraphNode]) -> list[GraphNode]:
 
 def is_topic(node: GraphNode) -> bool:
     node_type: NodeTypesEnum = node[1]["node_type"]
-    return node_type == NodeTypesEnum.TOPIC or node_type == NodeTypesEnum.ERROR_TOPIC
+    return node_type in (NodeTypesEnum.TOPIC, NodeTypesEnum.ERROR_TOPIC)
 
 
 class MetricProvider(Plugin):
