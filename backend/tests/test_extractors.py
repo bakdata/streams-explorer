@@ -4,6 +4,10 @@ import pytest
 from pytest_mock import MockerFixture
 
 from streams_explorer.core.config import settings
+from streams_explorer.core.extractor.extractor import (
+    CronJobExtractor,
+    StreamsAppExtractor,
+)
 from streams_explorer.core.services.kafkaconnect import KafkaConnect
 from streams_explorer.extractors import extractor_container, load_extractors
 from streams_explorer.models.kafka_connector import KafkaConnectorTypesEnum
@@ -42,6 +46,32 @@ class TestSinkTwo(ConnectorExtractor):
                 source=connector_name,
             )
         )
+"""
+
+extractor_file_3 = """from __future__ import annotations
+
+from pathlib import Path
+from typing import TYPE_CHECKING
+
+from kubernetes_asyncio.client import V1beta1CronJob
+from streams_explorer.models.k8s import K8sConfig
+from streams_explorer.core.extractor.extractor import (
+    CronJobExtractor,
+    StreamsAppExtractor,
+)
+
+if TYPE_CHECKING:
+    from streams_explorer.core.k8s_app import K8sAppCronJob
+
+class TestMultipleExtractor(StreamsAppExtractor, CronJobExtractor):
+    def on_streaming_app_add(self, config: K8sConfig) -> None:
+        pass
+
+    def on_streaming_app_delete(self, config: K8sConfig) -> None:
+        pass
+
+    def on_cron_job_parsing(self, cron_job: V1beta1CronJob) -> K8sAppCronJob | None:
+        pass
 """
 
 EMPTY_CONNECTOR_INFO = {"config": {}, "type": ""}
@@ -90,6 +120,24 @@ class TestExtractors:
         finally:
             extractor_1_path.unlink()
             extractor_2_path.unlink()
+
+    def test_load_extractor_multiple_inheritance(self):
+        settings.plugins.extractors.default = False
+        settings.plugins.path = Path.cwd() / "plugins"
+        extractor_3_path = settings.plugins.path / "fake_extractor_3.py"
+        try:
+            with open(extractor_3_path, "w") as f:
+                f.write(extractor_file_3)
+
+            load_extractors()
+            assert len(extractor_container.extractors) == 3
+
+            extractor = extractor_container.extractors[0]
+            assert extractor.__class__.__name__ == "TestMultipleExtractor"
+            assert isinstance(extractor, StreamsAppExtractor)
+            assert isinstance(extractor, CronJobExtractor)
+        finally:
+            extractor_3_path.unlink()
 
     def test_load_extractors_without_defaults(self):
         settings.plugins.extractors.default = False
