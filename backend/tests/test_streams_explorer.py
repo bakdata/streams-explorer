@@ -301,7 +301,9 @@ class TestStreamsExplorer:
     @pytest.mark.asyncio
     async def test_cron_job_extractor(self, streams_explorer: StreamsExplorer):
         class MockCronjobExtractor(CronJobExtractor):
-            def on_cron_job_parsing(self, cron_job: V1beta1CronJob):
+            def on_cron_job_parsing(
+                self, cron_job: V1beta1CronJob
+            ) -> K8sAppCronJob | None:
                 self.cron_job = cron_job
                 return K8sAppCronJob(cron_job)
 
@@ -326,11 +328,11 @@ class TestStreamsExplorer:
                     target=config.id,
                 )
 
-            def on_streaming_app_add(self, config: K8sConfig):
+            def on_streaming_app_add(self, config: K8sConfig) -> None:
                 source = self._parse(config)
                 self.sources.append(source)
 
-            def on_streaming_app_delete(self, config: K8sConfig):
+            def on_streaming_app_delete(self, config: K8sConfig) -> None:
                 source = self._parse(config)
                 self.sources.remove(source)
 
