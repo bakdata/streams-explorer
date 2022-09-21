@@ -6,7 +6,7 @@ from kubernetes_asyncio.client import V1beta1CronJob
 from loguru import logger
 
 from streams_explorer.core.extractor.default.generic import GenericSink, GenericSource
-from streams_explorer.core.extractor.extractor import Extractor
+from streams_explorer.core.extractor.extractor import ConnectorExtractor, Extractor
 from streams_explorer.models.k8s import K8sConfig
 from streams_explorer.models.kafka_connector import KafkaConnector
 from streams_explorer.models.sink import Sink
@@ -39,7 +39,8 @@ class ExtractorContainer:
 
     def reset_connector(self) -> None:
         for extractor in self.extractors:
-            extractor.reset_connector()
+            if isinstance(extractor, ConnectorExtractor):
+                extractor.reset()
 
     def on_streaming_app_add(self, config: K8sConfig) -> None:
         for extractor in self.extractors:
@@ -53,8 +54,11 @@ class ExtractorContainer:
         self, info: dict, connector_name: str
     ) -> KafkaConnector | None:
         for extractor in self.extractors:
-            if connector := extractor.on_connector_info_parsing(info, connector_name):
-                return connector
+            if isinstance(extractor, ConnectorExtractor):
+                if connector := extractor.on_connector_info_parsing(
+                    info, connector_name
+                ):
+                    return connector
 
     def on_cron_job(self, cron_job: V1beta1CronJob) -> K8sAppCronJob | None:
         for extractor in self.extractors:

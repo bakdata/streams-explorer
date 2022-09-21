@@ -26,12 +26,12 @@ class TestSinkOne(Extractor):
         )
 """
 
-extractor_file_2 = """from streams_explorer.core.extractor.extractor import Extractor
+extractor_file_2 = """from streams_explorer.core.extractor.extractor import ConnectorExtractor
 from streams_explorer.models.kafka_connector import KafkaConnector
 from streams_explorer.models.sink import Sink
 
 
-class TestSinkTwo(Extractor):
+class TestSinkTwo(ConnectorExtractor):
     def on_connector_info_parsing(
         self, info: dict, connector_name: str
     ) -> KafkaConnector | None:
@@ -231,3 +231,39 @@ class TestExtractors:
         )
         assert len(extractor.sinks) == 1
         assert extractor.sinks[0].name == "jdbc-table"
+
+    def test_load_extractor_type(self):
+        settings.plugins.extractors.default = False
+        settings.plugins.path = Path.cwd() / "plugins"
+        extractor_1_path = settings.plugins.path / "fake_extractor_1.py"
+        try:
+            with open(extractor_1_path, "w") as f:
+                f.write(extractor_file_1)
+
+            load_extractors()
+
+            extractor_classes = [
+                extractor.__class__.__name__
+                for extractor in extractor_container.extractors
+            ]
+            assert "TestSinkOne" in extractor_classes
+        finally:
+            extractor_1_path.unlink()
+
+    def test_load_extractor_subtype(self):
+        settings.plugins.extractors.default = False
+        settings.plugins.path = Path.cwd() / "plugins"
+        extractor_2_path = settings.plugins.path / "fake_extractor_2.py"
+        try:
+            with open(extractor_2_path, "w") as f:
+                f.write(extractor_file_2)
+
+            load_extractors()
+
+            extractor_classes = [
+                extractor.__class__.__name__
+                for extractor in extractor_container.extractors
+            ]
+            assert "TestSinkTwo" in extractor_classes
+        finally:
+            extractor_2_path.unlink()

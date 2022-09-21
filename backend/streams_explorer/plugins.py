@@ -47,7 +47,7 @@ def load_plugin(
 
 
 def get_class(module: ModuleType, base_class: type[T]) -> type[T] | None:
-    for name in dir(module):
+    for name in reversed([attr for attr in dir(module) if not attr.startswith("__")]):
         plugin_class = getattr(module, name)
         if (
             plugin_class
