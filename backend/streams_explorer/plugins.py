@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import importlib
+import inspect
 import sys
 from collections.abc import Sequence
-from inspect import isclass
 from pathlib import Path
 from types import ModuleType
 from typing import Literal, TypeVar, overload
@@ -47,17 +47,19 @@ def load_plugin(
 
 
 def get_class(module: ModuleType, base_class: type[T]) -> type[T] | None:
-    attrs = [attr for attr in dir(module) if not is_builtin(attr)]
-    for name in reversed(attrs):
-        plugin_class = getattr(module, name)
-        if (
-            plugin_class
-            and isclass(plugin_class)
-            and issubclass(plugin_class, base_class)
-            and plugin_class is not base_class
-        ):
-            return plugin_class
-
-
-def is_builtin(attr: str) -> bool:
-    return attr.startswith("__")
+    members = inspect.getmembers(module, inspect.isclass)
+    if not members:
+        return None
+    if len(members) > 1:  # multiple classes found
+        # exclude members from other modules
+        members = [
+            (name, val) for name, val in members if val.__module__ == module.__name__
+        ]
+    name, _ = members[0]
+    plugin_class = getattr(module, name)
+    if (
+        plugin_class
+        and issubclass(plugin_class, base_class)
+        and plugin_class is not base_class
+    ):
+        return plugin_class
