@@ -195,12 +195,6 @@ class DataFlowGraph:
         """
         graph = self.graph.reverse() if reverse else self.graph
         neighborhood = ego_graph(graph, node_name, radius=radius, undirected=False)
-        logger.debug(
-            "{} neighborhood size {}: {}",
-            node_name,
-            len(neighborhood.nodes),
-            neighborhood.nodes,
-        )
         pipelines = set()
         for _, node in neighborhood.nodes(data=True):
             if pipeline := node.get(ATTR_PIPELINE):
