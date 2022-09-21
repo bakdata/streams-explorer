@@ -55,6 +55,7 @@ class TestExtractors:
         yield  # testing
         # teardown
         settings.plugins.path = "./plugins"
+        extractor_container.extractors.clear()
 
     def test_load_extractors(self):
         settings.plugins.extractors.default = True
@@ -105,8 +106,8 @@ class TestExtractors:
         assert "GenericSource" in extractor_classes
 
     def test_generic_extractors_fallback(self, mocker: MockerFixture):
-
         settings.plugins.extractors.default = True
+        load_extractors()
 
         mocker.patch(
             "streams_explorer.core.services.kafkaconnect.KafkaConnect.get_connectors",
