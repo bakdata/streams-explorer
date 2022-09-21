@@ -74,7 +74,7 @@ class TestStreamsExplorer:
         """Creates LinkingService with non-default NodeInfoListItems."""
 
         class FakeLinker(DefaultLinker):
-            def __init__(self):
+            def __init__(self) -> None:
                 super().__init__()
                 self.topic_info = [
                     NodeInfoListItem(

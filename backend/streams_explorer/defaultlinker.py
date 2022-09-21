@@ -87,7 +87,7 @@ class DefaultLinker(LinkingService):
                 return f"{settings.redpanda_console.url}/groups/{consumer_group}"
 
     def get_sink_source_redirects(
-        self, node_type: str, sink_source_name: str
+        self, node_type: str, _sink_source_name: str
     ) -> str | None:
         if node_type == "elasticsearch-index":
             return settings.esindex.url

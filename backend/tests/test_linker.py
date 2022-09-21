@@ -9,15 +9,30 @@ from streams_explorer.defaultlinker import DefaultLinker
 from streams_explorer.linker import load_linker
 from streams_explorer.models.node_information import NodeInfoListItem
 
-fake_linker = """from streams_explorer.core.services.linking_services import LinkingService
+fake_linker = """from streams_explorer.core.k8s_app import K8sApp
+from streams_explorer.core.services.linking_services import LinkingService
 
 
 class FakeLinker(LinkingService):
+    def get_redirect_connector(self, config: dict, link_type: str) -> str | None:
+        pass
+
     def get_redirect_topic(
         self, topic_name: str, link_type: str
     ) -> str | None:
-        if link_type == "test":
-            return f"{topic_name}-link"
+        match link_type:
+            case "test":
+                return f"{topic_name}-link"
+
+    def get_redirect_streaming_app(
+        self, k8s_app: K8sApp, link_type: str
+    ) -> str | None:
+        pass
+
+    def get_sink_source_redirects(
+        self, node_type: str, sink_source_name: str
+    ) -> str | None:
+        pass
 """
 
 
