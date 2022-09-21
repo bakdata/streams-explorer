@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
@@ -10,13 +10,14 @@ from streams_explorer.models.k8s import K8sConfig
 from streams_explorer.models.kafka_connector import KafkaConnector
 from streams_explorer.models.sink import Sink
 from streams_explorer.models.source import Source
+from streams_explorer.plugins import Plugin
 
 if TYPE_CHECKING:
     from streams_explorer.core.k8s_app import K8sAppCronJob
 
 
 @dataclass
-class Extractor(ABC):
+class Extractor(Plugin):
     sources: list[Source] = field(default_factory=list)
     sinks: list[Sink] = field(default_factory=list)
 

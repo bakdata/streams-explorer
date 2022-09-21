@@ -5,12 +5,13 @@ from typing import TYPE_CHECKING
 from kubernetes_asyncio.client import V1Container
 
 from streams_explorer.models.k8s import K8sConfig
+from streams_explorer.plugins import Plugin
 
 if TYPE_CHECKING:
     from streams_explorer.core.k8s_app import K8sApp
 
 
-class K8sConfigParser:
+class K8sConfigParser(Plugin):
     """Base class for parsing configuration of streaming application deployments."""
 
     def __init__(self, k8s_app: K8sApp) -> None:

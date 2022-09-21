@@ -3,6 +3,7 @@ from __future__ import annotations
 import importlib
 import inspect
 import sys
+from abc import ABC
 from collections.abc import Sequence
 from pathlib import Path
 from types import ModuleType
@@ -12,7 +13,14 @@ from loguru import logger
 
 from streams_explorer.core.config import settings
 
-T = TypeVar("T")  # Plugin type
+
+class Plugin(ABC):
+    """Plugin base class."""
+
+    ...
+
+
+T = TypeVar("T", bound=Plugin)  # Plugin type
 
 
 @overload
@@ -36,7 +44,7 @@ def load_plugin(
     modules: list[type[T]] = []
     for file in path.glob("*.py"):
         module = importlib.import_module(file.stem)
-        plugin_class = get_class(module, base_class)
+        plugin_class = _find_class(module, base_class)
         if plugin_class is None:
             continue
         logger.info(f"Found {plugin_class} {file}")
@@ -46,7 +54,7 @@ def load_plugin(
     return modules
 
 
-def get_class(module: ModuleType, base_class: type[T]) -> type[T] | None:
+def _find_class(module: ModuleType, base_class: type[T]) -> type[T] | None:
     members = inspect.getmembers(module, inspect.isclass)
     if not members:
         return None

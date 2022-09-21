@@ -2,9 +2,10 @@ from collections import defaultdict
 
 from streams_explorer.core.k8s_app import K8sApp
 from streams_explorer.models.node_information import NodeInfoListItem
+from streams_explorer.plugins import Plugin
 
 
-class LinkingService:
+class LinkingService(Plugin):
     def __init__(self) -> None:
         self.sink_source_redirects: set[str] = set()
         self._connector_info: list[NodeInfoListItem] = []
