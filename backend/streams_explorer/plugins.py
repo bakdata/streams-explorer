@@ -47,7 +47,8 @@ def load_plugin(
 
 
 def get_class(module: ModuleType, base_class: type[T]) -> type[T] | None:
-    for name in reversed([attr for attr in dir(module) if not attr.startswith("__")]):
+    attrs = reversed([attr for attr in dir(module) if not is_builtin(attr)])
+    for name in attrs:
         plugin_class = getattr(module, name)
         if (
             plugin_class
@@ -56,3 +57,7 @@ def get_class(module: ModuleType, base_class: type[T]) -> type[T] | None:
             and plugin_class is not base_class
         ):
             return plugin_class
+
+
+def is_builtin(attr: str) -> bool:
+    return attr.startswith("__")
