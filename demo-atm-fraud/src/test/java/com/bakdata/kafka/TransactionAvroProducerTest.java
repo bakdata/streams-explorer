@@ -28,6 +28,9 @@ class TransactionAvroProducerTest {
     private double lon = 3.1328488;
     private double lat = 39.8417162;
     private final TransactionAvroProducer TransactionAvroProducer = createApp();
+    private Transaction transaction1 =
+            TransactionAvroProducer.createTransaction(accoundID, timestamp_str, atm_label, amount, transaction_id,
+                    lon, lat);
     private TestTopology<String, String> topology = null;
     Transaction transaction = new Transaction();
 
@@ -60,32 +63,11 @@ class TransactionAvroProducerTest {
         String filename = "ttest_atm_locations.csv";
         Map<Integer, String[]> locations = TransactionAvroProducer.loadCsvData(filename);
         Assertions.assertEquals(11, locations.size(), "Comparing size created dict with size of csv");
-
     }
 
-    Transaction createTransaction() {
-        return Transaction
-                .newBuilder()
-                .setAccountId(accoundID) //string
-                .setTimestamp(parsedDateTime.toInstant()) //Instant
-                .setAtm(atm_label) //string
-                .setAmount(amount) //int
-                .setTransactionId(transaction_id) //string
-                .setLocation(
-                        Location
-                                .newBuilder()
-                                .setLatitude(lat) //double
-                                .setLongitude(lon) //double
-                                .build()
-                )
-                .build();
-    }
 
     @Test
     void shouldCreateTransaction() {
-        Transaction transaction1 =
-                TransactionAvroProducer.createTransaction(accoundID, timestamp_str, atm_label, amount, transaction_id,
-                        lon, lat);
         Assertions.assertEquals("a11", transaction1.getAccountId(), "Comparing created Transactions accountID");
         Assertions.assertEquals(timestampInstant, transaction1.getTimestamp(),
                 "Comparing created Transactions timestamp");
@@ -100,9 +82,6 @@ class TransactionAvroProducerTest {
 
     @Test
     void shouldCreateFraudTransaction() {
-        Transaction transaction1 =
-                TransactionAvroProducer.createTransaction(accoundID, timestamp_str, atm_label, amount, transaction_id,
-                        lon, lat);
         Transaction fraudTransaction = TransactionAvroProducer.createFraudTransaction(transaction1, 5);
 
         Assertions.assertEquals(transaction1.getAccountId(), fraudTransaction.getAccountId(),
@@ -123,7 +102,5 @@ class TransactionAvroProducerTest {
                 "Verifying that both transactions have different lon-values");
 
     }
-
-//-0.413975,38.3685657,"Atm Banco Popular"
 
 }
