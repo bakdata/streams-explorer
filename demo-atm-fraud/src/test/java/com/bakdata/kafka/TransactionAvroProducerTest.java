@@ -3,6 +3,7 @@ package com.bakdata.kafka;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.bakdata.fluent_kafka_streams_tests.TestTopology;
+import java.net.URL;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -60,7 +61,7 @@ class TransactionAvroProducerTest {
 
     @Test
     void shouldLoadCsv() {
-        String filename = "ttest_atm_locations.csv";
+        String filename = "test_atm_locations.csv";
         Map<Integer, String[]> locations = TransactionAvroProducer.loadCsvData(filename);
         Assertions.assertEquals(11, locations.size(), "Comparing size of the created map with size of csv");
     }
@@ -100,7 +101,5 @@ class TransactionAvroProducerTest {
         Assertions.assertNotEquals(transaction1.getLocation().getLongitude(),
                 fraudTransaction.getLocation().getLongitude(),
                 "Verifying that both transactions have different lon-values");
-
     }
-
 }
