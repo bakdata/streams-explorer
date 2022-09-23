@@ -62,7 +62,7 @@ class TransactionAvroProducerTest {
     void shouldLoadCsv() {
         String filename = "ttest_atm_locations.csv";
         Map<Integer, String[]> locations = TransactionAvroProducer.loadCsvData(filename);
-        Assertions.assertEquals(11, locations.size(), "Comparing size created dict with size of csv");
+        Assertions.assertEquals(11, locations.size(), "Comparing size of the created map with size of csv");
     }
 
 
