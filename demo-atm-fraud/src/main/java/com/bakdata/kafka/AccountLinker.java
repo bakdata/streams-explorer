@@ -17,7 +17,7 @@ public class AccountLinker extends KafkaStreamsApplication {
     startApplication(new AccountLinker(), args);
   }
 
-  private static JoinedAccountTransaction join(JoinedTransaction joinedTransaction, Account account) {
+  private static JoinedAccountTransaction join(final JoinedTransaction joinedTransaction, final Account account) {
     final Transaction t1 = joinedTransaction.getTransaction1();
     final Transaction t2 = joinedTransaction.getTransaction2();
 
@@ -57,7 +57,7 @@ public class AccountLinker extends KafkaStreamsApplication {
   }
 
   @Override
-  public void buildTopology(StreamsBuilder builder) {
+  public void buildTopology(final StreamsBuilder builder) {
     final KStream<String, JoinedTransaction> transactionsKStream = builder.stream(this.getInputTopics());
     final KStream<String, JoinedTransaction> transactionsRekeyedKStream = transactionsKStream
         .map((k, v) -> KeyValue.pair(v.getTransaction1().getAccountId(), v));
