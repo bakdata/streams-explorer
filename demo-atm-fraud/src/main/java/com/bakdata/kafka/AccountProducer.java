@@ -1,7 +1,6 @@
 package com.bakdata.kafka;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -19,26 +18,29 @@ public class AccountProducer extends KafkaProducerApplication {
         startApplication(new AccountProducer(), args);
     }
 
-    private String filename = "accounts.txt";
-
-    private Map<Integer, String[]> allAccounts;
-
     @Override
     protected void runApplication() {
-        ClassLoader classLoader = getClass().getClassLoader();
-        InputStream inputStream = classLoader.getResourceAsStream(this.filename);
-        InputStreamReader streamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
-        this.allAccounts = this.loadCsvData(streamReader);
+        final ClassLoader classLoader = this.getClass().getClassLoader();
+        final String filename = "accounts.txt";
+        final InputStream inputStream = classLoader.getResourceAsStream(filename);
+        assert inputStream != null;
+        final InputStreamReader streamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+        final Map<Integer, String[]> allAccounts = AccountProducer.loadCsvData(streamReader);
         final KafkaProducer<String, Account> producer = this.createProducer();
 
-        int len = this.allAccounts.size();
+        final int len = allAccounts.size();
         for (int i = 0; i < len; i++) {
-            String[] accountData = this.allAccounts.get(i);
-            String account_id = accountData[0], first_name = accountData[1], last_name = accountData[2], email =
-                    accountData[3], phone = accountData[4],
-                    address = accountData[5], country = accountData[6];
+            final String[] accountData = allAccounts.get(i);
+            final String account_id = accountData[0];
+            final String first_name = accountData[1];
+            final String last_name = accountData[2];
+            final String email =
+                    accountData[3];
+            final String phone = accountData[4];
+            final String address = accountData[5];
+            final String country = accountData[6];
 
-            Account account = this.createAccount(account_id, first_name, last_name, email, phone, address, country);
+            final Account account = createAccount(account_id, first_name, last_name, email, phone, address, country);
             this.publishAccount(producer, account);
         }
     }
@@ -50,10 +52,10 @@ public class AccountProducer extends KafkaProducerApplication {
         return super.createKafkaProperties();
     }
 
-    public Map<Integer, String[]> loadCsvData(InputStreamReader streamReader) {
-        Map<Integer, String[]> accounts = new HashMap<Integer, String[]>();
+    public static Map<Integer, String[]> loadCsvData(final InputStreamReader streamReader) {
+        final Map<Integer, String[]> accounts = new HashMap<Integer, String[]>();
         String line = "";
-        String splitBy = ",";
+        final String splitBy = ",";
         Integer count = 0;
 
         BufferedReader reader = null;
@@ -62,39 +64,50 @@ public class AccountProducer extends KafkaProducerApplication {
 
             while ((line = reader.readLine()) != null)   //returns a Boolean value
             {
-                String[] row = line.split(splitBy);    // use comma as separator
-                String account_id = this.getContent(row[0]), first_name = this.getContent(row[1]),
-                        last_name = this.getContent(row[2]),
-                        email = this.getContent(row[3]), phone = this.getContent(row[4]);
-                String address, country = "";
+                final String[] row = line.split(splitBy);    // use comma as separator
+                final String account_id = getContent(row[0]);
+                final String first_name = getContent(row[1]);
+                final String last_name = getContent(row[2]);
+                final String email = getContent(row[3]);
+                final String phone = getContent(row[4]);
+                String address = "";
+                String country = "";
                 if (row.length == 8) {
-                    address = this.getContent(row[5] + row[6]);
-                    country = this.getContent(row[7]);
+                    address = getContent(row[5] + row[6]);
+                    country = getContent(row[7]);
                 } else {
-                    address = this.getContent(row[5]);
-                    country = this.getContent(row[6]);
+                    address = getContent(row[5]);
+                    country = getContent(row[6]);
                 }
                 accounts.put(count,
                         new String[]{account_id, first_name, last_name, email, phone, address, country});
                 count++;
             }
-        } catch (FileNotFoundException e) {
+        } catch (final IOException e) {
             throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        } finally {
+            if (reader != null) {
+                // again, a resource is involved, so try-catch another time
+                try {
+                    reader.close();
+                } catch (final IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
         return accounts;
     }
 
-    private String getContent(String rawData) {
+    private static String getContent(final String rawData) {
         String data = rawData.split(":")[1];
         data = data.replace("\"", "");
         data = data.replace(" ", "");
         return data;
     }
 
-    protected Account createAccount(String account_id, String first_name, String last_name, String email, String phone,
-            String address, String country) {
+    protected static Account createAccount(final String account_id, final String first_name, final String last_name,
+            final String email, final String phone,
+            final String address, final String country) {
         return Account.newBuilder()
                 .setAccountId(account_id)
                 .setFirstName(first_name)
@@ -106,7 +119,7 @@ public class AccountProducer extends KafkaProducerApplication {
                 .build();
     }
 
-    private void publishAccount(KafkaProducer<String, Account> producer, Account account) {
+    private void publishAccount(final KafkaProducer<? super String, ? super Account> producer, final Account account) {
         producer.send(new ProducerRecord<>(this.getOutputTopic(), account.getAccountId(), account));
     }
 }

@@ -1,6 +1,5 @@
 package com.bakdata.kafka;
 
-import com.bakdata.fluent_kafka_streams_tests.TestTopology;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -11,34 +10,34 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 class TransactionAvroProducerTest {
 
     static final String timestamp_str = "2022-09-23 14:25:14 +0000";
-    private ZonedDateTime parsedDateTime =
+    public static final int EXPECTED = 11;
+    private final ZonedDateTime parsedDateTime =
             ZonedDateTime.parse(timestamp_str, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss Z"));
-    private Instant timestampInstant = parsedDateTime.toInstant();
-    private String accoundID = "a11";
-    private String atm_label = "Atm ServiRed";
-    private int amount = 50;
-    private UUID uuid = UUID.randomUUID();
-    private String transaction_id = uuid.toString();
-    private double lon = 3.1328488;
-    private double lat = 39.8417162;
+    private final Instant timestampInstant = this.parsedDateTime.toInstant();
+    private static final String accoundID = "a11";
+    private static final String atm_label = "Atm ServiRed";
+    private static final int amount = 50;
+    private final UUID uuid = UUID.randomUUID();
+    private final String transaction_id = this.uuid.toString();
+    private static final double lon = 3.1328488;
+    private static final double lat = 39.8417162;
     private final TransactionAvroProducer TransactionAvroProducer = createApp();
-    private Transaction transaction1 =
-            TransactionAvroProducer.createTransaction(accoundID, timestamp_str, atm_label, amount, transaction_id,
+    private final Transaction transaction1 =
+            com.bakdata.kafka.TransactionAvroProducer.createTransaction(accoundID, timestamp_str, atm_label,
+                    amount,
+                    this.transaction_id,
                     lon, lat);
-    private TestTopology<String, String> topology = null;
-    Transaction transaction = new Transaction();
 
     private static TransactionAvroProducer createApp() {
         final TransactionAvroProducer transactionAvroProducer = new TransactionAvroProducer();
         transactionAvroProducer.setAllLocations();
-        List<String[]> locations = new ArrayList<>();
+        final List<String[]> locations = new ArrayList<>();
         locations.add(new String[]{"3.1328488", "39.8417162", "Atm ServiRed"});
         locations.add(new String[]{"3.1334979", "39.8416612", "Atm TeleBanco"});
         locations.add(new String[]{"3.13515", "39.8410749", "Atm TeleBanco"});
@@ -52,57 +51,53 @@ class TransactionAvroProducerTest {
         return transactionAvroProducer;
     }
 
-    @AfterEach
-    void tearDown() {
-        if (this.topology != null) {
-            this.topology.stop();
-        }
-    }
 
     @Test
     void shouldLoadCsv() {
-        String filename = "test_atm_locations.csv";
-        ClassLoader classLoader = getClass().getClassLoader();
-        InputStream inputStream = classLoader.getResourceAsStream(filename);
-        InputStreamReader streamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+        final String filename = "test_atm_locations.csv";
+        final ClassLoader classLoader = this.getClass().getClassLoader();
+        final InputStream inputStream = classLoader.getResourceAsStream(filename);
+        assert inputStream != null;
+        final InputStreamReader streamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
 
-        Map<Integer, String[]> locations = TransactionAvroProducer.loadCsvData(streamReader);
-        Assertions.assertEquals(11, locations.size(), "Comparing size of the created map with size of csv");
+        final Map<Integer, String[]> locations = com.bakdata.kafka.TransactionAvroProducer.loadCsvData(streamReader);
+        Assertions.assertEquals(EXPECTED, locations.size(), "Comparing size of the created map with size of csv");
     }
 
 
     @Test
     void shouldCreateTransaction() {
-        Assertions.assertEquals("a11", transaction1.getAccountId(), "Comparing created Transactions accountID");
-        Assertions.assertEquals(timestampInstant, transaction1.getTimestamp(),
+        Assertions.assertEquals("a11", this.transaction1.getAccountId(), "Comparing created Transactions accountID");
+        Assertions.assertEquals(this.timestampInstant, this.transaction1.getTimestamp(),
                 "Comparing created Transactions timestamp");
-        Assertions.assertEquals(atm_label, transaction1.getAtm(), "Comparing created Transactions atm label");
-        Assertions.assertEquals(amount, transaction1.getAmount(), "Comparing created Transactions amount");
-        Assertions.assertEquals(transaction_id, transaction1.getTransactionId(), "Comparing created Transactions ID");
-        Assertions.assertEquals(lat, transaction1.getLocation().getLatitude(),
+        Assertions.assertEquals(atm_label, this.transaction1.getAtm(), "Comparing created Transactions atm label");
+        Assertions.assertEquals(amount, this.transaction1.getAmount(), "Comparing created Transactions amount");
+        Assertions.assertEquals(this.transaction_id, this.transaction1.getTransactionId(),
+                "Comparing created Transactions ID");
+        Assertions.assertEquals(lat, this.transaction1.getLocation().getLatitude(),
                 "Comparing created Transactions locations lat");
-        Assertions.assertEquals(lon, transaction1.getLocation().getLongitude(),
+        Assertions.assertEquals(lon, this.transaction1.getLocation().getLongitude(),
                 "Comparing created Transactions locations lon");
     }
 
     @Test
     void shouldCreateFraudTransaction() {
-        Transaction fraudTransaction = TransactionAvroProducer.createFraudTransaction(transaction1, 5);
+        final Transaction fraudTransaction = this.TransactionAvroProducer.createFraudTransaction(this.transaction1, 5);
 
-        Assertions.assertEquals(transaction1.getAccountId(), fraudTransaction.getAccountId(),
+        Assertions.assertEquals(this.transaction1.getAccountId(), fraudTransaction.getAccountId(),
                 "Verifying that both transactions have the same accountID");
-        Assertions.assertNotEquals(transaction1.getTimestamp(), fraudTransaction.getTimestamp(),
+        Assertions.assertNotEquals(this.transaction1.getTimestamp(), fraudTransaction.getTimestamp(),
                 "Verifying that both transactions have different Timestamps");
-        Assertions.assertNotEquals(transaction1.getAtm(), fraudTransaction.getAtm(),
+        Assertions.assertNotEquals(this.transaction1.getAtm(), fraudTransaction.getAtm(),
                 "Verifying that both transactions have different atms");
-        Assertions.assertNotEquals(transaction1.getAmount(), fraudTransaction.getAmount(),
+        Assertions.assertNotEquals(this.transaction1.getAmount(), fraudTransaction.getAmount(),
                 "Verifying that both transactions have different amounts");
-        Assertions.assertNotEquals(transaction1.getTransactionId(), fraudTransaction.getTransactionId(),
+        Assertions.assertNotEquals(this.transaction1.getTransactionId(), fraudTransaction.getTransactionId(),
                 "Verifying that both transactions have different transactionIDs");
-        Assertions.assertNotEquals(transaction1.getLocation().getLatitude(),
+        Assertions.assertNotEquals(this.transaction1.getLocation().getLatitude(),
                 fraudTransaction.getLocation().getLatitude(),
                 "Verifying that both transactions have different lat-values");
-        Assertions.assertNotEquals(transaction1.getLocation().getLongitude(),
+        Assertions.assertNotEquals(this.transaction1.getLocation().getLongitude(),
                 fraudTransaction.getLocation().getLongitude(),
                 "Verifying that both transactions have different lon-values");
     }
