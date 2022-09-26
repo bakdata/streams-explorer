@@ -1,9 +1,9 @@
 package com.bakdata.kafka;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import com.bakdata.fluent_kafka_streams_tests.TestTopology;
-import java.net.URL;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -62,7 +62,11 @@ class TransactionAvroProducerTest {
     @Test
     void shouldLoadCsv() {
         String filename = "test_atm_locations.csv";
-        Map<Integer, String[]> locations = TransactionAvroProducer.loadCsvData(filename);
+        ClassLoader classLoader = getClass().getClassLoader();
+        InputStream inputStream = classLoader.getResourceAsStream(filename);
+        InputStreamReader streamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+
+        Map<Integer, String[]> locations = TransactionAvroProducer.loadCsvData(streamReader);
         Assertions.assertEquals(11, locations.size(), "Comparing size of the created map with size of csv");
     }
 

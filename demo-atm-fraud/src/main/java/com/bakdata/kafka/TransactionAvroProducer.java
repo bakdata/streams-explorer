@@ -2,7 +2,6 @@ package com.bakdata.kafka;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -46,6 +45,8 @@ public class TransactionAvroProducer extends KafkaProducerApplication {
         return this.allLocations;
     }
 
+    private String fileName = "atm_locations.csv";
+
     @Override
     protected Properties createKafkaProperties() {
         final Properties kafkaProperties = super.createKafkaProperties();
@@ -57,10 +58,10 @@ public class TransactionAvroProducer extends KafkaProducerApplication {
     protected void runApplication() {
         //every 51st transaction is an  fraudulent transaction
         int bound = 50;
-        //csv file containing ATM locations
-        String fileName = "atm_locations.csv";
-
-        this.allLocations = this.loadCsvData(fileName);
+        ClassLoader classLoader = getClass().getClassLoader();
+        InputStream inputStream = classLoader.getResourceAsStream(fileName);
+        InputStreamReader streamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+        this.allLocations = this.loadCsvData(streamReader);
         int amountLocation = this.allLocations.size();
 
         try (final KafkaProducer<String, Transaction> producer = this.createProducer()) {
@@ -107,16 +108,11 @@ public class TransactionAvroProducer extends KafkaProducerApplication {
         }
     }
 
-    public Map<Integer, String[]> loadCsvData(String filename) {
+    protected Map<Integer, String[]> loadCsvData(InputStreamReader streamReader) {
         Map<Integer, String[]> locations = new HashMap<Integer, String[]>();
         String line = "";
         String splitBy = ",";
         Integer count = 0;
-
-        ClassLoader classLoader = getClass().getClassLoader();
-
-        InputStream inputStream = classLoader.getResourceAsStream(filename);
-        InputStreamReader streamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
 
         BufferedReader reader = null;
         try {
