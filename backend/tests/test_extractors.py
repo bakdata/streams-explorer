@@ -56,14 +56,14 @@ from typing import TYPE_CHECKING
 from kubernetes_asyncio.client import V1beta1CronJob
 from streams_explorer.models.k8s import K8sConfig
 from streams_explorer.core.extractor.extractor import (
-    CronJobExtractor,
+    ProducerAppExtractor,
     StreamsAppExtractor,
 )
 
 if TYPE_CHECKING:
     from streams_explorer.core.k8s_app import K8sAppCronJob
 
-class TestMultipleExtractor(StreamsAppExtractor, CronJobExtractor):
+class TestMultipleExtractor(StreamsAppExtractor, ProducerAppExtractor):
     def on_streaming_app_add(self, config: K8sConfig) -> None:
         pass
 
