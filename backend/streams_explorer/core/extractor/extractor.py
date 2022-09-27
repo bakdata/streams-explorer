@@ -44,7 +44,7 @@ class StreamsAppExtractor(Extractor):
         ...
 
 
-class CronJobExtractor(Extractor):
+class ProducerAppExtractor(Extractor):
     @abstractmethod
     def on_cron_job_parsing(self, cron_job: V1beta1CronJob) -> K8sAppCronJob | None:
         ...

@@ -7,7 +7,7 @@ from streams_explorer.core.config import settings
 from streams_explorer.core.extractor.default.elasticsearch_sink import ElasticsearchSink
 from streams_explorer.core.extractor.default.generic import GenericSink, GenericSource
 from streams_explorer.core.extractor.extractor import (
-    CronJobExtractor,
+    ProducerAppExtractor,
     StreamsAppExtractor,
 )
 from streams_explorer.core.k8s_app import K8sAppCronJob, K8sObject
@@ -300,7 +300,7 @@ class TestStreamsExplorer:
 
     @pytest.mark.asyncio
     async def test_cron_job_extractor(self, streams_explorer: StreamsExplorer):
-        class MockCronjobExtractor(CronJobExtractor):
+        class MockCronjobExtractor(ProducerAppExtractor):
             def on_cron_job_parsing(
                 self, cron_job: V1beta1CronJob
             ) -> K8sAppCronJob | None:

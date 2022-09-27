@@ -5,7 +5,7 @@ from pytest_mock import MockerFixture
 
 from streams_explorer.core.config import settings
 from streams_explorer.core.extractor.extractor import (
-    CronJobExtractor,
+    ProducerAppExtractor,
     StreamsAppExtractor,
 )
 from streams_explorer.core.services.kafkaconnect import KafkaConnect
@@ -135,7 +135,7 @@ class TestExtractors:
             extractor = extractor_container.extractors[0]
             assert extractor.__class__.__name__ == "TestMultipleExtractor"
             assert isinstance(extractor, StreamsAppExtractor)
-            assert isinstance(extractor, CronJobExtractor)
+            assert isinstance(extractor, ProducerAppExtractor)
         finally:
             extractor_3_path.unlink()
 

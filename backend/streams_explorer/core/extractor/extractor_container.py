@@ -8,8 +8,8 @@ from loguru import logger
 from streams_explorer.core.extractor.default.generic import GenericSink, GenericSource
 from streams_explorer.core.extractor.extractor import (
     ConnectorExtractor,
-    CronJobExtractor,
     Extractor,
+    ProducerAppExtractor,
     StreamsAppExtractor,
 )
 from streams_explorer.models.k8s import K8sConfig
@@ -69,7 +69,7 @@ class ExtractorContainer:
 
     def on_cron_job(self, cron_job: V1beta1CronJob) -> K8sAppCronJob | None:
         for extractor in self.extractors:
-            if isinstance(extractor, CronJobExtractor):
+            if isinstance(extractor, ProducerAppExtractor):
                 if app := extractor.on_cron_job_parsing(cron_job):
                     return app
 
