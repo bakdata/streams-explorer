@@ -11,7 +11,11 @@ from streams_explorer.core.extractor.extractor import (
     StreamsAppExtractor,
 )
 from streams_explorer.core.services.kafkaconnect import KafkaConnect
-from streams_explorer.extractors import extractor_container, load_extractors
+from streams_explorer.extractors import (
+    extractor_container,
+    load_default,
+    load_extractors,
+)
 from streams_explorer.models.kafka_connector import KafkaConnectorTypesEnum
 from streams_explorer.models.sink import Sink
 
@@ -97,7 +101,6 @@ class TestExtractors:
         ]
 
     def test_load_extractors(self):
-        settings.plugins.extractors.default = True
         settings.plugins.path = Path.cwd() / "plugins"
         assert len(extractor_container.extractors) == 3
         extractor_1_path = settings.plugins.path / "fake_extractor_1.py"
@@ -128,7 +131,6 @@ class TestExtractors:
             extractor_2_path.unlink()
 
     def test_load_extractor_multiple_inheritance(self):
-        settings.plugins.extractors.default = False
         settings.plugins.path = Path.cwd() / "plugins"
         extractor_3_path = settings.plugins.path / "fake_extractor_3.py"
         try:
@@ -146,7 +148,6 @@ class TestExtractors:
             extractor_3_path.unlink()
 
     def test_load_extractors_without_defaults(self):
-        settings.plugins.extractors.default = False
         settings.plugins.path = Path.cwd() / "plugins"
         extractor_container.extractors.clear()
         load_extractors()
@@ -158,7 +159,6 @@ class TestExtractors:
         assert "GenericSource" in extractor_classes
 
     def test_generic_extractors_fallback(self, mocker: MockerFixture):
-        settings.plugins.extractors.default = True
         load_extractors()
 
         mocker.patch(
@@ -214,6 +214,7 @@ class TestExtractors:
         assert on_connector_info_parsing.call_count == 1
 
     def test_container_reset_connectors(self):
+        load_default()
         load_extractors()
         assert len(extractor_container.extractors) == 5
         extractor_classes = self.get_extractor_classes()
