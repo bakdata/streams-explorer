@@ -27,27 +27,27 @@ import picocli.CommandLine;
 public class TransactionAvroProducer extends KafkaProducerApplication {
 
     //every 51st transaction is an  fraudulent transaction
-    @CommandLine.Option(names = "--real-tx",
+    @CommandLine.Option(names = "--real-tx", arity = "1..1",
             description = "How many real transactions must be generated before a fraudulent transaction can be "
                     + "generated?")
-    private String bound = "";
+    private int bound = 9;
     // 1 iteration = {bound} real transactions + one fraudulent transaction
-    @CommandLine.Option(names = "--iteration",
+    @CommandLine.Option(names = "--iteration", arity = "1..1",
             description = "One iteration contains $BOUND real transactions and one fraudulent transaction")
-    private String iterations = "";
-    // by default, a total of 100 data will be generated
+    private int iterations = 20;
+    // by default, a total of 200 data will be generated
 
     public static void main(final String[] args) {
         startApplication(new TransactionAvroProducer(), args);
     }
 
     public void setIterations(final int iterations) {
-        this.iterations = String.valueOf(iterations);
+        this.iterations = iterations;
     }
 
 
     public void setBound(final int bound) {
-        this.bound = String.valueOf(bound);
+        this.bound = bound;
     }
 
 
@@ -71,7 +71,6 @@ public class TransactionAvroProducer extends KafkaProducerApplication {
 
     @Override
     protected void runApplication() {
-        int intBound = Integer.parseInt(this.bound);
         final KafkaProducer<String, Transaction> producer = this.createProducer();
         final ClassLoader classLoader = this.getClass().getClassLoader();
         final String fileName = "atm_locations.csv";
@@ -84,10 +83,10 @@ public class TransactionAvroProducer extends KafkaProducerApplication {
         final int amountLocation = this.allLocations.size();
         int counter = 0;
         do {
-            final int fraud_index = counter % intBound;
+            final int fraud_index = counter % this.bound;
             Transaction oldTransaction = new Transaction();
 
-            for (int i = 0; i < intBound; i++) {
+            for (int i = 0; i < this.bound; i++) {
                 final Transaction newRealTransaction = this.createRealTimeTransaction(amountLocation);
                 this.publish(producer, newRealTransaction);
                 if (i == fraud_index) {
@@ -97,7 +96,7 @@ public class TransactionAvroProducer extends KafkaProducerApplication {
             final Transaction fraudTransaction = this.createFraudTransaction(oldTransaction, fraud_index);
             this.publish(producer, fraudTransaction);
             counter++;
-        } while (counter != Integer.parseInt(this.iterations));
+        } while (counter != this.iterations);
     }
 
     private Transaction createRealTimeTransaction(final int amountLocation) {

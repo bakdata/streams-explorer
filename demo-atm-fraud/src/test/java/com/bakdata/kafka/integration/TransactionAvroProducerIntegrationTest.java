@@ -27,9 +27,9 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 class TransactionAvroProducerIntegrationTest {
     private static final int TIMEOUT_SECONDS = 10;
-    private static final int BOUND = 5;
+    private static final int BOUND = 4;
     // 1 iteration = {bound} real transactions + one fraudulent transaction
-    private static final int ITERATIONS = 20;
+    private static final int ITERATIONS = 5;
     public static final int EXPECTED = (BOUND + 1) * ITERATIONS;
     private static final int KEY_SIZE = 36;
     private static final int FRAUD_KEY_SIZE = 39;
