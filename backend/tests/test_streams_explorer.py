@@ -6,7 +6,10 @@ from pytest_mock import MockerFixture
 from streams_explorer.core.config import settings
 from streams_explorer.core.extractor.default.elasticsearch_sink import ElasticsearchSink
 from streams_explorer.core.extractor.default.generic import GenericSink, GenericSource
-from streams_explorer.core.extractor.extractor import Extractor
+from streams_explorer.core.extractor.extractor import (
+    ProducerAppExtractor,
+    StreamsAppExtractor,
+)
 from streams_explorer.core.k8s_app import K8sAppCronJob, K8sObject
 from streams_explorer.core.services import schemaregistry
 from streams_explorer.core.services.dataflow_graph import NodeTypesEnum
@@ -71,7 +74,7 @@ class TestStreamsExplorer:
         """Creates LinkingService with non-default NodeInfoListItems."""
 
         class FakeLinker(DefaultLinker):
-            def __init__(self):
+            def __init__(self) -> None:
                 super().__init__()
                 self.topic_info = [
                     NodeInfoListItem(
@@ -297,8 +300,10 @@ class TestStreamsExplorer:
 
     @pytest.mark.asyncio
     async def test_cron_job_extractor(self, streams_explorer: StreamsExplorer):
-        class MockCronjobExtractor(Extractor):
-            def on_cron_job_parsing(self, cron_job: V1beta1CronJob):
+        class MockCronjobExtractor(ProducerAppExtractor):
+            def on_cron_job_parsing(
+                self, cron_job: V1beta1CronJob
+            ) -> K8sAppCronJob | None:
                 self.cron_job = cron_job
                 return K8sAppCronJob(cron_job)
 
@@ -315,7 +320,7 @@ class TestStreamsExplorer:
 
     @pytest.mark.asyncio
     async def test_update_sinks_sources(self, streams_explorer: StreamsExplorer):
-        class MockAppExtractor(Extractor):
+        class MockAppExtractor(StreamsAppExtractor):
             def _parse(self, config: K8sConfig) -> Source:
                 return Source(
                     node_type="app-source",
@@ -323,11 +328,11 @@ class TestStreamsExplorer:
                     target=config.id,
                 )
 
-            def on_streaming_app_add(self, config: K8sConfig):
+            def on_streaming_app_add(self, config: K8sConfig) -> None:
                 source = self._parse(config)
                 self.sources.append(source)
 
-            def on_streaming_app_delete(self, config: K8sConfig):
+            def on_streaming_app_delete(self, config: K8sConfig) -> None:
                 source = self._parse(config)
                 self.sources.remove(source)
 

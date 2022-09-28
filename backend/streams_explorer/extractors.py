@@ -8,11 +8,15 @@ from streams_explorer.plugins import load_plugin
 
 extractor_container = ExtractorContainer()
 
-# add defaults
-if settings.plugins.extractors.default:
+
+def load_default() -> None:
     extractor_container.add(ElasticsearchSink())
     extractor_container.add(S3Sink())
     extractor_container.add(JdbcSink())
+
+
+if settings.plugins.extractors.default:
+    load_default()
 
 
 def load_extractors() -> None:

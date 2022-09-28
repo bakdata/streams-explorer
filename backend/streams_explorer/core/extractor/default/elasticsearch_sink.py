@@ -1,4 +1,4 @@
-from streams_explorer.core.extractor.extractor import Extractor
+from streams_explorer.core.extractor.extractor import ConnectorExtractor
 from streams_explorer.models.kafka_connector import (
     KafkaConnector,
     KafkaConnectorTypesEnum,
@@ -6,7 +6,7 @@ from streams_explorer.models.kafka_connector import (
 from streams_explorer.models.sink import Sink
 
 
-class ElasticsearchSink(Extractor):
+class ElasticsearchSink(ConnectorExtractor):
     def on_connector_info_parsing(
         self, info: dict, connector_name: str
     ) -> KafkaConnector | None:
@@ -29,6 +29,3 @@ class ElasticsearchSink(Extractor):
                     )
                 )
             return connector
-
-    def reset_connector(self) -> None:
-        self.reset()

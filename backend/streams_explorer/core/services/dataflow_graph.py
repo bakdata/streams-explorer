@@ -198,9 +198,10 @@ class DataFlowGraph:
         pipelines = set()
         for _, node in neighborhood.nodes(data=True):
             if pipeline := node.get(ATTR_PIPELINE):
-                logger.debug("Pipeline found for {}: {}", node_name, pipeline)
                 pipelines.add(pipeline)
-        if not pipelines:
+        if pipelines:
+            logger.debug("Pipelines found for {}: {}", node_name, pipelines)
+        else:
             logger.warning("No pipeline found for {}", node_name)
         return pipelines
 

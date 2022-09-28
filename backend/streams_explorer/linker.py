@@ -6,7 +6,7 @@ from streams_explorer.plugins import load_plugin
 
 
 def load_linker() -> type[LinkingService]:
-    linker = load_plugin(LinkingService)
+    linker = load_plugin(LinkingService)  # type: ignore[misc]
     if not linker:
         logger.info("Using default LinkingService")
         return DefaultLinker

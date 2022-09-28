@@ -196,7 +196,7 @@ class StreamsExplorer:
             await self._update_clients_delta(app)
 
     def update_connectors(self) -> None:
-        extractor_container.reset_connector()
+        extractor_container.reset_connectors()
         logger.info("Retrieve Kafka connectors")
         self.kafka_connectors = KafkaConnect.connectors()
         self.modified = True
