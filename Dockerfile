@@ -22,7 +22,7 @@ COPY ./backend/pyproject.toml ./backend/poetry.lock /app/
 ENV PIP_NO_CACHE_DIR=1
 RUN pip install -U pip poetry && \
     poetry config virtualenvs.create false && \
-    poetry install --no-dev --no-interaction
+    poetry install --without=dev --no-interaction
 COPY ./backend /app
 
 # install streams_explorer package
