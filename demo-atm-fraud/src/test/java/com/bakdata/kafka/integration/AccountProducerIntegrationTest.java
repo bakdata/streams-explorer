@@ -4,8 +4,9 @@ import static net.mguenther.kafka.junit.EmbeddedKafkaCluster.provisionWith;
 import static net.mguenther.kafka.junit.EmbeddedKafkaClusterConfig.defaultClusterConfig;
 import static net.mguenther.kafka.junit.Wait.delay;
 import static org.assertj.core.api.Assertions.assertThat;
-import com.bakdata.kafka.Transaction;
-import com.bakdata.kafka.TransactionAvroProducer;
+
+import com.bakdata.kafka.Account;
+import com.bakdata.kafka.AccountProducer;
 import com.bakdata.schemaregistrymock.junit5.SchemaRegistryMockExtension;
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
 import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
@@ -25,18 +26,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 
-class TransactionAvroProducerIntegrationTest {
+class AccountProducerIntegrationTest {
     private static final int TIMEOUT_SECONDS = 10;
-    private static final int BOUND = 5;
-    // 1 iteration = {bound} real transactions + one fraudulent transaction
-    private static final int ITERATIONS = 20;
-    public static final int EXPECTED = (BOUND + 1) * ITERATIONS;
-    private static final int KEY_SIZE = 36;
-    private static final int FRAUD_KEY_SIZE = 39;
-
+    public static final int EXPECTED = 999;
     @RegisterExtension
     final SchemaRegistryMockExtension schemaRegistryMockExtension = new SchemaRegistryMockExtension();
     private final EmbeddedKafkaCluster kafkaCluster = provisionWith(defaultClusterConfig());
+
+    private static final String OUTPUT_TOPIC = "atm-fraud-accounts-topic";
 
     @BeforeEach
     void setup() {
@@ -48,17 +45,15 @@ class TransactionAvroProducerIntegrationTest {
         this.kafkaCluster.stop();
     }
 
-    private static final String OUTPUT_TOPIC = "atm-fraud-incoming-transactions-topic";
-
     @Test
     void shouldRunApp() {
         this.kafkaCluster.createTopic(TopicConfig.withName(OUTPUT_TOPIC).useDefaults());
-        TransactionAvroProducer producerApp = new TransactionAvroProducer() {};
-        producerApp = this.setupApp(producerApp);
-        producerApp.run();
+        AccountProducer accountProducer = new AccountProducer() {};
+        accountProducer = this.setupApp(accountProducer);
+        accountProducer.run();
         try {
             delay(TIMEOUT_SECONDS, TimeUnit.SECONDS);
-            assertThat(this.kafkaCluster.read(ReadKeyValues.from(OUTPUT_TOPIC, String.class, Transaction.class)
+            assertThat(this.kafkaCluster.read(ReadKeyValues.from(OUTPUT_TOPIC, String.class, Account.class)
                     .with(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class)
                     .with(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, SpecificAvroDeserializer.class)
                     .with(AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG,
@@ -67,44 +62,39 @@ class TransactionAvroProducerIntegrationTest {
                     .hasSize(EXPECTED)
                     .allSatisfy(keyValue -> {
                         final String record_key = keyValue.getKey();
-                        final Transaction tx = keyValue.getValue();
-                        final String txID = tx.getTransactionId();
-                        final String fraud_prefix = "xxx";
+                        final Account account = keyValue.getValue();
+                        final String account_id = account.getAccountId();
                         final String regex = "^a([0-9]{1,3})";
 
-                        assertThat(record_key.length()).isIn(KEY_SIZE, FRAUD_KEY_SIZE);
-                        assertThat(record_key).isEqualTo(txID);
-                        if (record_key.length() > KEY_SIZE) {
-                            assertThat(record_key).contains(fraud_prefix);
-                        }
-                        assertThat(tx.getAccountId()).matches(regex);
+                        assertThat(account_id).matches(regex);
+                        assertThat(record_key).isEqualTo(account_id);
                     });
         } catch (final InterruptedException e) {
             throw new RuntimeException(e);
         }
+
         final SchemaRegistryClient client = this.schemaRegistryMockExtension.getSchemaRegistryClient();
-        this.clean_run_destroy(producerApp, client);
+        this.clean_run_destroy(accountProducer, client);
+
     }
 
-    TransactionAvroProducer setupApp(final TransactionAvroProducer producerApp) {
-        producerApp.setIterations(ITERATIONS);
-        producerApp.setBound(BOUND);
-        producerApp.setBrokers(this.kafkaCluster.getBrokerList());
-        producerApp.setSchemaRegistryUrl(this.schemaRegistryMockExtension.getUrl());
-        producerApp.setOutputTopic(OUTPUT_TOPIC);
-        producerApp.setStreamsConfig(Map.of(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, "10000"));
-        return producerApp;
+    AccountProducer setupApp(final AccountProducer accountProducer) {
+        accountProducer.setBrokers(this.kafkaCluster.getBrokerList());
+        accountProducer.setSchemaRegistryUrl(this.schemaRegistryMockExtension.getUrl());
+        accountProducer.setOutputTopic(OUTPUT_TOPIC);
+        accountProducer.setStreamsConfig(Map.of(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, "10000"));
+        return accountProducer;
     }
 
-    void clean_run_destroy(final TransactionAvroProducer producerApp, final SchemaRegistryClient client) {
+    void clean_run_destroy(final AccountProducer accountProducer, final SchemaRegistryClient client) {
         try {
             assertThat(client.getAllSubjects())
-                    .contains(producerApp.getOutputTopic() + "-value");
+                    .contains(accountProducer.getOutputTopic() + "-value");
         } catch (final IOException | RestClientException e) {
             throw new RuntimeException(e);
         }
-        producerApp.setCleanUp(true);
-        producerApp.run();
+        accountProducer.setCleanUp(true);
+        accountProducer.run();
         try {
             delay(TIMEOUT_SECONDS, TimeUnit.SECONDS);
         } catch (final InterruptedException e) {
@@ -112,13 +102,14 @@ class TransactionAvroProducerIntegrationTest {
         }
         try {
             assertThat(client.getAllSubjects())
-                    .doesNotContain(producerApp.getOutputTopic() + "-value");
+                    .doesNotContain(accountProducer.getOutputTopic() + "-value");
         } catch (final IOException | RestClientException e) {
             throw new RuntimeException(e);
         }
-        assertThat(this.kafkaCluster.exists(producerApp.getOutputTopic()))
+        assertThat(this.kafkaCluster.exists(accountProducer.getOutputTopic()))
                 .as("Output topic is deleted")
                 .isFalse();
     }
+
 
 }

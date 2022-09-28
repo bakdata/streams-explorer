@@ -21,19 +21,35 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.common.serialization.Serdes;
+import org.apache.kafka.common.serialization.StringSerializer;
+import picocli.CommandLine;
 
-public final class TransactionAvroProducer extends KafkaProducerApplication {
+public class TransactionAvroProducer extends KafkaProducerApplication {
 
-    public static final int ITERATIONS = 2000;
+    //every 51st transaction is an  fraudulent transaction
+    @CommandLine.Option(names = "--real-tx",
+            description = "How many real transactions must be generated before a fraudulent transaction can be "
+                    + "generated?")
+    private int bound = 19;
+    // 1 iteration = {bound} real transactions + one fraudulent transaction
+    @CommandLine.Option(names = "--iteration",
+            description = "One iteration contains $BOUND real transactions and one fraudulent transaction")
+    private int iterations = 100;
 
+    // by default, a total of 2k data will be generated
     public static void main(final String[] args) {
         startApplication(new TransactionAvroProducer(), args);
     }
 
-    private final KafkaProducer<String, Transaction> producer = this.createProducer();
-    //every 51st transaction is an  fraudulent transaction
-    private static final int bound = 50;
+    public void setIterations(final int iterations) {
+        this.iterations = iterations;
+    }
+
+
+    public void setBound(final int bound) {
+        this.bound = bound;
+    }
+
 
     private Map<Integer, String[]> allLocations = null;
     private static final Random randGenerator = new Random();
@@ -49,13 +65,13 @@ public final class TransactionAvroProducer extends KafkaProducerApplication {
     @Override
     protected Properties createKafkaProperties() {
         final Properties kafkaProperties = super.createKafkaProperties();
-        kafkaProperties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, Serdes.StringSerde.class);
+        kafkaProperties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         return kafkaProperties;
     }
 
     @Override
     protected void runApplication() {
-
+        final KafkaProducer<String, Transaction> producer = this.createProducer();
         final ClassLoader classLoader = this.getClass().getClassLoader();
         final String fileName = "atm_locations.csv";
         final InputStream inputStream = classLoader.getResourceAsStream(fileName);
@@ -67,24 +83,24 @@ public final class TransactionAvroProducer extends KafkaProducerApplication {
         final int amountLocation = this.allLocations.size();
         int counter = 0;
         do {
-            final int fraud_index = counter % bound;
+            final int fraud_index = counter % this.bound;
             Transaction oldTransaction = new Transaction();
 
-            for (int i = 0; i < bound; i++) {
+            for (int i = 0; i < this.bound; i++) {
                 final Transaction newRealTransaction = this.createRealTimeTransaction(amountLocation);
-                this.publish(this.producer, newRealTransaction);
+                this.publish(producer, newRealTransaction);
                 if (i == fraud_index) {
                     oldTransaction = newRealTransaction;
                 }
             }
             final Transaction fraudTransaction = this.createFraudTransaction(oldTransaction, fraud_index);
-            this.publish(this.producer, fraudTransaction);
+            this.publish(producer, fraudTransaction);
             counter++;
-        } while (counter != ITERATIONS);
+        } while (counter != this.iterations);
     }
 
     private Transaction createRealTimeTransaction(final int amountLocation) {
-        final String accoundId = "a" + randGenerator.nextInt(1000);
+        final String account_id = "a" + randGenerator.nextInt(1000);
         final String timestamp = getTimestamp();
         final int amount = AMOUNTS.randomAmount();
         final UUID uuid = UUID.randomUUID();
@@ -96,7 +112,7 @@ public final class TransactionAvroProducer extends KafkaProducerApplication {
         final double lat = Double.parseDouble(locationDetails[1]);
         final String atm_label = locationDetails[2];
 
-        return createTransaction(accoundId, timestamp, atm_label, amount, transaction_id, lon,
+        return createTransaction(account_id, timestamp, atm_label, amount, transaction_id, lon,
                 lat);
     }
 
@@ -114,7 +130,7 @@ public final class TransactionAvroProducer extends KafkaProducerApplication {
                 final String[] row = line.split(splitBy);    // use comma as separator
                 final String lon = row[0];
                 final String lat = row[1];
-                final String atm_label = row[2];
+                final String atm_label = row[2].replace("\"", "");
                 locations.put(count, new String[]{lon, lat, atm_label});
                 count++;
             }

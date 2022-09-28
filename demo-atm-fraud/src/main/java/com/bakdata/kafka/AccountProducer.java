@@ -12,6 +12,7 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.Serdes;
+import org.apache.kafka.common.serialization.StringSerializer;
 
 public class AccountProducer extends KafkaProducerApplication {
     public static void main(final String[] args) {
@@ -25,7 +26,7 @@ public class AccountProducer extends KafkaProducerApplication {
         final InputStream inputStream = classLoader.getResourceAsStream(filename);
         assert inputStream != null;
         final InputStreamReader streamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
-        final Map<Integer, String[]> allAccounts = AccountProducer.loadCsvData(streamReader);
+        final Map<Integer, String[]> allAccounts = this.loadCsvData(streamReader);
         final KafkaProducer<String, Account> producer = this.createProducer();
 
         final int len = allAccounts.size();
@@ -34,8 +35,7 @@ public class AccountProducer extends KafkaProducerApplication {
             final String account_id = accountData[0];
             final String first_name = accountData[1];
             final String last_name = accountData[2];
-            final String email =
-                    accountData[3];
+            final String email = accountData[3];
             final String phone = accountData[4];
             final String address = accountData[5];
             final String country = accountData[6];
@@ -48,8 +48,8 @@ public class AccountProducer extends KafkaProducerApplication {
     @Override
     protected Properties createKafkaProperties() {
         final Properties kafkaProperties = super.createKafkaProperties();
-        kafkaProperties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, Serdes.StringSerde.class);
-        return super.createKafkaProperties();
+        kafkaProperties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        return kafkaProperties;
     }
 
     public static Map<Integer, String[]> loadCsvData(final InputStreamReader streamReader) {
@@ -87,7 +87,6 @@ public class AccountProducer extends KafkaProducerApplication {
             throw new RuntimeException(e);
         } finally {
             if (reader != null) {
-                // again, a resource is involved, so try-catch another time
                 try {
                     reader.close();
                 } catch (final IOException e) {
