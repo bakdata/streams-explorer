@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.10.6"]
+        python-version: ["3.10"]
     defaults:
       run:
         working-directory: ${{ env.working-directory }}
@@ -28,7 +28,7 @@ jobs:
         run: sudo apt-get -y install python3-dev graphviz libgraphviz-dev pkg-config python3-wheel
 
       - name: Set up Poetry
-        uses: bakdata/ci-templates/actions/python-setup-poetry@v1.3.0
+        uses: bakdata/ci-templates/actions/python-setup-poetry@v1.5.1
         with:
           python-version: ${{ matrix.python-version }}
           working-directory: ${{ env.working-directory }}

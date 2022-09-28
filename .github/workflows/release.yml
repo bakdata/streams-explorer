@@ -21,7 +21,7 @@ jobs:
 
       - name: Bump version
         id: bump-version
-        uses: bakdata/ci-templates/actions/python-poetry-bump-version@v1.3.0
+        uses: bakdata/ci-templates/actions/python-poetry-bump-version@v1.5.1
         with:
           release-type: "${{ github.event.inputs.release-type }}"
           working-directory: ${{ env.BACKEND_DIR }}
