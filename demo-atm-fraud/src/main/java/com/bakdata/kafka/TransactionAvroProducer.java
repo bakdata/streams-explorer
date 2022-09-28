@@ -27,12 +27,12 @@ import picocli.CommandLine;
 public class TransactionAvroProducer extends KafkaProducerApplication {
 
     //every 51st transaction is an  fraudulent transaction
-    @CommandLine.Option(names = "--real-tx", arity = "1..1",
+    @CommandLine.Option(names = "--real-tx",
             description = "How many real transactions must be generated before a fraudulent transaction can be "
                     + "generated?")
     private int bound = 9;
     // 1 iteration = {bound} real transactions + one fraudulent transaction
-    @CommandLine.Option(names = "--iteration", arity = "1..1",
+    @CommandLine.Option(names = "--iteration",
             description = "One iteration contains $BOUND real transactions and one fraudulent transaction")
     private int iterations = 20;
     // by default, a total of 200 data will be generated
