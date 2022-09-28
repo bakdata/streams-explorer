@@ -30,13 +30,13 @@ public class TransactionAvroProducer extends KafkaProducerApplication {
     @CommandLine.Option(names = "--real-tx",
             description = "How many real transactions must be generated before a fraudulent transaction can be "
                     + "generated?")
-    private int bound = 19;
+    private int bound = 9;
     // 1 iteration = {bound} real transactions + one fraudulent transaction
     @CommandLine.Option(names = "--iteration",
             description = "One iteration contains $BOUND real transactions and one fraudulent transaction")
-    private int iterations = 100;
+    private int iterations = 20;
+    // by default, a total of 200 data will be generated
 
-    // by default, a total of 2k data will be generated
     public static void main(final String[] args) {
         startApplication(new TransactionAvroProducer(), args);
     }
