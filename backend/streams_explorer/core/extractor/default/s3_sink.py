@@ -1,4 +1,4 @@
-from streams_explorer.core.extractor.extractor import Extractor
+from streams_explorer.core.extractor.extractor import ConnectorExtractor
 from streams_explorer.models.kafka_connector import (
     KafkaConnector,
     KafkaConnectorTypesEnum,
@@ -6,15 +6,14 @@ from streams_explorer.models.kafka_connector import (
 from streams_explorer.models.sink import Sink
 
 
-class S3Sink(Extractor):
+class S3Sink(ConnectorExtractor):
     def on_connector_info_parsing(
         self, info: dict, connector_name: str
     ) -> KafkaConnector | None:
         config = info["config"]
         connector_class = config.get("connector.class")
         if connector_class and "S3SinkConnector" in connector_class:
-            name = config.get("s3.bucket.name")
-            if name:
+            if name := config.get("s3.bucket.name"):
                 self.sinks.append(
                     Sink(
                         name=name,

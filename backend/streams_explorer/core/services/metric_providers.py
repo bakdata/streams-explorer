@@ -9,6 +9,7 @@ from loguru import logger
 from streams_explorer.core.config import settings
 from streams_explorer.models.graph import GraphNode, Metric
 from streams_explorer.models.node_types import NodeTypesEnum
+from streams_explorer.plugins import Plugin
 
 
 class PrometheusMetric(Enum):
@@ -83,10 +84,10 @@ def sort_topics_first(nodes: list[GraphNode]) -> list[GraphNode]:
 
 def is_topic(node: GraphNode) -> bool:
     node_type: NodeTypesEnum = node[1]["node_type"]
-    return node_type == NodeTypesEnum.TOPIC or node_type == NodeTypesEnum.ERROR_TOPIC
+    return node_type in (NodeTypesEnum.TOPIC, NodeTypesEnum.ERROR_TOPIC)
 
 
-class MetricProvider:
+class MetricProvider(Plugin):
     def __init__(self, nodes: list[GraphNode]) -> None:
         self._nodes: list[GraphNode] = sort_topics_first(nodes)
         self._metrics: list[Metric] = []

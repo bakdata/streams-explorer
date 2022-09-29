@@ -51,4 +51,3 @@ The number of incoming transactions is configurable using the variables `REAL_TX
 The first variable specifies how many legitimate incoming transactions must be produced before producing one fraudulent incoming transaction.
 One iteration contains `REAL_TX` legitimate transactions and one fraudulent transaction.
 
-

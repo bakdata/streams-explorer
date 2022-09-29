@@ -9,15 +9,30 @@ from streams_explorer.defaultlinker import DefaultLinker
 from streams_explorer.linker import load_linker
 from streams_explorer.models.node_information import NodeInfoListItem
 
-fake_linker = """from streams_explorer.core.services.linking_services import LinkingService
+fake_linker = """from streams_explorer.core.k8s_app import K8sApp
+from streams_explorer.core.services.linking_services import LinkingService
 
 
 class FakeLinker(LinkingService):
+    def get_redirect_connector(self, config: dict, link_type: str) -> str | None:
+        pass
+
     def get_redirect_topic(
         self, topic_name: str, link_type: str
     ) -> str | None:
-        if link_type == "test":
-            return f"{topic_name}-link"
+        match link_type:
+            case "test":
+                return f"{topic_name}-link"
+
+    def get_redirect_streaming_app(
+        self, k8s_app: K8sApp, link_type: str
+    ) -> str | None:
+        pass
+
+    def get_sink_source_redirects(
+        self, node_type: str, sink_source_name: str
+    ) -> str | None:
+        pass
 """
 
 
@@ -54,58 +69,58 @@ def get_info_providers(info_list: list[NodeInfoListItem]):
 
 def test_default_linker_akhq():
     settings.akhq.enable = True
-    settings.kowl.enable = False
+    settings.redpanda_console.enable = False
     settings.validators.validate()
 
     linking_service = DefaultLinker()
 
     topic_info = get_info_providers(linking_service.topic_info)
     assert "akhq" in topic_info
-    assert "kowl" not in topic_info
+    assert "redpanda_console" not in topic_info
 
     streaming_app_info = get_info_providers(linking_service.streaming_app_info)
     assert "akhq" in streaming_app_info
-    assert "kowl" not in streaming_app_info
+    assert "redpanda_console" not in streaming_app_info
 
     connector_info = get_info_providers(linking_service.connector_info)
     assert "akhq" in connector_info
     assert "akhq-connect" not in connector_info
-    assert "kowl" not in connector_info
+    assert "redpanda_console" not in connector_info
 
     settings.akhq.connect = "kafka-connect"
     linking_service = DefaultLinker()
     assert "akhq-connect" in get_info_providers(linking_service.connector_info)
 
 
-def test_default_linker_kowl():
+def test_default_linker_redpanda_console():
     settings.akhq.enable = False
-    settings.kowl.enable = True
+    settings.redpanda_console.enable = True
     settings.validators.validate()
 
     linking_service = DefaultLinker()
 
     topic_info = get_info_providers(linking_service.topic_info)
-    assert "kowl" in topic_info
+    assert "redpanda_console" in topic_info
     assert "akhq" not in topic_info
 
     streaming_app_info = get_info_providers(linking_service.streaming_app_info)
-    assert "kowl" in streaming_app_info
+    assert "redpanda_console" in streaming_app_info
     assert "akhq" not in streaming_app_info
 
     connector_info = get_info_providers(linking_service.connector_info)
-    assert "kowl" in connector_info
+    assert "redpanda_console" in connector_info
     assert "akhq" not in connector_info
     assert "akhq-connect" not in connector_info
 
 
-def test_default_linker_akhq_kowl():
+def test_default_linker_akhq_redpanda_console():
     settings.akhq.enable = True
-    settings.kowl.enable = True
+    settings.redpanda_console.enable = True
     with pytest.raises(ValidationError):
         settings.validators.validate()
 
     settings.akhq.enable = False
-    settings.kowl.enable = False
+    settings.redpanda_console.enable = False
     settings.validators.validate()
 
 

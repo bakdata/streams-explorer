@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "streams-explorer"
-version = "2.0.0"
+version = "2.1.0"
 description = "Explore Data Pipelines in Apache Kafka."
 readme = "README.md"
 authors = ["bakdata"]
@@ -39,8 +39,8 @@ confluent-kafka = "^1.9.2"
 cachetools = "^4.2.2"
 kubernetes-asyncio = "^23.6.0"
 
-[tool.poetry.dev-dependencies]
-mypy = "^0.961"
+[tool.poetry.group.dev.dependencies]
+mypy = "^0.981"
 flake8 = "^4.0.1"
 black = "^22.6.0"
 isort = "^5.10.1"

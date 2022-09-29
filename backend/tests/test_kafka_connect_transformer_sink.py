@@ -159,7 +159,7 @@ class TestTransformerKafkaConnect:
                 ..., alias="type"
             )
 
-            def transform_topic(self, topic: str) -> str:
+            def transform_topic(self, _topic: str) -> str:
                 return "example-topic"
 
         class CustomKafkaConnectorTransformer(KafkaConnector):

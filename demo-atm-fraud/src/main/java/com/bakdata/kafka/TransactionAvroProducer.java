@@ -240,6 +240,7 @@ public class TransactionAvroProducer extends KafkaProducerApplication {
                     return newAmount;
                 }
             }
+
         }
     }
 }

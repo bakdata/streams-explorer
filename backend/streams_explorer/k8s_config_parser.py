@@ -8,7 +8,7 @@ from streams_explorer.plugins import load_plugin
 
 
 def load_config_parser() -> type[K8sConfigParser]:
-    parser = load_plugin(K8sConfigParser)
+    parser = load_plugin(K8sConfigParser)  # type: ignore[misc]
     if not parser:
         logger.info("Using default K8sConfigParser")
         return StreamsBootstrapEnvParser

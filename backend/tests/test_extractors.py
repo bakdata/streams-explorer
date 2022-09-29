@@ -4,16 +4,27 @@ import pytest
 from pytest_mock import MockerFixture
 
 from streams_explorer.core.config import settings
+from streams_explorer.core.extractor.extractor import (
+    ConnectorExtractor,
+    Extractor,
+    ProducerAppExtractor,
+    StreamsAppExtractor,
+)
 from streams_explorer.core.services.kafkaconnect import KafkaConnect
-from streams_explorer.extractors import extractor_container, load_extractors
+from streams_explorer.extractors import (
+    extractor_container,
+    load_default,
+    load_extractors,
+)
 from streams_explorer.models.kafka_connector import KafkaConnectorTypesEnum
+from streams_explorer.models.sink import Sink
 
-extractor_file_1 = """from streams_explorer.core.extractor.extractor import Extractor
+extractor_file_1 = """from streams_explorer.core.extractor.extractor import ConnectorExtractor
 from streams_explorer.models.kafka_connector import KafkaConnector
 from streams_explorer.models.sink import Sink
 
 
-class TestSinkOne(Extractor):
+class TestSinkOne(ConnectorExtractor):
     def on_connector_info_parsing(
         self, config: dict, connector_name: str
     ) -> KafkaConnector | None:
@@ -26,12 +37,12 @@ class TestSinkOne(Extractor):
         )
 """
 
-extractor_file_2 = """from streams_explorer.core.extractor.extractor import Extractor
+extractor_file_2 = """from streams_explorer.core.extractor.extractor import ConnectorExtractor
 from streams_explorer.models.kafka_connector import KafkaConnector
 from streams_explorer.models.sink import Sink
 
 
-class TestSinkTwo(Extractor):
+class TestSinkTwo(ConnectorExtractor):
     def on_connector_info_parsing(
         self, info: dict, connector_name: str
     ) -> KafkaConnector | None:
@@ -42,6 +53,32 @@ class TestSinkTwo(Extractor):
                 source=connector_name,
             )
         )
+"""
+
+extractor_file_3 = """from __future__ import annotations
+
+from pathlib import Path
+from typing import TYPE_CHECKING
+
+from kubernetes_asyncio.client import V1beta1CronJob
+from streams_explorer.models.k8s import K8sConfig
+from streams_explorer.core.extractor.extractor import (
+    ProducerAppExtractor,
+    StreamsAppExtractor,
+)
+
+if TYPE_CHECKING:
+    from streams_explorer.core.k8s_app import K8sAppCronJob
+
+class TestMultipleExtractor(StreamsAppExtractor, ProducerAppExtractor):
+    def on_streaming_app_add(self, config: K8sConfig) -> None:
+        pass
+
+    def on_streaming_app_delete(self, config: K8sConfig) -> None:
+        pass
+
+    def on_cron_job_parsing(self, cron_job: V1beta1CronJob) -> K8sAppCronJob | None:
+        pass
 """
 
 EMPTY_CONNECTOR_INFO = {"config": {}, "type": ""}
@@ -55,9 +92,15 @@ class TestExtractors:
         yield  # testing
         # teardown
         settings.plugins.path = "./plugins"
+        extractor_container.extractors.clear()
+
+    @staticmethod
+    def get_extractor_classes() -> list[str]:
+        return [
+            extractor.__class__.__name__ for extractor in extractor_container.extractors
+        ]
 
     def test_load_extractors(self):
-        settings.plugins.extractors.default = True
         settings.plugins.path = Path.cwd() / "plugins"
         assert len(extractor_container.extractors) == 3
         extractor_1_path = settings.plugins.path / "fake_extractor_1.py"
@@ -73,10 +116,7 @@ class TestExtractors:
 
             assert len(extractor_container.extractors) == 7
 
-            extractor_classes = [
-                extractor.__class__.__name__
-                for extractor in extractor_container.extractors
-            ]
+            extractor_classes = self.get_extractor_classes()
             assert "TestSinkOne" in extractor_classes
             assert "TestSinkTwo" in extractor_classes
             assert "ElasticsearchSink" in extractor_classes
@@ -90,23 +130,36 @@ class TestExtractors:
             extractor_1_path.unlink()
             extractor_2_path.unlink()
 
+    def test_load_extractor_multiple_inheritance(self):
+        settings.plugins.path = Path.cwd() / "plugins"
+        extractor_3_path = settings.plugins.path / "fake_extractor_3.py"
+        try:
+            with open(extractor_3_path, "w") as f:
+                f.write(extractor_file_3)
+
+            load_extractors()
+            assert len(extractor_container.extractors) == 3
+
+            extractor = extractor_container.extractors[0]
+            assert extractor.__class__.__name__ == "TestMultipleExtractor"
+            assert isinstance(extractor, StreamsAppExtractor)
+            assert isinstance(extractor, ProducerAppExtractor)
+        finally:
+            extractor_3_path.unlink()
+
     def test_load_extractors_without_defaults(self):
-        settings.plugins.extractors.default = False
         settings.plugins.path = Path.cwd() / "plugins"
         extractor_container.extractors.clear()
         load_extractors()
 
         assert len(extractor_container.extractors) == 2
 
-        extractor_classes = [
-            extractor.__class__.__name__ for extractor in extractor_container.extractors
-        ]
+        extractor_classes = self.get_extractor_classes()
         assert "GenericSink" in extractor_classes
         assert "GenericSource" in extractor_classes
 
     def test_generic_extractors_fallback(self, mocker: MockerFixture):
-
-        settings.plugins.extractors.default = True
+        load_extractors()
 
         mocker.patch(
             "streams_explorer.core.services.kafkaconnect.KafkaConnect.get_connectors",
@@ -159,6 +212,69 @@ class TestExtractors:
         )
         KafkaConnect.connectors()
         assert on_connector_info_parsing.call_count == 1
+
+    def test_container_reset_connectors(self):
+        load_default()
+        load_extractors()
+        assert len(extractor_container.extractors) == 5
+        extractor_classes = self.get_extractor_classes()
+        assert "ElasticsearchSink" in extractor_classes
+        assert "S3Sink" in extractor_classes
+        assert "JdbcSink" in extractor_classes
+        assert "GenericSink" in extractor_classes
+        assert "GenericSource" in extractor_classes
+
+        assert all(
+            len(extractor.sources) == 0 and len(extractor.sinks) == 0
+            for extractor in extractor_container.extractors
+        )
+
+        # add another type of sync
+        class MockExtractor(Extractor):
+            def mock_sink(self):
+                self.sinks.append(Sink("mock-sink", "source"))
+
+        mock_extractor = MockExtractor()
+        mock_extractor.mock_sink()
+        extractor_container.add(mock_extractor)
+
+        # add connector sinks
+        extractor_container.on_connector_info_parsing(
+            {
+                "config": {
+                    "connector.class": "io.confluent.connect.s3.S3SinkConnector",
+                    "s3.bucket.name": "s3-test-bucket",
+                }
+            },
+            "s3-sink-connector",
+        )
+        extractor_container.on_connector_info_parsing(
+            {
+                "config": {
+                    "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
+                    "table.name.format": "jdbc-table",
+                }
+            },
+            "jdbc-sink-connector",
+        )
+        assert all(
+            len(extractor.sources) == 0 and len(extractor.sinks) == 1
+            for extractor in extractor_container.extractors
+            if extractor.__class__.__name__ in ("JdbcSinkConnector", "S3SinkConnector")
+        )
+
+        # Verify reset_connectors works
+        extractor_container.reset_connectors()
+        assert all(
+            len(extractor.sources) == 0 and len(extractor.sinks) == 0
+            for extractor in extractor_container.extractors
+            if isinstance(extractor, ConnectorExtractor)
+        )
+        assert any(
+            len(extractor.sources) == 0 and len(extractor.sinks) == 1
+            for extractor in extractor_container.extractors
+            if not isinstance(extractor, ConnectorExtractor)
+        )
 
     def test_elasticsearch_sink(self):
         from streams_explorer.core.extractor.default.elasticsearch_sink import (

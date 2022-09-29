@@ -50,8 +50,9 @@ settings: Any = Dynaconf(
         Validator("grafana.dashboards.topics", is_type_of=str),
         Validator("grafana.dashboards.consumergroups", is_type_of=str),
         Validator("akhq.enable", is_type_of=bool, default=False),
-        Validator("kowl.enable", is_type_of=bool, default=False),
-        Validator("akhq.enable", eq=False) | Validator("kowl.enable", eq=False),
+        Validator("redpanda_console.enable", is_type_of=bool, default=False),
+        Validator("akhq.enable", eq=False)
+        | Validator("redpanda_console.enable", eq=False),
         Validator("kibanalogs.enable", is_type_of=bool, default=False),
         Validator("loki.enable", is_type_of=bool, default=False),
         Validator("kibanalogs.enable", eq=False) | Validator("loki.enable", eq=False),
