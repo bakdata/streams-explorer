@@ -17,39 +17,32 @@ import java.util.Properties;
 import java.util.Random;
 import java.util.TimeZone;
 import java.util.UUID;
+import lombok.Setter;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.apache.logging.log4j.LogManager;
 import picocli.CommandLine;
+import org.apache.logging.log4j.Logger;
 
+@Setter
 public class TransactionAvroProducer extends KafkaProducerApplication {
 
-    //every 51st transaction is an  fraudulent transaction
     @CommandLine.Option(names = "--real-tx",
             description = "How many real transactions must be generated before a fraudulent transaction can be "
                     + "generated?")
-    private int bound = 9;
-    // 1 iteration = {bound} real transactions + one fraudulent transaction
+    private int bound;
     @CommandLine.Option(names = "--iteration",
-            description = "One iteration contains $BOUND real transactions and one fraudulent transaction")
-    private int iterations = 20;
-    // by default, a total of 200 data will be generated
+            description = "One iteration contains number of real transactions and one fraudulent transaction")
+    private int iterations;
 
     public static void main(final String[] args) {
         startApplication(new TransactionAvroProducer(), args);
     }
 
-    public void setIterations(final int iterations) {
-        this.iterations = iterations;
-    }
-
-
-    public void setBound(final int bound) {
-        this.bound = bound;
-    }
-
+    private Logger logger = LogManager.getLogger(this.getClass().getName());
 
     private Map<Integer, String[]> allLocations = null;
     private static final Random randGenerator = new Random();
@@ -72,6 +65,9 @@ public class TransactionAvroProducer extends KafkaProducerApplication {
     @Override
     protected void runApplication() {
         final KafkaProducer<String, Transaction> producer = this.createProducer();
+        this.logger.info("====> Bound = {} and Iteration= {} <====", this.bound, this.iterations);
+        this.logger.info("====> Expected amount of transactions: {} <====", (this.bound + 1) * this.iterations);
+        this.logger.info("====> The defined output topic is:  {} <====", this.getOutputTopic());
         final ClassLoader classLoader = this.getClass().getClassLoader();
         final String fileName = "atm_locations.csv";
         final InputStream inputStream = classLoader.getResourceAsStream(fileName);
@@ -80,6 +76,7 @@ public class TransactionAvroProducer extends KafkaProducerApplication {
             streamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
         }
         this.allLocations = loadCsvData(streamReader);
+
         final int amountLocation = this.allLocations.size();
         int counter = 0;
         do {
@@ -96,6 +93,8 @@ public class TransactionAvroProducer extends KafkaProducerApplication {
             final Transaction fraudTransaction = this.createFraudTransaction(oldTransaction, fraud_index);
             this.publish(producer, fraudTransaction);
             counter++;
+            this.logger.info("====> Current iteration step: {} <====", counter);
+
         } while (counter != this.iterations);
     }
 
@@ -125,9 +124,8 @@ public class TransactionAvroProducer extends KafkaProducerApplication {
         final BufferedReader reader = new BufferedReader(streamReader);
         try {
 
-            while ((line = reader.readLine()) != null)   //returns a Boolean value
-            {
-                final String[] row = line.split(splitBy);    // use comma as separator
+            while ((line = reader.readLine()) != null) {
+                final String[] row = line.split(splitBy);
                 final String lon = row[0];
                 final String lat = row[1];
                 final String atm_label = row[2].replace("\"", "");
@@ -161,20 +159,19 @@ public class TransactionAvroProducer extends KafkaProducerApplication {
                 DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss Z"));
         return Transaction
                 .newBuilder()
-                .setAccountId(accoundID) //string
-                .setTimestamp(parsedDateTime.toInstant()) //Instant
-                .setAtm(atm_label) //string
-                .setAmount(amount) //int
-                .setTransactionId(transaction_id) //string
+                .setAccountId(accoundID)
+                .setTimestamp(parsedDateTime.toInstant())
+                .setAtm(atm_label)
+                .setAmount(amount)
+                .setTransactionId(transaction_id)
                 .setLocation(
                         Location
                                 .newBuilder()
-                                .setLatitude(lat) //double
-                                .setLongitude(lon) //double
+                                .setLatitude(lat)
+                                .setLongitude(lon)
                                 .build()
                 )
                 .build();
-
     }
 
     /*Note: the fraudulent transaction will have the same account ID as the original transaction but different
@@ -183,16 +180,16 @@ public class TransactionAvroProducer extends KafkaProducerApplication {
      'real' txn.*/
     Transaction createFraudTransaction(final Transaction realTransaction, final int newLocationIndex) {
         final String[] newLocation = this.allLocations.get(newLocationIndex);
-        final int real_amount = realTransaction.getAmount(); // must be changed
-        final Instant realtimestamp = realTransaction.getTimestamp(); // must be changed
+        final int real_amount = realTransaction.getAmount();
+        final Instant realtimestamp = realTransaction.getTimestamp();
         final int dif = randGenerator.nextInt(10) + 1;
 
-        final String accountID = realTransaction.getAccountId();  // remains the same
-        final Instant fraudTimestamp = realtimestamp.minus(dif, ChronoUnit.MINUTES); // changed
-        final String fraudAtm_label = newLocation[2]; // changed
-        final int fraudAmount = AMOUNTS.otherAmount(real_amount); // changed
-        final String fraudTransactionId = "xxx" + realTransaction.getTransactionId(); // // changed
-        final double fraud_lon = Double.parseDouble(newLocation[0]); // changed
+        final String accountID = realTransaction.getAccountId();
+        final Instant fraudTimestamp = realtimestamp.minus(dif, ChronoUnit.MINUTES);
+        final String fraudAtm_label = newLocation[2];
+        final int fraudAmount = AMOUNTS.otherAmount(real_amount);
+        final String fraudTransactionId = "xxx" + realTransaction.getTransactionId();
+        final double fraud_lon = Double.parseDouble(newLocation[0]);
         final double fraud_lat =
                 Double.parseDouble(newLocation[1]);
 
@@ -215,7 +212,13 @@ public class TransactionAvroProducer extends KafkaProducerApplication {
     }
 
     private void publish(final Producer<? super String, ? super Transaction> producer, final Transaction transaction) {
-        producer.send(new ProducerRecord<>(this.getOutputTopic(), transaction.getTransactionId(), transaction));
+        try {
+            producer.send(new ProducerRecord<>(this.getOutputTopic(), transaction.getTransactionId(), transaction));
+        } catch (final RuntimeException e) {
+            this.logger.error("Some Error occurred  while producing the transaction <{}> into the topic <{}>.",
+                    transaction.getTransactionId(), this.getOutputTopic());
+            throw new RuntimeException(e);
+        }
     }
 
     private enum AMOUNTS {

@@ -11,10 +11,13 @@ import java.util.Properties;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class AccountProducer extends KafkaProducerApplication {
+    private Logger logger = LogManager.getLogger(this.getClass().getName());
+
     public static void main(final String[] args) {
         startApplication(new AccountProducer(), args);
     }
@@ -28,8 +31,10 @@ public class AccountProducer extends KafkaProducerApplication {
         final InputStreamReader streamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
         final Map<Integer, String[]> allAccounts = this.loadCsvData(streamReader);
         final KafkaProducer<String, Account> producer = this.createProducer();
-
         final int len = allAccounts.size();
+
+        this.logger.info("====> Amount of found accounts: {} <====", len);
+        this.logger.info("====> The defined output topic is:  {} <====", this.getOutputTopic());
         for (int i = 0; i < len; i++) {
             final String[] accountData = allAccounts.get(i);
             final String account_id = accountData[0];
@@ -119,6 +124,12 @@ public class AccountProducer extends KafkaProducerApplication {
     }
 
     private void publishAccount(final KafkaProducer<? super String, ? super Account> producer, final Account account) {
-        producer.send(new ProducerRecord<>(this.getOutputTopic(), account.getAccountId(), account));
+        try {
+            producer.send(new ProducerRecord<>(this.getOutputTopic(), account.getAccountId(), account));
+        } catch (final RuntimeException e) {
+            this.logger.error("Some Error occurred  while producing an account <{}> into the topic <{}>.",
+                    account.getAccountId(), this.getOutputTopic());
+            throw new RuntimeException(e);
+        }
     }
 }
