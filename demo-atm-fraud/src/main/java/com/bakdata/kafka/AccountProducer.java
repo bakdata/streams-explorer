@@ -8,15 +8,14 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
+@Slf4j
 public class AccountProducer extends KafkaProducerApplication {
-    private Logger logger = LogManager.getLogger(this.getClass().getName());
 
     public static void main(final String[] args) {
         startApplication(new AccountProducer(), args);
@@ -33,8 +32,8 @@ public class AccountProducer extends KafkaProducerApplication {
         final KafkaProducer<String, Account> producer = this.createProducer();
         final int len = allAccounts.size();
 
-        this.logger.info("====> Amount of found accounts: {} <====", len);
-        this.logger.info("====> The defined output topic is:  {} <====", this.getOutputTopic());
+        log.debug("Amount of loaded accounts: {}", len);
+        log.info("Producing data into output topic <{}>...", this.getOutputTopic());
         for (int i = 0; i < len; i++) {
             final String[] accountData = allAccounts.get(i);
             final String account_id = accountData[0];
@@ -127,7 +126,7 @@ public class AccountProducer extends KafkaProducerApplication {
         try {
             producer.send(new ProducerRecord<>(this.getOutputTopic(), account.getAccountId(), account));
         } catch (final RuntimeException e) {
-            this.logger.error("Some Error occurred  while producing an account <{}> into the topic <{}>.",
+            log.error("Some Error occurred  while producing an account <{}> into the topic <{}>.",
                     account.getAccountId(), this.getOutputTopic());
             throw new RuntimeException(e);
         }

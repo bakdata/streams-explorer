@@ -10,8 +10,9 @@ streams:
   schemaRegistryUrl: "http://my-confluent-cp-schema-registry:8081"
   outputTopic: atm-fraud-incoming-transactions-topic
 
-annotations:
-  consumerGroup: "streams-explorer-transactionavroproducer-atm-fraud-incoming-transactions-topic"
+commandLine:
+  REAL_TX: 19
+  ITERATION: 20
 
 prometheus:
   jmx:

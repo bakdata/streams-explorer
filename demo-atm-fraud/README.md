@@ -12,6 +12,7 @@
 
 ```
 gradle jib -Djib.to.image=url-to-container-registry.com/streams-explorer-demo-transactionavroproducer -Djib.container.mainClass=com.bakdata.kafka.TransactionAvroProducer
+gradle jib -Djib.to.image=url-to-container-registry.com/streams-explorer-demo-accountproducer -Djib.container.mainClass=com.bakdata.kafka.AccountProducer
 gradle jib -Djib.to.image=url-to-container-registry.com/streams-explorer-demo-transactionjoiner -Djib.container.mainClass=com.bakdata.kafka.TransactionJoiner
 gradle jib -Djib.to.image=url-to-container-registry.com/streams-explorer-demo-frauddetector -Djib.container.mainClass=com.bakdata.kafka.FraudDetector
 gradle jib -Djib.to.image=url-to-container-registry.com/streams-explorer-demo-accountlinker -Djib.container.mainClass=com.bakdata.kafka.AccountLinker
@@ -23,28 +24,27 @@ gradle jib -Djib.to.image=url-to-container-registry.com/streams-explorer-demo-ac
 helm repo add bakdata-common https://raw.githubusercontent.com/bakdata/streams-bootstrap/master/charts/
 helm repo update
 helm upgrade --debug --install --force --values values-transactionavroproducer.yaml demo-transactionavroproducer bakdata-common/streams-app
+helm upgrade --debug --install --force --values values-accountproducer.yaml demo-accountproducer bakdata-common/streams-app
 helm upgrade --debug --install --force --values values-transactionjoiner.yaml demo-transactionjoiner bakdata-common/streams-app
 helm upgrade --debug --install --force --values values-frauddetector.yaml demo-frauddetector bakdata-common/streams-app
 helm upgrade --debug --install --force --values values-accountlinker.yaml demo-accountlinker bakdata-common/streams-app
 ```
-
 > port-forward leader Kafka broker and Schema Registry to localhost
 
 > You can find the leader Kafka broker for a given topic by executing `kafka-topics --zookeeper localhost:2181 --describe --topic atm-fraud-accounts-topic`
 
 ### Generate test accounts
 
-`python3 test-data/accounts.py`
+The account producer application publishes accounts data (stored in a `.txt` file)  into the expected topic. 
 
-```
-kafka-avro-console-producer --broker-list localhost:9092 --topic atm-fraud-accounts-topic --property value.schema=$(cat src/main/avro/Account.avsc | tr -d '\040\011\012\015') --property schema.registry.url=http://localhost:8081 < test-data/accounts.txt
-```
 
 ### Generate test transactions
 
-To generate our incoming transactions (legitimate or fraudulent) we are using the [gess](https://github.com/rmoff/gess) tool. Once it's running we pipe the output from the UDP port to `kafkacat` which writes the individual messages to our input topic.
+To generate our incoming transactions (legitimate or fraudulent) we are using the `transactionavroproducer` application inspired by the 
+[gess](https://github.com/rmoff/gess) tool. 
 
-```
-./gess.sh start
-nc -v -u -l 6900 | kafkacat -b localhost:9092 -P -t atm-fraud-raw-input-topic
-```
+The number of incoming transactions is configurable using the variables `REAL_TX` and `ITERATION` in our `values-transactionavroproducer.yaml` file.
+The first variable specifies how many legitimate incoming transactions must be produced before producing one fraudulent incoming transaction.
+One iteration contains `REAL_TX` legitimate transactions and one fraudulent transaction.
+
+

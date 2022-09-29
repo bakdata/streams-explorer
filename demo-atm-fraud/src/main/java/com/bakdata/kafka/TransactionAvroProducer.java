@@ -18,16 +18,16 @@ import java.util.Random;
 import java.util.TimeZone;
 import java.util.UUID;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.apache.logging.log4j.LogManager;
 import picocli.CommandLine;
-import org.apache.logging.log4j.Logger;
 
 @Setter
+@Slf4j
 public class TransactionAvroProducer extends KafkaProducerApplication {
 
     @CommandLine.Option(names = "--real-tx",
@@ -42,7 +42,6 @@ public class TransactionAvroProducer extends KafkaProducerApplication {
         startApplication(new TransactionAvroProducer(), args);
     }
 
-    private Logger logger = LogManager.getLogger(this.getClass().getName());
 
     private Map<Integer, String[]> allLocations = null;
     private static final Random randGenerator = new Random();
@@ -65,9 +64,9 @@ public class TransactionAvroProducer extends KafkaProducerApplication {
     @Override
     protected void runApplication() {
         final KafkaProducer<String, Transaction> producer = this.createProducer();
-        this.logger.info("====> Bound = {} and Iteration= {} <====", this.bound, this.iterations);
-        this.logger.info("====> Expected amount of transactions: {} <====", (this.bound + 1) * this.iterations);
-        this.logger.info("====> The defined output topic is:  {} <====", this.getOutputTopic());
+        log.debug("Bound = {} and Iteration= {}", this.bound, this.iterations);
+        log.debug("Expected amount of transactions: {}", (this.bound + 1) * this.iterations);
+        log.info("Producing data into output topic  <{}>...", this.getOutputTopic());
         final ClassLoader classLoader = this.getClass().getClassLoader();
         final String fileName = "atm_locations.csv";
         final InputStream inputStream = classLoader.getResourceAsStream(fileName);
@@ -78,8 +77,8 @@ public class TransactionAvroProducer extends KafkaProducerApplication {
         this.allLocations = loadCsvData(streamReader);
 
         final int amountLocation = this.allLocations.size();
-        int counter = 0;
-        do {
+        log.debug("Amount of locations information loaded from the csv file: {}", amountLocation);
+        for (int counter = 0; counter < this.iterations; counter++) {
             final int fraud_index = counter % this.bound;
             Transaction oldTransaction = new Transaction();
 
@@ -93,9 +92,8 @@ public class TransactionAvroProducer extends KafkaProducerApplication {
             final Transaction fraudTransaction = this.createFraudTransaction(oldTransaction, fraud_index);
             this.publish(producer, fraudTransaction);
             counter++;
-            this.logger.info("====> Current iteration step: {} <====", counter);
-
-        } while (counter != this.iterations);
+            log.debug("Current iteration step: {}", counter);
+        }
     }
 
     private Transaction createRealTimeTransaction(final int amountLocation) {
@@ -215,7 +213,7 @@ public class TransactionAvroProducer extends KafkaProducerApplication {
         try {
             producer.send(new ProducerRecord<>(this.getOutputTopic(), transaction.getTransactionId(), transaction));
         } catch (final RuntimeException e) {
-            this.logger.error("Some Error occurred  while producing the transaction <{}> into the topic <{}>.",
+            log.error("Some Error occurred  while producing the transaction <{}> into the topic <{}>.",
                     transaction.getTransactionId(), this.getOutputTopic());
             throw new RuntimeException(e);
         }
