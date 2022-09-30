@@ -7,8 +7,6 @@ import java.io.IOException;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -36,27 +34,22 @@ class TransactionAvroProducerTest {
 
     private static TransactionAvroProducer createApp() {
         final TransactionAvroProducer transactionAvroProducer = new TransactionAvroProducer();
-        transactionAvroProducer.setAllLocations();
-        final Collection<String[]> locations = new ArrayList<>();
-        locations.add(new String[]{"3.1328488", "39.8417162", "Atm ServiRed"});
-        locations.add(new String[]{"3.1334979", "39.8416612", "Atm TeleBanco"});
-        locations.add(new String[]{"3.13515", "39.8410749", "Atm TeleBanco"});
-        locations.add(new String[]{"3.1347859", "39.8411439", "Atm Sa Nostra"});
-        locations.add(new String[]{"3.1345255", "39.8412161", "Atm Santander"});
-        locations.add(new String[]{"-0.413975", "38.3685657", "Atm Banco Popular"});
+        transactionAvroProducer.addLocation(new AtmLocation("Atm ServiRed", 3.1328488, 39.8417162));
+        transactionAvroProducer.addLocation(new AtmLocation("Atm TeleBanco", 3.1334979, 39.8416612));
+        transactionAvroProducer.addLocation(new AtmLocation("Atm TeleBanco\"", 3.13515, 39.8410749));
+        transactionAvroProducer.addLocation(new AtmLocation("Atm Sa Nostra", 3.1347859, 39.8411439));
+        transactionAvroProducer.addLocation(new AtmLocation("Atm Santander", 3.1345255, 39.8412161));
+        transactionAvroProducer.addLocation(new AtmLocation("Atm Banco Popular", -0.413975, 38.3685657));
 
-        for (final String[] location : locations) {
-            transactionAvroProducer.addLocation(location);
-        }
         return transactionAvroProducer;
     }
 
 
     @Test
     void shouldLoadCsv() {
-        final String filename = "src/main/resources/test_atm_locations.csv";
+        final String filename = "test_atm_locations.csv";
 
-        final List<String[]> locations;
+        final List<AtmLocation> locations;
         try {
             locations = com.bakdata.kafka.TransactionAvroProducer.loadCsvData(filename);
         } catch (final IOException | CsvValidationException e) {
@@ -68,27 +61,28 @@ class TransactionAvroProducerTest {
 
     @Test
     void shouldCreateTransaction() {
-        assertThat(accountId).isEqualTo(this.transaction1.getAccountId());
-        assertThat(this.timestampInstant).isEqualTo(this.transaction1.getTimestamp());
-        assertThat(atmLabel).isEqualTo(this.transaction1.getAtm());
-        assertThat(amount).isEqualTo(this.transaction1.getAmount());
-        assertThat(this.transactionId).isEqualTo(this.transaction1.getTransactionId());
-        assertThat(lat).isEqualTo(this.transaction1.getLocation().getLatitude());
-        assertThat(lon).isEqualTo(this.transaction1.getLocation().getLongitude());
+        assertThat(this.transaction1.getAccountId()).isEqualTo(accountId);
+        assertThat(this.transaction1.getTimestamp()).isEqualTo(this.timestampInstant);
+        assertThat(this.transaction1.getAtm()).isEqualTo(atmLabel);
+        assertThat(this.transaction1.getAmount()).isEqualTo(amount);
+        assertThat(this.transaction1.getTransactionId()).isEqualTo(this.transactionId);
+        assertThat(this.transaction1.getLocation().getLatitude()).isEqualTo(lat);
+        assertThat(this.transaction1.getLocation().getLongitude()).isEqualTo(lon);
     }
 
     @Test
     void shouldCreateFraudTransaction() {
         final Transaction fraudTransaction = this.TransactionAvroProducer.createFraudTransaction(this.transaction1, 5);
-        assertThat(this.transaction1.getAccountId()).isEqualTo(fraudTransaction.getAccountId());
-        assertThat(this.transaction1.getTimestamp()).isNotEqualTo(fraudTransaction.getTimestamp());
-        assertThat(this.transaction1.getAtm()).isNotEqualTo(fraudTransaction.getAtm());
-        assertThat(this.transaction1.getAmount()).isNotEqualTo(fraudTransaction.getAmount());
-        assertThat(this.transaction1.getTransactionId()).isNotEqualTo(fraudTransaction.getTransactionId());
-        assertThat(this.transaction1.getLocation().getLongitude()).isNotEqualTo(
-                fraudTransaction.getLocation().getLongitude());
-        assertThat(this.transaction1.getLocation().getLatitude()).isNotEqualTo(
-                fraudTransaction.getLocation().getLatitude());
+        assertThat(fraudTransaction.getAccountId()).isEqualTo(this.transaction1.getAccountId());
+        assertThat(fraudTransaction.getTimestamp()).isNotEqualTo(this.transaction1.getTimestamp());
+        assertThat(fraudTransaction.getAtm()).isNotEqualTo(this.transaction1.getAtm());
+        assertThat(fraudTransaction.getAmount()).isNotEqualTo(this.transaction1.getAmount());
+        assertThat(fraudTransaction.getTransactionId()).isNotEqualTo(this.transaction1.getTransactionId());
+        assertThat(fraudTransaction.getLocation().getLongitude()).isNotEqualTo(
+                this.transaction1.getLocation().getLongitude());
+        assertThat(fraudTransaction.getLocation().getLatitude()).isNotEqualTo(
+                this.transaction1.getLocation().getLatitude()
+        );
 
     }
 }

@@ -28,22 +28,22 @@ class AccountProducerTest {
         accountDetails.put("country", country);
         final Account account = AccountProducer.parseAccount(accountDetails);
 
-        assertThat(accountId).isEqualTo(account.getAccountId());
-        assertThat(firstName).isEqualTo(account.getFirstName());
-        assertThat(lastName).isEqualTo(account.getLastName());
-        assertThat(email).isEqualTo(account.getEmail());
-        assertThat(phone).isEqualTo(account.getPhone());
-        assertThat(address).isEqualTo(account.getAddress());
-        assertThat(country).isEqualTo(account.getCountry());
+        assertThat(account.getAccountId()).isEqualTo(accountId);
+        assertThat(account.getFirstName()).isEqualTo(firstName);
+        assertThat(account.getLastName()).isEqualTo(lastName);
+        assertThat(account.getEmail()).isEqualTo(email);
+        assertThat(account.getPhone()).isEqualTo(phone);
+        assertThat(account.getAddress()).isEqualTo(address);
+        assertThat(account.getCountry()).isEqualTo(country);
     }
 
     @Test
     void shouldLoadJSON() {
-        final String filename = "src/main/resources/test_accounts.json";
+        final String filename = "test_accounts.json";
         final JSONArray loadedAccounts = AccountProducer.loadJSON(filename);
         final String regex = "^a([0-9]{1,3})";
 
-        assertThat(5).isEqualTo(loadedAccounts.size());
+        assertThat(loadedAccounts).hasSize(5);
         for (final Object accountObj : loadedAccounts) {
             final JSONObject account = (JSONObject) accountObj;
             assertThat(account.get("account_id").toString()).matches(regex);

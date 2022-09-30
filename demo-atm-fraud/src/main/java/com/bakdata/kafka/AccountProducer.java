@@ -1,7 +1,9 @@
 package com.bakdata.kafka;
 
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.Objects;
 import java.util.Properties;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +19,7 @@ import org.json.simple.parser.ParseException;
 @Slf4j
 @Setter
 public class AccountProducer extends KafkaProducerApplication {
-    private String fileName = "src/main/resources/accounts.json";
+    private String fileName = "accounts.json";
 
     public static void main(final String[] args) {
         startApplication(new AccountProducer(), args);
@@ -43,12 +45,14 @@ public class AccountProducer extends KafkaProducerApplication {
 
     public static JSONArray loadJSON(final String fileName) {
         final JSONParser jsonParser = new JSONParser();
-        try (final FileReader reader = new FileReader(fileName)) {
-            final Object obj = jsonParser.parse(reader);
-            return (JSONArray) obj;
+        final ClassLoader classLoader = AccountProducer.class.getClassLoader();
+        Object obj = null;
+        try (final InputStream inputStream = classLoader.getResourceAsStream(fileName)) {
+            obj = jsonParser.parse(new InputStreamReader(Objects.requireNonNull(inputStream)));
         } catch (final IOException | ParseException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Error occurred while reading the JSON file.",e);
         }
+        return (JSONArray) obj;
     }
 
 
@@ -65,12 +69,6 @@ public class AccountProducer extends KafkaProducerApplication {
     }
 
     private void publishAccount(final KafkaProducer<? super String, ? super Account> producer, final Account account) {
-        try {
-            producer.send(new ProducerRecord<>(this.getOutputTopic(), account.getAccountId(), account));
-        } catch (final RuntimeException e) {
-            log.error(
-                    "Some Error occurred  while producing an account <{}> into the topic <{}>. With error message: {}",
-                    account.getAccountId(), this.getOutputTopic(), e);
-        }
+        producer.send(new ProducerRecord<>(this.getOutputTopic(), account.getAccountId(), account));
     }
 }

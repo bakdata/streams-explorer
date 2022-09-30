@@ -4,13 +4,13 @@ import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
 import com.opencsv.exceptions.CsvValidationException;
 import java.io.IOException;
-import java.io.Reader;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -46,18 +46,14 @@ public class TransactionAvroProducer extends KafkaProducerApplication {
     }
 
 
-    private List<String[]> allLocations = null;
+    private List<AtmLocation> allLocations = new ArrayList<>();
     private static final Random randGenerator = new Random();
 
-    public void setAllLocations() {
-        this.allLocations = new ArrayList<>();
+    public void addLocation(final AtmLocation atmLocation) {
+        this.allLocations.add(atmLocation);
     }
 
-    public void addLocation(final String[] values) {
-        this.allLocations.add(values);
-    }
-
-    final Amounts amounts = new Amounts();
+    private final Amounts amounts = new Amounts();
 
     @Override
     protected Properties createKafkaProperties() {
@@ -72,13 +68,12 @@ public class TransactionAvroProducer extends KafkaProducerApplication {
         log.debug("Bound = {} and Iteration= {}", this.bound, this.iterations);
         log.debug("Expected amount of transactions: {}", (this.bound + 1) * this.iterations);
         log.info("Producing data into output topic  <{}>...", this.getOutputTopic());
-        //final ClassLoader classLoader = this.getClass().getClassLoader();
-        final String fileName = "src/main/resources/atm_locations.csv";
+        final String fileName = "atm_locations.csv";
 
         try {
             this.allLocations = loadCsvData(fileName);
         } catch (final IOException | CsvValidationException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Error occurred while loading the CSV.", e);
         }
 
         final int amountLocation = this.allLocations.size();
@@ -108,26 +103,31 @@ public class TransactionAvroProducer extends KafkaProducerApplication {
         final String transactionId = uuid.toString();
 
         final int index = randGenerator.nextInt(amountLocation - 1);
-        final String[] locationDetails = this.allLocations.get(index);
-        final double lon = Double.parseDouble(locationDetails[0]);
-        final double lat = Double.parseDouble(locationDetails[1]);
-        final String atmLabel = locationDetails[2];
+        final AtmLocation locationDetails = this.allLocations.get(index);
+        final double lon = locationDetails.getLongitude();
+        final double lat = locationDetails.getLatitude();
+        final String atmLabel = locationDetails.getAtmLabel();
 
         return createTransaction(accountId, timestamp, atmLabel, amount, transactionId, lon,
                 lat);
     }
 
-    public static List<String[]> loadCsvData(final String fileName) throws IOException, CsvValidationException {
-        final Path filePath = Paths.get(fileName);
-
-        try (final Reader reader = Files.newBufferedReader(filePath)) {
-            try (final CSVReader csvReader = new CSVReader(reader)) {
-                return csvReader.readAll();
+    public static List<AtmLocation> loadCsvData(final String fileName) throws IOException, CsvValidationException {
+        ClassLoader classLoader = AccountProducer.class.getClassLoader();
+        final InputStream inputStream = classLoader.getResourceAsStream(fileName);
+        String[] line = null;
+        List<AtmLocation> allLocations = new ArrayList<>();
+        try (InputStreamReader streamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+                final CSVReader csvReader = new CSVReader(streamReader)) {
+            while (((line = csvReader.readNext()) != null)) {
+                AtmLocation locationDetails =
+                        new AtmLocation(line[2], Double.parseDouble(line[0]), Double.parseDouble(line[1]));
+                allLocations.add(locationDetails);
             }
+            return allLocations;
         } catch (final IOException | CsvException e) {
             throw new RuntimeException(e);
         }
-
     }
 
     private static String getTimestamp() {
@@ -141,12 +141,13 @@ public class TransactionAvroProducer extends KafkaProducerApplication {
             final String atmLabel,
             final int amount,
             final String transactionId, final double lon, final double lat) {
-        final ZonedDateTime parsedDateTime = ZonedDateTime.parse(timestamp,
-                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss Z"));
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss Z");
+
+        final LocalDateTime parsedDateTime = LocalDateTime.parse(timestamp, formatter);
         return Transaction
                 .newBuilder()
                 .setAccountId(accoundID)
-                .setTimestamp(parsedDateTime.toInstant())
+                .setTimestamp(parsedDateTime.toInstant(ZoneOffset.UTC))
                 .setAtm(atmLabel)
                 .setAmount(amount)
                 .setTransactionId(transactionId)
@@ -165,19 +166,18 @@ public class TransactionAvroProducer extends KafkaProducerApplication {
      - The timestamp will be randomly different, in a range between one minute and ten minutes earlier than the
      'real' txn.*/
     Transaction createFraudTransaction(final Transaction realTransaction, final int newLocationIndex) {
-        final String[] newLocation = this.allLocations.get(newLocationIndex);
+        final AtmLocation newLocation = this.allLocations.get(newLocationIndex);
         final int realAmount = realTransaction.getAmount();
         final Instant realtimestamp = realTransaction.getTimestamp();
         final int dif = randGenerator.nextInt(10) + 1;
 
         final String accountID = realTransaction.getAccountId();
         final Instant fraudTimestamp = realtimestamp.minus(dif, ChronoUnit.MINUTES);
-        final String fraudAtmLabel = newLocation[2];
+        final String fraudAtmLabel = newLocation.getAtmLabel();
         final int fraudAmount = this.amounts.otherAmount(realAmount);
         final String fraudTransactionId = "xxx" + realTransaction.getTransactionId();
-        final double fraudLon = Double.parseDouble(newLocation[0]);
-        final double fraudLat =
-                Double.parseDouble(newLocation[1]);
+        final double fraudLon = newLocation.getLongitude();
+        final double fraudLat = newLocation.getLatitude();
 
         return Transaction
                 .newBuilder()
@@ -198,31 +198,7 @@ public class TransactionAvroProducer extends KafkaProducerApplication {
     }
 
     private void publish(final Producer<? super String, ? super Transaction> producer, final Transaction transaction) {
-        try {
-            producer.send(new ProducerRecord<>(this.getOutputTopic(), transaction.getTransactionId(), transaction));
-        } catch (final RuntimeException e) {
-            log.error("Some Error occurred  while producing the transaction <{}> into the topic <{}>.",
-                    transaction.getTransactionId(), this.getOutputTopic());
-            throw new RuntimeException(e);
-        }
+        producer.send(new ProducerRecord<>(this.getOutputTopic(), transaction.getTransactionId(), transaction));
     }
 
-    private static class Amounts {
-        private final int[] amountList = {50, 100, 150, 200};
-
-
-        private int randomAmount() {
-            return this.amountList[randGenerator.nextInt(this.amountList.length)];
-        }
-
-        private int otherAmount(final int oldAmount) {
-            while (true) {
-                final int newAmount = this.amountList[randGenerator.nextInt(this.amountList.length)];
-                if (newAmount != oldAmount) {
-                    return newAmount;
-                }
-            }
-
-        }
-    }
 }

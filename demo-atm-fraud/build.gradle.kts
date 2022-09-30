@@ -40,9 +40,9 @@ dependencies {
     testRuntimeOnly(group = "org.junit.jupiter", name = "junit-jupiter-engine", version = junitVersion)
     testImplementation(group = "org.assertj", name = "assertj-core", version = "3.23.1")
     testImplementation(
-            group = "com.bakdata.fluent-kafka-streams-tests",
-            name = "fluent-kafka-streams-tests-junit5",
-            version = "2.7.0"
+        group = "com.bakdata.fluent-kafka-streams-tests",
+        name = "fluent-kafka-streams-tests-junit5",
+        version = "2.7.0"
     )
 }
 
@@ -68,8 +68,8 @@ allprojects {
         implementation(group = "org.apache.kafka", name = "kafka_2.13", version = kafkaVersion)
 
         implementation(group = "info.picocli", name = "picocli", version = "4.6.1")
-        implementation(group= "com.opencsv", name= "opencsv", version= "5.7.0")
-        implementation(group= "com.googlecode.json-simple", name= "json-simple", version= "1.1.1")
+        implementation(group = "com.opencsv", name = "opencsv", version = "5.7.0")
+        implementation(group = "com.googlecode.json-simple", name = "json-simple", version = "1.1.1")
         api(group = "org.apache.kafka", name = "kafka-streams", version = kafkaVersion)
         api(group = "org.apache.kafka", name = "kafka-clients", version = kafkaVersion)
         val confluentVersion: String by project
