@@ -45,7 +45,7 @@ The account producer application publishes accounts data (stored in a `.txt` fil
 ### Generate test transactions
 
 To generate our incoming transactions (legitimate or fraudulent) we are using the `transactionavroproducer` application inspired by the 
-[gess](https://github.com/rmoff/gess) tool. The data (accounts and locations data) are also from the same [gess](https://github.com/rmoff/gess) project. 
+[gess](https://github.com/rmoff/gess) tool. This project's data is derived entirely from the same gess project.
 
 The number of incoming transactions is configurable using the variables `REAL_TX` and `ITERATION` in our `values-transactionavroproducer.yaml` file.
 The first variable specifies how many legitimate incoming transactions must be produced before producing one fraudulent incoming transaction.
