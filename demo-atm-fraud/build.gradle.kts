@@ -62,13 +62,14 @@ allprojects {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-
     dependencies {
 
         val kafkaVersion: String by project
         implementation(group = "org.apache.kafka", name = "kafka_2.13", version = kafkaVersion)
 
         implementation(group = "info.picocli", name = "picocli", version = "4.6.1")
+        implementation(group= "com.opencsv", name= "opencsv", version= "5.7.0")
+        implementation(group= "com.googlecode.json-simple", name= "json-simple", version= "1.1.1")
         api(group = "org.apache.kafka", name = "kafka-streams", version = kafkaVersion)
         api(group = "org.apache.kafka", name = "kafka-clients", version = kafkaVersion)
         val confluentVersion: String by project
@@ -116,7 +117,6 @@ configure<org.hildan.github.changelog.plugin.GitHubChangelogExtension> {
     futureVersionTag = findProperty("changelog.releaseVersion")?.toString()
     sinceTag = findProperty("changelog.sinceTag")?.toString()
 }
-
 tasks.withType<Test> {
     useJUnitPlatform()
 }

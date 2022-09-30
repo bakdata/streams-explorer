@@ -1,49 +1,52 @@
 package com.bakdata.kafka;
 
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.util.Map;
-import org.junit.jupiter.api.Assertions;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.junit.jupiter.api.Test;
 
 class AccountProducerTest {
 
     @Test
     void shouldCreateAccount() {
-        final String account_id = "a2";
-        final String first_name = "Robert";
-        final String last_name = "Taylor";
+        final String accountId = "a2";
+        final String firstName = "Robert";
+        final String lastName = "Taylor";
         final String email = "ygarcia@example.net";
         final String phone = "241-531-3839x99962";
         final String address = "45679 Choi Brooks\nMillertown, VA 96527";
         final String country = "Togo";
-        final Account account =
-                AccountProducer.createAccount(account_id, first_name, last_name, email, phone, address, country);
-        Assertions.assertEquals(account_id, account.getAccountId(), " Comparing accountIDs");
-        Assertions.assertEquals(first_name, account.getFirstName(), "Comparing first names");
-        Assertions.assertEquals(last_name, account.getLastName(), "Comparing last names");
-        Assertions.assertEquals(email, account.getEmail(), "Comparing emails");
-        Assertions.assertEquals(phone, account.getPhone(), "Comparing phones");
-        Assertions.assertEquals(address, account.getAddress(), "Comparing addresses");
-        Assertions.assertEquals(country, account.getCountry(), "Comparing countries");
 
+        final JSONObject accountDetails = new JSONObject();
+        accountDetails.put("account_id", accountId);
+        accountDetails.put("first_name", firstName);
+        accountDetails.put("last_name", lastName);
+        accountDetails.put("email", email);
+        accountDetails.put("phone", phone);
+        accountDetails.put("address", address);
+        accountDetails.put("country", country);
+        final Account account = AccountProducer.parseAccount(accountDetails);
+
+        assertThat(accountId).isEqualTo(account.getAccountId());
+        assertThat(firstName).isEqualTo(account.getFirstName());
+        assertThat(lastName).isEqualTo(account.getLastName());
+        assertThat(email).isEqualTo(account.getEmail());
+        assertThat(phone).isEqualTo(account.getPhone());
+        assertThat(address).isEqualTo(account.getAddress());
+        assertThat(country).isEqualTo(account.getCountry());
     }
 
     @Test
-    void shouldLoadCsvData() {
+    void shouldLoadJSON() {
+        final String filename = "src/main/resources/test_accounts.json";
+        final JSONArray loadedAccounts = AccountProducer.loadJSON(filename);
+        final String regex = "^a([0-9]{1,3})";
 
-        final ClassLoader classLoader = this.getClass().getClassLoader();
-        final String filename = "test_accounts.txt";
-        final InputStream inputStream = classLoader.getResourceAsStream(filename);
-        InputStreamReader streamReader = null;
-        if (inputStream != null) {
-            streamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+        assertThat(5).isEqualTo(loadedAccounts.size());
+        for (final Object accountObj : loadedAccounts) {
+            final JSONObject account = (JSONObject) accountObj;
+            assertThat(account.get("account_id").toString()).matches(regex);
         }
-
-        final Map<Integer, String[]> loadedAccounts = AccountProducer.loadCsvData(streamReader);
-        Assertions.assertEquals(10, loadedAccounts.size(), "Verifying that all accounts was loaded");
-        Assertions.assertEquals("a1", loadedAccounts.get(0)[0], "The AccountID name was loaded correctly");
-        Assertions.assertEquals("Richard", loadedAccounts.get(0)[1], "The first name was loaded correctly");
     }
 }

@@ -4,6 +4,7 @@ import static net.mguenther.kafka.junit.EmbeddedKafkaCluster.provisionWith;
 import static net.mguenther.kafka.junit.EmbeddedKafkaClusterConfig.defaultClusterConfig;
 import static net.mguenther.kafka.junit.Wait.delay;
 import static org.assertj.core.api.Assertions.assertThat;
+
 import com.bakdata.kafka.Transaction;
 import com.bakdata.kafka.TransactionAvroProducer;
 import com.bakdata.schemaregistrymock.junit5.SchemaRegistryMockExtension;
@@ -65,16 +66,16 @@ class TransactionAvroProducerIntegrationTest {
                     .build()))
                     .hasSize(EXPECTED)
                     .allSatisfy(keyValue -> {
-                        final String record_key = keyValue.getKey();
+                        final String recordKey = keyValue.getKey();
                         final Transaction tx = keyValue.getValue();
                         final String txID = tx.getTransactionId();
-                        final String fraud_prefix = "xxx";
+                        final String fraudPrefix = "xxx";
                         final String regex = "^a([0-9]{1,3})";
 
-                        assertThat(record_key.length()).isIn(KEY_SIZE, FRAUD_KEY_SIZE);
-                        assertThat(record_key).isEqualTo(txID);
-                        if (record_key.length() > KEY_SIZE) {
-                            assertThat(record_key).contains(fraud_prefix);
+                        assertThat(recordKey.length()).isIn(KEY_SIZE, FRAUD_KEY_SIZE);
+                        assertThat(recordKey).isEqualTo(txID);
+                        if (recordKey.length() > KEY_SIZE) {
+                            assertThat(recordKey).contains(fraudPrefix);
                         }
                         assertThat(tx.getAccountId()).matches(regex);
                     });

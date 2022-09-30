@@ -61,13 +61,13 @@ class AccountProducerIntegrationTest {
                     .build()))
                     .hasSize(EXPECTED)
                     .allSatisfy(keyValue -> {
-                        final String record_key = keyValue.getKey();
+                        final String recordKey = keyValue.getKey();
                         final Account account = keyValue.getValue();
-                        final String account_id = account.getAccountId();
+                        final String accountId = account.getAccountId();
                         final String regex = "^a([0-9]{1,3})";
 
-                        assertThat(account_id).matches(regex);
-                        assertThat(record_key).isEqualTo(account_id);
+                        assertThat(accountId).matches(regex);
+                        assertThat(recordKey).isEqualTo(accountId);
                     });
         } catch (final InterruptedException e) {
             throw new RuntimeException(e);
