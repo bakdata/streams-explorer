@@ -4,6 +4,9 @@
 
 ![streams-explorer](https://github.com/bakdata/streams-explorer/blob/main/screens/overview.png?raw=true)
 
+> **Note**
+> We are participating in the annual Hacktoberfest. If you're looking to contribute, please see our [open issues](https://github.com/bakdata/streams-explorer/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3Ahacktoberfest) and use the [standalone installation](#standalone) for development.
+
 ## Contents
 
 - [Streams Explorer](#streams-explorer)
