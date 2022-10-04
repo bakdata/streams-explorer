@@ -28,7 +28,6 @@ configure<JavaPluginConvention> {
 
 dependencies {
     implementation(group = "com.bakdata.seq2", name = "seq2", version = "1.0.0")
-    val confluentVersion: String by project
     implementation(group = "com.bakdata.kafka", name = "streams-bootstrap", version = "2.3.0")
     implementation(group = "com.bakdata.kafka", name = "error-handling", version = "1.0.0")
     implementation(group = "org.elasticsearch", name = "elasticsearch", version = "7.10.0")
@@ -80,6 +79,7 @@ allprojects {
         implementation(group = "org.apache.logging.log4j", name = "log4j-slf4j-impl", version = log4jVersion)
         implementation(group = "com.google.guava", name = "guava", version = "30.1.1-jre")
         implementation(group = "org.jooq", name = "jool", version = "0.9.14")
+        implementation(group = "org.jooq", name = "jool", version = "0.9.14")
 
         val junitVersion = "5.7.2"
         testImplementation(group = "org.junit.jupiter", name = "junit-jupiter-api", version = junitVersion)
@@ -88,7 +88,6 @@ allprojects {
         testImplementation(group = "org.assertj", name = "assertj-core", version = "3.20.2")
         val mockitoVersion = "3.12.4"
         testImplementation(group = "org.mockito", name = "mockito-core", version = mockitoVersion)
-        testImplementation(group = "org.mockito", name = "mockito-junit-jupiter", version = mockitoVersion)
 
         val fluentKafkaVersion = "2.7.0"
         testImplementation(

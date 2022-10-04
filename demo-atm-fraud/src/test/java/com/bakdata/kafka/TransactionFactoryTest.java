@@ -24,11 +24,21 @@ class TransactionFactoryTest {
     private static final double lon = 3.1328488;
     private static final double lat = 39.8417162;
     private final TransactionFactory transactionFactory = createApp();
-    private final Transaction transaction1 =
-            TransactionFactory.createTransaction(accountId, timestampStr, atmLabel,
-                    amount,
-                    this.transactionId,
-                    lon, lat);
+    private final Transaction transaction1 = Transaction
+            .newBuilder()
+            .setAccountId(accountId)
+            .setTimestamp(this.parsedDateTime.toInstant())
+            .setAtm(atmLabel)
+            .setAmount(amount)
+            .setTransactionId(this.transactionId)
+            .setLocation(
+                    Location
+                            .newBuilder()
+                            .setLatitude(lat)
+                            .setLongitude(lon)
+                            .build()
+            )
+            .build();
 
     private static TransactionFactory createApp() {
         final List<AtmLocation> atmLocations = new ArrayList<>();

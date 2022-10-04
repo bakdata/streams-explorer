@@ -20,16 +20,25 @@ public class TransactionFactory {
     private static final Random randGenerator = new Random();
     private final Amounts amounts = new Amounts();
 
-    static Transaction createTransaction(final String accoundID, final String timestamp,
-            final String atmLabel,
-            final int amount,
-            final String transactionId, final double lon, final double lat) {
+    public Transaction createRealTimeTransaction() {
+        final String accountId = "a" + randGenerator.nextInt(1000);
+        final String timestamp = getTimestamp();
         final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss Z");
-
         final LocalDateTime parsedDateTime = LocalDateTime.parse(timestamp, formatter);
+
+        final int amount = this.amounts.randomAmount();
+        final UUID uuid = UUID.randomUUID();
+        final String transactionId = uuid.toString();
+
+        final int index = randGenerator.nextInt(this.allLocations.size() - 1);
+        final AtmLocation locationDetails = this.allLocations.get(index);
+        final double lon = locationDetails.getLongitude();
+        final double lat = locationDetails.getLatitude();
+        final String atmLabel = locationDetails.getAtmLabel();
+
         return Transaction
                 .newBuilder()
-                .setAccountId(accoundID)
+                .setAccountId(accountId)
                 .setTimestamp(parsedDateTime.toInstant(ZoneOffset.UTC))
                 .setAtm(atmLabel)
                 .setAmount(amount)
@@ -42,23 +51,6 @@ public class TransactionFactory {
                                 .build()
                 )
                 .build();
-    }
-
-    public Transaction createRealTimeTransaction() {
-        final String accountId = "a" + randGenerator.nextInt(1000);
-        final String timestamp = getTimestamp();
-        final int amount = this.amounts.randomAmount();
-        final UUID uuid = UUID.randomUUID();
-        final String transactionId = uuid.toString();
-
-        final int index = randGenerator.nextInt(this.allLocations.size() - 1);
-        final AtmLocation locationDetails = this.allLocations.get(index);
-        final double lon = locationDetails.getLongitude();
-        final double lat = locationDetails.getLatitude();
-        final String atmLabel = locationDetails.getAtmLabel();
-
-        return createTransaction(accountId, timestamp, atmLabel, amount, transactionId, lon,
-                lat);
     }
 
     /*Note: the fraudulent transaction will have the same account ID as the original transaction but different
@@ -94,6 +86,7 @@ public class TransactionFactory {
                                 .build()
                 )
                 .build();
+
     }
 
     private static String getTimestamp() {

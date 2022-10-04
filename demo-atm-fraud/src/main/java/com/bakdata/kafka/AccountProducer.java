@@ -1,5 +1,7 @@
 package com.bakdata.kafka;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -50,22 +52,21 @@ public class AccountProducer extends KafkaProducerApplication {
         try (final InputStream inputStream = classLoader.getResourceAsStream(fileName)) {
             obj = jsonParser.parse(new InputStreamReader(Objects.requireNonNull(inputStream)));
         } catch (final IOException | ParseException e) {
-            throw new RuntimeException("Error occurred while reading the JSON file.",e);
+            throw new RuntimeException("Error occurred while reading the JSON file.", e);
         }
         return (JSONArray) obj;
     }
 
 
     public static Account parseAccount(final JSONObject accountJSON) {
-        return Account.newBuilder()
-                .setAccountId(accountJSON.get("account_id").toString())
-                .setFirstName(accountJSON.get("first_name").toString())
-                .setLastName(accountJSON.get("last_name").toString())
-                .setEmail(accountJSON.get("email").toString())
-                .setPhone(accountJSON.get("phone").toString())
-                .setAddress(accountJSON.get("address").toString())
-                .setCountry(accountJSON.get("country").toString())
-                .build();
+        final ObjectMapper objectMapper = new ObjectMapper();
+        final Account account;
+        try {
+            account = objectMapper.readValue(accountJSON.toJSONString(), Account.class);
+        } catch (final JsonProcessingException e) {
+            throw new RuntimeException("Error occurred while deserializing JSONObject to Account object", e);
+        }
+        return account;
     }
 
     private void publishAccount(final KafkaProducer<? super String, ? super Account> producer, final Account account) {
