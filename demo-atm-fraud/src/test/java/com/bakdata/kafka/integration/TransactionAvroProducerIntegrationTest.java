@@ -51,12 +51,11 @@ class TransactionAvroProducerIntegrationTest {
     private static final String OUTPUT_TOPIC = "atm-fraud-incoming-transactions-topic";
 
     @Test
-    void shouldRunApp() {
+    void shouldRunApp() throws InterruptedException {
         this.kafkaCluster.createTopic(TopicConfig.withName(OUTPUT_TOPIC).useDefaults());
         TransactionAvroProducer producerApp = new TransactionAvroProducer() {};
         producerApp = this.setupApp(producerApp);
         producerApp.run();
-        try {
             delay(TIMEOUT_SECONDS, TimeUnit.SECONDS);
             assertThat(this.kafkaCluster.read(ReadKeyValues.from(OUTPUT_TOPIC, String.class, Transaction.class)
                     .with(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class)
@@ -79,11 +78,8 @@ class TransactionAvroProducerIntegrationTest {
                         }
                         assertThat(tx.getAccountId()).matches(regex);
                     });
-        } catch (final InterruptedException e) {
-            throw new RuntimeException(e);
-        }
         final SchemaRegistryClient client = this.schemaRegistryMockExtension.getSchemaRegistryClient();
-        this.clean_run_destroy(producerApp, client);
+        this.cleanRunDestroy(producerApp, client);
     }
 
     TransactionAvroProducer setupApp(final TransactionAvroProducer producerApp) {
@@ -96,7 +92,7 @@ class TransactionAvroProducerIntegrationTest {
         return producerApp;
     }
 
-    void clean_run_destroy(final TransactionAvroProducer producerApp, final SchemaRegistryClient client) {
+    void cleanRunDestroy(final TransactionAvroProducer producerApp, final SchemaRegistryClient client) {
         try {
             assertThat(client.getAllSubjects())
                     .contains(producerApp.getOutputTopic() + "-value");
@@ -107,7 +103,7 @@ class TransactionAvroProducerIntegrationTest {
         producerApp.run();
         try {
             delay(TIMEOUT_SECONDS, TimeUnit.SECONDS);
-        } catch (final InterruptedException e) {
+        } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
         try {

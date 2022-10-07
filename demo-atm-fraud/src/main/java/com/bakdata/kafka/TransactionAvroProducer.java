@@ -1,13 +1,12 @@
 package com.bakdata.kafka;
 
 import com.opencsv.CSVReader;
-import com.opencsv.exceptions.CsvException;
-import com.opencsv.exceptions.CsvValidationException;
+import com.opencsv.bean.CsvToBean;
+import com.opencsv.bean.CsvToBeanBuilder;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
@@ -52,13 +51,7 @@ public class TransactionAvroProducer extends KafkaProducerApplication {
         log.debug("Expected amount of transactions: {}", (this.bound + 1) * this.iterations);
         log.info("Producing data into output topic  <{}>...", this.getOutputTopic());
         final String fileName = "atm_locations.csv";
-
-        try {
-            transactionFactory = new TransactionFactory(loadCsvData(fileName));
-        } catch (final IOException | CsvValidationException e) {
-            throw new RuntimeException("Error occurred while loading the CSV.", e);
-        }
-
+        transactionFactory = new TransactionFactory(loadCsvData(fileName));
         for (int counter = 0; counter < this.iterations; counter++) {
             final int fraudIndex = counter % this.bound;
             Transaction oldTransaction = new Transaction();
@@ -77,24 +70,28 @@ public class TransactionAvroProducer extends KafkaProducerApplication {
     }
 
 
-    public static List<AtmLocation> loadCsvData(final String fileName) throws IOException, CsvValidationException {
+    public static List<AtmLocation> loadCsvData(final String fileName) {
+        final List<AtmLocation> allLocations;
         final ClassLoader classLoader = AccountProducer.class.getClassLoader();
-        final InputStream inputStream = classLoader.getResourceAsStream(fileName);
-        String[] line = null;
-        final List<AtmLocation> allLocations = new ArrayList<>();
-        try (final InputStreamReader streamReader = new InputStreamReader(Objects.requireNonNull(inputStream), StandardCharsets.UTF_8);
+
+        try (final InputStream inputStream = classLoader.getResourceAsStream(fileName);
+                final InputStreamReader streamReader = new InputStreamReader(Objects.requireNonNull(inputStream),
+                        StandardCharsets.UTF_8);
                 final CSVReader csvReader = new CSVReader(streamReader)) {
-            while (((line = csvReader.readNext()) != null)) {
-                final AtmLocation locationDetails =
-                        new AtmLocation(line[2], Double.parseDouble(line[0]), Double.parseDouble(line[1]));
-                allLocations.add(locationDetails);
-            }
-            final int amountLocation = allLocations.size();
-            log.debug("Amount of locations information loaded from the csv file: {}", amountLocation);
-            return allLocations;
-        } catch (final IOException | CsvException e) {
-            throw new RuntimeException(e);
+
+            final CsvToBean<AtmLocation> csvToBean = new CsvToBeanBuilder<AtmLocation>(csvReader)
+                    .withType(AtmLocation.class)
+                    .withSeparator(',')
+                    .withIgnoreLeadingWhiteSpace(true)
+                    .withIgnoreEmptyLine(true)
+                    .build();
+            allLocations = csvToBean.parse();
+        } catch (final IOException e) {
+            throw new RuntimeException("Error occurred while loading CSV file", e);
         }
+        log.debug("Amount of locations information loaded from the csv file: {}", allLocations.size());
+        return allLocations;
+
     }
 
 

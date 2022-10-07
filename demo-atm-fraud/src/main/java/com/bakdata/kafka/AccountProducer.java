@@ -16,7 +16,7 @@ import org.apache.kafka.common.serialization.StringSerializer;
 @Slf4j
 @Setter
 public class AccountProducer extends KafkaProducerApplication {
-    private String fileName = "accounts.json";
+    private static final String FILE_NAME = "accounts.json";
 
     public static void main(final String[] args) {
         startApplication(new AccountProducer(), args);
@@ -24,9 +24,9 @@ public class AccountProducer extends KafkaProducerApplication {
 
     @Override
     protected void runApplication() {
-        final List<Account> accountMap = loadJSON(this.fileName);
+        final List<Account> accounts = loadJSON(this.FILE_NAME);
         final KafkaProducer<String, Account> producer = this.createProducer();
-        for (final Account accountObj : accountMap) {
+        for (final Account accountObj : accounts) {
             this.publishAccount(producer, accountObj);
         }
     }
@@ -40,14 +40,12 @@ public class AccountProducer extends KafkaProducerApplication {
 
     public static List<Account> loadJSON(final String fileName) {
         final ClassLoader classLoader = AccountProducer.class.getClassLoader();
-        final List<Account> accountList;
         final ObjectMapper objectMapper = new ObjectMapper();
         try (final InputStream inputStream = classLoader.getResourceAsStream(fileName)) {
-            accountList = objectMapper.readValue(inputStream, new TypeReference<>() {});
+            return objectMapper.readValue(inputStream, new TypeReference<>() {});
         } catch (final IOException e) {
             throw new RuntimeException("Error occurred while reading the JSON file.", e);
         }
-        return accountList;
     }
 
     private void publishAccount(final KafkaProducer<? super String, ? super Account> producer, final Account account) {

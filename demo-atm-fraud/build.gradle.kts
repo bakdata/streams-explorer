@@ -3,10 +3,7 @@ plugins {
     java
     idea
     `java-library`
-    id("net.researchgate.release") version "2.8.1"
-    id("com.bakdata.sonar") version "1.1.7"
-    id("com.bakdata.sonatype") version "1.1.7"
-    id("org.hildan.github.changelog") version "0.8.0"
+//    id("org.hildan.github.changelog") version "0.8.0"
     id("com.github.davidmc24.gradle.plugin.avro") version "1.2.1"
     id("io.freefair.lombok") version "5.3.3.3"
     id("com.google.cloud.tools.jib") version "3.1.1"
@@ -19,15 +16,7 @@ tasks.withType<Test> {
     useJUnitPlatform()
 }
 
-
-
-configure<JavaPluginConvention> {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
-}
-
 dependencies {
-    implementation(group = "com.bakdata.seq2", name = "seq2", version = "1.0.0")
     implementation(group = "com.bakdata.kafka", name = "streams-bootstrap", version = "2.3.0")
     implementation(group = "com.bakdata.kafka", name = "error-handling", version = "1.0.0")
     implementation(group = "org.elasticsearch", name = "elasticsearch", version = "7.10.0")
@@ -57,17 +46,13 @@ allprojects {
         mavenCentral()
         maven(url = "https://packages.confluent.io/maven/")
     }
-    configure<JavaPluginExtension> {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
     dependencies {
 
         val kafkaVersion: String by project
         implementation(group = "org.apache.kafka", name = "kafka_2.13", version = kafkaVersion)
 
         implementation(group = "info.picocli", name = "picocli", version = "4.6.1")
-        implementation(group = "com.opencsv", name = "opencsv", version = "5.7.0")
+        implementation(group = "com.opencsv", name = "opencsv", version = "5.2")
         implementation(group = "com.googlecode.json-simple", name = "json-simple", version = "1.1.1")
         api(group = "org.apache.kafka", name = "kafka-streams", version = kafkaVersion)
         api(group = "org.apache.kafka", name = "kafka-clients", version = kafkaVersion)
@@ -111,11 +96,11 @@ allprojects {
 
 }
 
-configure<org.hildan.github.changelog.plugin.GitHubChangelogExtension> {
-    githubUser = "bakdata"
-    futureVersionTag = findProperty("changelog.releaseVersion")?.toString()
-    sinceTag = findProperty("changelog.sinceTag")?.toString()
-}
+//configure<org.hildan.github.changelog.plugin.GitHubChangelogExtension> {
+//    githubUser = "bakdata"
+//    futureVersionTag = findProperty("changelog.releaseVersion")?.toString()
+//    sinceTag = findProperty("changelog.sinceTag")?.toString()
+//}
 tasks.withType<Test> {
     useJUnitPlatform()
 }

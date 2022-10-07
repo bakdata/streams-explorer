@@ -72,10 +72,12 @@ class AccountProducerIntegrationTest {
         } catch (final InterruptedException e) {
             throw new RuntimeException(e);
         }
-
         final SchemaRegistryClient client = this.schemaRegistryMockExtension.getSchemaRegistryClient();
-        this.clean_run_destroy(accountProducer, client);
-
+        try {
+            this.cleanRunDestroy(accountProducer, client);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     AccountProducer setupApp(final AccountProducer accountProducer) {
@@ -86,7 +88,8 @@ class AccountProducerIntegrationTest {
         return accountProducer;
     }
 
-    void clean_run_destroy(final AccountProducer accountProducer, final SchemaRegistryClient client) {
+    void cleanRunDestroy(final AccountProducer accountProducer, final SchemaRegistryClient client)
+            throws InterruptedException {
         try {
             assertThat(client.getAllSubjects())
                     .contains(accountProducer.getOutputTopic() + "-value");
@@ -95,11 +98,7 @@ class AccountProducerIntegrationTest {
         }
         accountProducer.setCleanUp(true);
         accountProducer.run();
-        try {
-            delay(TIMEOUT_SECONDS, TimeUnit.SECONDS);
-        } catch (final InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        delay(TIMEOUT_SECONDS, TimeUnit.SECONDS);
         try {
             assertThat(client.getAllSubjects())
                     .doesNotContain(accountProducer.getOutputTopic() + "-value");
@@ -110,6 +109,4 @@ class AccountProducerIntegrationTest {
                 .as("Output topic is deleted")
                 .isFalse();
     }
-
-
 }

@@ -11,10 +11,9 @@ class AccountProducerTest {
         final String filename = "test_accounts.json";
         final List<Account> loadedAccounts = AccountProducer.loadJSON(filename);
         final String regex = "^a([0-9]{1,3})";
-
         assertThat(loadedAccounts).hasSize(5);
         for (final Account account : loadedAccounts) {
-            assertThat(account.get("account_id").toString()).matches(regex);
+            assertThat(account.getAccountId()).matches(regex);
         }
     }
 }

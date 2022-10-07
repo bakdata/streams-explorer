@@ -1,18 +1,19 @@
 package com.bakdata.kafka;
 
-import lombok.Getter;
-import lombok.Setter;
+import com.opencsv.bean.CsvBindByName;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
-@Setter
-@Getter
+@Data
+@AllArgsConstructor
 public class AtmLocation {
-    public AtmLocation(final String atmLabel, final double longitude, final double latitude) {
-        this.atmLabel = atmLabel;
-        this.longitude = longitude;
-        this.latitude = latitude;
+    public AtmLocation() {
     }
-
+    @CsvBindByName
+    private Double lon;
+    @CsvBindByName
+    private Double lat;
+    @CsvBindByName
     private String atmLabel;
-    private double longitude;
-    private double latitude;
+
 }
