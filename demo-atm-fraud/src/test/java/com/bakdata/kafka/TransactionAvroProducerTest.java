@@ -7,13 +7,13 @@ import org.junit.jupiter.api.Test;
 
 class TransactionAvroProducerTest {
     public static final int EXPECTED = 11;
+    private static final String FILENAME = "test_atm_locations.csv";
 
     @Test
     void shouldLoadCsv() {
-        final String filename = "test_atm_locations.csv";
-        List<AtmLocation> locations = TransactionAvroProducer.loadCsvData(filename);
+        final List<AtmLocation> locations = TransactionAvroProducer.loadCsvData(FILENAME);
         assertThat(locations.size()).isEqualTo(EXPECTED);
-        for (AtmLocation loc: locations){
+        for (final AtmLocation loc : locations) {
             assertThat(loc.getAtmLabel()).contains("Atm");
         }
     }

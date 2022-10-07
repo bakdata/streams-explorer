@@ -30,11 +30,11 @@ public class TransactionAvroProducer extends KafkaProducerApplication {
     @CommandLine.Option(names = "--iteration",
             description = "One iteration contains number of real transactions and one fraudulent transaction")
     private int iterations;
+    private static final ClassLoader CLASS_LOADER = AccountProducer.class.getClassLoader();
 
     public static void main(final String[] args) {
         startApplication(new TransactionAvroProducer(), args);
     }
-
 
     @Override
     protected Properties createKafkaProperties() {
@@ -69,12 +69,9 @@ public class TransactionAvroProducer extends KafkaProducerApplication {
         }
     }
 
-
     public static List<AtmLocation> loadCsvData(final String fileName) {
         final List<AtmLocation> allLocations;
-        final ClassLoader classLoader = AccountProducer.class.getClassLoader();
-
-        try (final InputStream inputStream = classLoader.getResourceAsStream(fileName);
+        try (final InputStream inputStream = CLASS_LOADER.getResourceAsStream(fileName);
                 final InputStreamReader streamReader = new InputStreamReader(Objects.requireNonNull(inputStream),
                         StandardCharsets.UTF_8);
                 final CSVReader csvReader = new CSVReader(streamReader)) {
@@ -91,9 +88,7 @@ public class TransactionAvroProducer extends KafkaProducerApplication {
         }
         log.debug("Amount of locations information loaded from the csv file: {}", allLocations.size());
         return allLocations;
-
     }
-
 
     private void publish(final Producer<? super String, ? super Transaction> producer, final Transaction transaction) {
         producer.send(new ProducerRecord<>(this.getOutputTopic(), transaction.getTransactionId(), transaction));

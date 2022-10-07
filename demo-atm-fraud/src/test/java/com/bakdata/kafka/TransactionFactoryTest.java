@@ -42,14 +42,9 @@ class TransactionFactoryTest {
 
     private static TransactionFactory createApp() {
         final List<AtmLocation> atmLocations = new ArrayList<>();
-        //final AtmLocation locationDetails = new AtmLocation();
-        //locationDetails.setAtmLabel(line[2]);
-        //locationDetails.setLocation(new Location(Double.parseDouble(line[1]), Double.parseDouble(line[0])));
-//Location location = new Location(lat, lon)
-       // atmLocations.add(new AtmLocation("Atm ServiRed", new Location(3.1328488, 39.8417162)));
-        atmLocations.add(new AtmLocation( 39.8417162, 3.1328488,"Atm ServiRed"));
-        atmLocations.add(new AtmLocation( 3.1334979, 39.8416612,"Atm TeleBanco"));
-        atmLocations.add(new AtmLocation( 3.13515, 39.8410749, "Atm TeleBanco"));
+        atmLocations.add(new AtmLocation(39.8417162, 3.1328488, "Atm ServiRed"));
+        atmLocations.add(new AtmLocation(3.1334979, 39.8416612, "Atm TeleBanco"));
+        atmLocations.add(new AtmLocation(3.13515, 39.8410749, "Atm TeleBanco"));
         atmLocations.add(new AtmLocation(3.1347859, 39.8411439, "Atm Sa Nostra"));
         atmLocations.add(new AtmLocation(3.1345255, 39.8412161, "Atm Santander"));
         atmLocations.add(new AtmLocation(-0.413975, 38.3685657, "Atm Banco Popular"));
@@ -69,12 +64,13 @@ class TransactionFactoryTest {
     }
 
     @Test
-    void shouldCreateRealTransaction(){
+    void shouldCreateRealTransaction() {
         Transaction transaction = this.transactionFactory.createRealTimeTransaction();
         final String regex = "^a([0-9]{1,3})";
         assertThat(transaction.getAccountId()).matches(regex);
         assertThat(transaction.getTransactionId().length()).isEqualTo(36);
     }
+
     @Test
     void shouldCreateFraudTransaction() {
         final Transaction fraudTransaction = this.transactionFactory.createFraudTransaction(this.transaction1, 5);
@@ -88,6 +84,5 @@ class TransactionFactoryTest {
         assertThat(fraudTransaction.getLocation().getLatitude()).isNotEqualTo(
                 this.transaction1.getLocation().getLatitude()
         );
-
     }
 }

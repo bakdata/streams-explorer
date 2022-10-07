@@ -95,12 +95,6 @@ allprojects {
     }
 
 }
-
-//configure<org.hildan.github.changelog.plugin.GitHubChangelogExtension> {
-//    githubUser = "bakdata"
-//    futureVersionTag = findProperty("changelog.releaseVersion")?.toString()
-//    sinceTag = findProperty("changelog.sinceTag")?.toString()
-//}
 tasks.withType<Test> {
     useJUnitPlatform()
 }
