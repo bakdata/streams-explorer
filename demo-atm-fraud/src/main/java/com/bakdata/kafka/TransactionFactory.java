@@ -1,16 +1,14 @@
 package com.bakdata.kafka;
 
-import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
 import java.util.List;
 import java.util.Random;
-import java.util.TimeZone;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 
@@ -19,7 +17,6 @@ public class TransactionFactory {
 
     private final List<AtmLocation> locations;
     private static final Random RAND_GENERATOR = new Random();
-    private final Amounts amounts = new Amounts();
 
     public Transaction createRealTimeTransaction() {
         final String accountId = "a" + RAND_GENERATOR.nextInt(1000);
@@ -27,7 +24,7 @@ public class TransactionFactory {
         final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss Z");
         final LocalDateTime parsedDateTime = LocalDateTime.parse(timestamp, formatter);
 
-        final int amount = this.amounts.randomAmount();
+        final int amount = Amounts.randomAmount();
         final UUID uuid = UUID.randomUUID();
         final String transactionId = uuid.toString();
 
@@ -67,7 +64,7 @@ public class TransactionFactory {
         final String accountID = realTransaction.getAccountId();
         final Instant fraudTimestamp = realTimeStamp.minus(dif, ChronoUnit.MINUTES);
         final String fraudAtmLabel = newLocation.getAtmLabel();
-        final int fraudAmount = this.amounts.otherAmount(realAmount);
+        final int fraudAmount = Amounts.otherAmount(realAmount);
         final String fraudTransactionId = "xxx" + realTransaction.getTransactionId();
         final double fraudLon = newLocation.getLon();
         final double fraudLat = newLocation.getLat();
@@ -90,10 +87,9 @@ public class TransactionFactory {
     }
 
     private static String getTimestamp() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        LocalDateTime now = LocalDateTime.now();
-        String formatDateTime = now.format(formatter) + " +0000";
-        return formatDateTime;
+        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss Z");
+        ZoneId zone = ZoneId.of("UTC");
+        return ZonedDateTime.now(zone).format(formatter);
     }
 
 }

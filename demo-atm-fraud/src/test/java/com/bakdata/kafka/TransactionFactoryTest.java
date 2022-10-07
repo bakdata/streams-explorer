@@ -84,5 +84,6 @@ class TransactionFactoryTest {
         assertThat(fraudTransaction.getLocation().getLatitude()).isNotEqualTo(
                 this.transaction1.getLocation().getLatitude()
         );
+
     }
 }

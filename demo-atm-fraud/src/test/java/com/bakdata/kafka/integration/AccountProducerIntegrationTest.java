@@ -46,32 +46,28 @@ class AccountProducerIntegrationTest {
     }
 
     @Test
-    void shouldRunApp() {
+    void shouldRunApp() throws InterruptedException {
         this.kafkaCluster.createTopic(TopicConfig.withName(OUTPUT_TOPIC).useDefaults());
         AccountProducer accountProducer = new AccountProducer() {};
         accountProducer = this.setupApp(accountProducer);
         accountProducer.run();
-        try {
-            delay(TIMEOUT_SECONDS, TimeUnit.SECONDS);
-            assertThat(this.kafkaCluster.read(ReadKeyValues.from(OUTPUT_TOPIC, String.class, Account.class)
-                    .with(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class)
-                    .with(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, SpecificAvroDeserializer.class)
-                    .with(AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG,
-                            this.schemaRegistryMockExtension.getUrl())
-                    .build()))
-                    .hasSize(EXPECTED)
-                    .allSatisfy(keyValue -> {
-                        final String recordKey = keyValue.getKey();
-                        final Account account = keyValue.getValue();
-                        final String accountId = account.getAccountId();
-                        final String regex = "^a([0-9]{1,3})";
+        delay(TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        assertThat(this.kafkaCluster.read(ReadKeyValues.from(OUTPUT_TOPIC, String.class, Account.class)
+                .with(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class)
+                .with(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, SpecificAvroDeserializer.class)
+                .with(AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG,
+                        this.schemaRegistryMockExtension.getUrl())
+                .build()))
+                .hasSize(EXPECTED)
+                .allSatisfy(keyValue -> {
+                    final String recordKey = keyValue.getKey();
+                    final Account account = keyValue.getValue();
+                    final String accountId = account.getAccountId();
+                    final String regex = "^a([0-9]{1,3})";
 
-                        assertThat(accountId).matches(regex);
-                        assertThat(recordKey).isEqualTo(accountId);
-                    });
-        } catch (final InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+                    assertThat(accountId).matches(regex);
+                    assertThat(recordKey).isEqualTo(accountId);
+                });
         final SchemaRegistryClient client = this.schemaRegistryMockExtension.getSchemaRegistryClient();
         try {
             this.cleanRunDestroy(accountProducer, client);

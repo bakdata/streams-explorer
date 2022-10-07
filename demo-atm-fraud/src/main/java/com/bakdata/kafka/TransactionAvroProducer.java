@@ -30,6 +30,7 @@ public class TransactionAvroProducer extends KafkaProducerApplication {
     @CommandLine.Option(names = "--iteration",
             description = "One iteration contains number of real transactions and one fraudulent transaction")
     private int iterations;
+    static final String FILE_NAME = "atm_locations.csv";
     private static final ClassLoader CLASS_LOADER = AccountProducer.class.getClassLoader();
 
     public static void main(final String[] args) {
@@ -50,8 +51,7 @@ public class TransactionAvroProducer extends KafkaProducerApplication {
         log.debug("Bound = {} and Iteration= {}", this.bound, this.iterations);
         log.debug("Expected amount of transactions: {}", (this.bound + 1) * this.iterations);
         log.info("Producing data into output topic  <{}>...", this.getOutputTopic());
-        final String fileName = "atm_locations.csv";
-        transactionFactory = new TransactionFactory(loadCsvData(fileName));
+        transactionFactory = new TransactionFactory(loadCsvData(FILE_NAME));
         for (int counter = 0; counter < this.iterations; counter++) {
             final int fraudIndex = counter % this.bound;
             Transaction oldTransaction = new Transaction();
@@ -70,7 +70,6 @@ public class TransactionAvroProducer extends KafkaProducerApplication {
     }
 
     public static List<AtmLocation> loadCsvData(final String fileName) {
-        final List<AtmLocation> allLocations;
         try (final InputStream inputStream = CLASS_LOADER.getResourceAsStream(fileName);
                 final InputStreamReader streamReader = new InputStreamReader(Objects.requireNonNull(inputStream),
                         StandardCharsets.UTF_8);
@@ -82,12 +81,12 @@ public class TransactionAvroProducer extends KafkaProducerApplication {
                     .withIgnoreLeadingWhiteSpace(true)
                     .withIgnoreEmptyLine(true)
                     .build();
-            allLocations = csvToBean.parse();
+            final List<AtmLocation> allLocations = csvToBean.parse();
+            log.debug("Amount of locations information loaded from the csv file: {}", allLocations.size());
+            return allLocations;
         } catch (final IOException e) {
             throw new RuntimeException("Error occurred while loading CSV file", e);
         }
-        log.debug("Amount of locations information loaded from the csv file: {}", allLocations.size());
-        return allLocations;
     }
 
     private void publish(final Producer<? super String, ? super Transaction> producer, final Transaction transaction) {

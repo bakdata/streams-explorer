@@ -6,15 +6,12 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class TransactionAvroProducerTest {
-    public static final int EXPECTED = 11;
     private static final String FILENAME = "test_atm_locations.csv";
 
     @Test
     void shouldLoadCsv() {
         final List<AtmLocation> locations = TransactionAvroProducer.loadCsvData(FILENAME);
-        assertThat(locations.size()).isEqualTo(EXPECTED);
-        for (final AtmLocation loc : locations) {
-            assertThat(loc.getAtmLabel()).contains("Atm");
-        }
+        assertThat(locations).hasSize(11);
+        assertThat(locations).allSatisfy(location -> assertThat(location.getAtmLabel()).contains("Atm"));
     }
 }

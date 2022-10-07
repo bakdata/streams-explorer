@@ -3,7 +3,6 @@ plugins {
     java
     idea
     `java-library`
-//    id("org.hildan.github.changelog") version "0.8.0"
     id("com.github.davidmc24.gradle.plugin.avro") version "1.2.1"
     id("io.freefair.lombok") version "5.3.3.3"
     id("com.google.cloud.tools.jib") version "3.1.1"
@@ -15,11 +14,19 @@ tasks.withType<Test> {
     maxParallelForks = 4
     useJUnitPlatform()
 }
+repositories {
+    mavenCentral()
+    maven(url = "https://packages.confluent.io/maven/")
+}
 
 dependencies {
+    implementation(group = "com.bakdata.seq2", name = "seq2", version = "1.0.0")
+    val confluentVersion: String by project
+    implementation(group = "io.confluent", name = "kafka-streams-avro-serde", version = confluentVersion)
     implementation(group = "com.bakdata.kafka", name = "streams-bootstrap", version = "2.3.0")
-    implementation(group = "com.bakdata.kafka", name = "error-handling", version = "1.0.0")
+    implementation(group = "com.bakdata.kafka", name = "error-handling-avro", version = "1.3.0")
     implementation(group = "org.elasticsearch", name = "elasticsearch", version = "7.10.0")
+    implementation(group = "org.slf4j", name = "slf4j-log4j12", version = "1.7.26")
     implementation(group = "org.json", name = "json", version = "20201115")
 
     val junitVersion: String by project
@@ -27,6 +34,7 @@ dependencies {
     testImplementation(group = "org.junit.jupiter", name = "junit-jupiter-params", version = junitVersion)
     testRuntimeOnly(group = "org.junit.jupiter", name = "junit-jupiter-engine", version = junitVersion)
     testImplementation(group = "org.assertj", name = "assertj-core", version = "3.23.1")
+    testImplementation(group = "log4j", name = "log4j", version = "1.2.17")
     testImplementation(
         group = "com.bakdata.fluent-kafka-streams-tests",
         name = "fluent-kafka-streams-tests-junit5",
@@ -35,52 +43,16 @@ dependencies {
 }
 
 allprojects {
-
-    group = "com.bakdata.kafka"
-
-    tasks.withType<Test> {
-        maxParallelForks = 1 // Embedded Kafka does not reliably work in parallel since Kafka 3.0
-    }
-
-    repositories {
-        mavenCentral()
-        maven(url = "https://packages.confluent.io/maven/")
-    }
     dependencies {
-
         val kafkaVersion: String by project
-        implementation(group = "org.apache.kafka", name = "kafka_2.13", version = kafkaVersion)
-
         implementation(group = "info.picocli", name = "picocli", version = "4.6.1")
         implementation(group = "com.opencsv", name = "opencsv", version = "5.2")
-        implementation(group = "com.googlecode.json-simple", name = "json-simple", version = "1.1.1")
-        api(group = "org.apache.kafka", name = "kafka-streams", version = kafkaVersion)
         api(group = "org.apache.kafka", name = "kafka-clients", version = kafkaVersion)
-        val confluentVersion: String by project
-        implementation(group = "io.confluent", name = "kafka-streams-avro-serde", version = confluentVersion)
-        api(group = "io.confluent", name = "kafka-schema-registry-client", version = confluentVersion)
-        val log4jVersion = "2.17.2"
-        implementation(group = "org.apache.logging.log4j", name = "log4j-core", version = log4jVersion)
-        implementation(group = "org.apache.logging.log4j", name = "log4j-slf4j-impl", version = log4jVersion)
-        implementation(group = "com.google.guava", name = "guava", version = "30.1.1-jre")
-        implementation(group = "org.jooq", name = "jool", version = "0.9.14")
-        implementation(group = "org.jooq", name = "jool", version = "0.9.14")
 
-        val junitVersion = "5.7.2"
-        testImplementation(group = "org.junit.jupiter", name = "junit-jupiter-api", version = junitVersion)
-        testImplementation(group = "org.junit.jupiter", name = "junit-jupiter-params", version = junitVersion)
-        testRuntimeOnly(group = "org.junit.jupiter", name = "junit-jupiter-engine", version = junitVersion)
-        testImplementation(group = "org.assertj", name = "assertj-core", version = "3.20.2")
-        val mockitoVersion = "3.12.4"
-        testImplementation(group = "org.mockito", name = "mockito-core", version = mockitoVersion)
+        val confluentVersion: String by project
+        api(group = "io.confluent", name = "kafka-schema-registry-client", version = confluentVersion)
 
         val fluentKafkaVersion = "2.7.0"
-        testImplementation(
-            group = "com.bakdata.fluent-kafka-streams-tests",
-            name = "fluent-kafka-streams-tests-junit5",
-            version = fluentKafkaVersion
-        )
-        testImplementation(group = "org.apache.kafka", name = "kafka-streams-test-utils", version = kafkaVersion)
         testImplementation(
             group = "com.bakdata.fluent-kafka-streams-tests",
             name = "schema-registry-mock-junit5",
@@ -89,12 +61,5 @@ allprojects {
         testImplementation(group = "net.mguenther.kafka", name = "kafka-junit", version = kafkaVersion) {
             exclude(group = "org.slf4j", module = "slf4j-log4j12")
         }
-
-        testImplementation(group = "com.ginsberg", name = "junit5-system-exit", version = "1.1.1")
-
     }
-
-}
-tasks.withType<Test> {
-    useJUnitPlatform()
 }
