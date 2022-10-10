@@ -2,7 +2,7 @@ package com.bakdata.kafka;
 
 import java.util.Random;
 
-public class Amounts {
+public final class Amounts {
     private static final int[] amounts = {50, 100, 150, 200};
     private static final Random RAND_GENERATOR = new Random();
 
@@ -11,10 +11,11 @@ public class Amounts {
     }
 
     public static int otherAmount(final int oldAmount) {
-        int newAmount = 0;
+        int newAmount = 1;
         for (final int amount : amounts) {
-            if (newAmount != oldAmount) {
+            if (amount != oldAmount) {
                 newAmount = amount;
+                break;
             }
         }
         return newAmount;
