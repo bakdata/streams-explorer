@@ -2,7 +2,7 @@ description = "ATM fraud detection with Common Kafka Streams"
 plugins {
     java
     idea
-    id("io.freefair.lombok") version "5.1.0"
+    id("io.freefair.lombok") version "6.5.1"
     id("com.google.cloud.tools.jib") version "3.1.1"
     id("com.github.davidmc24.gradle.plugin.avro") version "1.2.0"
 }

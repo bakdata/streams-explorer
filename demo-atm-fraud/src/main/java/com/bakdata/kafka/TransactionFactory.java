@@ -2,10 +2,7 @@ package com.bakdata.kafka;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Random;
@@ -20,10 +17,7 @@ public class TransactionFactory {
 
     public Transaction createRealTimeTransaction() {
         final String accountId = "a" + RAND_GENERATOR.nextInt(1000);
-        final String timestamp = getTimestamp();
-        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss Z");
-        final LocalDateTime parsedDateTime = LocalDateTime.parse(timestamp, formatter);
-
+        LocalDateTime parsedDateTime = LocalDateTime.now();
         final int amount = Amounts.randomAmount();
         final UUID uuid = UUID.randomUUID();
         final String transactionId = uuid.toString();
@@ -85,11 +79,4 @@ public class TransactionFactory {
                 )
                 .build();
     }
-
-    private static String getTimestamp() {
-        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss Z");
-        ZoneId zone = ZoneId.of("UTC");
-        return ZonedDateTime.now(zone).format(formatter);
-    }
-
 }

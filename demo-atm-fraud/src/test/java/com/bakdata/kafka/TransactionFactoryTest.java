@@ -3,8 +3,8 @@ package com.bakdata.kafka;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Instant;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -12,10 +12,6 @@ import org.junit.jupiter.api.Test;
 
 class TransactionFactoryTest {
 
-    static final String timestampStr = "2022-09-23 14:25:14 +0000";
-    private final ZonedDateTime parsedDateTime =
-            ZonedDateTime.parse(timestampStr, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss Z"));
-    private final Instant timestampInstant = this.parsedDateTime.toInstant();
     private static final String accountId = "a11";
     private static final String atmLabel = "Atm ServiRed";
     private static final int amount = 50;
@@ -24,10 +20,11 @@ class TransactionFactoryTest {
     private static final double lon = 3.1328488;
     private static final double lat = 39.8417162;
     private final TransactionFactory transactionFactory = createApp();
+
     private final Transaction transaction1 = Transaction
             .newBuilder()
             .setAccountId(accountId)
-            .setTimestamp(this.parsedDateTime.toInstant())
+            .setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC))
             .setAtm(atmLabel)
             .setAmount(amount)
             .setTransactionId(this.transactionId)
@@ -55,7 +52,7 @@ class TransactionFactoryTest {
     @Test
     void shouldCreateTransaction() {
         assertThat(this.transaction1.getAccountId()).isEqualTo(accountId);
-        assertThat(this.transaction1.getTimestamp()).isEqualTo(this.timestampInstant);
+        assertThat(this.transaction1.getTimestamp()).isExactlyInstanceOf(Instant.class);
         assertThat(this.transaction1.getAtm()).isEqualTo(atmLabel);
         assertThat(this.transaction1.getAmount()).isEqualTo(amount);
         assertThat(this.transaction1.getTransactionId()).isEqualTo(this.transactionId);
@@ -68,7 +65,7 @@ class TransactionFactoryTest {
         Transaction transaction = this.transactionFactory.createRealTimeTransaction();
         final String regex = "^a([0-9]{1,3})";
         assertThat(transaction.getAccountId()).matches(regex);
-        assertThat(transaction.getTransactionId().length()).isEqualTo(36);
+        assertThat(transaction.getTransactionId()).hasSize(36);
     }
 
     @Test
@@ -84,6 +81,5 @@ class TransactionFactoryTest {
         assertThat(fraudTransaction.getLocation().getLatitude()).isNotEqualTo(
                 this.transaction1.getLocation().getLatitude()
         );
-
     }
 }

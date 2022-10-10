@@ -56,28 +56,28 @@ class TransactionAvroProducerIntegrationTest {
         TransactionAvroProducer producerApp = new TransactionAvroProducer() {};
         producerApp = this.setupApp(producerApp);
         producerApp.run();
-            delay(TIMEOUT_SECONDS, TimeUnit.SECONDS);
-            assertThat(this.kafkaCluster.read(ReadKeyValues.from(OUTPUT_TOPIC, String.class, Transaction.class)
-                    .with(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class)
-                    .with(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, SpecificAvroDeserializer.class)
-                    .with(AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG,
-                            this.schemaRegistryMockExtension.getUrl())
-                    .build()))
-                    .hasSize(EXPECTED)
-                    .allSatisfy(keyValue -> {
-                        final String recordKey = keyValue.getKey();
-                        final Transaction tx = keyValue.getValue();
-                        final String txID = tx.getTransactionId();
-                        final String fraudPrefix = "xxx";
-                        final String regex = "^a([0-9]{1,3})";
+        delay(TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        assertThat(this.kafkaCluster.read(ReadKeyValues.from(OUTPUT_TOPIC, String.class, Transaction.class)
+                .with(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class)
+                .with(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, SpecificAvroDeserializer.class)
+                .with(AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG,
+                        this.schemaRegistryMockExtension.getUrl())
+                .build()))
+                .hasSize(EXPECTED)
+                .allSatisfy(keyValue -> {
+                    final String recordKey = keyValue.getKey();
+                    final Transaction tx = keyValue.getValue();
+                    final String txID = tx.getTransactionId();
+                    final String fraudPrefix = "xxx";
+                    final String regex = "^a([0-9]{1,3})";
 
-                        assertThat(recordKey.length()).isIn(KEY_SIZE, FRAUD_KEY_SIZE);
-                        assertThat(recordKey).isEqualTo(txID);
-                        if (recordKey.length() > KEY_SIZE) {
-                            assertThat(recordKey).contains(fraudPrefix);
-                        }
-                        assertThat(tx.getAccountId()).matches(regex);
-                    });
+                    assertThat(recordKey.length()).isIn(KEY_SIZE, FRAUD_KEY_SIZE);
+                    assertThat(recordKey).isEqualTo(txID);
+                    if (recordKey.length() > KEY_SIZE) {
+                        assertThat(recordKey).contains(fraudPrefix);
+                    }
+                    assertThat(tx.getAccountId()).matches(regex);
+                });
         final SchemaRegistryClient client = this.schemaRegistryMockExtension.getSchemaRegistryClient();
         this.cleanRunDestroy(producerApp, client);
     }
@@ -116,5 +116,4 @@ class TransactionAvroProducerIntegrationTest {
                 .as("Output topic is deleted")
                 .isFalse();
     }
-
 }

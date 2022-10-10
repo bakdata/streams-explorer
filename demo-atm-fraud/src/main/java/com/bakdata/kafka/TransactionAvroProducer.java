@@ -46,12 +46,11 @@ public class TransactionAvroProducer extends KafkaProducerApplication {
 
     @Override
     protected void runApplication() {
-        final TransactionFactory transactionFactory;
+        final TransactionFactory transactionFactory = new TransactionFactory(loadCsvData(FILE_NAME));
         final KafkaProducer<String, Transaction> producer = this.createProducer();
         log.debug("Bound = {} and Iteration= {}", this.bound, this.iterations);
         log.debug("Expected amount of transactions: {}", (this.bound + 1) * this.iterations);
         log.info("Producing data into output topic  <{}>...", this.getOutputTopic());
-        transactionFactory = new TransactionFactory(loadCsvData(FILE_NAME));
         for (int counter = 0; counter < this.iterations; counter++) {
             final int fraudIndex = counter % this.bound;
             Transaction oldTransaction = new Transaction();

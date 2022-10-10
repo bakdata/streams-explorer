@@ -11,13 +11,11 @@ public final class Amounts {
     }
 
     public static int otherAmount(final int oldAmount) {
-        int newAmount = 1;
         for (final int amount : amounts) {
             if (amount != oldAmount) {
-                newAmount = amount;
-                break;
+                return amount;
             }
         }
-        return newAmount;
+        throw new RuntimeException("Was unable to generate a different amount than the given one");
     }
 }
