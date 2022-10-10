@@ -10,7 +10,7 @@ plugins {
 group = "com.bakdata.kafka"
 
 tasks.withType<Test> {
-    maxParallelForks = 4
+    maxParallelForks = 1
     useJUnitPlatform()
 }
 
