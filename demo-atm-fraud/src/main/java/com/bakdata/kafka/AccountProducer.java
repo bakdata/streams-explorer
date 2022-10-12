@@ -16,15 +16,14 @@ import org.apache.kafka.common.serialization.StringSerializer;
 @Slf4j
 @Setter
 public class AccountProducer extends KafkaProducerApplication {
-
+    private static final String FILE_NAME = "accounts.json";
     public static void main(final String[] args) {
         startApplication(new AccountProducer(), args);
     }
 
     @Override
     protected void runApplication() {
-        final String fileName = "accounts.json";
-        final List<Account> accounts = loadJSON(fileName);
+        final List<Account> accounts = loadJSON(FILE_NAME);
         final KafkaProducer<String, Account> producer = this.createProducer();
         for (final Account accountObj : accounts) {
             this.publishAccount(producer, accountObj);
