@@ -2,7 +2,6 @@ package com.bakdata.kafka;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -12,30 +11,7 @@ import org.junit.jupiter.api.Test;
 
 class TransactionFactoryTest {
 
-    private static final String accountId = "a11";
-    private static final String atmLabel = "Atm ServiRed";
-    private static final int amount = 50;
-    private final UUID uuid = UUID.randomUUID();
-    private final String transactionId = this.uuid.toString();
-    private static final double lon = 3.1328488;
-    private static final double lat = 39.8417162;
     private final TransactionFactory transactionFactory = createApp();
-
-    private final Transaction transaction1 = Transaction
-            .newBuilder()
-            .setAccountId(accountId)
-            .setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC))
-            .setAtm(atmLabel)
-            .setAmount(amount)
-            .setTransactionId(this.transactionId)
-            .setLocation(
-                    Location
-                            .newBuilder()
-                            .setLatitude(lat)
-                            .setLongitude(lon)
-                            .build()
-            )
-            .build();
 
     private static TransactionFactory createApp() {
         final List<AtmLocation> atmLocations = new ArrayList<>();
@@ -49,20 +25,35 @@ class TransactionFactoryTest {
         return new TransactionFactory(atmLocations);
     }
 
-    @Test
-    void shouldCreateTransaction() {
-        assertThat(this.transaction1.getAccountId()).isEqualTo(accountId);
-        assertThat(this.transaction1.getTimestamp()).isExactlyInstanceOf(Instant.class);
-        assertThat(this.transaction1.getAtm()).isEqualTo(atmLabel);
-        assertThat(this.transaction1.getAmount()).isEqualTo(amount);
-        assertThat(this.transaction1.getTransactionId()).isEqualTo(this.transactionId);
-        assertThat(this.transaction1.getLocation().getLatitude()).isEqualTo(lat);
-        assertThat(this.transaction1.getLocation().getLongitude()).isEqualTo(lon);
+    static Transaction createTransaction() {
+        final String accountId = "a11";
+        final String atmLabel = "Atm ServiRed";
+        final int amount = 50;
+        final UUID uuid = UUID.randomUUID();
+        final String transactionId = uuid.toString();
+        final double lon = 3.1328488;
+        final double lat = 39.8417162;
+
+        return Transaction
+                .newBuilder()
+                .setAccountId(accountId)
+                .setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC))
+                .setAtm(atmLabel)
+                .setAmount(amount)
+                .setTransactionId(transactionId)
+                .setLocation(
+                        Location
+                                .newBuilder()
+                                .setLatitude(lat)
+                                .setLongitude(lon)
+                                .build()
+                )
+                .build();
     }
 
     @Test
     void shouldCreateRealTransaction() {
-        Transaction transaction = this.transactionFactory.createRealTimeTransaction();
+        final Transaction transaction = this.transactionFactory.createRealTimeTransaction();
         final String regex = "^a([0-9]{1,3})";
         assertThat(transaction.getAccountId()).matches(regex);
         assertThat(transaction.getTransactionId()).hasSize(36);
@@ -70,16 +61,17 @@ class TransactionFactoryTest {
 
     @Test
     void shouldCreateFraudTransaction() {
-        final Transaction fraudTransaction = this.transactionFactory.createFraudTransaction(this.transaction1, 5);
-        assertThat(fraudTransaction.getAccountId()).isEqualTo(this.transaction1.getAccountId());
-        assertThat(fraudTransaction.getTimestamp()).isNotEqualTo(this.transaction1.getTimestamp());
-        assertThat(fraudTransaction.getAtm()).isNotEqualTo(this.transaction1.getAtm());
-        assertThat(fraudTransaction.getAmount()).isNotEqualTo(this.transaction1.getAmount());
-        assertThat(fraudTransaction.getTransactionId()).isNotEqualTo(this.transaction1.getTransactionId());
+        final Transaction transaction1 = createTransaction();
+        final Transaction fraudTransaction = this.transactionFactory.createFraudTransaction(transaction1, 5);
+        assertThat(fraudTransaction.getAccountId()).isEqualTo(transaction1.getAccountId());
+        assertThat(fraudTransaction.getTimestamp()).isNotEqualTo(transaction1.getTimestamp());
+        assertThat(fraudTransaction.getAtm()).isNotEqualTo(transaction1.getAtm());
+        assertThat(fraudTransaction.getAmount()).isNotEqualTo(transaction1.getAmount());
+        assertThat(fraudTransaction.getTransactionId()).isNotEqualTo(transaction1.getTransactionId());
         assertThat(fraudTransaction.getLocation().getLongitude()).isNotEqualTo(
-                this.transaction1.getLocation().getLongitude());
+                transaction1.getLocation().getLongitude());
         assertThat(fraudTransaction.getLocation().getLatitude()).isNotEqualTo(
-                this.transaction1.getLocation().getLatitude()
+                transaction1.getLocation().getLatitude()
         );
     }
 }

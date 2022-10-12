@@ -8,11 +8,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.bakdata.kafka.Account;
 import com.bakdata.kafka.AccountProducer;
 import com.bakdata.schemaregistrymock.junit5.SchemaRegistryMockExtension;
-import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
-import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
 import io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroDeserializer;
-import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import net.mguenther.kafka.junit.EmbeddedKafkaCluster;
@@ -28,7 +25,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 class AccountProducerIntegrationTest {
     private static final int TIMEOUT_SECONDS = 10;
-    public static final int EXPECTED = 999;
     @RegisterExtension
     final SchemaRegistryMockExtension schemaRegistryMockExtension = new SchemaRegistryMockExtension();
     private final EmbeddedKafkaCluster kafkaCluster = provisionWith(defaultClusterConfig());
@@ -48,7 +44,7 @@ class AccountProducerIntegrationTest {
     @Test
     void shouldRunApp() throws InterruptedException {
         this.kafkaCluster.createTopic(TopicConfig.withName(OUTPUT_TOPIC).useDefaults());
-        AccountProducer accountProducer = new AccountProducer() {};
+        AccountProducer accountProducer = new AccountProducer();
         accountProducer = this.setupApp(accountProducer);
         accountProducer.run();
         delay(TIMEOUT_SECONDS, TimeUnit.SECONDS);
@@ -58,7 +54,7 @@ class AccountProducerIntegrationTest {
                 .with(AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG,
                         this.schemaRegistryMockExtension.getUrl())
                 .build()))
-                .hasSize(EXPECTED)
+                .hasSize(999)
                 .allSatisfy(keyValue -> {
                     final String recordKey = keyValue.getKey();
                     final Account account = keyValue.getValue();
@@ -68,12 +64,6 @@ class AccountProducerIntegrationTest {
                     assertThat(accountId).matches(regex);
                     assertThat(recordKey).isEqualTo(accountId);
                 });
-        final SchemaRegistryClient client = this.schemaRegistryMockExtension.getSchemaRegistryClient();
-        try {
-            this.cleanRunDestroy(accountProducer, client);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     AccountProducer setupApp(final AccountProducer accountProducer) {
@@ -82,27 +72,5 @@ class AccountProducerIntegrationTest {
         accountProducer.setOutputTopic(OUTPUT_TOPIC);
         accountProducer.setStreamsConfig(Map.of(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, "10000"));
         return accountProducer;
-    }
-
-    void cleanRunDestroy(final AccountProducer accountProducer, final SchemaRegistryClient client)
-            throws InterruptedException {
-        try {
-            assertThat(client.getAllSubjects())
-                    .contains(accountProducer.getOutputTopic() + "-value");
-        } catch (final IOException | RestClientException e) {
-            throw new RuntimeException(e);
-        }
-        accountProducer.setCleanUp(true);
-        accountProducer.run();
-        delay(TIMEOUT_SECONDS, TimeUnit.SECONDS);
-        try {
-            assertThat(client.getAllSubjects())
-                    .doesNotContain(accountProducer.getOutputTopic() + "-value");
-        } catch (final IOException | RestClientException e) {
-            throw new RuntimeException(e);
-        }
-        assertThat(this.kafkaCluster.exists(accountProducer.getOutputTopic()))
-                .as("Output topic is deleted")
-                .isFalse();
     }
 }
