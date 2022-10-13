@@ -1,90 +1,95 @@
 package com.bakdata.kafka;
 
-import java.time.Instant;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
+import com.opencsv.CSVReader;
+import com.opencsv.bean.CsvToBean;
+import com.opencsv.bean.CsvToBeanBuilder;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Objects;
 import java.util.Properties;
-import org.apache.kafka.common.serialization.Serdes;
-import org.apache.kafka.streams.StreamsBuilder;
-import org.apache.kafka.streams.StreamsConfig;
-import org.apache.kafka.streams.kstream.Consumed;
-import org.apache.kafka.streams.kstream.KStream;
-import org.apache.kafka.streams.kstream.ValueTransformer;
-import org.apache.kafka.streams.processor.ProcessorContext;
-import org.json.JSONObject;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.Producer;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.serialization.StringSerializer;
+import picocli.CommandLine;
 
-public class TransactionAvroProducer extends KafkaStreamsApplication {
+@Setter
+@Slf4j
+public class TransactionAvroProducer extends KafkaProducerApplication {
+
+    @CommandLine.Option(names = "--real-tx",
+            description = "How many real transactions must be generated before a fraudulent transaction can be "
+                    + "generated?")
+    private int bound;
+    @CommandLine.Option(names = "--iteration",
+            description = "One iteration contains number of real transactions and one fraudulent transaction")
+    private int iterations;
+    static final String FILE_NAME = "atm_locations.csv";
+    private static final ClassLoader CLASS_LOADER = AccountProducer.class.getClassLoader();
 
     public static void main(final String[] args) {
         startApplication(new TransactionAvroProducer(), args);
     }
 
     @Override
-    public void buildTopology(final StreamsBuilder builder) {
-        final KStream<String, String> input =
-                builder.stream(this.getInputTopics(), Consumed.with(Serdes.String(), Serdes.String()));
-
-        final KStream<String, ProcessedValue<String, Transaction>> mapped =
-                input.transformValues(
-                        () -> ErrorCapturingValueTransformer.captureErrors(new ValueTransformerTransaction()));
-
-        mapped.flatMapValues(ProcessedValue::getValues)
-                .to(this.getOutputTopic());
-
-        mapped.flatMapValues(ProcessedValue::getErrors)
-                .transformValues(AvroDeadLetterConverter.asTransformer("Could not convert transaction from json to avro."))
-                .to(this.getErrorTopic());
-    }
-
-    @Override
-    public String getUniqueAppId() {
-        return "streams-explorer-transactionavroproducer-" + this.getOutputTopic();
-    }
-
-    @Override
     protected Properties createKafkaProperties() {
         final Properties kafkaProperties = super.createKafkaProperties();
-        kafkaProperties.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.StringSerde.class);
+        kafkaProperties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         return kafkaProperties;
     }
 
-    private static class ValueTransformerTransaction
-            implements ValueTransformer<String, Transaction> {
+    @Override
+    protected void runApplication() {
+        final TransactionFactory transactionFactory = new TransactionFactory(loadCsvData(FILE_NAME));
+        final KafkaProducer<String, Transaction> producer = this.createProducer();
+        log.debug("Bound = {} and Iteration= {}", this.bound, this.iterations);
+        log.debug("Expected amount of transactions: {}", (this.bound + 1) * this.iterations);
+        log.info("Producing data into output topic  <{}>...", this.getOutputTopic());
+        for (int counter = 0; counter < this.iterations; counter++) {
+            final int fraudIndex = counter % this.bound;
+            Transaction oldTransaction = new Transaction();
 
-        @Override
-        public void init(final ProcessorContext context) {
-        }
-
-        @Override
-        public Transaction transform(final String value) {
-            final JSONObject input = new JSONObject(value);
-            final JSONObject location = input.getJSONObject("location");
-            return Transaction
-                    .newBuilder()
-                    .setAccountId(input.getString("account_id"))
-                    .setTimestamp(this.parseDateTimeString(input.getString("timestamp")))
-                    .setAtm(input.getString("atm"))
-                    .setAmount(input.getInt("amount"))
-                    .setTransactionId(input.getString("transaction_id"))
-                    .setLocation(
-                            Location
-                                    .newBuilder()
-                                    .setLatitude(location.getDouble("lat"))
-                                    .setLongitude(location.getDouble("lon"))
-                                    .build()
-                    )
-                    .build();
-        }
-
-        @Override
-        public void close() {
-            // do nothing
-        }
-
-        public Instant parseDateTimeString(final String dateTimeString) {
-            final ZonedDateTime parsedDateTime = ZonedDateTime.parse(dateTimeString,
-                    DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss Z"));
-            return parsedDateTime.toInstant();
+            for (int i = 0; i < this.bound; i++) {
+                final Transaction newRealTransaction = transactionFactory.createRealTimeTransaction();
+                this.publish(producer, newRealTransaction);
+                if (i == fraudIndex) {
+                    oldTransaction = newRealTransaction;
+                }
+            }
+            final Transaction fraudTransaction = transactionFactory.createFraudTransaction(oldTransaction, fraudIndex);
+            this.publish(producer, fraudTransaction);
+            log.debug("Current iteration step: {}", counter);
         }
     }
+
+    public static List<AtmLocation> loadCsvData(final String fileName) {
+        try (final InputStream inputStream = CLASS_LOADER.getResourceAsStream(fileName);
+                final InputStreamReader streamReader = new InputStreamReader(Objects.requireNonNull(inputStream),
+                        StandardCharsets.UTF_8);
+                final CSVReader csvReader = new CSVReader(streamReader)) {
+
+            final CsvToBean<AtmLocation> csvToBean = new CsvToBeanBuilder<AtmLocation>(csvReader)
+                    .withType(AtmLocation.class)
+                    .withSeparator(',')
+                    .withIgnoreLeadingWhiteSpace(true)
+                    .withIgnoreEmptyLine(true)
+                    .build();
+            final List<AtmLocation> allLocations = csvToBean.parse();
+            log.debug("Amount of locations information loaded from the csv file: {}", allLocations.size());
+            return allLocations;
+        } catch (final IOException e) {
+            throw new RuntimeException("Error occurred while loading CSV file", e);
+        }
+    }
+
+    private void publish(final Producer<? super String, ? super Transaction> producer, final Transaction transaction) {
+        producer.send(new ProducerRecord<>(this.getOutputTopic(), transaction.getTransactionId(), transaction));
+    }
+
 }

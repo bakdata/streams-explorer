@@ -28,7 +28,7 @@ public class TransactionJoiner extends KafkaStreamsApplication {
                                 .setTransaction1(t1)
                                 .setTransaction2(t2)
                                 .build(),
-                        JoinWindows.ofTimeDifferenceWithNoGrace(Duration.ofMinutes(10)).before(Duration.ZERO));
+                        JoinWindows.of(Duration.ofMinutes(10)).before(Duration.ZERO));
 
         joined.to(this.getOutputTopic());
     }

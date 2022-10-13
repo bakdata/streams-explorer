@@ -1,4 +1,4 @@
-nameOverride: atm-fraud-transactionavroproducer
+nameOverride: atm-fraud-accountsproducer
 
 replicaCount: 1
 
@@ -8,11 +8,7 @@ imageTag: latest
 streams:
   brokers: "kafka://my-confluent-cp-kafka-headless:9092"
   schemaRegistryUrl: "http://my-confluent-cp-schema-registry:8081"
-  outputTopic: atm-fraud-incoming-transactions-topic
-
-commandLine:
-  REAL_TX: 19
-  ITERATION: 20
+  outputTopic: atm-fraud-accounts-topic
 
 prometheus:
   jmx:

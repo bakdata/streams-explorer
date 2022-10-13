@@ -2,7 +2,7 @@ description = "ATM fraud detection with Common Kafka Streams"
 plugins {
     java
     idea
-    id("io.freefair.lombok") version "5.1.0"
+    id("io.freefair.lombok") version "6.5.1"
     id("com.google.cloud.tools.jib") version "3.1.1"
     id("com.github.davidmc24.gradle.plugin.avro") version "1.2.0"
 }
@@ -10,7 +10,7 @@ plugins {
 group = "com.bakdata.kafka"
 
 tasks.withType<Test> {
-    maxParallelForks = 4
+    maxParallelForks = 1
     useJUnitPlatform()
 }
 
@@ -41,9 +41,22 @@ dependencies {
     testRuntimeOnly(group = "org.junit.jupiter", name = "junit-jupiter-engine", version = junitVersion)
     testImplementation(group = "org.assertj", name = "assertj-core", version = "3.23.1")
     testImplementation(group = "log4j", name = "log4j", version = "1.2.17")
+    val kafkaVersion: String by project
+    val fluentKafkaVersion = "2.7.0"
     testImplementation(
             group = "com.bakdata.fluent-kafka-streams-tests",
             name = "fluent-kafka-streams-tests-junit5",
-            version = "2.7.0"
+            version = fluentKafkaVersion
     )
+    testImplementation(group = "net.mguenther.kafka", name = "kafka-junit", version = kafkaVersion) {
+        exclude(group = "org.slf4j", module = "slf4j-log4j12")
+    }
+    implementation(group = "com.opencsv", name = "opencsv", version = "5.2")
+    testImplementation(
+        group = "com.bakdata.fluent-kafka-streams-tests",
+        name = "schema-registry-mock-junit5",
+        version = fluentKafkaVersion
+    )
+    implementation(group = "info.picocli", name = "picocli", version = "4.6.1")
+
 }
