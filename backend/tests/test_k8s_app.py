@@ -180,7 +180,7 @@ class TestK8sApp:
         assert len(k8s_app.attributes) == 1
 
     def test_replicas(self):
-        k8s_app = K8sAppDeployment(get_streaming_app_deployment())
+        k8s_app: K8sApp = K8sAppDeployment(get_streaming_app_deployment())
         assert k8s_app.replicas_total == 1
         assert k8s_app.replicas_ready is None
 
