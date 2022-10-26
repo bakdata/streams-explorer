@@ -1,4 +1,5 @@
 import pytest
+import pytest_asyncio
 from kubernetes_asyncio.client import V1beta1CronJob
 from pytest import MonkeyPatch
 from pytest_mock import MockerFixture
@@ -86,8 +87,7 @@ class TestStreamsExplorer:
 
         return FakeLinker()
 
-    @pytest.fixture()
-    @pytest.mark.asyncio
+    @pytest_asyncio.fixture
     async def streams_explorer(  # noqa: C901
         self,
         monkeypatch: MonkeyPatch,
