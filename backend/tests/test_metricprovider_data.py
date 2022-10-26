@@ -1,6 +1,6 @@
 from streams_explorer.models.node_types import NodeTypesEnum
 
-nodes = [
+nodes: list[tuple[str, dict]] = [
     (
         "atm-fraud-transactionavroproducer",
         {
@@ -12,12 +12,6 @@ nodes = [
         "atm-fraud-incoming-transactions-topic",
         {
             "node_type": NodeTypesEnum.TOPIC,
-        },
-    ),
-    (
-        None,
-        {
-            "node_type": NodeTypesEnum.ERROR_TOPIC,
         },
     ),
     (

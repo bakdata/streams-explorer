@@ -64,7 +64,7 @@ class TestPrometheusMetricProvider:
             MetricProvider.get_consumer_group(node_id, node)
             == "streams-explorer-transactionavroproducer-atm-fraud-incoming-transactions-topic"
         )
-        node_id, node = nodes[4]  # connector
+        node_id, node = nodes[3]  # connector
         assert MetricProvider.get_consumer_group(node_id, node) == "connect-demo-sink"
 
     @pytest.mark.asyncio
