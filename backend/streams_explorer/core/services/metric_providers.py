@@ -124,7 +124,6 @@ class MetricProvider(Plugin):
                 connector_tasks=self._data["connector_tasks"].get(node_id),
             )
             for node_id, node in self._nodes
-            if node_id
         ]
 
     async def get(self) -> list[Metric]:
