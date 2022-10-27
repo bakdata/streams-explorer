@@ -1,0 +1,23 @@
+name: Helm
+
+on:
+  workflow_dispatch:
+    inputs:
+      release-type:
+        description: "The scope of the release (major, minor or patch)."
+        default: "patch"
+        required: false
+
+jobs:
+  call-workflow-passing-data:
+    name: Release & Publish Helm chart
+    uses: bakdata/ci-templates/.github/workflows/helm-release.yaml@v1.6.0
+    with:
+      page-url: https://bakdata.github.io/streams-explorer
+      release-type: ${{ inputs.release-type }}
+      charts-dir: helm-chart
+      skip-download: "true"
+    secrets:
+      github-username: ${{ secrets.GH_USERNAME }}
+      github-email: ${{ secrets.GH_EMAIL }}
+      github-token: ${{ secrets.GH_TOKEN }}
