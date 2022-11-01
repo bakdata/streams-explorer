@@ -16,7 +16,7 @@ jobs:
       page-url: https://bakdata.github.io/streams-explorer
       release-type: ${{ inputs.release-type }}
       charts-dir: helm-chart
-      skip-download: "true"
+      skip-download: "false"
     secrets:
       github-username: ${{ secrets.GH_USERNAME }}
       github-email: ${{ secrets.GH_EMAIL }}
