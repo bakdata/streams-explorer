@@ -1,6 +1,6 @@
 # Demo: ATM Fraud detection with streams-bootstrap
 
-![demo-pipeline](https://github.com/bakdata/streams-explorer/blob/main/screens/demo-pipeline.png?raw=true)
+![demo-pipeline](https://github.com/bakdata/streams-explorer/blob/main/screens/updated-demo-pipeline.png?raw=true)
 
 > This is an adaption of the example pipeline for ATM fraud detection using [streams-bootstrap](https://github.com/bakdata/streams-bootstrap). The original by Confluent is written in KSQL and can be found in the [ksql-atm-fraud-detection](https://github.com/confluentinc/demo-scene/tree/master/ksql-atm-fraud-detection) repo. Details can be found in their [blogpost](https://www.confluent.io/blog/atm-fraud-detection-apache-kafka-ksql/)
 >
@@ -44,8 +44,7 @@ The account producer application publishes accounts data (stored in a `.txt` fil
 
 ### Generate test transactions
 
-To generate our incoming transactions (legitimate or fraudulent) we are using the `transactionavroproducer` application inspired by the 
-[gess](https://github.com/rmoff/gess) tool. This project's data is derived entirely from the same gess project.
+To generate our incoming transactions (legitimate or fraudulent) we are using the `transactionavroproducer` application inspired by the [gess](https://github.com/rmoff/gess) tool. This project's data is derived entirely from the same gess project.
 
 The number of incoming transactions is configurable using the variables `REAL_TX` and `ITERATION` in our `values-transactionavroproducer.yaml` file.
 The first variable specifies how many legitimate incoming transactions must be produced before producing one fraudulent incoming transaction.
