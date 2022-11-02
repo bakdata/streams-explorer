@@ -21,6 +21,3 @@ helm-chart/index-cache.yaml
 .env*
 *private*
 mock/
-
-# Ignore Gradle build output directory
-build
