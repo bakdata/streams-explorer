@@ -14,7 +14,7 @@
 
 ### Build containers using jib
 
-```
+```shell
 gradle jib -Djib.to.image=url-to-container-registry.com/streams-explorer-demo-transactionavroproducer -Djib.container.mainClass=com.bakdata.kafka.TransactionAvroProducer
 gradle jib -Djib.to.image=url-to-container-registry.com/streams-explorer-demo-accountproducer -Djib.container.mainClass=com.bakdata.kafka.AccountProducer
 gradle jib -Djib.to.image=url-to-container-registry.com/streams-explorer-demo-transactionjoiner -Djib.container.mainClass=com.bakdata.kafka.TransactionJoiner
@@ -24,7 +24,7 @@ gradle jib -Djib.to.image=url-to-container-registry.com/streams-explorer-demo-ac
 
 ### Deploy in Kubernetes
 
-```
+```shell
 helm repo add bakdata-common https://raw.githubusercontent.com/bakdata/streams-bootstrap/master/charts/
 helm repo update
 helm upgrade --debug --install --force --values values-transactionavroproducer.yaml demo-transactionavroproducer bakdata-common/streams-app
@@ -33,21 +33,17 @@ helm upgrade --debug --install --force --values values-transactionjoiner.yaml de
 helm upgrade --debug --install --force --values values-frauddetector.yaml demo-frauddetector bakdata-common/streams-app
 helm upgrade --debug --install --force --values values-accountlinker.yaml demo-accountlinker bakdata-common/streams-app
 ```
-> port-forward leader Kafka broker and Schema Registry to localhost
 
+> port-forward leader Kafka broker and Schema Registry to localhost
 > You can find the leader Kafka broker for a given topic by executing `kafka-topics --zookeeper localhost:2181 --describe --topic atm-fraud-accounts-topic`
 
 ### Generate test accounts
 
-The account producer application publishes accounts data (stored in a `.txt` file)  into the expected topic. 
-
+The account producer application publishes accounts data (stored in a `.txt` file) into the expected topic.
 
 ### Generate test transactions
 
-To generate our incoming transactions (legitimate or fraudulent) we are using the `transactionavroproducer` application inspired by the 
-[gess](https://github.com/rmoff/gess) tool. This project's data is derived entirely from the same gess project.
-
+To generate our incoming transactions (legitimate or fraudulent) we are using the `transactionavroproducer` application inspired by the [gess](https://github.com/rmoff/gess) tool. This project's data is derived entirely from the same gess project.
 The number of incoming transactions is configurable using the variables `REAL_TX` and `ITERATION` in our `values-transactionavroproducer.yaml` file.
 The first variable specifies how many legitimate incoming transactions must be produced before producing one fraudulent incoming transaction.
 One iteration contains `REAL_TX` legitimate transactions and one fraudulent transaction.
-
