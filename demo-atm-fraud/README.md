@@ -33,7 +33,6 @@ helm upgrade --debug --install --force --values values-transactionjoiner.yaml de
 helm upgrade --debug --install --force --values values-frauddetector.yaml demo-frauddetector bakdata-common/streams-app
 helm upgrade --debug --install --force --values values-accountlinker.yaml demo-accountlinker bakdata-common/streams-app
 ```
-> port-forward leader Kafka broker and Schema Registry to localhost
 
 > You can find the leader Kafka broker for a given topic by executing `kafka-topics --zookeeper localhost:2181 --describe --topic atm-fraud-accounts-topic`
 
