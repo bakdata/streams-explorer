@@ -64,7 +64,7 @@ rbac:
     namespaces: ["kubernetes-namespace"]
 
 ingress:
-  enabled: true
+  enabled: false
   annotations: {}
   hosts:
     - host: sample.dev.daaa.cloud
