@@ -104,11 +104,10 @@ class TestStreamsExplorer:
         explorer = StreamsExplorer(
             linking_service=fake_linker, metric_provider=MetricProvider
         )
-        extractor_container.extractors = [
-            ElasticsearchSink(),
-            GenericSink(),
-            GenericSource(),
-        ]
+        extractor_container.extractors.clear()
+        extractor_container.extractors.add(ElasticsearchSink())
+        extractor_container.extractors.add(GenericSink())
+        extractor_container.extractors.add(GenericSource())
         monkeypatch.setattr(settings.k8s, "consumer_group_annotation", "consumerGroup")
 
         async def watch():
@@ -308,7 +307,8 @@ class TestStreamsExplorer:
                 return K8sAppCronJob(cron_job)
 
         extractor = MockCronjobExtractor()
-        extractor_container.extractors = [extractor]
+        extractor_container.extractors.clear()
+        extractor_container.extractors.add(extractor)
         await streams_explorer.watch()
         await streams_explorer.update_graph()
         assert extractor.cron_job is not None
@@ -337,7 +337,7 @@ class TestStreamsExplorer:
                 self.sources.remove(source)
 
         extractor = MockAppExtractor()
-        extractor_container.extractors.append(extractor)
+        extractor_container.extractors.add(extractor)
         await streams_explorer.watch()
         await streams_explorer.update_graph()
         sources, sinks = extractor_container.get_sources_sinks()

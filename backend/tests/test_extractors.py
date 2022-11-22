@@ -140,7 +140,7 @@ class TestExtractors:
             load_extractors()
             assert len(extractor_container.extractors) == 3
 
-            extractor = extractor_container.extractors[0]
+            extractor = extractor_container.extractors[StreamsAppExtractor]
             assert extractor.__class__.__name__ == "TestMultipleExtractor"
             assert isinstance(extractor, StreamsAppExtractor)
             assert isinstance(extractor, ProducerAppExtractor)
