@@ -58,7 +58,7 @@ Visit our introduction [blogpost](https://medium.com/bakdata/exploring-data-pipe
 docker compose up
 ```
 
-Once the container is started visit <http://localhost:3000>
+Once the container is started visit <http://localhost:8080>
 
 ### Deploying to Kubernetes cluster
 
