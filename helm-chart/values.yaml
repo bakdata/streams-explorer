@@ -5,7 +5,7 @@ imagePullSecrets: []
 
 replicaCount: 1
 imagePullPolicy: Always
-serviceHttpPort: 80
+serviceHttpPort: 8080
 
 # Configure using env variables
 config:
@@ -71,8 +71,8 @@ ingress:
       paths:
         - path: /
           # pathType: ImplementationSpecific
-          # serviceName: 
-          # servicePort: 
+          # serviceName:
+          # servicePort:
   tls: []
   # Commonly used to map ingress objects to specific ingress controller installations within your cluster
   #ingressClassName: nginx-web-ingress
