@@ -22,7 +22,7 @@ COPY ./backend/pyproject.toml ./backend/poetry.lock /app/
 ENV PIP_NO_CACHE_DIR=1
 RUN pip install poetry && \
     python -m venv --copies /app/venv && \
-    source /app/venv/bin/activate && \
+    . /app/venv/bin/activate && \
     poetry install --without=dev --no-interaction
 COPY ./backend /app
 
