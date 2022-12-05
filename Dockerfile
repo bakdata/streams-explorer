@@ -13,7 +13,7 @@ RUN npm run build
 FROM python:3.10-slim AS backend
 
 RUN apt-get -y update && \
-    apt-get --no-install-recommends -y install libc6-dev gcc graphviz libgraphviz-dev && \
+    apt-get --no-install-recommends -y install libc6-dev gcc libgraphviz-dev && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -26,6 +26,11 @@ RUN pip install poetry && \
     poetry install --without=dev --no-interaction
 
 FROM python:3.10-slim AS prod
+
+RUN apt-get -y update && \
+    apt-get download graphviz && \
+    dpkg -i ./graphviz_*.deb && \
+    rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
