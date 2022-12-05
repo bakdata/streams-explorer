@@ -32,10 +32,10 @@ RUN apt-get -y update && \
 
 WORKDIR /app
 
-COPY --from=backend /app /app
-COPY --from=frontend /build/out /app/static
+COPY --from=backend /app/venv ./
+COPY --from=frontend /build/out ./static
 ENV PATH /app/venv/bin:$PATH
-COPY ./backend /app
+COPY ./backend/streams_explorer ./backend/plugins ./backend/settings.yaml ./backend/main.py ./
 
 # install streams_explorer package
 RUN pip install -e .
