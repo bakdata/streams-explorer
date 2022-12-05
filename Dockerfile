@@ -13,7 +13,7 @@ RUN npm run build
 FROM python:3.10-slim AS backend
 
 RUN apt-get -y update && \
-    apt-get --no-install-recommends -y install build-essential gcc graphviz libgraphviz-dev pkg-config && \
+    apt-get --no-install-recommends -y install linux-libc-dev gcc graphviz libgraphviz-dev && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
