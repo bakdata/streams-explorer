@@ -24,10 +24,6 @@ RUN pip install poetry && \
     python -m venv --copies /app/venv && \
     . /app/venv/bin/activate && \
     poetry install --without=dev --no-interaction
-COPY ./backend /app
-
-# install streams_explorer package
-RUN pip install -e .
 
 FROM python:3.10-slim AS prod
 
@@ -36,6 +32,10 @@ WORKDIR /app
 COPY --from=backend /app /app
 COPY --from=frontend /build/out /app/static
 ENV PATH /app/venv/bin:$PATH
+COPY ./backend /app
+
+# install streams_explorer package
+RUN pip install -e .
 
 EXPOSE 8080
 
