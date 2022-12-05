@@ -35,7 +35,7 @@ WORKDIR /app
 COPY --from=backend /app .
 COPY --from=frontend /build/out ./static
 ENV PATH /app/venv/bin:$PATH
-COPY ./backend/streams_explorer ./backend/plugins ./backend/settings.yaml ./backend/main.py ./
+COPY ./backend/streams_explorer ./backend/plugins ./backend/settings.yaml ./backend/main.py ./backend/README.md ./
 
 # install streams_explorer package
 RUN pip install -e .
