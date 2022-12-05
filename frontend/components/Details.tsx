@@ -4,10 +4,10 @@ import copy from "copy-to-clipboard";
 import React from "react";
 import ReactJson from "react-json-view";
 import {
-  NodeInfoListItem,
   useGetLinkingApiNodeLinkingNodeIdGet,
   useGetNodeInfoApiNodeNodeIdGet,
-} from "./api/fetchers";
+} from "./api/apiComponents";
+import { NodeInfoListItem } from "./api/apiSchemas";
 import style from "./Details.module.css";
 import Schema from "./Schema";
 

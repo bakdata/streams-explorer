@@ -5,7 +5,7 @@ import ReactJson from "react-json-view";
 import {
   useGetNodeSchemaApiNodeNodeIdSchemaVersionGet,
   useGetNodeSchemaVersionsApiNodeNodeIdSchemaGet,
-} from "./api/fetchers";
+} from "./api/apiComponents";
 import style from "./Details.module.css";
 
 interface SchemaProps {

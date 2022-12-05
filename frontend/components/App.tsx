@@ -12,13 +12,13 @@ import {
 import { useRouter } from "next/router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
-import { useMutate } from "restful-react";
 import {
-  HTTPValidationError,
   useGetMetricsApiMetricsGet,
   useGetPipelinesApiPipelinesGet,
   useGetPositionedGraphApiGraphGet,
-} from "./api/fetchers";
+  useUpdateApiUpdatePost,
+} from "./api/apiComponents";
+import { HTTPValidationError } from "./api/apiSchemas";
 import DetailsCard from "./DetailsCard";
 import Node from "./graph/Node";
 import GraphVisualization from "./graph/Visualization";
@@ -68,15 +68,14 @@ const App: React.FC = () => {
     localStorage.setItem(REFRESH_INTERVAL, refreshInterval.toString());
   }, [refreshInterval]);
 
-  const { mutate: update, loading: isUpdating } = useMutate({
-    verb: "POST",
-    path: "/api/update",
-  });
+  const { mutate: update, isLoading: isUpdating, isError: isUpdateError } =
+    useUpdateApiUpdatePost();
 
   const {
     data: graph,
-    loading: isLoadingGraph,
     error: graphError,
+    isLoading: isLoadingGraph,
+    isError: isGraphError,
     refetch: graphRefetch,
   } = useGetPositionedGraphApiGraphGet({
     queryParams: currentPipeline !== ALL_PIPELINES
@@ -87,6 +86,7 @@ const App: React.FC = () => {
   const {
     refetch: retryPipelineGraph,
     error: retryPipelineGraphError,
+    isError: isRetryPipelineGraphError,
     data: retryPipelineGraphData,
   } = useGetPositionedGraphApiGraphGet({
     queryParams: { pipeline_name: currentPipeline },
@@ -95,13 +95,13 @@ const App: React.FC = () => {
 
   const {
     data: pipelines,
-    loading: isLoadingPipelines,
+    isLoading: isLoadingPipelines,
     error: pipelineError,
   } = useGetPipelinesApiPipelinesGet({});
 
   const {
     data: metrics,
-    loading: isLoadingMetrics,
+    isLoading: isLoadingMetrics,
     refetch: refetchMetrics,
     error: metricsError,
   } = useGetMetricsApiMetricsGet({ lazy: true });
@@ -132,38 +132,31 @@ const App: React.FC = () => {
   }, [graph, query]);
 
   useEffect(() => {
-    if (graphError) {
+    if (isGraphError) {
       let errorMessage: string | undefined;
-      if ("data" in graphError) {
-        // specific pipeline was not found
-        const data = graphError["data"] as HTTPValidationError;
-        if (data.detail) {
-          errorMessage = data.detail.toString();
-        }
+      // specific pipeline was not found
+      const data = graphError.payload as HTTPValidationError;
+      if (data.detail) {
+        errorMessage = data.detail.toString();
       }
       message.error(errorMessage || "Failed loading graph", 5);
 
-      if (graphError.status === 404 && currentPipeline !== ALL_PIPELINES) {
+      if (isGraphError && currentPipeline !== ALL_PIPELINES) {
         // check if a re-scrape solves it
         const hideMessage = message.warning("Refreshing pipelines", 0);
-        update({})
-          .then(() => {
-            retryPipelineGraph();
-          })
-          .catch(() => {
-            redirectAllPipelines();
-          })
-          .finally(() => {
-            hideMessage();
-          });
+        update({});
+        if (isUpdateError) {
+          redirectAllPipelines();
+        } else {
+          hideMessage();
+        }
       }
     }
   }, [graphError]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (
-      retryPipelineGraphError
-      && retryPipelineGraphError.status === 404
+      isRetryPipelineGraphError
       && currentPipeline !== ALL_PIPELINES
     ) {
       // pipeline still not found
@@ -261,9 +254,10 @@ const App: React.FC = () => {
                 key="3"
                 style={{ float: "right", marginLeft: "auto" }}
                 onClick={() => {
-                  update({})
-                    .then(() => router.reload())
-                    .catch(() => message.error("Failed to update!"));
+                  update({});
+                  router.reload();
+                  // .then(() => router.reload())
+                  // .catch(() => message.error("Failed to update!"));
                 }}
               >
                 <Button type="dashed" ghost={true}>

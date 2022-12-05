@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import "antd/dist/antd.css";
 import dynamic from "next/dynamic";
 import Head from "next/head";
@@ -16,6 +17,8 @@ function Home() {
     return null;
   }
 
+  const queryClient = new QueryClient();
+
   return (
     <>
       <Head>
@@ -25,7 +28,9 @@ function Home() {
         <meta name="description" content="Streams Explorer" />
         <meta name="theme-color" content="#323232" />
       </Head>
-      <App />
+      <QueryClientProvider client={queryClient}>
+        <App />
+      </QueryClientProvider>
     </>
   );
 }

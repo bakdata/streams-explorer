@@ -8,7 +8,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { Graph as Data, Metric } from "../api/fetchers";
+import { Graph as Data, Metric } from "../api/apiSchemas";
 import { graphConfig as config } from "./config";
 import Node from "./Node";
 import "./GenericNode";
@@ -20,7 +20,7 @@ export const isBrowser = typeof window !== "undefined"; // disable SSR
 
 interface GraphVisualizationProps {
   data: Data | GraphData;
-  metrics: Metric[] | null;
+  metrics: Metric[] | undefined;
   refetchMetrics: Function;
   onClickNode: Function;
   width: number;
