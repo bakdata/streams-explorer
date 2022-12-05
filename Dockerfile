@@ -28,8 +28,7 @@ RUN pip install poetry && \
 FROM python:3.10-slim AS prod
 
 RUN apt-get -y update && \
-    apt-get download graphviz && \
-    dpkg -i ./graphviz_*.deb && \
+    apt-get --no-install-recommends -y install graphviz && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
