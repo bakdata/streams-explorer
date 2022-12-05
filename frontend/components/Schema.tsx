@@ -16,10 +16,10 @@ const Schema = ({ nodeId }: SchemaProps) => {
   const [schemaVersion, setSchemaVersion] = useState<number | null>(null);
   const {
     data: versions,
-    loading: versionsLoading,
+    isLoading: versionsLoading,
     error: versionsError,
   } = useGetNodeSchemaVersionsApiNodeNodeIdSchemaGet({
-    node_id: nodeId,
+    pathParams: { nodeId: nodeId },
   });
 
   const menu = (
@@ -38,11 +38,10 @@ const Schema = ({ nodeId }: SchemaProps) => {
   const {
     data: schema,
     refetch: fetchSchema,
-    loading: schemaLoading,
+    isLoading: schemaLoading,
     error: schemaError,
   } = useGetNodeSchemaApiNodeNodeIdSchemaVersionGet({
-    node_id: nodeId,
-    version: schemaVersion!,
+    pathParams: { nodeId: nodeId, version: schemaVersion! },
     lazy: true,
   });
 
