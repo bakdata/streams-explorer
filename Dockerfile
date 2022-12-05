@@ -33,12 +33,12 @@ RUN apt-get -y update && \
 WORKDIR /app
 
 COPY --from=backend /app /app
-COPY --from=frontend /build/out ./static
+COPY --from=frontend /build/out /app/static
 ENV PATH /app/venv/bin:$PATH
-COPY ./backend/streams_explorer ./backend/plugins ./backend/settings.yaml ./backend/main.py ./backend/README.md ./
+COPY ./backend/streams_explorer ./backend/plugins ./backend/settings.yaml ./backend/main.py ./backend/README.md /app/
 
 # install streams_explorer package
-RUN pip install -e .
+# RUN pip install -e .
 
 EXPOSE 8080
 
