@@ -33,8 +33,8 @@ FROM python:3.10-slim AS prod
 
 WORKDIR /app
 
+COPY --from=backend /app /app
 COPY --from=frontend /build/out /app/static
-COPY --from=backend /app/venv /app/venv
 ENV PATH /app/venv/bin:$PATH
 
 EXPOSE 8080
