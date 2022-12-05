@@ -1,9 +1,11 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render } from "@testing-library/react";
 import nock from "nock";
 import React from "react";
-import { RestfulProvider } from "restful-react";
 import DetailsCard from "../components/DetailsCard";
 import Node from "../components/graph/Node";
+
+const queryClient = new QueryClient();
 
 describe("display card for node details", () => {
   beforeAll(() => {
@@ -38,9 +40,9 @@ describe("display card for node details", () => {
     });
 
     const { queryByText } = render(
-      <RestfulProvider base="http://localhost">
+      <QueryClientProvider client={queryClient}>
         <DetailsCard node={node} />
-      </RestfulProvider>
+      </QueryClientProvider>
     );
 
     expect(queryByText("test-app-name - Details")).toBeInTheDocument();
