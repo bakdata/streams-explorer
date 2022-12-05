@@ -1,9 +1,18 @@
 import { fireEvent, render, within } from "@testing-library/react";
 import nock from "nock";
 import React from "react";
-import App from "../components/App";
+import { QueryClient, QueryClientProvider } from "react-query";
+import AppComponent from "../components/App";
 
 jest.mock("next/router", () => require("next-router-mock"));
+
+const queryClient = new QueryClient();
+
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <AppComponent />
+  </QueryClientProvider>
+);
 
 // -- Mock GraphVisualization
 jest.mock("../components/graph/Visualization", () => {
