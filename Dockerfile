@@ -10,27 +10,35 @@ COPY ./frontend /build
 RUN npm run build
 
 # build stage 2: backend
-FROM python:3.10-slim
+FROM python:3.10-slim AS backend
 
 RUN apt-get -y update && \
-    apt-get --no-install-recommends -y install gcc python3-dev graphviz libgraphviz-dev pkg-config && \
-    rm -rf /var/lib/apt/lists/*
+    apt-get --no-install-recommends -y install libc6-dev gcc libgraphviz-dev
 
 WORKDIR /app
 
 COPY ./backend/pyproject.toml ./backend/poetry.lock /app/
 ENV PIP_NO_CACHE_DIR=1
-RUN pip install -U pip poetry && \
-    poetry config virtualenvs.create false && \
+RUN pip install poetry && \
+    python -m venv --copies /app/venv && \
+    . /app/venv/bin/activate && \
     poetry install --without=dev --no-interaction
+
+FROM python:3.10-slim AS prod
+
+RUN apt-get -y update && \
+    apt-get --no-install-recommends -y install graphviz && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY --from=backend /app /app
+COPY --from=frontend /build/out /app/static
+ENV PATH /app/venv/bin:$PATH
 COPY ./backend /app
 
 # install streams_explorer package
 RUN pip install -e .
-
-RUN apt-get -y purge --auto-remove -o APT::AutoRemove::RecommendsImportant=false
-
-COPY --from=frontend /build/out /app/static
 
 EXPOSE 8080
 
