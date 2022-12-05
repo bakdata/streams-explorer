@@ -90,8 +90,7 @@ const App: React.FC = () => {
     data: retryPipelineGraphData,
   } = useGetPositionedGraphApiGraphGet({
     queryParams: { pipeline_name: currentPipeline },
-    lazy: true,
-  });
+  }, { enabled: false });
 
   const {
     data: pipelines,
@@ -104,7 +103,7 @@ const App: React.FC = () => {
     isLoading: isLoadingMetrics,
     refetch: refetchMetrics,
     error: metricsError,
-  } = useGetMetricsApiMetricsGet({ lazy: true });
+  } = useGetMetricsApiMetricsGet({}, { enabled: false });
 
   useEffect(() => {
     if (refreshInterval && refreshInterval > 0) {

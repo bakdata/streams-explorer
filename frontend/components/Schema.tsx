@@ -42,8 +42,7 @@ const Schema = ({ nodeId }: SchemaProps) => {
     error: schemaError,
   } = useGetNodeSchemaApiNodeNodeIdSchemaVersionGet({
     pathParams: { nodeId: nodeId, version: schemaVersion! },
-    lazy: true,
-  });
+  }, { enabled: false });
 
   useEffect(() => {
     if (versions) {
