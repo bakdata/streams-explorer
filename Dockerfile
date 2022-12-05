@@ -13,8 +13,7 @@ RUN npm run build
 FROM python:3.10-slim AS backend
 
 RUN apt-get -y update && \
-    apt-get --no-install-recommends -y install libc6-dev gcc libgraphviz-dev && \
-    rm -rf /var/lib/apt/lists/*
+    apt-get --no-install-recommends -y install libc6-dev gcc libgraphviz-dev
 
 WORKDIR /app
 
