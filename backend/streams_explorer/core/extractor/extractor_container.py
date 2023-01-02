@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, NamedTuple
 
-from kubernetes_asyncio.client import V1beta1CronJob
+from kubernetes_asyncio.client import V1beta1CronJob, V1Job
 from loguru import logger
 
 from streams_explorer.core.extractor.default.generic import GenericSink, GenericSource
@@ -67,7 +67,7 @@ class ExtractorContainer:
                 ):
                     return connector
 
-    def on_job(self, job: V1beta1CronJob) -> K8sAppJob | None:
+    def on_job(self, job: V1Job | V1beta1CronJob) -> K8sAppJob | None:
         for extractor in self.extractors:
             if isinstance(extractor, ProducerAppExtractor):
                 if app := extractor.on_job_parsing(job):

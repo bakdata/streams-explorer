@@ -14,6 +14,8 @@ from kubernetes_asyncio.client import (
     V1beta1CronJobList,
     V1Deployment,
     V1DeploymentList,
+    V1Job,
+    V1JobList,
     V1StatefulSet,
     V1StatefulSetList,
 )
@@ -30,7 +32,11 @@ if TYPE_CHECKING:
 class K8sResource(NamedTuple):
     func: Callable[
         ...,
-        V1DeploymentList | V1StatefulSetList | V1beta1CronJobList | EventsV1EventList,
+        V1DeploymentList
+        | V1StatefulSetList
+        | V1JobList
+        | V1beta1CronJobList
+        | EventsV1EventList,
     ]
     return_type: type | None
     callback: Callable[..., Awaitable[None]]
@@ -70,7 +76,8 @@ class Kubernetes:
         kubernetes_asyncio.client.Configuration.set_default(conf)
 
         self.k8s_app_client = kubernetes_asyncio.client.AppsV1Api()
-        self.k8s_batch_client = kubernetes_asyncio.client.BatchV1beta1Api()
+        self.k8s_batch_client = kubernetes_asyncio.client.BatchV1Api()
+        self.k8s_beta_batch_client = kubernetes_asyncio.client.BatchV1beta1Api()
         self.k8s_events_client = kubernetes_asyncio.client.EventsV1Api()
 
     async def watch(self) -> None:
@@ -84,8 +91,13 @@ class Kubernetes:
                 *args, namespace=namespace, **kwargs
             )
 
+        def list_jobs(namespace: str, *args, **kwargs) -> V1JobList:
+            return self.k8s_batch_client.list_namespaced_job(
+                *args, namespace=namespace, **kwargs
+            )
+
         def list_cron_jobs(namespace: str, *args, **kwargs) -> V1beta1CronJobList:
-            return self.k8s_batch_client.list_namespaced_cron_job(
+            return self.k8s_beta_batch_client.list_namespaced_cron_job(
                 *args, namespace=namespace, **kwargs
             )
 
@@ -103,6 +115,11 @@ class Kubernetes:
             K8sResource(
                 list_stateful_sets,
                 V1StatefulSet,
+                self.streams_explorer.handle_deployment_update,
+            ),
+            K8sResource(
+                list_jobs,
+                V1Job,
                 self.streams_explorer.handle_deployment_update,
             ),
             K8sResource(
