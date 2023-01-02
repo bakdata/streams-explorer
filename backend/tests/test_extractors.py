@@ -60,7 +60,7 @@ extractor_file_3 = """from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from kubernetes_asyncio.client import V1beta1CronJob
+from kubernetes_asyncio.client import V1beta1CronJob, V1Job
 from streams_explorer.models.k8s import K8sConfig
 from streams_explorer.core.extractor.extractor import (
     ProducerAppExtractor,
@@ -77,7 +77,7 @@ class TestMultipleExtractor(StreamsAppExtractor, ProducerAppExtractor):
     def on_streaming_app_delete(self, config: K8sConfig) -> None:
         pass
 
-    def on_cron_job_parsing(self, cron_job: V1beta1CronJob) -> K8sAppCronJob | None:
+    def on_job_parsing(self, cron_job: V1Job | V1beta1CronJob) -> K8sAppCronJob | None:
         pass
 """
 

@@ -2,8 +2,8 @@ from pytest import MonkeyPatch
 
 from streams_explorer.core.k8s_app import (
     K8sApp,
-    K8sAppCronJob,
     K8sAppDeployment,
+    K8sAppJob,
     K8sAppStatefulSet,
 )
 from streams_explorer.core.k8s_config_parser import StreamsBootstrapArgsParser
@@ -184,7 +184,7 @@ class TestK8sApp:
         assert k8s_app.replicas_total == 1
         assert k8s_app.replicas_ready is None
 
-        k8s_app = K8sAppCronJob(get_streaming_app_cronjob())
+        k8s_app = K8sAppJob(get_streaming_app_cronjob())
         assert not k8s_app.k8s_object.status
         assert k8s_app.replicas_total is None
         assert k8s_app.replicas_ready is None

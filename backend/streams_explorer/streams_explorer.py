@@ -157,7 +157,7 @@ class StreamsExplorer:
 
         app: K8sApp | None = None
         if isinstance(item, V1beta1CronJob):
-            app = extractor_container.on_cron_job(item)
+            app = extractor_container.on_job(item)
         else:
             app = K8sApp.factory(item)
         if app:
