@@ -10,6 +10,6 @@ metadata:
   name: {{ template "streams-explorer.roleName" . }}
 rules:
   - apiGroups: ["apps", "batch", "events.k8s.io"]
-    resources: ["deployments", "cronjobs", "statefulsets", "events"]
+    resources: ["deployments", "jobs", "cronjobs", "statefulsets", "events"]
     verbs: ["get", "list", "watch"]
 {{- end }}
