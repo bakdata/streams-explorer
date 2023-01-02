@@ -13,4 +13,6 @@ if TYPE_CHECKING:
 
 class StreamsBootstrapProducer(ProducerAppExtractor):
     def on_job_parsing(self, job: V1Job | V1beta1CronJob) -> K8sAppJob | None:
-        return k8s.K8sAppJob(job)
+        producer = k8s.K8sAppJob(job)
+        if producer.is_streams_app:
+            return producer
