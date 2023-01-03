@@ -69,14 +69,12 @@ class StreamsBootstrapConfigParser(K8sConfigParser):
 
     @staticmethod
     def parse_extra_topics(extra_topics: str) -> list[str]:
-        # remove trailing commas
-        extra_topics.removesuffix(",")
-        return list(
-            map(
-                lambda topic: topic.split("=")[1],
-                extra_topics.split(","),
-            )
-        )
+        extra_topics = extra_topics.removesuffix(",")  # remove trailing comma
+        return [
+            topic
+            for role in extra_topics.split(",")
+            for topic in role.split("=")[1].split(";")
+        ]
 
 
 class StreamsBootstrapEnvParser(StreamsBootstrapConfigParser):
