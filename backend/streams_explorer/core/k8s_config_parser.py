@@ -70,20 +70,13 @@ class StreamsBootstrapConfigParser(K8sConfigParser):
     @staticmethod
     def parse_extra_topics(extra_topics: str) -> list[str]:
         # remove trailing commas
-        extra_topics = extra_topics[:-1] if extra_topics[-1] == "," else extra_topics
+        extra_topics.removesuffix(",")
         return list(
             map(
                 lambda topic: topic.split("=")[1],
                 extra_topics.split(","),
             )
         )
-
-    @staticmethod
-    def remove_prefix(name: str, prefix: str) -> str:
-        if name.startswith(prefix):
-            initial = len(prefix)
-            return name[initial:]
-        return name
 
 
 class StreamsBootstrapEnvParser(StreamsBootstrapConfigParser):
@@ -107,7 +100,7 @@ class StreamsBootstrapEnvParser(StreamsBootstrapConfigParser):
 
     def __normalise_name(self, name: str) -> str:
         if self.env_prefix:
-            return self.remove_prefix(name, self.env_prefix)
+            return name.removeprefix(self.env_prefix)
         return name
 
     @staticmethod
@@ -130,7 +123,7 @@ class StreamsBootstrapArgsParser(StreamsBootstrapConfigParser):
         args: list[str] = container.args
 
         for arg in args:
-            arg = self.remove_prefix(arg, "--")
+            arg = arg.removeprefix("--")
             name, value = arg.split("=")
             if not name or not value:
                 continue
