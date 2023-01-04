@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING, Awaitable, Callable, NamedTuple, TypedDict
 
 import kubernetes_asyncio.client
 import kubernetes_asyncio.config
-import kubernetes_asyncio.watch
 from kubernetes_asyncio.client import (
     ApiException,
     EventsV1Event,
@@ -17,6 +16,7 @@ from kubernetes_asyncio.client import (
     V1StatefulSet,
     V1StatefulSetList,
 )
+from kubernetes_asyncio.watch import Watch
 from loguru import logger
 
 from streams_explorer.core.config import settings
@@ -135,7 +135,7 @@ class Kubernetes:
     ) -> None:
         return_type = resource.return_type.__name__ if resource.return_type else None
         try:
-            async with kubernetes_asyncio.watch.Watch(return_type) as w:
+            async with Watch(return_type) as w:
                 async with w.stream(resource.func, namespace) as stream:
                     async for event in stream:
                         await resource.callback(event)
