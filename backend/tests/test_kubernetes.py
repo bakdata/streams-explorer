@@ -1,4 +1,4 @@
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, call
 
 import pytest
 from kubernetes_asyncio.client import ApiException
@@ -17,14 +17,21 @@ def kubernetes() -> Kubernetes:
 @pytest.mark.asyncio
 async def test_watch(kubernetes: Kubernetes, mocker: MockFixture):
     mock_kubernetes_asyncio_watch = mocker.patch(
-        "streams_explorer.core.services.kubernetes.kubernetes_asyncio.watch"
+        "streams_explorer.core.services.kubernetes.kubernetes_asyncio.watch.Watch"
     )
     mock_watch_namespace = mocker.spy(kubernetes, "_Kubernetes__watch_namespace")
 
     mock_ctx = AsyncMock(side_effect=ApiException(status=410))
-    mock_kubernetes_asyncio_watch.Watch.return_value = mock_ctx
+    mock_kubernetes_asyncio_watch.return_value = mock_ctx
+
     await kubernetes.watch()
-    mock_kubernetes_asyncio_watch.Watch.assert_called()
+
+    assert mock_kubernetes_asyncio_watch.call_count == 3
+    assert mock_kubernetes_asyncio_watch.call_args_list == [
+        call("V1Deployment"),
+        call("V1StatefulSet"),
+        call("V1beta1CronJob"),
+    ]
     mock_ctx.__aenter__.assert_awaited()
     assert mock_ctx.__aenter__.await_count == 3
     assert mock_watch_namespace.call_count == 4
