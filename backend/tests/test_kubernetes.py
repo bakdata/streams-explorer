@@ -17,14 +17,14 @@ def kubernetes() -> Kubernetes:
 @pytest.mark.asyncio
 async def test_watch(kubernetes: Kubernetes, mocker: MockFixture):
     mock_kubernetes_asyncio_watch = mocker.patch(
-        "streams_explorer.core.services.kubernetes.Watch"
+        "streams_explorer.core.services.kubernetes.kubernetes_asyncio.watch"
     )
     mock_watch_namespace = mocker.spy(kubernetes, "_Kubernetes__watch_namespace")
 
     mock_ctx = AsyncMock(side_effect=ApiException(status=410))
-    mock_kubernetes_asyncio_watch.return_value = mock_ctx
+    mock_kubernetes_asyncio_watch.Watch.return_value = mock_ctx
     await kubernetes.watch()
-    mock_kubernetes_asyncio_watch.assert_called()
+    mock_kubernetes_asyncio_watch.Watch.assert_called()
     mock_ctx.__aenter__.assert_awaited()
     assert mock_ctx.__aenter__.await_count == 3
     assert mock_watch_namespace.call_count == 4
