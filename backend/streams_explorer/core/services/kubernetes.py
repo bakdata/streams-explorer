@@ -140,7 +140,7 @@ class Kubernetes:
                     async for event in stream:
                         await resource.callback(event)
         except ApiException as e:
-            if e.reason == "Expired":
+            if e.status == 410:
                 # restart watch to get fresh resource version
                 return await self.__watch_namespace(namespace, resource)
             else:
