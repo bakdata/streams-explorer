@@ -24,7 +24,6 @@ async def test_watch(kubernetes: Kubernetes, mocker: MockFixture):
     mock_Watch = AsyncMock(side_effect=ApiException(status=410, reason="Expired"))
 
     mock_kubernetes_asyncio_watch.return_value = mock_Watch
-    # mock_Watch.__aenter__.side_effect = ApiException(status=410, reason="Expired")
 
     await kubernetes.watch()
 
@@ -52,14 +51,10 @@ async def test_watch(kubernetes: Kubernetes, mocker: MockFixture):
 
 @pytest.mark.asyncio
 async def test_watch_namespace(kubernetes: Kubernetes, mocker: MockFixture):
-    mock_kubernetes_asyncio_watch = mocker.patch(
+    mock_stream = mocker.patch(
         "streams_explorer.core.services.kubernetes.kubernetes_asyncio.watch.Watch.stream"
     )
     mock_watch_namespace = mocker.spy(kubernetes, "_Kubernetes__watch_namespace")
-
-    mock_Watch = AsyncMock()
-    mock_kubernetes_asyncio_watch.return_value = mock_Watch
-    mock_Watch.__aenter__.return_value.stream.return_value.__aenter__.return_value = []
 
     def mock_list_deployments() -> V1DeploymentList:
         return V1DeploymentList()
@@ -74,7 +69,8 @@ async def test_watch_namespace(kubernetes: Kubernetes, mocker: MockFixture):
         ),
     )
 
-    assert mock_kubernetes_asyncio_watch.call_count == 1
+    assert mock_stream.call_count == 1
+    assert mock_watch_namespace.call_count == 1
 
 
 @pytest.mark.asyncio
@@ -131,6 +127,3 @@ async def test_watch_namespace_restart(kubernetes: Kubernetes, mocker: MockFixtu
                 mock_list_deployments, return_type=None, callback=mock_callback
             ),
         )
-
-    # assert mock_kubernetes_asyncio_watch.call_count == 1
-    # assert mock_kubernetes_asyncio_watch.call_args_list == [call("V1Deployment")]
