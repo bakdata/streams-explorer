@@ -100,6 +100,20 @@ async def test_watch_namespace_error(kubernetes: Kubernetes, mocker: MockFixture
         assert e.value.status == 500
         assert e.value.reason == "Internal Server Error"
 
+    mock_kubernetes_asyncio_watch.return_value.__aenter__.side_effect = ApiException(
+        status=409, reason="Expired"  # demo error, doesn't exist
+    )
+
+    with pytest.raises(ApiException) as e:
+        await mock_watch_namespace(
+            "test-namespace",
+            K8sResource(
+                mock_list_deployments, return_type=None, callback=mock_callback
+            ),
+        )
+        assert e.value.status == 409
+        assert e.value.reason == "Expired"
+
 
 @pytest.mark.asyncio
 async def test_watch_namespace_restart(kubernetes: Kubernetes, mocker: MockFixture):
