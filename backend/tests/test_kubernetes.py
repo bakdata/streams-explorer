@@ -21,7 +21,7 @@ async def test_watch(kubernetes: Kubernetes, mocker: MockFixture):
     )
     mock_watch_namespace = mocker.spy(kubernetes, "_Kubernetes__watch_namespace")
 
-    mock_Watch = AsyncMock(side_effect=ApiException(status=410, reason="Expired"))
+    mock_Watch = AsyncMock()
 
     mock_kubernetes_asyncio_watch.return_value = mock_Watch
 
@@ -80,9 +80,7 @@ async def test_watch_namespace_error(kubernetes: Kubernetes, mocker: MockFixture
     )
     mock_watch_namespace = mocker.spy(kubernetes, "_Kubernetes__watch_namespace")
 
-    mock_Watch = AsyncMock()
-    mock_kubernetes_asyncio_watch.return_value = mock_Watch
-    mock_Watch.__aenter__.side_effect = ApiException(
+    mock_kubernetes_asyncio_watch.return_value.__aenter__.side_effect = ApiException(
         status=500, reason="Internal Server Error"
     )
 
@@ -110,9 +108,9 @@ async def test_watch_namespace_restart(kubernetes: Kubernetes, mocker: MockFixtu
     )
     mock_watch_namespace = mocker.spy(kubernetes, "_Kubernetes__watch_namespace")
 
-    mock_Watch = AsyncMock()
-    mock_kubernetes_asyncio_watch.return_value = mock_Watch
-    mock_Watch.__aenter__.side_effect = ApiException(status=410, reason="Expired")
+    mock_kubernetes_asyncio_watch.return_value.__aenter__.side_effect = ApiException(
+        status=410, reason="Expired"
+    )
 
     def mock_list_deployments() -> V1DeploymentList:
         return V1DeploymentList()
