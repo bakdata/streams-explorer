@@ -109,7 +109,7 @@ async def test_watch_namespace_restart(kubernetes: Kubernetes, mocker: MockFixtu
     mock_watch_namespace = mocker.spy(kubernetes, "_Kubernetes__watch_namespace")
 
     mock_kubernetes_asyncio_watch.return_value.__aenter__.side_effect = ApiException(
-        status=410, reason="Expired"
+        status=410, reason="Expired: ..."
     )
 
     def mock_list_deployments() -> V1DeploymentList:
@@ -118,10 +118,14 @@ async def test_watch_namespace_restart(kubernetes: Kubernetes, mocker: MockFixtu
     async def mock_callback() -> None:
         pass
 
+    # watch is restarting due to expired watch
     with pytest.raises(RecursionError):
-        await mock_watch_namespace(
-            "test-namespace",
-            K8sResource(
-                mock_list_deployments, return_type=None, callback=mock_callback
-            ),
-        )
+        with pytest.raises(ApiException) as e:
+            await mock_watch_namespace(
+                "test-namespace",
+                K8sResource(
+                    mock_list_deployments, return_type=None, callback=mock_callback
+                ),
+            )
+            assert e.value.status == 410
+            assert e.value.reason == "Expired: ..."
