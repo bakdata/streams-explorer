@@ -54,8 +54,8 @@ class K8sEvent(TypedDict):
 
 
 class Kubernetes:
-    context = settings.k8s.deployment.context
-    namespaces = settings.k8s.deployment.namespaces
+    context: str = settings.k8s.deployment.context
+    namespaces: list[str] = settings.k8s.deployment.namespaces
 
     def __init__(self, streams_explorer: StreamsExplorer) -> None:
         self.streams_explorer = streams_explorer
