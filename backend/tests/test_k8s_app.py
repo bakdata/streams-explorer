@@ -145,11 +145,11 @@ class TestK8sApp:
                 input_topics="input-topic",
                 output_topic="output-topic",
                 error_topic="error-topic",
-                multiple_inputs="0=test1,1=test2",
+                multiple_inputs="0=test1,1=test2;test3,",
                 env_prefix="TEST_",
             )
         )
-        assert k8s_app.extra_input_topics == ["test1", "test2"]
+        assert k8s_app.extra_input_topics == ["test1", "test2", "test3"]
 
     def test_extra_output_topics(self):
         k8s_app = K8sAppDeployment(
