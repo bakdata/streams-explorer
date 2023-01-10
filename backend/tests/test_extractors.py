@@ -1,6 +1,19 @@
 from pathlib import Path
 
 import pytest
+from kubernetes_asyncio.client import (
+    V1beta1CronJob,
+    V1beta1CronJobSpec,
+    V1beta1JobTemplateSpec,
+    V1Container,
+    V1EnvVar,
+    V1Job,
+    V1JobSpec,
+    V1ObjectMeta,
+    V1OwnerReference,
+    V1PodSpec,
+    V1PodTemplateSpec,
+)
 from pytest_mock import MockerFixture
 
 from streams_explorer.core.config import settings
@@ -10,6 +23,7 @@ from streams_explorer.core.extractor.extractor import (
     ProducerAppExtractor,
     StreamsAppExtractor,
 )
+from streams_explorer.core.k8s_app import K8sAppCronJob, K8sAppJob
 from streams_explorer.core.services.kafkaconnect import KafkaConnect
 from streams_explorer.extractors import (
     extractor_container,
@@ -77,7 +91,10 @@ class TestMultipleExtractor(StreamsAppExtractor, ProducerAppExtractor):
     def on_streaming_app_delete(self, config: K8sConfig) -> None:
         pass
 
-    def on_job_parsing(self, cron_job: V1Job | V1beta1CronJob) -> K8sAppCronJob | None:
+    def on_job_parsing(self, job: V1Job) -> K8sAppJob | None:
+        pass
+
+    def on_cron_job_parsing(self, cron_job: V1beta1CronJob) -> K8sAppCronJob | None:
         pass
 """
 
@@ -347,3 +364,50 @@ class TestExtractors:
         )
         assert len(extractor.sinks) == 1
         assert extractor.sinks[0].name == "jdbc-table"
+
+    def test_streams_bootstrap_producer(self):
+        from streams_explorer.core.extractor.default.streams_bootstrap_producer import (
+            StreamsBootstrapProducer,
+        )
+
+        extractor = StreamsBootstrapProducer()
+        env = [
+            V1EnvVar(name="ENV_PREFIX", value="APP_"),
+            V1EnvVar(name="APP_OUTPUT_TOPIC", value="test-files-import-topic"),
+        ]
+        container = V1Container(name="test-container", env=env)
+        pod_spec = V1PodSpec(containers=[container])
+        pod_template_spec = V1PodTemplateSpec(spec=pod_spec)
+        job_spec = V1JobSpec(template=pod_template_spec, selector=None)
+        job_template = V1beta1JobTemplateSpec(spec=job_spec)
+        spec = V1beta1CronJobSpec(job_template=job_template, schedule="* * * * *")
+        name = "test-files-import"
+        metadata = V1ObjectMeta(
+            name=name,
+            annotations={
+                "deployment.kubernetes.io/revision": "1",
+            },
+            labels={
+                "app": name,
+                "app_name": "files-import",
+                "chart": "producer-app-0.1.0",
+                "release": name,
+            },
+            namespace="test-namespace",
+        )
+        cron_job = V1beta1CronJob(metadata=metadata, spec=spec)
+        app_cron_job = extractor.on_cron_job_parsing(cron_job)
+        assert isinstance(app_cron_job, K8sAppCronJob), "should extract CronJob"
+
+        job = V1Job(metadata=metadata, spec=job_spec)
+        app_job = extractor.on_job_parsing(job)
+        assert isinstance(app_job, K8sAppJob), "should extract Job"
+
+        metadata.owner_references = [
+            V1OwnerReference(
+                name=name, api_version="v1", kind="CronJob", uid="123456789abc"
+            )
+        ]
+        assert not extractor.on_job_parsing(
+            job
+        ), "Job belonging to CronJob should be filtered out"
