@@ -6,6 +6,7 @@ from kubernetes_asyncio.client import (
     V1beta1CronJob,
     V1Container,
     V1Deployment,
+    V1Job,
     V1ObjectMeta,
     V1PodSpec,
     V1StatefulSet,
@@ -20,7 +21,7 @@ from streams_explorer.models.k8s import K8sConfig, K8sReason
 
 ATTR_PIPELINE = "pipeline"
 
-K8sObject: TypeAlias = V1Deployment | V1StatefulSet | V1beta1CronJob
+K8sObject: TypeAlias = V1Deployment | V1StatefulSet | V1Job | V1beta1CronJob
 
 config_parser: type[K8sConfigParser] = load_config_parser()
 
@@ -157,14 +158,17 @@ class K8sApp:
 
     @staticmethod
     def factory(k8s_object: K8sObject) -> K8sApp:
-        if isinstance(k8s_object, V1Deployment):
-            return K8sAppDeployment(k8s_object)
-        elif isinstance(k8s_object, V1StatefulSet):
-            return K8sAppStatefulSet(k8s_object)
-        elif isinstance(k8s_object, V1beta1CronJob):
-            return K8sAppCronJob(k8s_object)
-        else:
-            raise ValueError(k8s_object)
+        match k8s_object:
+            case V1Deployment():  # type: ignore[misc]
+                return K8sAppDeployment(k8s_object)
+            case V1StatefulSet():  # type: ignore[misc]
+                return K8sAppStatefulSet(k8s_object)
+            case V1Job():  # type: ignore[misc]
+                return K8sAppJob(k8s_object)
+            case V1beta1CronJob():  # type: ignore[misc]
+                return K8sAppCronJob(k8s_object)
+            case _:
+                raise ValueError(k8s_object)
 
     @staticmethod
     def get_app_container(
@@ -182,6 +186,33 @@ class K8sApp:
     @staticmethod
     def _labels_to_use() -> set[str]:
         return set(settings.k8s.labels)
+
+
+class K8sAppJob(K8sApp):
+    def __init__(self, k8s_object: V1Job) -> None:
+        super().__init__(k8s_object)
+
+    def setup(self) -> None:
+        self.spec = self._get_pod_spec()
+        self.container = self.get_app_container(self.spec)
+        self.extract_config()
+        self.__set_attributes()
+
+    @property
+    def replicas_ready(self) -> None:
+        return None
+
+    @property
+    def replicas_total(self) -> None:
+        return None
+
+    def _get_pod_spec(self) -> V1PodSpec | None:
+        if self.k8s_object.spec and self.k8s_object.spec.template.spec:
+            return self.k8s_object.spec.template.spec
+
+    def __set_attributes(self) -> None:
+        self._set_labels()
+        self._set_pipeline()
 
 
 class K8sAppCronJob(K8sApp):

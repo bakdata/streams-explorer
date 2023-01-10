@@ -4,7 +4,7 @@ from abc import abstractmethod
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
-from kubernetes_asyncio.client import V1beta1CronJob
+from kubernetes_asyncio.client import V1beta1CronJob, V1Job
 
 from streams_explorer.models.k8s import K8sConfig
 from streams_explorer.models.kafka_connector import KafkaConnector
@@ -13,7 +13,7 @@ from streams_explorer.models.source import Source
 from streams_explorer.plugins import Plugin
 
 if TYPE_CHECKING:
-    from streams_explorer.core.k8s_app import K8sAppCronJob
+    from streams_explorer.core.k8s_app import K8sAppCronJob, K8sAppJob
 
 
 @dataclass
@@ -45,6 +45,10 @@ class StreamsAppExtractor(Extractor):
 
 
 class ProducerAppExtractor(Extractor):
+    @abstractmethod
+    def on_job_parsing(self, job: V1Job) -> K8sAppJob | None:
+        ...
+
     @abstractmethod
     def on_cron_job_parsing(self, cron_job: V1beta1CronJob) -> K8sAppCronJob | None:
         ...

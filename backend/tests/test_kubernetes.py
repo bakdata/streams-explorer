@@ -27,16 +27,17 @@ async def test_watch(kubernetes: Kubernetes, mocker: MockFixture):
 
     await kubernetes.watch()
 
-    assert mock_kubernetes_asyncio_watch.call_count == 3
+    assert mock_kubernetes_asyncio_watch.call_count == 4
     assert mock_kubernetes_asyncio_watch.call_args_list == [
         call("V1Deployment"),
         call("V1StatefulSet"),
+        call("V1Job"),
         call("V1beta1CronJob"),
     ]
     mock_Watch.__aenter__.assert_awaited()
-    assert mock_Watch.__aenter__.await_count == 3
+    assert mock_Watch.__aenter__.await_count == 4
 
-    assert mock_watch_namespace.call_count == 4
+    assert mock_watch_namespace.call_count == 5
     resources: list[str] = [
         call.args[1].return_type.__name__
         for call in mock_watch_namespace.call_args_list
@@ -44,6 +45,7 @@ async def test_watch(kubernetes: Kubernetes, mocker: MockFixture):
     assert resources == [
         "V1Deployment",
         "V1StatefulSet",
+        "V1Job",
         "V1beta1CronJob",
         "EventsV1Event",
     ]
