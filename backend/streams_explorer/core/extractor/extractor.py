@@ -13,7 +13,7 @@ from streams_explorer.models.source import Source
 from streams_explorer.plugins import Plugin
 
 if TYPE_CHECKING:
-    from streams_explorer.core.k8s_app import K8sAppJob
+    from streams_explorer.core.k8s_app import K8sAppCronJob, K8sAppJob
 
 
 @dataclass
@@ -46,5 +46,9 @@ class StreamsAppExtractor(Extractor):
 
 class ProducerAppExtractor(Extractor):
     @abstractmethod
-    def on_job_parsing(self, job: V1Job | V1beta1CronJob) -> K8sAppJob | None:
+    def on_job_parsing(self, job: V1Job) -> K8sAppJob | None:
+        ...
+
+    @abstractmethod
+    def on_cron_job_parsing(self, cron_job: V1beta1CronJob) -> K8sAppCronJob | None:
         ...

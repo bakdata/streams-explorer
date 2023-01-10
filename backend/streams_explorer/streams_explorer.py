@@ -156,10 +156,13 @@ class StreamsExplorer:
         )
 
         app: K8sApp | None = None
-        if isinstance(item, V1Job | V1beta1CronJob):
-            app = extractor_container.on_job(item)
-        else:
-            app = K8sApp.factory(item)
+        match item:
+            case V1Job():  # type: ignore[misc]
+                app = extractor_container.on_job(item)
+            case V1beta1CronJob():  # type: ignore[misc]
+                app = extractor_container.on_cron_job(item)
+            case _:
+                app = K8sApp.factory(item)
         if app:
             await self._handle_app_update(update["type"], app)
 

@@ -163,8 +163,10 @@ class K8sApp:
                 return K8sAppDeployment(k8s_object)
             case V1StatefulSet():  # type: ignore[misc]
                 return K8sAppStatefulSet(k8s_object)
-            case V1Job() | V1beta1CronJob():  # type: ignore[misc]
+            case V1Job():  # type: ignore[misc]
                 return K8sAppJob(k8s_object)
+            case V1beta1CronJob():  # type: ignore[misc]
+                return K8sAppCronJob(k8s_object)
             case _:
                 raise ValueError(k8s_object)
 
@@ -187,7 +189,34 @@ class K8sApp:
 
 
 class K8sAppJob(K8sApp):
-    def __init__(self, k8s_object: V1Job | V1beta1CronJob) -> None:
+    def __init__(self, k8s_object: V1Job) -> None:
+        super().__init__(k8s_object)
+
+    def setup(self) -> None:
+        self.spec = self._get_pod_spec()
+        self.container = self.get_app_container(self.spec)
+        self.extract_config()
+        self.__set_attributes()
+
+    @property
+    def replicas_ready(self) -> None:
+        return None
+
+    @property
+    def replicas_total(self) -> None:
+        return None
+
+    def _get_pod_spec(self) -> V1PodSpec | None:
+        if self.k8s_object.spec and self.k8s_object.spec.template.spec:
+            return self.k8s_object.spec.template.spec
+
+    def __set_attributes(self) -> None:
+        self._set_labels()
+        self._set_pipeline()
+
+
+class K8sAppCronJob(K8sApp):
+    def __init__(self, k8s_object: V1beta1CronJob) -> None:
         super().__init__(k8s_object)
 
     def setup(self) -> None:

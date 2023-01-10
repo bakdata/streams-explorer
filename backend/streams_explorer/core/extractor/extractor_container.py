@@ -18,7 +18,7 @@ from streams_explorer.models.sink import Sink
 from streams_explorer.models.source import Source
 
 if TYPE_CHECKING:
-    from streams_explorer.core.k8s_app import K8sAppJob
+    from streams_explorer.core.k8s_app import K8sAppCronJob, K8sAppJob
 
 
 class SourcesSinks(NamedTuple):
@@ -67,10 +67,16 @@ class ExtractorContainer:
                 ):
                     return connector
 
-    def on_job(self, job: V1Job | V1beta1CronJob) -> K8sAppJob | None:
+    def on_job(self, job: V1Job) -> K8sAppJob | None:
         for extractor in self.extractors:
             if isinstance(extractor, ProducerAppExtractor):
                 if app := extractor.on_job_parsing(job):
+                    return app
+
+    def on_cron_job(self, cron_job: V1beta1CronJob) -> K8sAppCronJob | None:
+        for extractor in self.extractors:
+            if isinstance(extractor, ProducerAppExtractor):
+                if app := extractor.on_cron_job_parsing(cron_job):
                     return app
 
     def get_sources_sinks(self) -> SourcesSinks:
