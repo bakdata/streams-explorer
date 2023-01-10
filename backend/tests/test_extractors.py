@@ -119,7 +119,7 @@ class TestExtractors:
 
     def test_load_extractors(self):
         settings.plugins.path = Path.cwd() / "plugins"
-        assert len(extractor_container.extractors) == 3
+        assert len(extractor_container.extractors) == 4
         extractor_1_path = settings.plugins.path / "fake_extractor_1.py"
         extractor_2_path = settings.plugins.path / "fake_extractor_2.py"
         try:
@@ -131,7 +131,7 @@ class TestExtractors:
 
             load_extractors()
 
-            assert len(extractor_container.extractors) == 7
+            assert len(extractor_container.extractors) == 8
 
             extractor_classes = self.get_extractor_classes()
             assert "TestSinkOne" in extractor_classes
@@ -233,8 +233,16 @@ class TestExtractors:
     def test_container_reset_connectors(self):
         load_default()
         load_extractors()
-        assert len(extractor_container.extractors) == 5
+        assert len(extractor_container.extractors) == 6
         extractor_classes = self.get_extractor_classes()
+        assert extractor_classes == [
+            "StreamsBootstrapProducer",
+            "ElasticsearchSink",
+            "S3Sink",
+            "JdbcSink",
+            "GenericSink",
+            "GenericSource",
+        ]
         assert "ElasticsearchSink" in extractor_classes
         assert "S3Sink" in extractor_classes
         assert "JdbcSink" in extractor_classes

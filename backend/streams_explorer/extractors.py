@@ -13,10 +13,10 @@ extractor_container = ExtractorContainer()
 
 
 def load_default() -> None:
+    extractor_container.add(StreamsBootstrapProducer())
     extractor_container.add(ElasticsearchSink())
     extractor_container.add(S3Sink())
     extractor_container.add(JdbcSink())
-    extractor_container.add(StreamsBootstrapProducer())
 
 
 if settings.plugins.extractors.default:
