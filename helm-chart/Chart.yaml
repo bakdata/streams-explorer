@@ -1,4 +1,4 @@
 apiVersion: v1
 description: A Helm chart for the Streams Explorer on Kubernetes
 name: streams-explorer
-version: 0.2.3
+version: 0.3.0
