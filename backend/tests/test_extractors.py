@@ -419,3 +419,11 @@ class TestExtractors:
         assert not extractor.on_job_parsing(
             job
         ), "Job belonging to CronJob should be filtered out"
+
+        env.clear()
+        assert not extractor.on_cron_job_parsing(
+            cron_job
+        ), "should not extract non streams app CronJob"
+        assert not extractor.on_job_parsing(
+            job
+        ), "should not extract non streams app Job"
