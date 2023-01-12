@@ -21,10 +21,10 @@ class StreamsBootstrapProducer(ProducerAppExtractor):
                 if owner_reference.kind == "CronJob":
                     return None
 
-        if producer.is_streams_app:
+        if producer.is_streams_app():
             return producer
 
     def on_cron_job_parsing(self, cron_job: V1beta1CronJob) -> K8sAppCronJob | None:
         producer = k8s.K8sAppCronJob(cron_job)
-        if producer.is_streams_app:
+        if producer.is_streams_app():
             return producer
