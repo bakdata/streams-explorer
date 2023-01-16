@@ -17,7 +17,7 @@ class JdbcSink(ConnectorExtractor):
                 self.sinks.append(
                     Sink(
                         name=name,
-                        node_type="jdbc-sink",
+                        node_type="database",
                         source=connector_name,
                     )
                 )
