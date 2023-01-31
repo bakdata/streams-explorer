@@ -13,6 +13,8 @@ services:
     environment:
       - KUBECONFIG=/app/kubeconfig
       - SE_K8S__deployment__cluster=false
+      - SE_K8S__deployment__context=kubernetes-cluster
+      - SE_K8S__deployment__namespaces=['kubernetes-namespace1', 'kubernetes-namespace2']
       - SE_SCHEMAREGISTRY__url=http://host.docker.internal:8081
       - SE_KAFKACONNECT__url=http://host.docker.internal:8083
       - SE_PROMETHEUS__url=http://host.docker.internal:9090
