@@ -1,6 +1,6 @@
 # Streams Explorer
 
-> Explore Data Pipelines in Apache Kafka.
+> Explore Apache Kafka data pipelines in Kubernetes.
 
 ![streams-explorer](https://github.com/bakdata/streams-explorer/blob/main/screens/overview.png?raw=true)
 
@@ -48,6 +48,9 @@
 Visit our introduction [blogpost](https://medium.com/bakdata/exploring-data-pipelines-in-apache-kafka-with-streams-explorer-8337dd11fdad) for a complete overview and demo of Streams Explorer.
 
 ## Installation
+
+> **Prerequisites**
+> Access to a Kubernetes cluster, where streaming apps and services are deployed.
 
 ### Docker Compose
 
