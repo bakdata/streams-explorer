@@ -158,6 +158,7 @@ class Kubernetes:
                     async for event in stream:
                         await resource.callback(event)
         except ApiException as e:
+            logger.error(e)
             if e.status == 410:
                 # parse resource version from error
                 resource_version = None
@@ -175,4 +176,3 @@ class Kubernetes:
                 # restart watch to get fresh resource version
                 return await self.__watch_namespace(namespace, resource)
             raise e
-            # logger.error(e)
