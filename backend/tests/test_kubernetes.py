@@ -14,16 +14,6 @@ def kubernetes() -> Kubernetes:
     return kubernetes
 
 
-# @pytest.fixture(autouse=True)
-# def sleep(mocker: MockFixture) -> None:
-#     async_mock = AsyncMock()
-#     # mocker.patch("asyncio.sleep", side_effect=async_mock)
-#     mocker.patch(
-#         "streams_explorer.core.services.kubernetes.asyncio.sleep",
-#         side_effect=async_mock,
-#     )
-
-
 @pytest.mark.asyncio
 async def test_watch(kubernetes: Kubernetes, mocker: MockFixture):
     mock_kubernetes_asyncio_watch = mocker.patch(
