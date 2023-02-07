@@ -14,6 +14,16 @@ def kubernetes() -> Kubernetes:
     return kubernetes
 
 
+# @pytest.fixture(autouse=True)
+# def sleep(mocker: MockFixture) -> None:
+#     async_mock = AsyncMock()
+#     # mocker.patch("asyncio.sleep", side_effect=async_mock)
+#     mocker.patch(
+#         "streams_explorer.core.services.kubernetes.asyncio.sleep",
+#         side_effect=async_mock,
+#     )
+
+
 @pytest.mark.asyncio
 async def test_watch(kubernetes: Kubernetes, mocker: MockFixture):
     mock_kubernetes_asyncio_watch = mocker.patch(
@@ -118,7 +128,9 @@ async def test_watch_namespace_error(kubernetes: Kubernetes, mocker: MockFixture
 
 
 @pytest.mark.asyncio
-async def test_watch_namespace_restart(kubernetes: Kubernetes, mocker: MockFixture):
+async def test_watch_namespace_restart_expired(
+    kubernetes: Kubernetes, mocker: MockFixture
+):
     mock_kubernetes_asyncio_watch = mocker.patch(
         "streams_explorer.core.services.kubernetes.kubernetes_asyncio.watch.Watch"
     )
@@ -135,13 +147,84 @@ async def test_watch_namespace_restart(kubernetes: Kubernetes, mocker: MockFixtu
         pass
 
     # watch is restarting due to expired watch
+    with pytest.raises(RecursionError) as e:
+        await mock_watch_namespace(
+            "test-namespace",
+            K8sResource(
+                mock_list_deployments, return_type=None, callback=mock_callback
+            ),
+        )
+        assert isinstance(e, RecursionError)
+    mock_watch_namespace.assert_called_with(
+        "test-namespace",
+        K8sResource(mock_list_deployments, return_type=None, callback=mock_callback),
+        resource_version=None,
+    )
+
+
+@pytest.mark.asyncio
+async def test_watch_namespace_restart_expired_with_resource_version(
+    kubernetes: Kubernetes, mocker: MockFixture
+):
+    mock_kubernetes_asyncio_watch = mocker.patch(
+        "streams_explorer.core.services.kubernetes.kubernetes_asyncio.watch.Watch"
+    )
+    mock_watch_namespace = mocker.spy(kubernetes, "_Kubernetes__watch_namespace")
+
+    mock_kubernetes_asyncio_watch.return_value.__aenter__.side_effect = ApiException(
+        status=410, reason="Expired: too old resource version: 123456789 (987654321)"
+    )
+
+    def mock_list_deployments() -> V1DeploymentList:
+        return V1DeploymentList()
+
+    async def mock_callback() -> None:
+        pass
+
+    # watch is restarting due to expired watch
     with pytest.raises(RecursionError):
-        with pytest.raises(ApiException) as e:
-            await mock_watch_namespace(
-                "test-namespace",
-                K8sResource(
-                    mock_list_deployments, return_type=None, callback=mock_callback
-                ),
-            )
-            assert e.value.status == 410
-            assert e.value.reason == "Expired: ..."
+        await mock_watch_namespace(
+            "test-namespace",
+            K8sResource(
+                mock_list_deployments, return_type=None, callback=mock_callback
+            ),
+        )
+    mock_watch_namespace.assert_called_with(
+        "test-namespace",
+        K8sResource(mock_list_deployments, return_type=None, callback=mock_callback),
+        resource_version="987654321",
+    )
+
+
+@pytest.mark.asyncio
+async def test_watch_namespace_restart_unauthorized(
+    kubernetes: Kubernetes, mocker: MockFixture
+):
+    mock_kubernetes_asyncio_watch = mocker.patch(
+        "streams_explorer.core.services.kubernetes.kubernetes_asyncio.watch.Watch"
+    )
+    mock_watch_namespace = mocker.spy(kubernetes, "_Kubernetes__watch_namespace")
+
+    mock_kubernetes_asyncio_watch.return_value.__aenter__.side_effect = ApiException(
+        status=401, reason="Unauthorized: Unauthorized'"
+    )
+
+    def mock_list_deployments() -> V1DeploymentList:
+        return V1DeploymentList()
+
+    async def mock_callback() -> None:
+        pass
+
+    # watch is restarting due to expired watch
+    with pytest.raises(RecursionError) as e:
+        await mock_watch_namespace(
+            "test-namespace",
+            K8sResource(
+                mock_list_deployments, return_type=None, callback=mock_callback
+            ),
+        )
+        assert isinstance(e, RecursionError)
+    mock_watch_namespace.assert_called_with(
+        "test-namespace",
+        K8sResource(mock_list_deployments, return_type=None, callback=mock_callback),
+    )
