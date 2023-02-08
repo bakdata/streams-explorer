@@ -205,7 +205,7 @@ async def test_watch_namespace_restart_unauthorized(
     async def mock_callback() -> None:
         pass
 
-    # watch is restarting due to expired watch
+    # watch is restarting due to unauthorized error
     with pytest.raises(RecursionError) as e:
         await mock_watch_namespace(
             "test-namespace",
