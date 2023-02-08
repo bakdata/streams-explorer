@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import re
 from typing import TYPE_CHECKING, Awaitable, Callable, NamedTuple, TypedDict
 
 import kubernetes_asyncio.client
@@ -146,19 +147,34 @@ class Kubernetes:
                 )
 
     async def __watch_namespace(
-        self,
-        namespace: str,
-        resource: K8sResource,
+        self, namespace: str, resource: K8sResource, resource_version: int | None = None
     ) -> None:
         return_type = resource.return_type.__name__ if resource.return_type else None
         try:
             async with kubernetes_asyncio.watch.Watch(return_type) as w:
-                async with w.stream(resource.func, namespace) as stream:
+                async with w.stream(
+                    resource.func, namespace, resource_version=resource_version
+                ) as stream:
                     async for event in stream:
                         await resource.callback(event)
         except ApiException as e:
-            if e.status == 410:
-                # restart watch to get fresh resource version
-                return await self.__watch_namespace(namespace, resource)
-            else:
-                raise
+            logger.error("Kubernetes watch error {}", e)
+            match e.status:
+                case 410:  # Expired
+                    # parse resource version from error
+                    resource_version = None
+                    if e.reason:
+                        match = re.match(
+                            r"Expired: too old resource version: \d+ \((\d+)\)",
+                            e.reason,
+                        )
+
+                        if match:
+                            resource_version = int(match.group(1))
+                    return await self.__watch_namespace(
+                        namespace, resource, resource_version
+                    )
+                case 401:  # Unauthorized
+                    # restart watch to get fresh resource version
+                    return await self.__watch_namespace(namespace, resource)
+            raise e
