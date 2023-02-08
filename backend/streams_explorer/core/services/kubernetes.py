@@ -159,20 +159,22 @@ class Kubernetes:
                         await resource.callback(event)
         except ApiException as e:
             logger.error(e)
-            if e.status == 410:
-                # parse resource version from error
-                resource_version = None
-                if e.reason:
-                    match = re.match(
-                        r"Expired: too old resource version: \d+ \((\d+)\)", e.reason
-                    )
+            match e.status:
+                case 410:  # Expired
+                    # parse resource version from error
+                    resource_version = None
+                    if e.reason:
+                        match = re.match(
+                            r"Expired: too old resource version: \d+ \((\d+)\)",
+                            e.reason,
+                        )
 
-                    if match:
-                        resource_version = int(match.group(1))
-                return await self.__watch_namespace(
-                    namespace, resource, resource_version
-                )
-            if e.status == 401:
-                # restart watch to get fresh resource version
-                return await self.__watch_namespace(namespace, resource)
+                        if match:
+                            resource_version = int(match.group(1))
+                    return await self.__watch_namespace(
+                        namespace, resource, resource_version
+                    )
+                case 401:  # Unauthorized
+                    # restart watch to get fresh resource version
+                    return await self.__watch_namespace(namespace, resource)
             raise e
