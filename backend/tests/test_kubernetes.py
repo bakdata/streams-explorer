@@ -182,7 +182,7 @@ async def test_watch_namespace_restart_expired_with_resource_version(
     mock_watch_namespace.assert_called_with(
         "test-namespace",
         K8sResource(mock_list_deployments, return_type=None, callback=mock_callback),
-        resource_version="987654321",
+        resource_version=987654321,
     )
 
 

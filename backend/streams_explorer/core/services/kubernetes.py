@@ -147,7 +147,7 @@ class Kubernetes:
                 )
 
     async def __watch_namespace(
-        self, namespace: str, resource: K8sResource, resource_version: str | None = None
+        self, namespace: str, resource: K8sResource, resource_version: int | None = None
     ) -> None:
         return_type = resource.return_type.__name__ if resource.return_type else None
         try:
@@ -168,7 +168,7 @@ class Kubernetes:
                     )
 
                     if match:
-                        resource_version = match.group(1)
+                        resource_version = int(match.group(1))
                 return await self.__watch_namespace(
                     namespace, resource, resource_version
                 )
