@@ -140,6 +140,9 @@ class Kubernetes:
         for resource in resources:
             await asyncio.sleep(resource.delay)
             for namespace in self.namespaces:
+                # create background task and store a strong reference to prevent
+                # garbage collection while the task is scheduled on the event loop
+                # https://docs.python.org/3/library/asyncio-task.html#asyncio.create_task
                 task = asyncio.create_task(
                     self.__watch_namespace(
                         namespace,
