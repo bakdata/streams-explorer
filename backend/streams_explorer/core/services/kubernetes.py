@@ -147,6 +147,7 @@ class Kubernetes:
                     )
                 )
                 self.tasks.add(task)
+                # remove task from collection upon completion
                 task.add_done_callback(self.tasks.discard)
 
     async def __watch_namespace(
