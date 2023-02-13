@@ -60,6 +60,7 @@ class Kubernetes:
 
     def __init__(self, streams_explorer: StreamsExplorer) -> None:
         self.streams_explorer = streams_explorer
+        self.tasks: set[asyncio.Task[None]] = set()
 
     async def setup(self) -> None:
         try:
@@ -139,12 +140,14 @@ class Kubernetes:
         for resource in resources:
             await asyncio.sleep(resource.delay)
             for namespace in self.namespaces:
-                asyncio.create_task(
+                task = asyncio.create_task(
                     self.__watch_namespace(
                         namespace,
                         resource,
                     )
                 )
+                self.tasks.add(task)
+                task.add_done_callback(self.tasks.discard)
 
     async def __watch_namespace(
         self, namespace: str, resource: K8sResource, resource_version: int | None = None
