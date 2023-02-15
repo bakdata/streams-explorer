@@ -385,7 +385,7 @@ class TestExtractors:
         connector = extractor.on_connector_info_parsing(
             {
                 "config": {
-                    "name": "RedisSinkConnector",
+                    "name": "redis-sink-connector",
                     "connector.class": "com.github.jcustenborder.kafka.connect.redis.RedisSinkConnector",
                     "redis.hosts": "wc-redis-db-headless:6379",
                     "redis.database": 0,
@@ -402,7 +402,31 @@ class TestExtractors:
         assert extractor.sinks[0].name == "word-count-countedwords-topic-db-0"
         assert extractor.sinks[0].source == "redis-sink-connector"
         assert isinstance(connector, RedisSinkConnector)
+        assert connector.name == "redis-sink-connector"
         assert connector.get_topics() == ["word-count-countedwords-topic"]
+
+    def test_redis_sink_multiple_topics(self):
+        extractor = RedisSink()
+        connector = extractor.on_connector_info_parsing(
+            {
+                "config": {
+                    "name": "redis-sink-connector",
+                    "connector.class": "com.github.jcustenborder.kafka.connect.redis.RedisSinkConnector",
+                    "redis.hosts": "wc-redis-db-headless:6379",
+                    "redis.database": 4,
+                    "topics": "topic-1,topic-2",
+                }
+            },
+            "redis-sink-connector",
+        )
+        assert len(extractor.sinks) == 2
+        assert all(sink.node_type == "database" for sink in extractor.sinks)
+        assert extractor.sinks[0].name == "topic-1-db-4"
+        assert extractor.sinks[1].name == "topic-2-db-4"
+        assert extractor.sinks[0].source == "redis-sink-connector"
+        assert isinstance(connector, RedisSinkConnector)
+        assert connector.name == "redis-sink-connector"
+        assert connector.get_topics() == ["topic-1", "topic-2"]
 
     def test_streams_bootstrap_producer(self):
         from streams_explorer.core.extractor.default.streams_bootstrap_producer import (
