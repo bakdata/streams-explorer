@@ -1,6 +1,7 @@
 from streams_explorer.core.config import settings
 from streams_explorer.core.extractor.default.elasticsearch_sink import ElasticsearchSink
 from streams_explorer.core.extractor.default.jdbc_sink import JdbcSink
+from streams_explorer.core.extractor.default.redis_sink import RedisSink
 from streams_explorer.core.extractor.default.s3_sink import S3Sink
 from streams_explorer.core.extractor.default.streams_bootstrap_producer import (
     StreamsBootstrapProducer,
@@ -17,6 +18,7 @@ def load_default() -> None:
     extractor_container.add(ElasticsearchSink())
     extractor_container.add(S3Sink())
     extractor_container.add(JdbcSink())
+    extractor_container.add(RedisSink())
 
 
 if settings.plugins.extractors.default:
