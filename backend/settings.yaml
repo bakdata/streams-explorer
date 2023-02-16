@@ -1,6 +1,6 @@
 graph:
   # render graph every x seconds
-  update_interval: 300
+  update_interval: 30
   layout_arguments: "-Grankdir=LR -Gnodesep=0.8 -Gpad=10"
   pipeline_distance: 500
   resolve:
