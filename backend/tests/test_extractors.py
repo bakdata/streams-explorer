@@ -17,6 +17,10 @@ from kubernetes_asyncio.client import (
 from pytest_mock import MockerFixture
 
 from streams_explorer.core.config import settings
+from streams_explorer.core.extractor.default.redis_sink import (
+    RedisSink,
+    RedisSinkConnector,
+)
 from streams_explorer.core.extractor.extractor import (
     ConnectorExtractor,
     Extractor,
@@ -119,7 +123,7 @@ class TestExtractors:
 
     def test_load_extractors(self):
         settings.plugins.path = Path.cwd() / "plugins"
-        assert len(extractor_container.extractors) == 4
+        assert len(extractor_container.extractors) == 5
         extractor_1_path = settings.plugins.path / "fake_extractor_1.py"
         extractor_2_path = settings.plugins.path / "fake_extractor_2.py"
         try:
@@ -131,7 +135,7 @@ class TestExtractors:
 
             load_extractors()
 
-            assert len(extractor_container.extractors) == 8
+            assert len(extractor_container.extractors) == 9
 
             extractor_classes = self.get_extractor_classes()
             assert "TestSinkOne" in extractor_classes
@@ -233,13 +237,14 @@ class TestExtractors:
     def test_container_reset_connectors(self):
         load_default()
         load_extractors()
-        assert len(extractor_container.extractors) == 6
+        assert len(extractor_container.extractors) == 7
         extractor_classes = self.get_extractor_classes()
         assert extractor_classes == [
             "StreamsBootstrapProducer",
             "ElasticsearchSink",
             "S3Sink",
             "JdbcSink",
+            "RedisSink",
             "GenericSink",
             "GenericSource",
         ]
@@ -372,6 +377,59 @@ class TestExtractors:
         )
         assert len(extractor.sinks) == 1
         assert extractor.sinks[0].name == "jdbc-table"
+
+    def test_redis_sink(self):
+        extractor = RedisSink()
+        extractor.on_connector_info_parsing({"config": {}, "type": ""}, "")
+        assert len(extractor.sources) == 0
+        connector = extractor.on_connector_info_parsing(
+            {
+                "config": {
+                    "name": "redis-sink-connector",
+                    "connector.class": "com.github.jcustenborder.kafka.connect.redis.RedisSinkConnector",
+                    "redis.hosts": "wc-redis-db-headless:6379",
+                    "redis.database": 0,
+                    "topics": "word-count-countedwords-topic",
+                    "tasks.max": "1",
+                    "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+                    "value.converter": "org.apache.kafka.connect.storage.StringConverter",
+                }
+            },
+            "redis-sink-connector",
+        )
+        assert len(extractor.sinks) == 1
+        assert extractor.sinks[0].node_type == "database"
+        assert extractor.sinks[0].name == "wc-redis-db-headless:6379-db-0"
+        assert extractor.sinks[0].source == "redis-sink-connector"
+        assert isinstance(connector, RedisSinkConnector)
+        assert connector.type is KafkaConnectorTypesEnum.SINK
+        assert connector.name == "redis-sink-connector"
+        assert connector.get_topics() == ["word-count-countedwords-topic"]
+
+    def test_redis_sink_multiple_topics(self):
+        extractor = RedisSink()
+        connector = extractor.on_connector_info_parsing(
+            {
+                "config": {
+                    "name": "redis-sink-connector",
+                    "connector.class": "com.github.jcustenborder.kafka.connect.redis.RedisSinkConnector",
+                    "redis.hosts": "wc-redis-db-headless:6379",
+                    "redis.database": 4,
+                    "topics": "topic-1,topic-2",
+                    "errors.deadletterqueue.topic.name": "dead-letter-topic",
+                }
+            },
+            "redis-sink-connector",
+        )
+        assert len(extractor.sinks) == 1
+        assert extractor.sinks[0].node_type == "database"
+        assert extractor.sinks[0].name == "wc-redis-db-headless:6379-db-4"
+        assert extractor.sinks[0].source == "redis-sink-connector"
+        assert isinstance(connector, RedisSinkConnector)
+        assert connector.type is KafkaConnectorTypesEnum.SINK
+        assert connector.name == "redis-sink-connector"
+        assert connector.get_topics() == ["topic-1", "topic-2"]
+        assert connector.get_error_topic() == "dead-letter-topic"
 
     def test_streams_bootstrap_producer(self):
         from streams_explorer.core.extractor.default.streams_bootstrap_producer import (
