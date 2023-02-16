@@ -20,15 +20,15 @@ class RedisSink(ConnectorExtractor):
             == "com.github.jcustenborder.kafka.connect.redis.RedisSinkConnector"
         ):
             topics = KafkaConnector.split_topics(config.get("topics"))
-            for topic in topics:
-                database = f"{topic}-db-{config['redis.database']}"  # TODO: use redis host instead of topic name, otherwise it's there are different names for multiple input topics
-                self.sinks.append(
-                    Sink(
-                        node_type="database",
-                        name=database,
-                        source=connector_name,
-                    )
+            hosts = config["redis.hosts"]
+            database = f"{hosts}-db-{config['redis.database']}"
+            self.sinks.append(
+                Sink(
+                    node_type="database",
+                    name=database,
+                    source=connector_name,
                 )
+            )
             return RedisSinkConnector(
                 type=KafkaConnectorTypesEnum.SINK,
                 name=connector_name,

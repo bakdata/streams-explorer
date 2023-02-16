@@ -399,7 +399,7 @@ class TestExtractors:
         )
         assert len(extractor.sinks) == 1
         assert extractor.sinks[0].node_type == "database"
-        assert extractor.sinks[0].name == "word-count-countedwords-topic-db-0"
+        assert extractor.sinks[0].name == "wc-redis-db-headless:6379-db-0"
         assert extractor.sinks[0].source == "redis-sink-connector"
         assert isinstance(connector, RedisSinkConnector)
         assert connector.name == "redis-sink-connector"
@@ -419,10 +419,9 @@ class TestExtractors:
             },
             "redis-sink-connector",
         )
-        assert len(extractor.sinks) == 2
-        assert all(sink.node_type == "database" for sink in extractor.sinks)
-        assert extractor.sinks[0].name == "topic-1-db-4"
-        assert extractor.sinks[1].name == "topic-2-db-4"
+        assert len(extractor.sinks) == 1
+        assert extractor.sinks[0].node_type == "database"
+        assert extractor.sinks[0].name == "wc-redis-db-headless:6379-db-4"
         assert extractor.sinks[0].source == "redis-sink-connector"
         assert isinstance(connector, RedisSinkConnector)
         assert connector.name == "redis-sink-connector"
