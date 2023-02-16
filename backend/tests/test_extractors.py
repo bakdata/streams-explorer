@@ -402,6 +402,7 @@ class TestExtractors:
         assert extractor.sinks[0].name == "wc-redis-db-headless:6379-db-0"
         assert extractor.sinks[0].source == "redis-sink-connector"
         assert isinstance(connector, RedisSinkConnector)
+        assert connector.type is KafkaConnectorTypesEnum.SINK
         assert connector.name == "redis-sink-connector"
         assert connector.get_topics() == ["word-count-countedwords-topic"]
 
@@ -425,6 +426,7 @@ class TestExtractors:
         assert extractor.sinks[0].name == "wc-redis-db-headless:6379-db-4"
         assert extractor.sinks[0].source == "redis-sink-connector"
         assert isinstance(connector, RedisSinkConnector)
+        assert connector.type is KafkaConnectorTypesEnum.SINK
         assert connector.name == "redis-sink-connector"
         assert connector.get_topics() == ["topic-1", "topic-2"]
         assert connector.get_error_topic() == "dead-letter-topic"
