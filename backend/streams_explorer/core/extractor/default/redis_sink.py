@@ -19,7 +19,6 @@ class RedisSink(ConnectorExtractor):
             config.get("connector.class")
             == "com.github.jcustenborder.kafka.connect.redis.RedisSinkConnector"
         ):
-            topics = KafkaConnector.split_topics(config.get("topics"))
             database = f"{config['redis.hosts']}-db-{config['redis.database']}"
             self.sinks.append(
                 Sink(
@@ -32,5 +31,4 @@ class RedisSink(ConnectorExtractor):
                 type=KafkaConnectorTypesEnum.SINK,
                 name=connector_name,
                 config=config,
-                topics=topics,
             )
