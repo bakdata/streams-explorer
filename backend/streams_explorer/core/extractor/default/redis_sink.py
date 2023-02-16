@@ -7,7 +7,8 @@ from streams_explorer.models.sink import Sink
 
 
 class RedisSinkConnector(KafkaConnector):
-    pass
+    def __init__(self, **kwargs) -> None:
+        super().__init__(type=KafkaConnectorTypesEnum.SINK, **kwargs)
 
 
 class RedisSink(ConnectorExtractor):
@@ -27,8 +28,4 @@ class RedisSink(ConnectorExtractor):
                     source=connector_name,
                 )
             )
-            return RedisSinkConnector(
-                type=KafkaConnectorTypesEnum.SINK,
-                name=connector_name,
-                config=config,
-            )
+            return RedisSinkConnector(name=connector_name, config=config)
