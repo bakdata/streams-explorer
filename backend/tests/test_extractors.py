@@ -415,6 +415,7 @@ class TestExtractors:
                     "redis.hosts": "wc-redis-db-headless:6379",
                     "redis.database": 4,
                     "topics": "topic-1,topic-2",
+                    "errors.deadletterqueue.topic.name": "dead-letter-topic",
                 }
             },
             "redis-sink-connector",
@@ -426,6 +427,7 @@ class TestExtractors:
         assert isinstance(connector, RedisSinkConnector)
         assert connector.name == "redis-sink-connector"
         assert connector.get_topics() == ["topic-1", "topic-2"]
+        assert connector.get_error_topic() == "dead-letter-topic"
 
     def test_streams_bootstrap_producer(self):
         from streams_explorer.core.extractor.default.streams_bootstrap_producer import (

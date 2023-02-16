@@ -33,5 +33,4 @@ class RedisSink(ConnectorExtractor):
                 name=connector_name,
                 config=config,
                 topics=topics,
-                error_topic=None,
             )
