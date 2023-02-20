@@ -1,5 +1,6 @@
 import asyncio
 import datetime
+from time import sleep
 
 import pytest
 from fastapi import status
@@ -346,8 +347,7 @@ class TestApplication:
                     ws1.close()
                     ws2.close()
 
-    @pytest.mark.asyncio
-    async def test_websocket_disconnect(self, mocker: MockerFixture):
+    def test_websocket_disconnect(self, mocker: MockerFixture):
         mocker.patch.object(StreamsExplorer, "setup")
         mocker.patch.object(StreamsExplorer, "watch")
 
@@ -357,8 +357,11 @@ class TestApplication:
         disconnect = mocker.spy(ClientManager, "disconnect")
 
         with TestClient(app) as client:
+            streams_explorer = get_streams_explorer_from_state(app)
             with client.websocket_connect(WS_ENDPOINT) as ws:
                 assert connect.call_count == 1
                 assert disconnect.call_count == 0
                 ws.close()
-                # assert disconnect.call_count == 1 # FIXME
+                sleep(1)  # HACK: wait for coroutine disconnect to run
+                assert disconnect.call_count == 1
+                assert len(streams_explorer.client_manager._clients) == 0
