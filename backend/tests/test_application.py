@@ -1,5 +1,6 @@
 import asyncio
 import datetime
+from time import sleep
 
 import pytest
 from fastapi import status
@@ -28,11 +29,6 @@ from streams_explorer.models.k8s import K8sDeploymentUpdateType, K8sEventType, K
 from streams_explorer.streams_explorer import StreamsExplorer
 from tests.utils import get_streaming_app_deployment
 
-
-async def mock_setup(_):
-    pass
-
-
 APP1 = get_streaming_app_deployment(
     "streaming-app1", "input-topic1", "output-topic1", "error-topic1"
 )
@@ -46,6 +42,9 @@ APP3 = get_streaming_app_deployment(
     "error-topic3",
     pipeline="pipeline2",
 )
+
+
+WS_ENDPOINT = "/api/graph/ws"
 
 
 class TestApplication:
@@ -94,7 +93,7 @@ class TestApplication:
                 )
                 await self.handle_deployment_update(event)
 
-        monkeypatch.setattr(StreamsExplorer, "setup", mock_setup)
+        mocker.patch.object(StreamsExplorer, "setup")
         monkeypatch.setattr(StreamsExplorer, "watch", watch)
 
         connectors = ["connector1", "connector2"]
@@ -213,10 +212,10 @@ class TestApplication:
             assert len(nodes) == 9
 
     @pytest.mark.asyncio
-    async def test_pipeline_not_found(self, monkeypatch: MonkeyPatch):
+    async def test_pipeline_not_found(self, mocker: MockerFixture):
         from main import app
 
-        monkeypatch.setattr(StreamsExplorer, "setup", mock_setup)
+        mocker.patch.object(StreamsExplorer, "setup")
 
         with TestClient(app) as client:
             response = client.get(
@@ -235,8 +234,6 @@ class TestApplication:
         stateful_sets: list[K8sObject],
         cron_jobs: list[K8sObject],
     ):
-        ENDPOINT = "/api/graph/ws"
-
         async def watch(self: StreamsExplorer):
             for deployment in deployments + stateful_sets + cron_jobs:
                 update = K8sDeploymentUpdate(
@@ -266,7 +263,7 @@ class TestApplication:
             event = K8sEvent(type=K8sEventType.WARNING, object=object)
             await self.handle_event(event)
 
-        monkeypatch.setattr(StreamsExplorer, "setup", mock_setup)
+        mocker.patch.object(StreamsExplorer, "setup")
         monkeypatch.setattr(StreamsExplorer, "watch", watch)
 
         from main import app
@@ -278,7 +275,7 @@ class TestApplication:
         with TestClient(app) as client:
             streams_explorer = get_streams_explorer_from_state(app)
 
-            with client.websocket_connect(ENDPOINT) as ws1:
+            with client.websocket_connect(WS_ENDPOINT) as ws1:
                 assert connect.call_count == 1
                 assert update_clients_delta.call_count == 5
                 assert ws1.receive_json() == {
@@ -298,7 +295,7 @@ class TestApplication:
                     "state": K8sReason.BACKOFF,
                 }
 
-                with client.websocket_connect(ENDPOINT) as ws2:
+                with client.websocket_connect(WS_ENDPOINT) as ws2:
                     assert connect.call_count == 2
                     for _ in range(3):  # receive full update
                         ws2.receive_json()
@@ -349,3 +346,26 @@ class TestApplication:
 
                     ws1.close()
                     ws2.close()
+
+    def test_websocket_disconnect(self, mocker: MockerFixture):
+        """
+        Simulate client dropping connection.
+        This occurs when the user closes the browser window or triggers a page refresh.
+        """
+        mocker.patch.object(StreamsExplorer, "setup")
+        mocker.patch.object(StreamsExplorer, "watch")
+
+        from main import app
+
+        connect = mocker.spy(ClientManager, "connect")
+        disconnect = mocker.spy(ClientManager, "disconnect")
+
+        with TestClient(app) as client:
+            streams_explorer = get_streams_explorer_from_state(app)
+            with client.websocket_connect(WS_ENDPOINT) as ws:
+                assert connect.call_count == 1
+                assert disconnect.call_count == 0
+                ws.close()  # client disconnects
+                sleep(1)  # HACK: wait for coroutine disconnect to run
+                assert disconnect.call_count == 1
+                assert len(streams_explorer.client_manager._clients) == 0

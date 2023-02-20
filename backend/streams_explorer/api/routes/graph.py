@@ -44,6 +44,8 @@ async def websocket_endpoint(
             await websocket.receive_text()
 
     except WebSocketDisconnect:
+        # client disconnected: browser window closed or manual page refresh
+        # continue to finally clause and remove client from client manager
         return
     finally:
         await streams_explorer.client_manager.disconnect(websocket)
