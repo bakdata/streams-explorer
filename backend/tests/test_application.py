@@ -263,8 +263,8 @@ class TestApplication:
             event = K8sEvent(type=K8sEventType.WARNING, object=object)
             await self.handle_event(event)
 
-            mocker.patch.object(StreamsExplorer, "setup")
-            monkeypatch.setattr(StreamsExplorer, "watch", watch)
+        mocker.patch.object(StreamsExplorer, "setup")
+        monkeypatch.setattr(StreamsExplorer, "watch", watch)
 
         from main import app
 
