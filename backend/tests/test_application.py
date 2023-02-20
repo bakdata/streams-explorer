@@ -348,6 +348,10 @@ class TestApplication:
                     ws2.close()
 
     def test_websocket_disconnect(self, mocker: MockerFixture):
+        """
+        Simulate client dropping connection.
+        This occurs when the user closes the browser window or triggers a page refresh.
+        """
         mocker.patch.object(StreamsExplorer, "setup")
         mocker.patch.object(StreamsExplorer, "watch")
 
@@ -361,7 +365,7 @@ class TestApplication:
             with client.websocket_connect(WS_ENDPOINT) as ws:
                 assert connect.call_count == 1
                 assert disconnect.call_count == 0
-                ws.close()
+                ws.close()  # client disconnects
                 sleep(1)  # HACK: wait for coroutine disconnect to run
                 assert disconnect.call_count == 1
                 assert len(streams_explorer.client_manager._clients) == 0
