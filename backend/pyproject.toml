@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "streams-explorer"
-version = "2.1.1"
+version = "2.2.5"
 description = "Explore Data Pipelines in Apache Kafka."
 readme = "README.md"
 authors = ["bakdata"]
@@ -43,7 +43,7 @@ kubernetes-asyncio = "^23.6.0"
 mypy = "^0.981"
 flake8 = "^4.0.1"
 black = "^22.6.0"
-isort = "^5.10.1"
+isort = "^5.12.0"
 pytest = "^7.2.0"
 pre-commit = "^2.15.0"
 pytest-asyncio = "^0.20.1"

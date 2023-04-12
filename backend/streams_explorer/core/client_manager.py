@@ -1,8 +1,8 @@
 from dataclasses import dataclass, field
 
-from fastapi import WebSocket
 from loguru import logger
 from pydantic import BaseModel
+from starlette.websockets import WebSocket, WebSocketState
 
 
 @dataclass(frozen=True)
@@ -15,7 +15,8 @@ class ClientManager:
         self._clients.append(websocket)
 
     async def disconnect(self, websocket: WebSocket) -> None:
-        await websocket.close()
+        if websocket.client_state is not WebSocketState.DISCONNECTED:
+            await websocket.close()
         logger.info("WebSocket client {} disconnected", websocket.client)
         self._clients.remove(websocket)
 

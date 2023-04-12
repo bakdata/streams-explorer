@@ -37,7 +37,7 @@
     "@types/react-dom": "^17.0.11",
     "@types/testing-library__jest-dom": "^5.14.1",
     "babel-jest": "^27.3.1",
-    "canvas": "^2.10.2",
+    "canvas": "^2.11.0",
     "dprint": "^0.30.2",
     "eslint": "^8.19.0",
     "eslint-config-next": "^12.2.0",

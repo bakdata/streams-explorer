@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import re
 from typing import TYPE_CHECKING, Awaitable, Callable, NamedTuple, TypedDict
 
 import kubernetes_asyncio.client
@@ -14,6 +15,8 @@ from kubernetes_asyncio.client import (
     V1beta1CronJobList,
     V1Deployment,
     V1DeploymentList,
+    V1Job,
+    V1JobList,
     V1StatefulSet,
     V1StatefulSetList,
 )
@@ -30,7 +33,11 @@ if TYPE_CHECKING:
 class K8sResource(NamedTuple):
     func: Callable[
         ...,
-        V1DeploymentList | V1StatefulSetList | V1beta1CronJobList | EventsV1EventList,
+        V1DeploymentList
+        | V1StatefulSetList
+        | V1JobList
+        | V1beta1CronJobList
+        | EventsV1EventList,
     ]
     return_type: type | None
     callback: Callable[..., Awaitable[None]]
@@ -48,11 +55,12 @@ class K8sEvent(TypedDict):
 
 
 class Kubernetes:
-    context = settings.k8s.deployment.context
-    namespaces = settings.k8s.deployment.namespaces
+    context: str = settings.k8s.deployment.context
+    namespaces: list[str] = settings.k8s.deployment.namespaces
 
     def __init__(self, streams_explorer: StreamsExplorer) -> None:
         self.streams_explorer = streams_explorer
+        self.tasks: set[asyncio.Task[None]] = set()
 
     async def setup(self) -> None:
         try:
@@ -70,7 +78,8 @@ class Kubernetes:
         kubernetes_asyncio.client.Configuration.set_default(conf)
 
         self.k8s_app_client = kubernetes_asyncio.client.AppsV1Api()
-        self.k8s_batch_client = kubernetes_asyncio.client.BatchV1beta1Api()
+        self.k8s_batch_client = kubernetes_asyncio.client.BatchV1Api()
+        self.k8s_beta_batch_client = kubernetes_asyncio.client.BatchV1beta1Api()
         self.k8s_events_client = kubernetes_asyncio.client.EventsV1Api()
 
     async def watch(self) -> None:
@@ -84,8 +93,13 @@ class Kubernetes:
                 *args, namespace=namespace, **kwargs
             )
 
+        def list_jobs(namespace: str, *args, **kwargs) -> V1JobList:
+            return self.k8s_batch_client.list_namespaced_job(
+                *args, namespace=namespace, **kwargs
+            )
+
         def list_cron_jobs(namespace: str, *args, **kwargs) -> V1beta1CronJobList:
-            return self.k8s_batch_client.list_namespaced_cron_job(
+            return self.k8s_beta_batch_client.list_namespaced_cron_job(
                 *args, namespace=namespace, **kwargs
             )
 
@@ -106,6 +120,11 @@ class Kubernetes:
                 self.streams_explorer.handle_deployment_update,
             ),
             K8sResource(
+                list_jobs,
+                V1Job,
+                self.streams_explorer.handle_deployment_update,
+            ),
+            K8sResource(
                 list_cron_jobs,
                 V1beta1CronJob,
                 self.streams_explorer.handle_deployment_update,
@@ -121,27 +140,48 @@ class Kubernetes:
         for resource in resources:
             await asyncio.sleep(resource.delay)
             for namespace in self.namespaces:
-                asyncio.create_task(
+                # create background task and store a strong reference to prevent
+                # garbage collection while the task is scheduled on the event loop
+                # https://docs.python.org/3/library/asyncio-task.html#asyncio.create_task
+                task = asyncio.create_task(
                     self.__watch_namespace(
                         namespace,
                         resource,
                     )
                 )
+                self.tasks.add(task)
+                # remove task from collection upon completion
+                task.add_done_callback(self.tasks.discard)
 
     async def __watch_namespace(
-        self,
-        namespace: str,
-        resource: K8sResource,
+        self, namespace: str, resource: K8sResource, resource_version: int | None = None
     ) -> None:
         return_type = resource.return_type.__name__ if resource.return_type else None
         try:
             async with kubernetes_asyncio.watch.Watch(return_type) as w:
-                async with w.stream(resource.func, namespace) as stream:
+                async with w.stream(
+                    resource.func, namespace, resource_version=resource_version
+                ) as stream:
                     async for event in stream:
                         await resource.callback(event)
         except ApiException as e:
-            if e.reason == "Expired":
-                # restart watch to get fresh resource version
-                return await self.__watch_namespace(namespace, resource)
-            else:
-                raise
+            logger.error("Kubernetes watch error {}", e)
+            match e.status:
+                case 410:  # Expired
+                    # parse resource version from error
+                    resource_version = None
+                    if e.reason:
+                        match = re.match(
+                            r"Expired: too old resource version: \d+ \((\d+)\)",
+                            e.reason,
+                        )
+
+                        if match:
+                            resource_version = int(match.group(1))
+                    return await self.__watch_namespace(
+                        namespace, resource, resource_version
+                    )
+                case 401:  # Unauthorized
+                    # restart watch to get fresh resource version
+                    return await self.__watch_namespace(namespace, resource)
+            raise e

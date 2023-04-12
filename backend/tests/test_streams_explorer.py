@@ -1,6 +1,6 @@
 import pytest
 import pytest_asyncio
-from kubernetes_asyncio.client import V1beta1CronJob
+from kubernetes_asyncio.client import V1beta1CronJob, V1Job
 from pytest import MonkeyPatch
 from pytest_mock import MockerFixture
 
@@ -11,7 +11,7 @@ from streams_explorer.core.extractor.extractor import (
     ProducerAppExtractor,
     StreamsAppExtractor,
 )
-from streams_explorer.core.k8s_app import K8sAppCronJob, K8sObject
+from streams_explorer.core.k8s_app import K8sAppCronJob, K8sAppJob, K8sObject
 from streams_explorer.core.services import schemaregistry
 from streams_explorer.core.services.dataflow_graph import NodeTypesEnum
 from streams_explorer.core.services.kubernetes import K8sDeploymentUpdate
@@ -299,15 +299,19 @@ class TestStreamsExplorer:
         )
 
     @pytest.mark.asyncio
-    async def test_cron_job_extractor(self, streams_explorer: StreamsExplorer):
-        class MockCronjobExtractor(ProducerAppExtractor):
+    async def test_job_extractor(self, streams_explorer: StreamsExplorer):
+        class MockJobExtractor(ProducerAppExtractor):
+            def on_job_parsing(self, job: V1Job) -> K8sAppJob | None:
+                self.job = job
+                return K8sAppJob(job)
+
             def on_cron_job_parsing(
                 self, cron_job: V1beta1CronJob
             ) -> K8sAppCronJob | None:
                 self.cron_job = cron_job
                 return K8sAppCronJob(cron_job)
 
-        extractor = MockCronjobExtractor()
+        extractor = MockJobExtractor()
         extractor_container.extractors = [extractor]
         await streams_explorer.watch()
         await streams_explorer.update_graph()
