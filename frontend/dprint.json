@@ -18,7 +18,7 @@
     "**/node_modules",
     "./.next",
     "./out",
-    "./components/api/fetchers.tsx"
+    "./components/api/apiComponents.ts"
   ],
   "plugins": [
     "https://plugins.dprint.dev/typescript-0.69.4.wasm",

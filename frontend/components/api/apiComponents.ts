@@ -3,8 +3,8 @@
  *
  * @version 0.1.0
  */
-import * as reactQuery from "react-query";
-import { ApiContext, useApiContext } from "./apiContext";
+import * as reactQuery from "@tanstack/react-query";
+import { useApiContext, ApiContext } from "./apiContext";
 import type * as Fetcher from "./apiFetcher";
 import { apiFetch } from "./apiFetcher";
 import type * as Schemas from "./apiSchemas";
@@ -247,7 +247,7 @@ export const fetchGetNodeSchemaVersionsApiNodeNodeIdSchemaGet = (
   >({ url: "/api/node/{nodeId}/schema", method: "get", ...variables, signal });
 
 export const useGetNodeSchemaVersionsApiNodeNodeIdSchemaGet = <
-  TData = GetNodeSchemaVersionsApiNodeNodeIdSchemaGetResponse,
+  TData = GetNodeSchemaVersionsApiNodeNodeIdSchemaGetResponse
 >(
   variables: GetNodeSchemaVersionsApiNodeNodeIdSchemaGetVariables,
   options?: Omit<
@@ -316,7 +316,7 @@ export const fetchGetNodeSchemaApiNodeNodeIdSchemaVersionGet = (
   });
 
 export const useGetNodeSchemaApiNodeNodeIdSchemaVersionGet = <
-  TData = Record<string, any>,
+  TData = Record<string, any>
 >(
   variables: GetNodeSchemaApiNodeNodeIdSchemaVersionGetVariables,
   options?: Omit<
@@ -436,7 +436,7 @@ export const fetchGetMetricsApiMetricsGet = (
   >({ url: "/api/metrics", method: "get", ...variables, signal });
 
 export const useGetMetricsApiMetricsGet = <
-  TData = GetMetricsApiMetricsGetResponse,
+  TData = GetMetricsApiMetricsGetResponse
 >(
   variables: GetMetricsApiMetricsGetVariables,
   options?: Omit<
@@ -470,37 +470,37 @@ export const useGetMetricsApiMetricsGet = <
 
 export type QueryOperation =
   | {
-    path: "/api/graph";
-    operationId: "getPositionedGraphApiGraphGet";
-    variables: GetPositionedGraphApiGraphGetVariables;
-  }
+      path: "/api/graph";
+      operationId: "getPositionedGraphApiGraphGet";
+      variables: GetPositionedGraphApiGraphGetVariables;
+    }
   | {
-    path: "/api/pipelines";
-    operationId: "getPipelinesApiPipelinesGet";
-    variables: GetPipelinesApiPipelinesGetVariables;
-  }
+      path: "/api/pipelines";
+      operationId: "getPipelinesApiPipelinesGet";
+      variables: GetPipelinesApiPipelinesGetVariables;
+    }
   | {
-    path: "/api/node/{node_id}";
-    operationId: "getNodeInfoApiNodeNodeIdGet";
-    variables: GetNodeInfoApiNodeNodeIdGetVariables;
-  }
+      path: "/api/node/{node_id}";
+      operationId: "getNodeInfoApiNodeNodeIdGet";
+      variables: GetNodeInfoApiNodeNodeIdGetVariables;
+    }
   | {
-    path: "/api/node/{node_id}/schema";
-    operationId: "getNodeSchemaVersionsApiNodeNodeIdSchemaGet";
-    variables: GetNodeSchemaVersionsApiNodeNodeIdSchemaGetVariables;
-  }
+      path: "/api/node/{node_id}/schema";
+      operationId: "getNodeSchemaVersionsApiNodeNodeIdSchemaGet";
+      variables: GetNodeSchemaVersionsApiNodeNodeIdSchemaGetVariables;
+    }
   | {
-    path: "/api/node/{node_id}/schema/{version}";
-    operationId: "getNodeSchemaApiNodeNodeIdSchemaVersionGet";
-    variables: GetNodeSchemaApiNodeNodeIdSchemaVersionGetVariables;
-  }
+      path: "/api/node/{node_id}/schema/{version}";
+      operationId: "getNodeSchemaApiNodeNodeIdSchemaVersionGet";
+      variables: GetNodeSchemaApiNodeNodeIdSchemaVersionGetVariables;
+    }
   | {
-    path: "/api/node/linking/{node_id}";
-    operationId: "getLinkingApiNodeLinkingNodeIdGet";
-    variables: GetLinkingApiNodeLinkingNodeIdGetVariables;
-  }
+      path: "/api/node/linking/{node_id}";
+      operationId: "getLinkingApiNodeLinkingNodeIdGet";
+      variables: GetLinkingApiNodeLinkingNodeIdGetVariables;
+    }
   | {
-    path: "/api/metrics";
-    operationId: "getMetricsApiMetricsGet";
-    variables: GetMetricsApiMetricsGetVariables;
-  };
+      path: "/api/metrics";
+      operationId: "getMetricsApiMetricsGet";
+      variables: GetMetricsApiMetricsGetVariables;
+    };
