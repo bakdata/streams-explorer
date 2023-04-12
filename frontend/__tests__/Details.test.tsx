@@ -192,9 +192,8 @@ describe("display node information", () => {
       });
 
     nock("http://localhost")
-      .get(
-        "/api/node/linking/atm-fraud-incoming-transactions-topic?link_type=grafana"
-      )
+      .get("/api/node/linking/atm-fraud-incoming-transactions-topic")
+      .query({ link_type: "grafana" })
       .reply(
         200,
         "http://localhost:3000/d/path/to/dashboard?var-topics=atm-fraud-incoming-transactions-topic"
