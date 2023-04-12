@@ -1,4 +1,4 @@
-import type { QueryKey, UseQueryOptions } from "react-query";
+import type { QueryKey, UseQueryOptions } from "@tanstack/react-query";
 import { QueryOperation } from "./apiComponents";
 
 export type ApiContext = {

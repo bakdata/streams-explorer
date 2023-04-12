@@ -1,7 +1,7 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, within } from "@testing-library/react";
 import nock from "nock";
 import React from "react";
-import { QueryClient, QueryClientProvider } from "react-query";
 import AppComponent from "../components/App";
 
 jest.mock("next/router", () => require("next-router-mock"));

@@ -1,7 +1,7 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render } from "@testing-library/react";
 import nock from "nock";
 import React from "react";
-import { QueryClient, QueryClientProvider } from "react-query";
 import DetailsCard from "../components/DetailsCard";
 import Node from "../components/graph/Node";
 

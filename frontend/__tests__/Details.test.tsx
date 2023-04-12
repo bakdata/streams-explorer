@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   fireEvent,
   render,
@@ -6,7 +7,6 @@ import {
 } from "@testing-library/react";
 import nock from "nock";
 import React from "react";
-import { QueryClient, QueryClientProvider } from "react-query";
 import Details from "../components/Details";
 
 const queryClient = new QueryClient();
