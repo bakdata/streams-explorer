@@ -192,10 +192,13 @@ class TestStreamsExplorer:
 
     @pytest.mark.asyncio
     async def test_update(self, streams_explorer: StreamsExplorer):
-        assert "streaming-app1" in streams_explorer.applications
-        assert "streaming-app2" in streams_explorer.applications
-        assert "streaming-app3" in streams_explorer.applications
-        assert "non-streams-app-deployment" not in streams_explorer.applications
+        assert "test-namespace-streaming-app1" in streams_explorer.applications
+        assert "test-namespace-streaming-app2" in streams_explorer.applications
+        assert "test-namespace-streaming-app3" in streams_explorer.applications
+        assert (
+            "test-namespace-non-streams-app-deployment"
+            not in streams_explorer.applications
+        )
         assert len(streams_explorer.applications) == 3
         assert len(streams_explorer.kafka_connectors) == 2
 
@@ -219,9 +222,9 @@ class TestStreamsExplorer:
         )
 
         assert streams_explorer.get_node_information(
-            "streaming-app2"
+            "test-namespace-streaming-app2"
         ) == NodeInformation(
-            node_id="streaming-app2",
+            node_id="test-namespace-streaming-app2",
             node_type=NodeTypesEnum.STREAMING_APP,
             info=[],
         )
@@ -318,8 +321,11 @@ class TestStreamsExplorer:
         assert extractor.cron_job is not None
         assert extractor.cron_job.metadata is not None
         assert extractor.cron_job.metadata.name == "test-cronjob"
-        assert "test-cronjob" in streams_explorer.applications
-        assert "non-streams-app-cronjob" not in streams_explorer.applications
+        assert "test-namespace-test-cronjob" in streams_explorer.applications
+        assert (
+            "test-namespace-non-streams-app-cronjob"
+            not in streams_explorer.applications
+        )
         extractor_container.extractors.clear()
 
     @pytest.mark.asyncio
@@ -383,7 +389,7 @@ class TestStreamsExplorer:
 
         # apps
         assert (
-            streams_explorer.get_link("streaming-app2", "grafana")
+            streams_explorer.get_link("test-namespace-streaming-app2", "grafana")
             == f"{settings.grafana.url}/d/{settings.grafana.dashboards.consumergroups}?var-consumergroups=consumer-group2"
         )
 
@@ -415,7 +421,9 @@ class TestStreamsExplorer:
 
         # apps
         assert (
-            streams_explorer.get_link("streaming-app2", "redpanda_console")
+            streams_explorer.get_link(
+                "test-namespace-streaming-app2", "redpanda_console"
+            )
             == f"{settings.redpanda_console.url}/groups/consumer-group2"
         )
 
@@ -435,7 +443,7 @@ class TestStreamsExplorer:
 
         # apps
         assert (
-            streams_explorer.get_link("streaming-app2", "akhq")
+            streams_explorer.get_link("test-namespace-streaming-app2", "akhq")
             == f"{settings.akhq.url}/ui/kubernetes-cluster/group/consumer-group2"
         )
 
@@ -453,13 +461,13 @@ class TestStreamsExplorer:
     @pytest.mark.asyncio
     async def test_get_link_kibanalogs(self, streams_explorer: StreamsExplorer):
         assert (
-            streams_explorer.get_link("streaming-app2", "kibanalogs")
+            streams_explorer.get_link("test-namespace-streaming-app2", "kibanalogs")
             == f"{settings.kibanalogs.url}/app/discover#/?_a=(columns:!(message),query:(language:lucene,query:'kubernetes.labels.app: \"streaming-app2\"'))"
         )
 
     @pytest.mark.asyncio
     async def test_get_link_loki(self, streams_explorer: StreamsExplorer):
-        link = streams_explorer.get_link("streaming-app2", "loki")
+        link = streams_explorer.get_link("test-namespace-streaming-app2", "loki")
         assert link is not None
         assert (
             '/explore?orgId=1&left=["now-1h","now","loki",{"expr":"{app=\\"streaming-app2\\"}"}]'

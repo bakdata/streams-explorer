@@ -55,7 +55,7 @@ def get_streaming_app_deployment(
         config_type=config_type,
     )
     spec = V1DeploymentSpec(template=template, selector=V1LabelSelector())
-    metadata = get_metadata(name, pipeline=pipeline)
+    metadata = get_metadata(name, pipeline)
     status = V1DeploymentStatus(ready_replicas=None, replicas=1)
     return V1Deployment(metadata=metadata, spec=spec, status=status)
 
@@ -126,7 +126,7 @@ def get_streaming_app_cronjob(
     return V1beta1CronJob(metadata=metadata, spec=spec)
 
 
-def get_metadata(name, pipeline=None) -> V1ObjectMeta:
+def get_metadata(name, pipeline: str | None = None) -> V1ObjectMeta:
     return V1ObjectMeta(
         annotations={
             "deployment.kubernetes.io/revision": "1",
