@@ -39,9 +39,9 @@ class TestDataFlowGraph:
         df.add_streaming_app(K8sApp.factory(get_streaming_app_deployment()))
 
         assert len(df.graph.nodes) == 4
-        assert df.graph.has_edge("input-topic", "test-app")
-        assert df.graph.has_edge("test-app", "output-topic")
-        assert df.graph.has_edge("test-app", "error-topic")
+        assert df.graph.has_edge("input-topic", "test-namespace-test-app")
+        assert df.graph.has_edge("test-namespace-test-app", "output-topic")
+        assert df.graph.has_edge("test-namespace-test-app", "error-topic")
 
         # should have multiple input topic
         df.reset()
@@ -52,10 +52,10 @@ class TestDataFlowGraph:
         )
 
         assert len(df.graph.nodes) == 5
-        assert df.graph.has_edge("input-topic1", "test-app")
-        assert df.graph.has_edge("input-topic2", "test-app")
-        assert df.graph.has_edge("test-app", "output-topic")
-        assert df.graph.has_edge("test-app", "error-topic")
+        assert df.graph.has_edge("input-topic1", "test-namespace-test-app")
+        assert df.graph.has_edge("input-topic2", "test-namespace-test-app")
+        assert df.graph.has_edge("test-namespace-test-app", "output-topic")
+        assert df.graph.has_edge("test-namespace-test-app", "error-topic")
 
         df.reset()
         df.add_streaming_app(
@@ -67,11 +67,11 @@ class TestDataFlowGraph:
         )
 
         assert len(df.graph.nodes) == 6
-        assert df.graph.has_edge("input-topic", "test-app")
-        assert df.graph.has_edge("test-app", "output-topic")
-        assert df.graph.has_edge("test-app", "error-topic")
-        assert df.graph.has_edge("test-app", "extra-output1")
-        assert df.graph.has_edge("test-app", "extra-output2")
+        assert df.graph.has_edge("input-topic", "test-namespace-test-app")
+        assert df.graph.has_edge("test-namespace-test-app", "output-topic")
+        assert df.graph.has_edge("test-namespace-test-app", "error-topic")
+        assert df.graph.has_edge("test-namespace-test-app", "extra-output1")
+        assert df.graph.has_edge("test-namespace-test-app", "extra-output2")
 
     def test_resolve_input_pattern(self, df: DataFlowGraph):
         df.add_streaming_app(
@@ -96,12 +96,12 @@ class TestDataFlowGraph:
         )
         df.apply_input_pattern_edges()
         assert len(df.graph.nodes) == 7
-        assert df.graph.has_edge("fake-dead-letter-topic", "test-app2")
+        assert df.graph.has_edge("fake-dead-letter-topic", "test-namespace-test-app2")
         assert df.graph.has_edge(
-            "fake2-dead-letter-topic", "test-app2"
+            "fake2-dead-letter-topic", "test-namespace-test-app2"
         ), "Should match on app's own error topic"
-        assert df.graph.has_edge("test-app2", "output-topic2")
-        assert df.graph.has_edge("test-app2", "fake2-dead-letter-topic")
+        assert df.graph.has_edge("test-namespace-test-app2", "output-topic2")
+        assert df.graph.has_edge("test-namespace-test-app2", "fake2-dead-letter-topic")
 
     def test_resolve_input_patterns_for_topics_in_kafka(self, monkeypatch: MonkeyPatch):
         kafka = KafkaAdminClient()
@@ -127,8 +127,10 @@ class TestDataFlowGraph:
         )
         df.apply_input_pattern_edges()
         assert len(df.graph.nodes) == 4
-        assert df.graph.has_edge("another-dead-letter-topic", "test-app2")
-        assert df.graph.has_edge("fake2-dead-letter-topic", "test-app2")
+        assert df.graph.has_edge(
+            "another-dead-letter-topic", "test-namespace-test-app2"
+        )
+        assert df.graph.has_edge("fake2-dead-letter-topic", "test-namespace-test-app2")
         assert df.graph.has_node("another-dead-letter-topic")
         assert not df.graph.has_node("another-non-matching-topic")
 
@@ -155,10 +157,12 @@ class TestDataFlowGraph:
         )
         df.apply_input_pattern_edges()
         assert len(df.graph.nodes) == 8
-        assert df.graph.has_edge(".*-dead-letter-topic", "test-app2")
-        assert not df.graph.has_edge("fake2-dead-letter-topic", "test-app2")
-        assert df.graph.has_edge("test-app2", "output-topic2")
-        assert df.graph.has_edge("test-app2", "fake2-dead-letter-topic")
+        assert df.graph.has_edge(".*-dead-letter-topic", "test-namespace-test-app2")
+        assert not df.graph.has_edge(
+            "fake2-dead-letter-topic", "test-namespace-test-app2"
+        )
+        assert df.graph.has_edge("test-namespace-test-app2", "output-topic2")
+        assert df.graph.has_edge("test-namespace-test-app2", "fake2-dead-letter-topic")
 
     def test_resolve_extra_input_patterns(self, df: DataFlowGraph):
         df.add_streaming_app(
@@ -171,9 +175,9 @@ class TestDataFlowGraph:
         )
 
         assert len(df.graph.nodes) == 5
-        assert df.graph.has_edge("input-topic", "test-app")
-        assert df.graph.has_edge("test-app", "output-topic")
-        assert df.graph.has_edge("test-app", "fake-dead-letter-topic")
+        assert df.graph.has_edge("input-topic", "test-namespace-test-app")
+        assert df.graph.has_edge("test-namespace-test-app", "output-topic")
+        assert df.graph.has_edge("test-namespace-test-app", "fake-dead-letter-topic")
 
         settings.graph.resolve.input_pattern_topics.all = True
         df.add_streaming_app(
@@ -189,12 +193,12 @@ class TestDataFlowGraph:
         )
         df.apply_input_pattern_edges()
         assert len(df.graph.nodes) == 8
-        assert df.graph.has_edge("fake-dead-letter-topic", "test-app2")
+        assert df.graph.has_edge("fake-dead-letter-topic", "test-namespace-test-app2")
         assert df.graph.has_edge(
-            "fake2-dead-letter-topic", "test-app2"
+            "fake2-dead-letter-topic", "test-namespace-test-app2"
         ), "Should match on app's own error topic"
-        assert not df.graph.has_edge("another-topic", "test-app2")
-        assert df.graph.has_edge("fake-dead-letter-topic", "test-app2")
+        assert not df.graph.has_edge("another-topic", "test-namespace-test-app2")
+        assert df.graph.has_edge("fake-dead-letter-topic", "test-namespace-test-app2")
 
     def test_no_resolve_extra_input_patterns(self, df: DataFlowGraph):
         settings.graph.resolve.input_pattern_topics.all = False
@@ -220,8 +224,8 @@ class TestDataFlowGraph:
         )
         df.apply_input_pattern_edges()
         assert len(df.graph.nodes) == 10
-        assert df.graph.has_edge(".*-dead-letter-topic", "test-app2")
-        assert df.graph.has_edge(".*output-topic", "test-app2")
+        assert df.graph.has_edge(".*-dead-letter-topic", "test-namespace-test-app2")
+        assert df.graph.has_edge(".*output-topic", "test-namespace-test-app2")
 
     def test_add_connector(self, df: DataFlowGraph):
         sink_connector = KafkaConnector(
@@ -274,24 +278,24 @@ class TestDataFlowGraph:
         source = Source(
             name="test-source",
             node_type="test-type",
-            target="test-app",
+            target="test-namespace-test-app",
         )
         df.add_streaming_app(K8sApp.factory(get_streaming_app_deployment()))
         df.add_source(source)
         assert len(df.graph.nodes) == 5
-        assert df.graph.has_edge("test-source", "test-app")
+        assert df.graph.has_edge("test-source", "test-namespace-test-app")
         assert len(df.pipelines) == 0
 
     def test_add_sink(self, df: DataFlowGraph):
         sink = Sink(
             name="test-sink",
             node_type="test-type",
-            source="test-app",
+            source="test-namespace-test-app",
         )
         df.add_streaming_app(K8sApp.factory(get_streaming_app_deployment()))
         df.add_sink(sink)
         assert len(df.graph.nodes) == 5
-        assert df.graph.has_edge("test-app", "test-sink")
+        assert df.graph.has_edge("test-namespace-test-app", "test-sink")
         assert len(df.pipelines) == 0
 
     @pytest.mark.asyncio
@@ -306,7 +310,7 @@ class TestDataFlowGraph:
 
     def test_get_node_type(self, df: DataFlowGraph):
         df.add_streaming_app(K8sApp.factory(get_streaming_app_deployment()))
-        assert df.get_node_type("test-app") == "streaming-app"
+        assert df.get_node_type("test-namespace-test-app") == "streaming-app"
 
     def test_node_attributes(self, df: DataFlowGraph):
         df.add_streaming_app(
@@ -317,7 +321,9 @@ class TestDataFlowGraph:
                 )
             )
         )
-        assert df.graph.nodes["test-app1"].get(ATTR_PIPELINE) == "pipeline1"
+        assert (
+            df.graph.nodes["test-namespace-test-app1"].get(ATTR_PIPELINE) == "pipeline1"
+        )
         df.add_streaming_app(
             K8sApp.factory(
                 get_streaming_app_deployment(
@@ -326,7 +332,7 @@ class TestDataFlowGraph:
                 )
             )
         )
-        assert df.graph.nodes["test-app2"].get(ATTR_PIPELINE) is None
+        assert df.graph.nodes["test-namespace-test-app2"].get(ATTR_PIPELINE) is None
 
     def test_pipeline_graph(self, df: DataFlowGraph):
         df.add_streaming_app(
@@ -356,14 +362,14 @@ class TestDataFlowGraph:
         assert set(pipeline1.nodes) == {
             "input-topic",
             "output-topic",
-            "test-app",
+            "test-namespace-test-app",
             "error-topic",
         }
         assert set(pipeline2.nodes) == {
             "output-topic",
             "input-topic2",
             "output-topic2",
-            "test-app2",
+            "test-namespace-test-app2",
             "error-topic2",
         }
 
@@ -402,9 +408,9 @@ class TestDataFlowGraph:
         assert "pipeline1" in df.pipelines
         pipeline1 = df.pipelines["pipeline1"]
         assert set(pipeline1.nodes) == {
-            "test-cronjob",
+            "test-namespace-test-cronjob",
             "output-topic",
-            "test-app",
+            "test-namespace-test-app",
             "output-topic2",
         }
 
@@ -437,13 +443,13 @@ class TestDataFlowGraph:
         pipeline1 = df.pipelines["pipeline1"]
         pipeline2 = df.pipelines["pipeline2"]
         assert set(pipeline1.nodes) == {
-            "test-app1",
+            "test-namespace-test-app1",
             "input-topic1",
             "output-topic1",
             "error-topic1",
         }
         assert set(pipeline2.nodes) == {
-            "test-app2",
+            "test-namespace-test-app2",
             "input-topic2",
             "output-topic2",
             "error-topic2",
@@ -557,14 +563,14 @@ class TestDataFlowGraph:
         assert "test-sink" in pipeline1.nodes
         assert "test-sink" in pipeline2.nodes
         assert set(pipeline1.nodes) == {
-            "test-app1",
+            "test-namespace-test-app1",
             "input-topic1",
             "output-topic1",
             "sink-connector1",
             "test-sink",
         }
         assert set(pipeline2.nodes) == {
-            "test-app2",
+            "test-namespace-test-app2",
             "input-topic2",
             "output-topic2",
             "sink-connector2",
@@ -601,12 +607,12 @@ class TestDataFlowGraph:
         pipeline1 = df.pipelines["pipeline1"]
         pipeline2 = df.pipelines["pipeline2"]
         assert set(pipeline1.nodes) == {
-            "test-app1",
+            "test-namespace-test-app1",
             "input-topic1",
             "output-topic1",
         }
         assert set(pipeline2.nodes) == {
-            "test-app2",
+            "test-namespace-test-app2",
             "output-topic1",
             "output-topic2",
         }
