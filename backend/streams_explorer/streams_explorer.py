@@ -182,7 +182,7 @@ class StreamsExplorer:
         if not event.reason or not event.regarding or not event.regarding.field_path:
             return
         name = re.findall(r"{(.+?)}", event.regarding.field_path)[0]
-        id = event.regarding.namespace + "-" + name
+        id = event.regarding.namespace or "default" + "-" + name
 
         logger.info(
             "{} {} {} ({})",
