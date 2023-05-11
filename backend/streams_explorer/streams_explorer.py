@@ -8,6 +8,7 @@ from loguru import logger
 from streams_explorer.core.client_manager import ClientManager
 from streams_explorer.core.config import settings
 from streams_explorer.core.k8s_app import K8sApp
+from streams_explorer.core.k8s_config_parser import K8sConfigParser
 from streams_explorer.core.node_info_extractor import (
     get_displayed_information_connector,
     get_displayed_information_deployment,
@@ -182,7 +183,7 @@ class StreamsExplorer:
         if not event.reason or not event.regarding or not event.regarding.field_path:
             return
         name = re.findall(r"{(.+?)}", event.regarding.field_path)[0]
-        id = event.regarding.namespace or "default" + "-" + name
+        id = K8sConfigParser.namespace(name, event.regarding.namespace)
 
         logger.info(
             "{} {} {} ({})",

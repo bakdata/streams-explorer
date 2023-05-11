@@ -22,6 +22,10 @@ class K8sConfigParser(Plugin):
     def parse(self) -> K8sConfig:
         ...
 
+    @staticmethod
+    def namespace(name: str, namespace: str | None = None) -> str:
+        return f"{namespace or 'default'}/{name}"
+
 
 class StreamsBootstrapConfigParser(K8sConfigParser):
     """Config parser for deployments configured through streams-bootstrap."""
@@ -39,8 +43,7 @@ class StreamsBootstrapConfigParser(K8sConfigParser):
             name = self.k8s_app.metadata.name
         if not name:
             raise TypeError(f"Name is required for {self.k8s_app.class_name}")
-        namespace = self.k8s_app.metadata.namespace or "default"
-        self._id: str = namespace + "-" + name
+        self._id: str = self.namespace(name, self.k8s_app.metadata.namespace)
         self._name: str = name
 
     def parse_config(self, name: str, value: str) -> None:
