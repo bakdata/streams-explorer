@@ -182,18 +182,19 @@ class StreamsExplorer:
         if not event.reason or not event.regarding or not event.regarding.field_path:
             return
         name = re.findall(r"{(.+?)}", event.regarding.field_path)[0]
+        id = event.regarding.namespace + "-" + name
 
         logger.info(
             "{} {} {} ({})",
             event.regarding.namespace,
-            name,
+            id,
             event.reason,
             event.type,
         )
         logger.debug(event)
 
         # map event to application
-        if app := self.applications.get(name):
+        if app := self.applications.get(id):
             app.state = K8sReason.from_str(event.reason)
             # app.note = event["note"] # TODO
             await self._update_clients_delta(app)
