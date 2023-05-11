@@ -309,7 +309,7 @@ export const fetchGetNodeSchemaApiNodeNodeIdSchemaVersionGet = (
     {},
     GetNodeSchemaApiNodeNodeIdSchemaVersionGetPathParams
   >({
-    url: "/api/node/{nodeId}/schema/{version}",
+    url: "/api/node/{nodeIdSchemaVersion}",
     method: "get",
     ...variables,
     signal,
