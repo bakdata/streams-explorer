@@ -59,17 +59,17 @@ class K8sEvent:
     @property
     def name(self) -> str:
         """Extract deployment name from pod."""
-        assert self.object.regarding  # HACK: wrong type annotation
+        assert self.object.regarding  # HACK: incorrectly typed as optional
         return re.findall(r"{(.+?)}", self.object.regarding.field_path)[0]
 
     @property
     def id(self) -> str:
-        assert self.object.regarding
+        assert self.object.regarding  # HACK: incorrectly typed as optional
         return K8sConfigParser.namespace(self.name, self.object.regarding.namespace)
 
     @property
     def reason(self) -> K8sReason:
-        assert self.object.reason
+        assert self.object.reason  # HACK: incorrectly typed as optional
         return K8sReason.from_str(self.object.reason)
 
 
