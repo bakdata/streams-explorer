@@ -68,6 +68,8 @@ class DataFlowGraph:
             )
 
     def _add_streaming_app(self, graph: nx.DiGraph, app: K8sApp) -> None:
+        if graph.has_node(app.id):
+            raise ValueError(f"Duplicate app {app.id}")
         graph.add_node(
             app.id,
             label=app.name,
