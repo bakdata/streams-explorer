@@ -53,8 +53,15 @@ class K8sDeploymentUpdate(TypedDict):
 
 @dataclass
 class K8sEvent:
+    """Wrapper around EventsV1Event with added convenience methods."""
+
     type: K8sEventType
     object: EventsV1Event
+
+    @property
+    def is_valid(self) -> bool:
+        assert self.object.regarding  # HACK: incorrectly typed as optional
+        return bool(self.object.regarding.field_path)
 
     @property
     def name(self) -> str:
@@ -152,7 +159,7 @@ class Kubernetes:
                 list_events,
                 EventsV1Event,
                 lambda raw_event: self.streams_explorer.handle_event(
-                    K8sEvent(**raw_event)
+                    K8sEvent(type=raw_event["type"], object=raw_event["object"])
                 ),
                 delay=5,
             ),

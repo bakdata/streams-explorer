@@ -174,14 +174,15 @@ class StreamsExplorer:
                 self.__remove_app(app)
 
     async def handle_event(self, event: K8sEvent) -> None:
-        logger.info(
-            "{} {} {} ({})",
-            event.object.regarding.namespace,  # type: ignore
+        logger.trace(event)
+        if not event.is_valid:
+            return
+        logger.debug(
+            "{} {} ({})",
             event.id,
             event.object.reason,
             event.type,
         )
-        logger.debug(event)
 
         # map event to application
         if app := self.applications.get(event.id):
