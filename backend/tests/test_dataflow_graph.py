@@ -73,6 +73,25 @@ class TestDataFlowGraph:
         assert df.graph.has_edge("test-namespace/test-app", "extra-output1")
         assert df.graph.has_edge("test-namespace/test-app", "extra-output2")
 
+    def test_duplicate_node_names(self, df: DataFlowGraph):
+        df.add_streaming_app(
+            K8sApp.factory(
+                get_streaming_app_deployment(
+                    namespace="test-namespace1", pipeline="pipeline1"
+                )
+            )
+        )
+        df.add_streaming_app(
+            K8sApp.factory(
+                get_streaming_app_deployment(
+                    namespace="test-namespace2", pipeline="pipeline2"
+                )
+            )
+        )
+        assert len(df.graph.nodes) == 5
+        assert df.graph.has_node("test-namespace1/test-app")
+        assert df.graph.has_node("test-namespace2/test-app")
+
     def test_resolve_input_pattern(self, df: DataFlowGraph):
         df.add_streaming_app(
             K8sApp.factory(

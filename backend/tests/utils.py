@@ -37,6 +37,7 @@ def get_streaming_app_deployment(
     extra_input_patterns: str | None = None,
     extra: dict[str, str] = {},
     env_prefix: str = "APP_",
+    namespace: str = "test-namespace",
     pipeline: str | None = None,
     consumer_group: str | None = None,
     config_type: ConfigType = ConfigType.ENV,
@@ -55,7 +56,7 @@ def get_streaming_app_deployment(
         config_type=config_type,
     )
     spec = V1DeploymentSpec(template=template, selector=V1LabelSelector())
-    metadata = get_metadata(name, pipeline)
+    metadata = get_metadata(name, namespace=namespace, pipeline=pipeline)
     status = V1DeploymentStatus(ready_replicas=None, replicas=1)
     return V1Deployment(metadata=metadata, spec=spec, status=status)
 
@@ -71,6 +72,7 @@ def get_streaming_app_stateful_set(
     extra_input_patterns: str | None = None,
     extra: dict[str, str] = {},
     env_prefix: str = "APP_",
+    namespace: str = "test-namespace",
     pipeline: str | None = None,
     consumer_group: str | None = None,
     service_name: str = "test-service",
@@ -89,7 +91,7 @@ def get_streaming_app_stateful_set(
         consumer_group=consumer_group,
         config_type=config_type,
     )
-    metadata = get_metadata(name, pipeline=pipeline)
+    metadata = get_metadata(name, namespace=namespace, pipeline=pipeline)
     spec = V1StatefulSetSpec(
         service_name=service_name,
         template=template,
@@ -105,6 +107,7 @@ def get_streaming_app_cronjob(
     output_topic: str | None = "output-topic",
     error_topic: str | None = "error-topic",
     env_prefix: str = "APP_",
+    namespace: str = "test-namespace",
     pipeline: str | None = None,
 ) -> V1beta1CronJob:
     env = get_env(
@@ -122,11 +125,11 @@ def get_streaming_app_cronjob(
     )
     job_template = V1beta1JobTemplateSpec(spec=job_spec)
     spec = V1beta1CronJobSpec(job_template=job_template, schedule="* * * * *")
-    metadata = get_metadata(name, pipeline=pipeline)
+    metadata = get_metadata(name, namespace=namespace, pipeline=pipeline)
     return V1beta1CronJob(metadata=metadata, spec=spec)
 
 
-def get_metadata(name, pipeline: str | None = None) -> V1ObjectMeta:
+def get_metadata(name, *, namespace: str, pipeline: str | None = None) -> V1ObjectMeta:
     return V1ObjectMeta(
         annotations={
             "deployment.kubernetes.io/revision": "1",
@@ -139,7 +142,7 @@ def get_metadata(name, pipeline: str | None = None) -> V1ObjectMeta:
             ATTR_PIPELINE: pipeline,
         },
         name=name,
-        namespace="test-namespace",
+        namespace=namespace,
     )
 
 
