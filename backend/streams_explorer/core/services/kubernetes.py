@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import re
 from dataclasses import dataclass
+from functools import cached_property
 from typing import TYPE_CHECKING, Awaitable, Callable, NamedTuple, TypedDict
 
 import kubernetes_asyncio.client
@@ -63,7 +64,7 @@ class K8sEvent:
         assert self.object.regarding  # HACK: incorrectly typed as optional
         return bool(self.object.regarding.field_path)
 
-    @property
+    @cached_property
     def name(self) -> str:
         """Extract deployment name from pod."""
         assert self.object.regarding  # HACK: incorrectly typed as optional
