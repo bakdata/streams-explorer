@@ -92,6 +92,15 @@ class TestDataFlowGraph:
         assert df.graph.has_node("test-namespace1/test-app")
         assert df.graph.has_node("test-namespace2/test-app")
 
+        with pytest.raises(ValueError, match="Duplicate app test-namespace1/test-app"):
+            df.add_streaming_app(
+                K8sApp.factory(
+                    get_streaming_app_deployment(
+                        namespace="test-namespace1", pipeline="pipeline1"
+                    )
+                )
+            )
+
     def test_resolve_input_pattern(self, df: DataFlowGraph):
         df.add_streaming_app(
             K8sApp.factory(
