@@ -51,7 +51,7 @@ jobs:
         run: poetry run pre-commit run mypy --all-files
 
       - name: Test
-        run: poetry run pytest tests
+        run: poetry run pytest tests --cov=streams_explorer --cov-report term-missing
 
   frontend:
     name: Frontend
