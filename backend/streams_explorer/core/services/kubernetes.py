@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import asyncio
 import re
+from dataclasses import dataclass
+from functools import cached_property
 from typing import TYPE_CHECKING, Awaitable, Callable, NamedTuple, TypedDict
 
 import kubernetes_asyncio.client
@@ -24,7 +26,8 @@ from loguru import logger
 
 from streams_explorer.core.config import settings
 from streams_explorer.core.k8s_app import K8sObject
-from streams_explorer.models.k8s import K8sDeploymentUpdateType, K8sEventType
+from streams_explorer.core.k8s_config_parser import K8sConfigParser
+from streams_explorer.models.k8s import K8sDeploymentUpdateType, K8sEventType, K8sReason
 
 if TYPE_CHECKING:
     from streams_explorer.streams_explorer import StreamsExplorer
@@ -49,9 +52,33 @@ class K8sDeploymentUpdate(TypedDict):
     object: K8sObject
 
 
-class K8sEvent(TypedDict):
+@dataclass
+class K8sEvent:
+    """Wrapper around EventsV1Event with added convenience methods."""
+
     type: K8sEventType
     object: EventsV1Event
+
+    @property
+    def is_valid(self) -> bool:
+        assert self.object.regarding  # HACK: incorrectly typed as optional
+        return bool(self.object.regarding.field_path)
+
+    @cached_property
+    def name(self) -> str:
+        """Extract deployment name from pod."""
+        assert self.object.regarding  # HACK: incorrectly typed as optional
+        return re.findall(r"{(.+?)}", self.object.regarding.field_path)[0]
+
+    @property
+    def id(self) -> str:
+        assert self.object.regarding  # HACK: incorrectly typed as optional
+        return K8sConfigParser.namespace(self.name, self.object.regarding.namespace)
+
+    @property
+    def reason(self) -> K8sReason:
+        assert self.object.reason  # HACK: incorrectly typed as optional
+        return K8sReason.from_str(self.object.reason)
 
 
 class Kubernetes:
@@ -132,7 +159,9 @@ class Kubernetes:
             K8sResource(
                 list_events,
                 EventsV1Event,
-                self.streams_explorer.handle_event,
+                lambda raw_event: self.streams_explorer.handle_event(
+                    K8sEvent(type=raw_event["type"], object=raw_event["object"])
+                ),
                 delay=5,
             ),
         )

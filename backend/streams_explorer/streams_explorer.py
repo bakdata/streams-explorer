@@ -1,5 +1,3 @@
-import re
-
 from cachetools.func import ttl_cache
 from fastapi import WebSocket
 from kubernetes_asyncio.client import V1beta1CronJob, V1Job
@@ -25,7 +23,7 @@ from streams_explorer.core.services.linking_services import LinkingService
 from streams_explorer.core.services.metric_providers import MetricProvider
 from streams_explorer.extractors import extractor_container
 from streams_explorer.models.graph import Metric
-from streams_explorer.models.k8s import K8sDeploymentUpdateType, K8sReason
+from streams_explorer.models.k8s import K8sDeploymentUpdateType
 from streams_explorer.models.kafka_connector import KafkaConnector
 from streams_explorer.models.node_information import (
     NodeInfoListItem,
@@ -175,26 +173,20 @@ class StreamsExplorer:
             case K8sDeploymentUpdateType.DELETED:
                 self.__remove_app(app)
 
-    async def handle_event(self, raw_event: K8sEvent) -> None:
-        event = raw_event["object"]
-
-        # extract deployment name from pod
-        if not event.reason or not event.regarding or not event.regarding.field_path:
+    async def handle_event(self, event: K8sEvent) -> None:
+        logger.trace(event)
+        if not event.is_valid:
             return
-        name = re.findall(r"{(.+?)}", event.regarding.field_path)[0]
-
-        logger.info(
-            "{} {} {} ({})",
-            event.regarding.namespace,
-            name,
-            event.reason,
+        logger.debug(
+            "{} {} ({})",
+            event.id,
+            event.object.reason,
             event.type,
         )
-        logger.debug(event)
 
         # map event to application
-        if app := self.applications.get(name):
-            app.state = K8sReason.from_str(event.reason)
+        if app := self.applications.get(event.id):
+            app.state = event.reason
             # app.note = event["note"] # TODO
             await self._update_clients_delta(app)
 

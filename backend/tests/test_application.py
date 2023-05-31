@@ -144,9 +144,9 @@ class TestApplication:
             await asyncio.sleep(1)
 
             nodes = fetch_graph()
-            assert "streaming-app1" in nodes
-            assert "streaming-app2" in nodes
-            assert "streaming-app3" in nodes
+            assert "test-namespace/streaming-app1" in nodes
+            assert "test-namespace/streaming-app2" in nodes
+            assert "test-namespace/streaming-app3" in nodes
             assert "connector1" in nodes
             assert "connector2" in nodes
             assert "input-topic1" in nodes
@@ -169,9 +169,9 @@ class TestApplication:
 
             await asyncio.sleep(1)  # update graph
             nodes = fetch_graph()
-            assert "streaming-app1" in nodes
-            assert "streaming-app2" in nodes
-            assert "streaming-app3" not in nodes
+            assert "test-namespace/streaming-app1" in nodes
+            assert "test-namespace/streaming-app2" in nodes
+            assert "test-namespace/streaming-app3" not in nodes
             assert "connector1" in nodes
             assert "connector2" in nodes
             assert "input-topic1" in nodes
@@ -196,9 +196,9 @@ class TestApplication:
 
             await asyncio.sleep(1)  # update graph
             nodes = fetch_graph()
-            assert "streaming-app1" in nodes
-            assert "streaming-app2" in nodes
-            assert "streaming-app3" not in nodes
+            assert "test-namespace/streaming-app1" in nodes
+            assert "test-namespace/streaming-app2" in nodes
+            assert "test-namespace/streaming-app3" not in nodes
             assert "connector1" in nodes
             assert "connector2" not in nodes
             assert "input-topic1" in nodes
@@ -279,18 +279,18 @@ class TestApplication:
                 assert connect.call_count == 1
                 assert update_clients_delta.call_count == 5
                 assert ws1.receive_json() == {
-                    "id": "streaming-app1",
+                    "id": "test-namespace/streaming-app1",
                     "replicas": [None, 1],
                     "state": K8sReason.UNKNOWN,
                 }
                 assert update_client_full.call_count == 1
                 assert ws1.receive_json() == {
-                    "id": "streaming-app2",
+                    "id": "test-namespace/streaming-app2",
                     "replicas": [None, 1],
                     "state": K8sReason.STARTED,
                 }
                 assert ws1.receive_json() == {
-                    "id": "streaming-app3",
+                    "id": "test-namespace/streaming-app3",
                     "replicas": [None, 1],
                     "state": K8sReason.BACKOFF,
                 }
@@ -315,7 +315,7 @@ class TestApplication:
                         ws1.receive_json()
                         == ws2.receive_json()
                         == {
-                            "id": "streaming-app1",
+                            "id": "test-namespace/streaming-app1",
                             "replicas": [0, 10],
                             "state": K8sReason.UNKNOWN,
                         }
@@ -338,7 +338,7 @@ class TestApplication:
                         ws1.receive_json()
                         == ws2.receive_json()
                         == {
-                            "id": "streaming-app3",
+                            "id": "test-namespace/streaming-app3",
                             "replicas": [None, 1],
                             "state": K8sReason.STARTED,
                         }
