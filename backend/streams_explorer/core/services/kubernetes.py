@@ -212,6 +212,13 @@ class Kubernetes:
 
                         if match:
                             resource_version = int(match.group(1))
+                    logger.debug(
+                        "Restarting Kubernetes {} watch {}",
+                        return_type,
+                        f"at resource version {resource_version}"
+                        if resource_version
+                        else "from beginning",
+                    )
                     return await self.__watch_namespace(
                         namespace, resource, resource_version
                     )
