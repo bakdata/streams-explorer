@@ -204,6 +204,7 @@ class Kubernetes:
                 case 410:  # Expired
                     # parse resource version from error
                     resource_version = None
+                    # FIXME: leads to graph errors, e.g. in data_flow.apply_input_pattern_edges()
                     if e.reason:
                         match = re.match(
                             r"Expired: too old resource version: \d+ \((\d+)\)",
@@ -217,7 +218,7 @@ class Kubernetes:
                         return_type,
                         f"at resource version {resource_version}"
                         if resource_version
-                        else "from beginning",
+                        else "from the start",
                     )
                     return await self.__watch_namespace(
                         namespace, resource, resource_version
