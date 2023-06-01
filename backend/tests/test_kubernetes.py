@@ -96,7 +96,7 @@ async def test_watch_namespace_error(kubernetes: Kubernetes, mocker: MockFixture
         await mock_watch_namespace(
             "test-namespace",
             K8sResource(
-                mock_list_deployments, return_type=None, callback=mock_callback
+                mock_list_deployments, return_type=V1Deployment, callback=mock_callback
             ),
         )
         assert e.value.status == 500
@@ -110,7 +110,7 @@ async def test_watch_namespace_error(kubernetes: Kubernetes, mocker: MockFixture
         await mock_watch_namespace(
             "test-namespace",
             K8sResource(
-                mock_list_deployments, return_type=None, callback=mock_callback
+                mock_list_deployments, return_type=V1Deployment, callback=mock_callback
             ),
         )
         assert e.value.status == 409
@@ -141,13 +141,15 @@ async def test_watch_namespace_restart_expired(
         await mock_watch_namespace(
             "test-namespace",
             K8sResource(
-                mock_list_deployments, return_type=None, callback=mock_callback
+                mock_list_deployments, return_type=V1Deployment, callback=mock_callback
             ),
         )
         assert isinstance(e, RecursionError)
     mock_watch_namespace.assert_called_with(
         "test-namespace",
-        K8sResource(mock_list_deployments, return_type=None, callback=mock_callback),
+        K8sResource(
+            mock_list_deployments, return_type=V1Deployment, callback=mock_callback
+        ),
         resource_version=None,
     )
 
@@ -176,12 +178,14 @@ async def test_watch_namespace_restart_expired_with_resource_version(
         await mock_watch_namespace(
             "test-namespace",
             K8sResource(
-                mock_list_deployments, return_type=None, callback=mock_callback
+                mock_list_deployments, return_type=V1Deployment, callback=mock_callback
             ),
         )
     mock_watch_namespace.assert_called_with(
         "test-namespace",
-        K8sResource(mock_list_deployments, return_type=None, callback=mock_callback),
+        K8sResource(
+            mock_list_deployments, return_type=V1Deployment, callback=mock_callback
+        ),
         resource_version=987654321,
     )
 
@@ -210,11 +214,13 @@ async def test_watch_namespace_restart_unauthorized(
         await mock_watch_namespace(
             "test-namespace",
             K8sResource(
-                mock_list_deployments, return_type=None, callback=mock_callback
+                mock_list_deployments, return_type=V1Deployment, callback=mock_callback
             ),
         )
         assert isinstance(e, RecursionError)
     mock_watch_namespace.assert_called_with(
         "test-namespace",
-        K8sResource(mock_list_deployments, return_type=None, callback=mock_callback),
+        K8sResource(
+            mock_list_deployments, return_type=V1Deployment, callback=mock_callback
+        ),
     )

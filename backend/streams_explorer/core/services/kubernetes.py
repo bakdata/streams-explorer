@@ -42,7 +42,7 @@ class K8sResource(NamedTuple):
         | V1beta1CronJobList
         | EventsV1EventList,
     ]
-    return_type: type | None
+    return_type: type
     callback: Callable[..., Awaitable[None]]
     delay: int = 0
 
@@ -185,7 +185,7 @@ class Kubernetes:
     async def __watch_namespace(
         self, namespace: str, resource: K8sResource, resource_version: int | None = None
     ) -> None:
-        return_type = resource.return_type.__name__ if resource.return_type else None
+        return_type = resource.return_type.__name__
         try:
             async with kubernetes_asyncio.watch.Watch(return_type) as w:
                 async with w.stream(
@@ -197,7 +197,7 @@ class Kubernetes:
             formatted_error = " ".join(str(e).splitlines())
             logger.error(
                 "Kubernetes {} watch error {}",
-                return_type or "",
+                return_type,
                 formatted_error,
             )
             match e.status:
