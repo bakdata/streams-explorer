@@ -194,7 +194,12 @@ class Kubernetes:
                     async for event in stream:
                         await resource.callback(event)
         except ApiException as e:
-            logger.error("Kubernetes watch error {}", e)
+            formatted_error = " ".join(str(e).splitlines())
+            logger.error(
+                "Kubernetes {} watch error {}",
+                return_type or "",
+                formatted_error,
+            )
             match e.status:
                 case 410:  # Expired
                     # parse resource version from error
