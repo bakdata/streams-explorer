@@ -78,20 +78,16 @@ class DataFlowGraph:
         )
 
         for input_topic in app.input_topics:
-            self._add_topic(graph, input_topic)
             self._add_input_topic(graph, app.id, input_topic)
         if app.output_topic:
-            self._add_topic(graph, app.output_topic)
             self._add_output_topic(graph, app.id, app.output_topic)
         if app.error_topic:
             self._add_error_topic(graph, app.id, app.error_topic)
         if app.input_pattern:
             self._enqueue_input_pattern(app.input_pattern, app.id)
         for extra_input in app.extra_input_topics:
-            self._add_topic(graph, extra_input)
             self._add_input_topic(graph, app.id, extra_input)
         for extra_output in app.extra_output_topics:
-            self._add_topic(graph, extra_output)
             self._add_output_topic(graph, app.id, extra_output)
         for extra_pattern in app.extra_input_patterns:
             self._enqueue_input_pattern(extra_pattern, app.id)
@@ -178,9 +174,9 @@ class DataFlowGraph:
         return await self.__get_positioned_json_graph(self.graph)
 
     async def get_metrics(self) -> list[Metric]:
-        if self.metric_provider is not None:
-            return await self.metric_provider.get()
-        return []
+        if not self.metric_provider:
+            return []
+        return await self.metric_provider.get()
 
     def get_node_type(self, id: str) -> NodeTypesEnum:
         try:
@@ -208,8 +204,35 @@ class DataFlowGraph:
         return pipelines
 
     @staticmethod
-    def _add_topic(graph: nx.DiGraph, name: str) -> None:
-        graph.add_node(name, label=name, node_type=NodeTypesEnum.TOPIC)
+    def _add_topic(graph: nx.DiGraph, topic_name: str) -> None:
+        graph.add_node(
+            topic_name,
+            **{
+                NodeDataFields.LABEL: topic_name,
+                NodeDataFields.NODE_TYPE: NodeTypesEnum.TOPIC,
+            },
+        )
+
+    @staticmethod
+    def _add_input_topic(graph: nx.DiGraph, app_id: str, topic_name: str) -> None:
+        DataFlowGraph._add_topic(graph, topic_name)
+        graph.add_edge(topic_name, app_id)
+
+    @staticmethod
+    def _add_output_topic(graph: nx.DiGraph, app_id: str, topic_name: str) -> None:
+        DataFlowGraph._add_topic(graph, topic_name)
+        graph.add_edge(app_id, topic_name)
+
+    @staticmethod
+    def _add_error_topic(graph: nx.DiGraph, app_id: str, topic_name: str) -> None:
+        graph.add_node(
+            topic_name,
+            **{
+                NodeDataFields.LABEL: topic_name,
+                NodeDataFields.NODE_TYPE: NodeTypesEnum.ERROR_TOPIC,
+            },
+        )
+        graph.add_edge(app_id, topic_name)
 
     @staticmethod
     def _filter_topic_node_ids(graph: nx.DiGraph) -> set[str]:
@@ -221,19 +244,6 @@ class DataFlowGraph:
             ]
             in (NodeTypesEnum.TOPIC, NodeTypesEnum.ERROR_TOPIC)
         }
-
-    @staticmethod
-    def _add_input_topic(graph: nx.DiGraph, app_id: str, topic_name: str) -> None:
-        graph.add_edge(topic_name, app_id)
-
-    def _add_output_topic(
-        self,
-        graph: nx.DiGraph,
-        app_id: str,
-        topic_name: str,
-    ) -> None:
-        self._add_topic(graph, topic_name)
-        graph.add_edge(app_id, topic_name)
 
     def _enqueue_input_pattern(self, pattern: str, node_id: str) -> None:
         """
@@ -317,21 +327,6 @@ class DataFlowGraph:
         else:
             self.add_pattern_as_topic(self.pipelines[pipeline], node_id, pattern)
 
-    @staticmethod
-    def _add_error_topic(
-        graph: nx.DiGraph,
-        app_id: str,
-        topic_name: str,
-    ) -> None:
-        graph.add_node(
-            topic_name,
-            **{
-                NodeDataFields.LABEL: topic_name,
-                NodeDataFields.NODE_TYPE: NodeTypesEnum.ERROR_TOPIC,
-            },
-        )
-        graph.add_edge(app_id, topic_name)
-
     def reset(self) -> None:
         self.graph.clear()
         self.json_graph.clear()
@@ -340,7 +335,7 @@ class DataFlowGraph:
 
     @staticmethod
     def __get_json_graph(graph: nx.Graph) -> dict:
-        json_graph: dict = nx.node_link_data(graph)
+        json_graph = dict(nx.node_link_data(graph))
         json_graph["edges"] = json_graph.pop("links")
         return json_graph
 
