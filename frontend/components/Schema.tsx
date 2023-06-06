@@ -5,7 +5,7 @@ import ReactJson from "react-json-view";
 import {
   useGetNodeSchemaApiNodeNodeIdSchemaVersionGet,
   useGetNodeSchemaVersionsApiNodeNodeIdSchemaGet,
-} from "./api/fetchers";
+} from "./api/apiComponents";
 import style from "./Details.module.css";
 
 interface SchemaProps {
@@ -16,10 +16,10 @@ const Schema = ({ nodeId }: SchemaProps) => {
   const [schemaVersion, setSchemaVersion] = useState<number | null>(null);
   const {
     data: versions,
-    loading: versionsLoading,
+    isLoading: versionsLoading,
     error: versionsError,
   } = useGetNodeSchemaVersionsApiNodeNodeIdSchemaGet({
-    node_id: nodeId,
+    pathParams: { nodeId: nodeId },
   });
 
   const menu = (
@@ -38,13 +38,11 @@ const Schema = ({ nodeId }: SchemaProps) => {
   const {
     data: schema,
     refetch: fetchSchema,
-    loading: schemaLoading,
+    isLoading: schemaLoading,
     error: schemaError,
   } = useGetNodeSchemaApiNodeNodeIdSchemaVersionGet({
-    node_id: nodeId,
-    version: schemaVersion!,
-    lazy: true,
-  });
+    pathParams: { nodeId: nodeId, version: schemaVersion! },
+  }, { enabled: false });
 
   useEffect(() => {
     if (versions) {

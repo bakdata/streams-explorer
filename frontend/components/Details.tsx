@@ -4,10 +4,10 @@ import copy from "copy-to-clipboard";
 import React from "react";
 import ReactJson from "react-json-view";
 import {
-  NodeInfoListItem,
   useGetLinkingApiNodeLinkingNodeIdGet,
   useGetNodeInfoApiNodeNodeIdGet,
-} from "./api/fetchers";
+} from "./api/apiComponents";
+import { NodeInfoListItem } from "./api/apiSchemas";
 import style from "./Details.module.css";
 import Schema from "./Schema";
 
@@ -16,17 +16,17 @@ interface DetailsProps {
 }
 
 const Details = ({ nodeId }: DetailsProps) => {
-  const { data, loading, error } = useGetNodeInfoApiNodeNodeIdGet({
-    node_id: nodeId,
+  const { data, isLoading, isError } = useGetNodeInfoApiNodeNodeIdGet({
+    pathParams: { nodeId: nodeId },
   });
-  if (loading) {
+  if (isLoading) {
     return (
       <div className={style.loadingSpinnerContainer}>
         <Spin tip="Loading..." />
       </div>
     );
   }
-  if (!data || error) {
+  if (!data || isError) {
     return (
       <Alert
         data-testid="no-node-info"
@@ -82,14 +82,15 @@ const NodeInfoDetail = ({ infoListItem, nodeId }: NodeInfoDetailProps) => {
 };
 
 const LinkInfo = ({ infoListItem, nodeId }: NodeInfoDetailProps) => {
-  const { data: linkToService, loading } = useGetLinkingApiNodeLinkingNodeIdGet(
-    {
-      node_id: nodeId,
-      queryParams: { link_type: infoListItem.value as string },
-    }
-  );
+  const { data: linkToService, isLoading } =
+    useGetLinkingApiNodeLinkingNodeIdGet(
+      {
+        pathParams: { nodeId: nodeId },
+        queryParams: { link_type: infoListItem.value as string },
+      }
+    );
 
-  if (loading) {
+  if (isLoading) {
     return <Spin tip="Loading link..." />;
   }
   if (linkToService) {

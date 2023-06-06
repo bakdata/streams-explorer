@@ -1,14 +1,15 @@
-import nock from "nock";
-import React from "react";
-import { RestfulProvider } from "restful-react";
-
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   fireEvent,
   render,
   waitFor,
   waitForElementToBeRemoved,
 } from "@testing-library/react";
+import nock from "nock";
+import React from "react";
 import Details from "../components/Details";
+
+const queryClient = new QueryClient();
 
 describe("display node information", () => {
   beforeAll(() => {
@@ -33,9 +34,9 @@ describe("display node information", () => {
     });
 
     const { findByTestId, asFragment } = render(
-      <RestfulProvider base="http://localhost">
+      <QueryClientProvider client={queryClient}>
         <Details nodeId="1" />
-      </RestfulProvider>
+      </QueryClientProvider>
     );
 
     await findByTestId("no-node-info");
@@ -50,9 +51,9 @@ describe("display node information", () => {
     });
 
     const { findByText, asFragment } = render(
-      <RestfulProvider base="http://localhost">
+      <QueryClientProvider client={queryClient}>
         <Details nodeId="2" />
-      </RestfulProvider>
+      </QueryClientProvider>
     );
 
     await findByText("connector");
@@ -67,9 +68,9 @@ describe("display node information", () => {
     });
 
     const { findByText, asFragment } = render(
-      <RestfulProvider base="http://localhost">
+      <QueryClientProvider client={queryClient}>
         <Details nodeId="2" />
-      </RestfulProvider>
+      </QueryClientProvider>
     );
 
     await findByText("connector");
@@ -106,9 +107,9 @@ describe("display node information", () => {
         "http://localhost:5601/app/kibana#/discover?_a=(columns:!(_source),query:(language:lucene,query:'kubernetes.labels.app:%20%22atm-fraud-transactionavroproducer%22'))"
       );
     const { findByText, asFragment, queryByText } = render(
-      <RestfulProvider base="http://localhost">
+      <QueryClientProvider client={queryClient}>
         <Details nodeId="atm-fraud-transactionavroproducer" />
-      </RestfulProvider>
+      </QueryClientProvider>
     );
 
     await findByText("streaming-app");
@@ -191,18 +192,17 @@ describe("display node information", () => {
       });
 
     nock("http://localhost")
-      .get(
-        "/api/node/linking/atm-fraud-incoming-transactions-topic?link_type=grafana"
-      )
+      .get("/api/node/linking/atm-fraud-incoming-transactions-topic")
+      .query({ link_type: "grafana" })
       .reply(
         200,
         "http://localhost:3000/d/path/to/dashboard?var-topics=atm-fraud-incoming-transactions-topic"
       );
 
     const { getByText, findByText, getByTestId } = render(
-      <RestfulProvider base="http://localhost">
+      <QueryClientProvider client={queryClient}>
         <Details nodeId="atm-fraud-incoming-transactions-topic" />
-      </RestfulProvider>
+      </QueryClientProvider>
     );
 
     await findByText("v2"); // get dropdown menu for schema version
@@ -252,9 +252,9 @@ describe("display node information", () => {
       .reply(404);
 
     const { findByTestId } = render(
-      <RestfulProvider base="http://localhost">
+      <QueryClientProvider client={queryClient}>
         <Details nodeId="atm-fraud-incoming-transactions-topic" />
-      </RestfulProvider>
+      </QueryClientProvider>
     );
 
     await findByTestId("no-schema-versions");
@@ -280,9 +280,9 @@ describe("display node information", () => {
       .reply(200, []);
 
     const { findByTestId } = render(
-      <RestfulProvider base="http://localhost">
+      <QueryClientProvider client={queryClient}>
         <Details nodeId="atm-fraud-incoming-transactions-topic" />
-      </RestfulProvider>
+      </QueryClientProvider>
     );
 
     await findByTestId("no-schema-versions");
@@ -312,9 +312,9 @@ describe("display node information", () => {
       .reply(404);
 
     const { findByTestId } = render(
-      <RestfulProvider base="http://localhost">
+      <QueryClientProvider client={queryClient}>
         <Details nodeId="atm-fraud-incoming-transactions-topic" />
-      </RestfulProvider>
+      </QueryClientProvider>
     );
 
     await findByTestId("no-schema");

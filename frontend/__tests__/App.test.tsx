@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   act,
   fireEvent,
@@ -9,9 +10,17 @@ import mockRouter from "next-router-mock";
 import singletonRouter from "next/router";
 import nock from "nock";
 import React from "react";
-import App from "../components/App";
+import AppComponent from "../components/App";
 
 jest.mock("next/router", () => require("next-router-mock"));
+
+const queryClient = new QueryClient();
+
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <AppComponent />
+  </QueryClientProvider>
+);
 
 // -- Mock GraphVisualization
 jest.mock("../components/graph/Visualization", () => {
