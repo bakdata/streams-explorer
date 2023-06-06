@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export default function middleware(req: NextRequest) {
-  const { pathname, protocol } = req.nextUrl;
+  const nextUrl = req.nextUrl;
 
-  if (pathname.startsWith("/api")) {
-    return NextResponse.rewrite(`${protocol}//localhost:8000${pathname}`);
+  if (nextUrl.pathname.startsWith("/api")) {
+    nextUrl.host = "localhost";
+    nextUrl.port = "8000";
+    return NextResponse.rewrite(nextUrl);
   }
 
   return NextResponse.next();
