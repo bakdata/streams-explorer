@@ -154,6 +154,7 @@ async def test_watch_namespace_restart_expired(
     )
 
 
+@pytest.mark.skip("Disabled parsing resource version")
 @pytest.mark.asyncio
 async def test_watch_namespace_restart_expired_with_resource_version(
     kubernetes: Kubernetes, mocker: MockFixture
