@@ -205,14 +205,15 @@ class Kubernetes:
                     # parse resource version from error
                     resource_version = None
                     # FIXME: leads to graph errors, e.g. in data_flow.apply_input_pattern_edges()
-                    if e.reason:
-                        match = re.match(
-                            r"Expired: too old resource version: \d+ \((\d+)\)",
-                            e.reason,
-                        )
+                    # probably due to missed events for added or removed deployments
+                    # if e.reason:
+                    #     match = re.match(
+                    #         r"Expired: too old resource version: \d+ \((\d+)\)",
+                    #         e.reason,
+                    #     )
 
-                        if match:
-                            resource_version = int(match.group(1))
+                    #     if match:
+                    #         resource_version = int(match.group(1))
                     logger.debug(
                         "Restarting Kubernetes {} watch {}",
                         return_type,
