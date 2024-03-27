@@ -217,7 +217,7 @@ for Kafka Connect Elasticsearch connector
 
 ![demo-pipeline](https://github.com/bakdata/streams-explorer/blob/main/screens/demo-pipeline.png?raw=true)
 
-[ATM Fraud detection with streams-bootstrap](https://github.com/bakdata/streams-explorer/blob/main/demo-atm-fraud/README.md)
+[ATM Fraud detection with streams-bootstrap](https://github.com/bakdata/pipeline-atm-fraud)
 
 ## Plugin customization
 
