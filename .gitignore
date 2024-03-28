@@ -1,11 +1,8 @@
 # Ignore dynaconf secret files
 .secrets.*
-*_private*
 
 backend/static/
 backend/docs/
-demo-atm-fraud/build/
-.gradle
 
 # Generic
 .DS_Store
