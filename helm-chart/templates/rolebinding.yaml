@@ -28,7 +28,7 @@ metadata:
     app.kubernetes.io/instance: {{ $root.Release.Name }}
     app.kubernetes.io/managed-by: {{ $root.Release.Service }}
     helm.sh/chart: {{ include "streams-explorer.chart" $ }}
-  name: {{ template "streams-explorer.fullname" $ }}
+  name: {{ template "streams-explorer.fullname" $ | quote }}
   namespace: {{ . | quote }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
