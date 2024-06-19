@@ -35,7 +35,7 @@ fastapi-utils = "^0.2.1"
 fastapi = "^0.78.0"
 uvicorn = { extras = ["standard"], version = "^0.20.0" }
 pygraphviz = "^1.10"
-confluent-kafka = "2.0.4"
+confluent-kafka = "2.4.0"
 cachetools = "^4.2.2"
 kubernetes-asyncio = "^23.6.0"
 
