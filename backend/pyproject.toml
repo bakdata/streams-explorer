@@ -32,7 +32,7 @@ dynaconf = "^3.1.7"
 httpx = "^0.23.1"
 pydantic = "^1.9.1"
 fastapi-utils = "^0.2.1"
-fastapi = "^0.103.1" 
+fastapi = "^0.103.1"
 uvicorn = { extras = ["standard"], version = "^0.20.0" }
 pygraphviz = "^1.10"
 confluent-kafka = "2.4.0"
@@ -40,7 +40,7 @@ cachetools = "^4.2.2"
 kubernetes-asyncio = "^23.6.0"
 
 [tool.poetry.group.dev.dependencies]
-mypy = "1.0.0"
+mypy = "^0.981"
 flake8 = "^4.0.1"
 black = "^22.6.0"
 isort = "^5.12.0"
