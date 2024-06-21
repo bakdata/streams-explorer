@@ -5,7 +5,7 @@ WORKDIR /build
 COPY ./frontend/package.json ./frontend/package-lock.json /build/
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN apt-get -y update && \
-    apt-get --no-install-recommends -y install libc6-dev gcc libgraphviz-dev build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
+    apt-get -y install gcc build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
 RUN npm ci
 
 COPY ./frontend /build
@@ -15,7 +15,7 @@ RUN npm run build
 FROM python:3.10-slim AS backend
 
 RUN apt-get -y update && \
-    apt-get --no-install-recommends -y install libc6-dev gcc libgraphviz-dev build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
+    apt-get --no-install-recommends -y install libc6-dev gcc libgraphviz-dev
 
 WORKDIR /app
 
