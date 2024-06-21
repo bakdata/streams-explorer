@@ -27,7 +27,7 @@ RUN pip install poetry && \
 FROM python:3.10-slim AS prod
 
 RUN apt-get -y update && \
-    apt-get --no-install-recommends -y install graphviz && \
+    apt-get --no-install-recommends -y install graphviz build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
