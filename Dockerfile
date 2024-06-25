@@ -4,6 +4,9 @@ FROM node:16 AS frontend
 WORKDIR /build
 COPY ./frontend/package.json ./frontend/package-lock.json /build/
 ENV NEXT_TELEMETRY_DISABLED=1
+# We need the libraries ,because of canvas https://github.com/Automattic/node-canvas/issues/1662
+RUN apt-get -y update && \
+    apt-get -y install gcc build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
 RUN npm ci
 
 COPY ./frontend /build
