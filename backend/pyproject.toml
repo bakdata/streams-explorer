@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "streams-explorer"
-version = "2.3.2"
+version = "2.3.3"
 description = "Explore Data Pipelines in Apache Kafka."
 readme = "README.md"
 authors = ["bakdata"]
