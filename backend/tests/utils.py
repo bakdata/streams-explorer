@@ -48,9 +48,9 @@ def get_streaming_app_deployment(
     streams_bootstrap_version: StreamsBootstrapVersion = 3,
 ) -> V1Deployment:
     template = get_template(
-        input_topics,
-        output_topic,
-        error_topic,
+        input_topics=input_topics,
+        output_topic=output_topic,
+        error_topic=error_topic,
         input_pattern=input_pattern,
         multiple_inputs=multiple_inputs,
         multiple_outputs=multiple_outputs,
@@ -86,10 +86,10 @@ def get_streaming_app_stateful_set(
     streams_bootstrap_version: StreamsBootstrapVersion = 3,
 ) -> V1StatefulSet:
     template = get_template(
-        input_topics,
-        output_topic,
-        error_topic,
-        input_pattern,
+        input_topics=input_topics,
+        output_topic=output_topic,
+        error_topic=error_topic,
+        input_pattern=input_pattern,
         multiple_inputs=multiple_inputs,
         multiple_outputs=multiple_outputs,
         extra_input_patterns=extra_input_patterns,
@@ -117,12 +117,14 @@ def get_streaming_app_cronjob(
     env_prefix: str = "APP_",
     namespace: str = "test-namespace",
     pipeline: str | None = None,
+    streams_bootstrap_version: StreamsBootstrapVersion = 3,
 ) -> V1beta1CronJob:
     env = get_env(
-        input_topics,
-        output_topic,
-        error_topic,
+        input_topics=input_topics,
+        output_topic=output_topic,
+        error_topic=error_topic,
         env_prefix=env_prefix,
+        streams_bootstrap_version=streams_bootstrap_version,
     )
     container = V1Container(name="test-container", env=env)
     pod_spec = V1PodSpec(containers=[container])
@@ -155,6 +157,7 @@ def get_metadata(name, *, namespace: str, pipeline: str | None = None) -> V1Obje
 
 
 def get_env(
+    *,
     input_topics: str | None,
     output_topic: str | None,
     error_topic: str | None,
@@ -163,8 +166,8 @@ def get_env(
     multiple_outputs: str | None = None,
     extra_input_patterns: str | None = None,
     extra: dict[str, str] = {},
-    env_prefix: str = "APP_",
-    streams_bootstrap_version: StreamsBootstrapVersion = 3,
+    env_prefix: str,
+    streams_bootstrap_version: StreamsBootstrapVersion,
 ) -> list[V1EnvVar]:
     labeled_topics_prefix = "EXTRA" if streams_bootstrap_version == 2 else "LABELED"
     env = [V1EnvVar(name="ENV_PREFIX", value=env_prefix)]
@@ -208,6 +211,7 @@ def _create_arg(name: str, value: str) -> str:
 
 
 def get_args(
+    *,
     input_topics: str | None,
     output_topic: str | None,
     error_topic: str | None,
@@ -215,7 +219,7 @@ def get_args(
     multiple_outputs: str | None,
     extra_input_patterns: str | None,
     extra: dict[str, str],
-    streams_bootstrap_version: StreamsBootstrapVersion = 3,
+    streams_bootstrap_version: StreamsBootstrapVersion,
 ) -> list[str]:
     args = []
     if input_topics:
@@ -237,6 +241,7 @@ def get_args(
 
 
 def get_template(
+    *,
     input_topics: str | None,
     output_topic: str | None,
     error_topic: str | None,
@@ -245,22 +250,22 @@ def get_template(
     multiple_outputs: str | None,
     extra_input_patterns: str | None,
     extra: dict[str, str],
-    env_prefix: str = "APP_",
-    consumer_group: str | None = None,
-    config_type: ConfigType = ConfigType.ENV,
-    streams_bootstrap_version: StreamsBootstrapVersion = 3,
+    env_prefix: str,
+    consumer_group: str | None,
+    config_type: ConfigType,
+    streams_bootstrap_version: StreamsBootstrapVersion,
 ) -> V1PodTemplateSpec:
     env = None
     args = None
     match config_type:
         case ConfigType.ENV:
             env = get_env(
-                input_topics,
-                output_topic,
-                error_topic,
-                input_pattern,
-                multiple_inputs,
-                multiple_outputs,
+                input_topics=input_topics,
+                output_topic=output_topic,
+                error_topic=error_topic,
+                input_pattern=input_pattern,
+                multiple_inputs=multiple_inputs,
+                multiple_outputs=multiple_outputs,
                 extra_input_patterns=extra_input_patterns,
                 env_prefix=env_prefix,
                 extra=extra,
@@ -268,13 +273,13 @@ def get_template(
             )
         case ConfigType.ARGS:
             args = get_args(
-                input_topics,
-                output_topic,
-                error_topic,
-                multiple_inputs,
-                multiple_outputs,
-                extra_input_patterns,
-                extra,
+                input_topics=input_topics,
+                output_topic=output_topic,
+                error_topic=error_topic,
+                multiple_inputs=multiple_inputs,
+                multiple_outputs=multiple_outputs,
+                extra_input_patterns=extra_input_patterns,
+                extra=extra,
                 streams_bootstrap_version=streams_bootstrap_version,
             )
     container = V1Container(name="test-container", env=env, args=args)
