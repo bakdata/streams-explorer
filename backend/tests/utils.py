@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Literal
 
 from kubernetes_asyncio.client import (
     V1beta1CronJob,
@@ -26,6 +27,9 @@ class ConfigType(str, Enum):
     ARGS = "args"
 
 
+StreamsBootstrapVersion = Literal[2, 3]
+
+
 def get_streaming_app_deployment(
     name: str = "test-app",
     input_topics: str | None = "input-topic",
@@ -41,6 +45,7 @@ def get_streaming_app_deployment(
     pipeline: str | None = None,
     consumer_group: str | None = None,
     config_type: ConfigType = ConfigType.ENV,
+    streams_bootstrap_version: StreamsBootstrapVersion = 3,
 ) -> V1Deployment:
     template = get_template(
         input_topics,
@@ -54,6 +59,7 @@ def get_streaming_app_deployment(
         env_prefix=env_prefix,
         consumer_group=consumer_group,
         config_type=config_type,
+        streams_bootstrap_version=streams_bootstrap_version,
     )
     spec = V1DeploymentSpec(template=template, selector=V1LabelSelector())
     metadata = get_metadata(name, namespace=namespace, pipeline=pipeline)
@@ -77,6 +83,7 @@ def get_streaming_app_stateful_set(
     consumer_group: str | None = None,
     service_name: str = "test-service",
     config_type: ConfigType = ConfigType.ENV,
+    streams_bootstrap_version: StreamsBootstrapVersion = 3,
 ) -> V1StatefulSet:
     template = get_template(
         input_topics,
@@ -90,6 +97,7 @@ def get_streaming_app_stateful_set(
         env_prefix=env_prefix,
         consumer_group=consumer_group,
         config_type=config_type,
+        streams_bootstrap_version=streams_bootstrap_version,
     )
     metadata = get_metadata(name, namespace=namespace, pipeline=pipeline)
     spec = V1StatefulSetSpec(
@@ -156,7 +164,9 @@ def get_env(
     extra_input_patterns: str | None = None,
     extra: dict[str, str] = {},
     env_prefix: str = "APP_",
+    streams_bootstrap_version: StreamsBootstrapVersion = 3,
 ) -> list[V1EnvVar]:
+    labeled_topics_prefix = "EXTRA" if streams_bootstrap_version == 2 else "LABELED"
     env = [V1EnvVar(name="ENV_PREFIX", value=env_prefix)]
     if input_topics:
         env.append(V1EnvVar(name=env_prefix + "INPUT_TOPICS", value=input_topics))
@@ -168,16 +178,23 @@ def get_env(
         env.append(V1EnvVar(name=env_prefix + "INPUT_PATTERN", value=input_pattern))
     if multiple_inputs:
         env.append(
-            V1EnvVar(name=env_prefix + "EXTRA_INPUT_TOPICS", value=multiple_inputs)
+            V1EnvVar(
+                name=env_prefix + labeled_topics_prefix + "_INPUT_TOPICS",
+                value=multiple_inputs,
+            )
         )
     if multiple_outputs:
         env.append(
-            V1EnvVar(name=env_prefix + "EXTRA_OUTPUT_TOPICS", value=multiple_outputs)
+            V1EnvVar(
+                name=env_prefix + labeled_topics_prefix + "_OUTPUT_TOPICS",
+                value=multiple_outputs,
+            )
         )
     if extra_input_patterns:
         env.append(
             V1EnvVar(
-                name=env_prefix + "EXTRA_INPUT_PATTERNS", value=extra_input_patterns
+                name=env_prefix + labeled_topics_prefix + "_INPUT_PATTERNS",
+                value=extra_input_patterns,
             )
         )
     if extra:
@@ -198,6 +215,7 @@ def get_args(
     multiple_outputs: str | None,
     extra_input_patterns: str | None,
     extra: dict[str, str],
+    streams_bootstrap_version: StreamsBootstrapVersion = 3,
 ) -> list[str]:
     args = []
     if input_topics:
@@ -230,6 +248,7 @@ def get_template(
     env_prefix: str = "APP_",
     consumer_group: str | None = None,
     config_type: ConfigType = ConfigType.ENV,
+    streams_bootstrap_version: StreamsBootstrapVersion = 3,
 ) -> V1PodTemplateSpec:
     env = None
     args = None
@@ -245,6 +264,7 @@ def get_template(
                 extra_input_patterns=extra_input_patterns,
                 env_prefix=env_prefix,
                 extra=extra,
+                streams_bootstrap_version=streams_bootstrap_version,
             )
         case ConfigType.ARGS:
             args = get_args(
@@ -255,6 +275,7 @@ def get_template(
                 multiple_outputs,
                 extra_input_patterns,
                 extra,
+                streams_bootstrap_version=streams_bootstrap_version,
             )
     container = V1Container(name="test-container", env=env, args=args)
     pod_spec = V1PodSpec(containers=[container])

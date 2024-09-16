@@ -61,15 +61,15 @@ class K8sApp:
 
     @property
     def extra_input_topics(self) -> list[str]:
-        return self.config.extra_input_topics
+        return self.config.labeled_input_topics
 
     @property
     def extra_output_topics(self) -> list[str]:
-        return self.config.extra_output_topics
+        return self.config.labeled_output_topics
 
     @property
     def extra_input_patterns(self) -> list[str]:
-        return self.config.extra_input_patterns
+        return self.config.labeled_input_patterns
 
     @property
     def pipeline(self) -> str | None:
