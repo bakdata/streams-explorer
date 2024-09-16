@@ -150,7 +150,7 @@ class TestK8sApp:
                 streams_bootstrap_version=2,
             )
         )
-        assert k8s_app.extra_input_topics == ["test1", "test2", "test3"]
+        assert k8s_app.labeled_input_topics == ["test1", "test2", "test3"]
 
     def test_streams_bootstrap_v3_labeled_input_topics(self):
         k8s_app = K8sAppDeployment(
@@ -164,7 +164,7 @@ class TestK8sApp:
                 streams_bootstrap_version=3,
             )
         )
-        assert k8s_app.extra_input_topics == ["test1", "test2", "test3"]
+        assert k8s_app.labeled_input_topics == ["test1", "test2", "test3"]
 
     def test_streams_bootstrap_v2_extra_output_topics(self):
         k8s_app = K8sAppDeployment(
@@ -178,7 +178,7 @@ class TestK8sApp:
                 streams_bootstrap_version=2,
             )
         )
-        assert k8s_app.extra_output_topics == ["test1", "test2"]
+        assert k8s_app.labeled_output_topics == ["test1", "test2"]
 
     def test_streams_bootstrap_v3_labeled_output_topics(self):
         k8s_app = K8sAppDeployment(
@@ -192,7 +192,7 @@ class TestK8sApp:
                 streams_bootstrap_version=3,
             )
         )
-        assert k8s_app.extra_output_topics == ["test1", "test2"]
+        assert k8s_app.labeled_output_topics == ["test1", "test2"]
 
     def test_attributes(self):
         k8s_app = K8sAppDeployment(
