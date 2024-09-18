@@ -17,18 +17,6 @@ class K8sConfig:
     labeled_input_patterns: list[str] = field(default_factory=list)
     extra: dict[str, str] = field(default_factory=dict)
 
-    @property
-    def extra_input_topics(self) -> list[str]:
-        return self.labeled_input_topics
-
-    @property
-    def extra_output_topics(self) -> list[str]:
-        return self.labeled_output_topics
-
-    @property
-    def extra_input_patterns(self) -> list[str]:
-        return self.labeled_input_patterns
-
 
 class K8sDeploymentUpdateType(str, Enum):
     ADDED = "ADDED"
