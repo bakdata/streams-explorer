@@ -192,7 +192,7 @@ class TestDataFlowGraph:
         assert df.graph.has_edge("test-namespace/test-app2", "output-topic2")
         assert df.graph.has_edge("test-namespace/test-app2", "fake2-dead-letter-topic")
 
-    def test_resolve_extra_input_patterns(self, df: DataFlowGraph):
+    def test_resolve_labeled_input_patterns(self, df: DataFlowGraph):
         df.add_streaming_app(
             K8sApp.factory(
                 get_streaming_app_deployment(
@@ -215,7 +215,7 @@ class TestDataFlowGraph:
                     input_topics="output-topic",
                     output_topic="another-topic",
                     error_topic="fake2-dead-letter-topic",
-                    extra_input_patterns="fake1=.*-dead-letter-topic,fake2=.*-output-topic",
+                    labeled_input_patterns="fake1=.*-dead-letter-topic,fake2=.*-output-topic",
                 )
             )
         )
@@ -228,7 +228,7 @@ class TestDataFlowGraph:
         assert not df.graph.has_edge("another-topic", "test-namespace/test-app2")
         assert df.graph.has_edge("fake-dead-letter-topic", "test-namespace/test-app2")
 
-    def test_no_resolve_extra_input_patterns(self, df: DataFlowGraph):
+    def test_no_resolve_labeled_input_patterns(self, df: DataFlowGraph):
         settings.graph.resolve.input_pattern_topics.all = False
         df.add_streaming_app(
             K8sApp.factory(
@@ -246,7 +246,7 @@ class TestDataFlowGraph:
                     input_topics="output-topic",
                     output_topic="output-topic2",
                     error_topic="fake2-dead-letter-topic",
-                    extra_input_patterns="fake1=.*-dead-letter-topic,fake2=.*output-topic",
+                    labeled_input_patterns="fake1=.*-dead-letter-topic,fake2=.*output-topic",
                 )
             )
         )

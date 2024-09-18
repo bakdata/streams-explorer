@@ -87,14 +87,14 @@ class DataFlowGraph:
             self._add_error_topic(graph, app.id, app.error_topic)
         if app.input_pattern:
             self._enqueue_input_pattern(app.input_pattern, app.id)
-        for extra_input in app.extra_input_topics:
-            self._add_topic(graph, extra_input)
-            self._add_input_topic(graph, app.id, extra_input)
-        for extra_output in app.extra_output_topics:
-            self._add_topic(graph, extra_output)
-            self._add_output_topic(graph, app.id, extra_output)
-        for extra_pattern in app.extra_input_patterns:
-            self._enqueue_input_pattern(extra_pattern, app.id)
+        for labeled_input in app.labeled_input_topics:
+            self._add_topic(graph, labeled_input)
+            self._add_input_topic(graph, app.id, labeled_input)
+        for labeled_output in app.labeled_output_topics:
+            self._add_topic(graph, labeled_output)
+            self._add_output_topic(graph, app.id, labeled_output)
+        for labeled_pattern in app.labeled_input_patterns:
+            self._enqueue_input_pattern(labeled_pattern, app.id)
 
     def add_connector(
         self, connector: KafkaConnector, pipeline: str | None = None

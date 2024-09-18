@@ -54,14 +54,14 @@ class StreamsBootstrapConfigParser(K8sConfigParser):
                 self.config.output_topic = value
             case "ERROR_TOPIC":
                 self.config.error_topic = value
-            case "EXTRA_INPUT_TOPICS":
-                self.config.extra_input_topics = self.parse_extra_topics(value)
-            case "EXTRA_OUTPUT_TOPICS":
-                self.config.extra_output_topics = self.parse_extra_topics(value)
+            case "LABELED_INPUT_TOPICS" | "EXTRA_INPUT_TOPICS":
+                self.config.labeled_input_topics = self.parse_labeled_topics(value)
+            case "LABELED_OUTPUT_TOPICS" | "EXTRA_OUTPUT_TOPICS":
+                self.config.labeled_output_topics = self.parse_labeled_topics(value)
             case "INPUT_PATTERN":
                 self.config.input_pattern = value
-            case "EXTRA_INPUT_PATTERNS":
-                self.config.extra_input_patterns = self.parse_extra_topics(value)
+            case "LABELED_INPUT_PATTERNS" | "EXTRA_INPUT_PATTERNS":
+                self.config.labeled_input_patterns = self.parse_labeled_topics(value)
             case _:
                 self.config.extra[name] = value
 
@@ -70,11 +70,11 @@ class StreamsBootstrapConfigParser(K8sConfigParser):
         return input_topics.split(",")
 
     @staticmethod
-    def parse_extra_topics(extra_topics: str) -> list[str]:
-        extra_topics = extra_topics.removesuffix(",")  # remove trailing comma
+    def parse_labeled_topics(labeled_topics: str) -> list[str]:
+        labeled_topics = labeled_topics.removesuffix(",")  # remove trailing comma
         return [
             topic
-            for role in extra_topics.split(",")
+            for role in labeled_topics.split(",")
             for topic in role.split("=")[1].split(";")
         ]
 

@@ -12,9 +12,9 @@ class K8sConfig:
     output_topic: str | None = None  # required for streaming app
     error_topic: str | None = None
     input_pattern: str | None = None
-    extra_input_topics: list[str] = field(default_factory=list)
-    extra_output_topics: list[str] = field(default_factory=list)
-    extra_input_patterns: list[str] = field(default_factory=list)
+    labeled_input_topics: list[str] = field(default_factory=list)
+    labeled_output_topics: list[str] = field(default_factory=list)
+    labeled_input_patterns: list[str] = field(default_factory=list)
     extra: dict[str, str] = field(default_factory=dict)
 
 

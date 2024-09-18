@@ -138,7 +138,7 @@ class TestK8sApp:
         assert k8s_app.output_topic == "output-topic"
         assert k8s_app.input_topics == ["input-topic"]
 
-    def test_extra_input_topics(self):
+    def test_streams_bootstrap_v2_extra_input_topics(self):
         k8s_app = K8sAppDeployment(
             get_streaming_app_deployment(
                 name="test-app",
@@ -147,11 +147,26 @@ class TestK8sApp:
                 error_topic="error-topic",
                 multiple_inputs="0=test1,1=test2;test3,",
                 env_prefix="TEST_",
+                streams_bootstrap_version=2,
             )
         )
-        assert k8s_app.extra_input_topics == ["test1", "test2", "test3"]
+        assert k8s_app.labeled_input_topics == ["test1", "test2", "test3"]
 
-    def test_extra_output_topics(self):
+    def test_streams_bootstrap_v3_labeled_input_topics(self):
+        k8s_app = K8sAppDeployment(
+            get_streaming_app_deployment(
+                name="test-app",
+                input_topics="input-topic",
+                output_topic="output-topic",
+                error_topic="error-topic",
+                multiple_inputs="0=test1,1=test2;test3,",
+                env_prefix="TEST_",
+                streams_bootstrap_version=3,
+            )
+        )
+        assert k8s_app.labeled_input_topics == ["test1", "test2", "test3"]
+
+    def test_streams_bootstrap_v2_extra_output_topics(self):
         k8s_app = K8sAppDeployment(
             get_streaming_app_deployment(
                 name="test-app",
@@ -160,9 +175,24 @@ class TestK8sApp:
                 error_topic="error-topic",
                 multiple_outputs="0=test1,1=test2",
                 env_prefix="TEST_",
+                streams_bootstrap_version=2,
             )
         )
-        assert k8s_app.extra_output_topics == ["test1", "test2"]
+        assert k8s_app.labeled_output_topics == ["test1", "test2"]
+
+    def test_streams_bootstrap_v3_labeled_output_topics(self):
+        k8s_app = K8sAppDeployment(
+            get_streaming_app_deployment(
+                name="test-app",
+                input_topics="input-topic",
+                output_topic="output-topic",
+                error_topic="error-topic",
+                multiple_outputs="0=test1,1=test2",
+                env_prefix="TEST_",
+                streams_bootstrap_version=3,
+            )
+        )
+        assert k8s_app.labeled_output_topics == ["test1", "test2"]
 
     def test_attributes(self):
         k8s_app = K8sAppDeployment(
