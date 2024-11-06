@@ -14,39 +14,16 @@ on:
           - major
 
 jobs:
-  bump-version:
-    name: Bump version
-    runs-on: ubuntu-latest
-    env:
-      BACKEND_DIR: ./backend
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          persist-credentials: false
-
-      - name: Bump version
-        id: bump-version
-        uses: bakdata/ci-templates/actions/python-poetry-bump-version@v1.5.1
-        with:
-          release-type: "${{ github.event.inputs.release-type }}"
-          working-directory: ${{ env.BACKEND_DIR }}
-
-      - name: Commit and push pyproject.toml file
-        uses: bakdata/ci-templates/actions/commit-and-push@v1.3.0
-        with:
-          commit-message: "Bump version ${{ steps.bump-version.outputs.old-tag }} → ${{ steps.bump-version.outputs.release-tag }}"
-          github-username: ${{ secrets.GH_USERNAME }}
-          github-email: ${{ secrets.GH_EMAIL }}
-          github-token: ${{ secrets.GH_TOKEN }}
-
-      - name: Create tag
-        run: |
-          git config user.name ${{ secrets.GH_USERNAME }}
-          git config user.email ${{ secrets.GH_EMAIL }}
-          git tag v${{ steps.bump-version.outputs.release-tag }}
-
-      - name: Push tag
-        uses: ad-m/github-push-action@v0.6.0
-        with:
-          github_token: ${{ secrets.GH_TOKEN }}
-          branch: refs/tags/v${{ steps.bump-version.outputs.release-tag }}
+  release:
+    uses: bakdata/ci-templates/.github/workflows/python-poetry-release.yaml@1.48.0
+    name: Release
+    with:
+      release-type: ${{ inputs.release-type }}
+      poetry-version: "1.8.2"
+      python-version: "3.12"
+      changelog: true
+      working-directory: "./backend"
+    secrets:
+      github-username: "${{ secrets.GH_USERNAME }}"
+      github-email: "${{ secrets.GH_EMAIL }}"
+      github-token: "${{ secrets.GH_TOKEN }}"
