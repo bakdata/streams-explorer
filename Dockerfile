@@ -20,7 +20,7 @@ RUN apt-get -y update && \
 
 WORKDIR /app
 
-COPY ./backend/pyproject.toml ./backend/poetry.lock /app/
+COPY ./backend/pyproject.toml ./backend/poetry.lock ./backend/README.md /app/
 ENV PIP_NO_CACHE_DIR=1
 RUN pip install poetry && \
     python -m venv --copies /app/venv && \
@@ -37,7 +37,7 @@ WORKDIR /app
 
 COPY --from=backend /app /app
 COPY --from=frontend /build/out /app/static
-ENV PATH /app/venv/bin:$PATH
+ENV PATH=/app/venv/bin:$PATH
 COPY ./backend /app
 
 # install streams_explorer package
