@@ -20,7 +20,8 @@ RUN apt-get -y update && \
 
 WORKDIR /app
 
-COPY ./backend/pyproject.toml ./backend/poetry.lock ./backend/README.md /app/
+COPY ./backend/pyproject.toml ./backend/poetry.lock /app/
+RUN touch README.md
 ENV PIP_NO_CACHE_DIR=1
 RUN pip install poetry && \
     python -m venv --copies /app/venv && \
