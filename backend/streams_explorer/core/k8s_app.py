@@ -3,8 +3,8 @@ from __future__ import annotations
 from typing import TypeAlias
 
 from kubernetes_asyncio.client import (
-    V1beta1CronJob,
     V1Container,
+    V1CronJob,
     V1Deployment,
     V1Job,
     V1ObjectMeta,
@@ -21,7 +21,7 @@ from streams_explorer.models.k8s import K8sConfig, K8sReason
 
 ATTR_PIPELINE = "pipeline"
 
-K8sObject: TypeAlias = V1Deployment | V1StatefulSet | V1Job | V1beta1CronJob
+K8sObject: TypeAlias = V1Deployment | V1StatefulSet | V1Job | V1CronJob
 
 config_parser: type[K8sConfigParser] = load_config_parser()
 
@@ -165,7 +165,7 @@ class K8sApp:
                 return K8sAppStatefulSet(k8s_object)
             case V1Job():  # type: ignore[misc]
                 return K8sAppJob(k8s_object)
-            case V1beta1CronJob():  # type: ignore[misc]
+            case V1CronJob():  # type: ignore[misc]
                 return K8sAppCronJob(k8s_object)
             case _:
                 raise ValueError(k8s_object)
@@ -216,7 +216,7 @@ class K8sAppJob(K8sApp):
 
 
 class K8sAppCronJob(K8sApp):
-    def __init__(self, k8s_object: V1beta1CronJob) -> None:
+    def __init__(self, k8s_object: V1CronJob) -> None:
         super().__init__(k8s_object)
 
     def setup(self) -> None:

@@ -13,8 +13,8 @@ from kubernetes_asyncio.client import (
     ApiException,
     EventsV1Event,
     EventsV1EventList,
-    V1beta1CronJob,
-    V1beta1CronJobList,
+    V1CronJob,
+    V1CronJobList,
     V1Deployment,
     V1DeploymentList,
     V1Job,
@@ -39,7 +39,7 @@ class K8sResource(NamedTuple):
         V1DeploymentList
         | V1StatefulSetList
         | V1JobList
-        | V1beta1CronJobList
+        | V1CronJobList
         | EventsV1EventList,
     ]
     return_type: type | None
@@ -106,7 +106,6 @@ class Kubernetes:
 
         self.k8s_app_client = kubernetes_asyncio.client.AppsV1Api()
         self.k8s_batch_client = kubernetes_asyncio.client.BatchV1Api()
-        self.k8s_beta_batch_client = kubernetes_asyncio.client.BatchV1beta1Api()
         self.k8s_events_client = kubernetes_asyncio.client.EventsV1Api()
 
     async def watch(self) -> None:
@@ -125,8 +124,8 @@ class Kubernetes:
                 *args, namespace=namespace, **kwargs
             )
 
-        def list_cron_jobs(namespace: str, *args, **kwargs) -> V1beta1CronJobList:
-            return self.k8s_beta_batch_client.list_namespaced_cron_job(
+        def list_cron_jobs(namespace: str, *args, **kwargs) -> V1CronJobList:
+            return self.k8s_batch_client.list_namespaced_cron_job(
                 *args, namespace=namespace, **kwargs
             )
 
@@ -153,7 +152,7 @@ class Kubernetes:
             ),
             K8sResource(
                 list_cron_jobs,
-                V1beta1CronJob,
+                V1CronJob,
                 self.streams_explorer.handle_deployment_update,
             ),
             K8sResource(
