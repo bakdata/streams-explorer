@@ -37,7 +37,7 @@ uvicorn = { extras = ["standard"], version = "^0.20.0" }
 pygraphviz = "^1.10"
 confluent-kafka = "2.4.0"
 cachetools = "^4.2.2"
-kubernetes-asyncio = "^23.6.0"
+kubernetes-asyncio = "^32.0.0"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "^0.981"
