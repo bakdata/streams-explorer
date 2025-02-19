@@ -153,7 +153,7 @@ class DataFlowGraph:
         self, node: GraphNode, edge: GraphEdge, reverse: bool = False
     ) -> None:
         node_name, node_data = node
-        self.graph.add_node(node_data, label=node_name)
+        self.graph.add_node(node_name, **node_data)
         self.graph.add_edge(*edge)
 
         if pipelines := self.find_associated_pipelines(node_name, reverse=reverse):
