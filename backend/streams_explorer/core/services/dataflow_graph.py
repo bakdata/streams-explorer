@@ -152,9 +152,9 @@ class DataFlowGraph:
     def add_to_graph(
         self, node: GraphNode, edge: GraphEdge, reverse: bool = False
     ) -> None:
-        self.graph.add_node(node)
-        self.graph.add_edge(*edge)
         node_name, node_data = node
+        self.graph.add_node(node_data, label=node_name)
+        self.graph.add_edge(*edge)
 
         if pipelines := self.find_associated_pipelines(node_name, reverse=reverse):
             target = (set(edge) - {node_name}).pop()
