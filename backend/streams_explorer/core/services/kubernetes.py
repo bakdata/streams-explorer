@@ -95,7 +95,7 @@ class Kubernetes:
                 logger.info("Setup K8s environment in cluster")
                 kubernetes_asyncio.config.load_incluster_config()
             else:
-                logger.info("Setup K8s environment")
+                logger.info(f"Setup K8s environment for context {self.context}")
                 await kubernetes_asyncio.config.load_kube_config(context=self.context)
         except kubernetes_asyncio.config.ConfigException as e:
             raise Exception("Could not load K8s environment configuration") from e
