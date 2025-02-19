@@ -73,7 +73,7 @@ class DataFlowGraph:
         graph.add_node(
             app.id,
             label=app.name,
-            node_type=NodeTypesEnum.STREAMING_APP,
+            node_type=NodeTypesEnum.STREAMING_APP.value,
             **app.attributes,
         )
 
@@ -106,7 +106,7 @@ class DataFlowGraph:
         graph.add_node(
             connector.name,
             label=connector.name,
-            node_type=NodeTypesEnum.CONNECTOR,
+            node_type=NodeTypesEnum.CONNECTOR.value,
         )
         for topic in connector.get_topics():
             self._add_topic(graph, topic)
@@ -131,8 +131,8 @@ class DataFlowGraph:
         node: GraphNode = (
             source.name,
             {
-                NodeDataFields.LABEL: source.name,
-                NodeDataFields.NODE_TYPE: source.node_type,
+                NodeDataFields.LABEL.value: source.name,
+                NodeDataFields.NODE_TYPE.value: source.node_type,
             },
         )
         edge: GraphEdge = (source.name, source.target)
@@ -141,7 +141,10 @@ class DataFlowGraph:
     def add_sink(self, sink: Sink) -> None:
         node: GraphNode = (
             sink.name,
-            {NodeDataFields.LABEL: sink.name, NodeDataFields.NODE_TYPE: sink.node_type},
+            {
+                NodeDataFields.LABEL.value: sink.name,
+                NodeDataFields.NODE_TYPE.value: sink.node_type,
+            },
         )
         edge: GraphEdge = (sink.source, sink.name)
         self.add_to_graph(node, edge, reverse=True)
@@ -149,8 +152,9 @@ class DataFlowGraph:
     def add_to_graph(
         self, node: GraphNode, edge: GraphEdge, reverse: bool = False
     ) -> None:
+        self.graph.add_node(node)
+        self.graph.add_edge(*edge)
         node_name, node_data = node
-        self.graph.update(nodes=[node], edges=[edge])
 
         if pipelines := self.find_associated_pipelines(node_name, reverse=reverse):
             target = (set(edge) - {node_name}).pop()
@@ -184,7 +188,7 @@ class DataFlowGraph:
 
     def get_node_type(self, id: str) -> NodeTypesEnum:
         try:
-            return self.graph.nodes[id][NodeDataFields.NODE_TYPE]
+            return self.graph.nodes[id][NodeDataFields.NODE_TYPE.value]
         except KeyError:
             raise NodeNotFound()
 
@@ -209,7 +213,7 @@ class DataFlowGraph:
 
     @staticmethod
     def _add_topic(graph: nx.DiGraph, name: str) -> None:
-        graph.add_node(name, label=name, node_type=NodeTypesEnum.TOPIC)
+        graph.add_node(name, label=name, node_type=NodeTypesEnum.TOPIC.value)
 
     @staticmethod
     def _filter_topic_node_ids(graph: nx.DiGraph) -> set[str]:
@@ -217,9 +221,9 @@ class DataFlowGraph:
             node_id
             for node_id, data in graph.nodes(data=True)
             if data[  # pyright: ignore[reportOptionalSubscript]
-                NodeDataFields.NODE_TYPE
+                NodeDataFields.NODE_TYPE.value
             ]
-            in (NodeTypesEnum.TOPIC, NodeTypesEnum.ERROR_TOPIC)
+            in (NodeTypesEnum.TOPIC.value, NodeTypesEnum.ERROR_TOPIC.value)
         }
 
     @staticmethod
@@ -326,8 +330,8 @@ class DataFlowGraph:
         graph.add_node(
             topic_name,
             **{
-                NodeDataFields.LABEL: topic_name,
-                NodeDataFields.NODE_TYPE: NodeTypesEnum.ERROR_TOPIC,
+                NodeDataFields.LABEL.value: topic_name,
+                NodeDataFields.NODE_TYPE.value: NodeTypesEnum.ERROR_TOPIC.value,
             },
         )
         graph.add_edge(app_id, topic_name)
