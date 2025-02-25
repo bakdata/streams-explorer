@@ -7,7 +7,7 @@ from fastapi import status
 from fastapi.testclient import TestClient
 from kubernetes_asyncio.client import (
     EventsV1Event,
-    V1beta1CronJob,
+    V1CronJob,
     V1Deployment,
     V1ObjectMeta,
     V1ObjectReference,
@@ -71,8 +71,8 @@ class TestApplication:
         return []
 
     @pytest.fixture()
-    def cron_jobs(self) -> list[V1beta1CronJob]:
-        return [V1beta1CronJob(metadata=V1ObjectMeta(name="test"))]
+    def cron_jobs(self) -> list[V1CronJob]:
+        return [V1CronJob(metadata=V1ObjectMeta(name="test"))]
 
     @pytest.mark.asyncio
     async def test_update_every_x_seconds(

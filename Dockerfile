@@ -22,7 +22,7 @@ WORKDIR /app
 
 COPY ./backend/pyproject.toml ./backend/poetry.lock /app/
 ENV PIP_NO_CACHE_DIR=1
-RUN pip install poetry && \
+RUN pip install poetry==1.8.5 && \
     python -m venv --copies /app/venv && \
     . /app/venv/bin/activate && \
     poetry install --without=dev --no-interaction
@@ -37,7 +37,7 @@ WORKDIR /app
 
 COPY --from=backend /app /app
 COPY --from=frontend /build/out /app/static
-ENV PATH /app/venv/bin:$PATH
+ENV PATH=/app/venv/bin:$PATH
 COPY ./backend /app
 
 # install streams_explorer package

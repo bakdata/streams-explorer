@@ -32,7 +32,7 @@ async def test_watch(kubernetes: Kubernetes, mocker: MockFixture):
         call("V1Deployment"),
         call("V1StatefulSet"),
         call("V1Job"),
-        call("V1beta1CronJob"),
+        call("V1CronJob"),
     ]
     mock_Watch.__aenter__.assert_awaited()
     assert mock_Watch.__aenter__.await_count == 4
@@ -46,7 +46,7 @@ async def test_watch(kubernetes: Kubernetes, mocker: MockFixture):
         "V1Deployment",
         "V1StatefulSet",
         "V1Job",
-        "V1beta1CronJob",
+        "V1CronJob",
         "EventsV1Event",
     ]
 
@@ -103,7 +103,8 @@ async def test_watch_namespace_error(kubernetes: Kubernetes, mocker: MockFixture
         assert e.value.reason == "Internal Server Error"
 
     mock_kubernetes_asyncio_watch.return_value.__aenter__.side_effect = ApiException(
-        status=409, reason="Expired"  # demo error, doesn't exist
+        status=409,
+        reason="Expired",  # demo error, doesn't exist
     )
 
     with pytest.raises(ApiException) as e:

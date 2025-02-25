@@ -2,15 +2,15 @@ from enum import Enum
 from typing import Literal
 
 from kubernetes_asyncio.client import (
-    V1beta1CronJob,
-    V1beta1CronJobSpec,
-    V1beta1JobTemplateSpec,
     V1Container,
+    V1CronJob,
+    V1CronJobSpec,
     V1Deployment,
     V1DeploymentSpec,
     V1DeploymentStatus,
     V1EnvVar,
     V1JobSpec,
+    V1JobTemplateSpec,
     V1LabelSelector,
     V1ObjectMeta,
     V1PodSpec,
@@ -118,7 +118,7 @@ def get_streaming_app_cronjob(
     namespace: str = "test-namespace",
     pipeline: str | None = None,
     streams_bootstrap_version: StreamsBootstrapVersion = 3,
-) -> V1beta1CronJob:
+) -> V1CronJob:
     env = get_env(
         input_topics=input_topics,
         output_topic=output_topic,
@@ -133,10 +133,10 @@ def get_streaming_app_cronjob(
         template=pod_template_spec,
         selector=None,
     )
-    job_template = V1beta1JobTemplateSpec(spec=job_spec)
-    spec = V1beta1CronJobSpec(job_template=job_template, schedule="* * * * *")
+    job_template = V1JobTemplateSpec(spec=job_spec)
+    spec = V1CronJobSpec(job_template=job_template, schedule="* * * * *")
     metadata = get_metadata(name, namespace=namespace, pipeline=pipeline)
-    return V1beta1CronJob(metadata=metadata, spec=spec)
+    return V1CronJob(metadata=metadata, spec=spec)
 
 
 def get_metadata(name, *, namespace: str, pipeline: str | None = None) -> V1ObjectMeta:

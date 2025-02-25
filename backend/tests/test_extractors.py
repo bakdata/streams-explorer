@@ -2,13 +2,13 @@ from pathlib import Path
 
 import pytest
 from kubernetes_asyncio.client import (
-    V1beta1CronJob,
-    V1beta1CronJobSpec,
-    V1beta1JobTemplateSpec,
     V1Container,
+    V1CronJob,
+    V1CronJobSpec,
     V1EnvVar,
     V1Job,
     V1JobSpec,
+    V1JobTemplateSpec,
     V1ObjectMeta,
     V1OwnerReference,
     V1PodSpec,
@@ -78,7 +78,7 @@ extractor_file_3 = """from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from kubernetes_asyncio.client import V1beta1CronJob, V1Job
+from kubernetes_asyncio.client import V1CronJob, V1Job
 from streams_explorer.models.k8s import K8sConfig
 from streams_explorer.core.extractor.extractor import (
     ProducerAppExtractor,
@@ -98,7 +98,7 @@ class TestMultipleExtractor(StreamsAppExtractor, ProducerAppExtractor):
     def on_job_parsing(self, job: V1Job) -> K8sAppJob | None:
         pass
 
-    def on_cron_job_parsing(self, cron_job: V1beta1CronJob) -> K8sAppCronJob | None:
+    def on_cron_job_parsing(self, cron_job: V1CronJob) -> K8sAppCronJob | None:
         pass
 """
 
@@ -445,8 +445,8 @@ class TestExtractors:
         pod_spec = V1PodSpec(containers=[container])
         pod_template_spec = V1PodTemplateSpec(spec=pod_spec)
         job_spec = V1JobSpec(template=pod_template_spec, selector=None)
-        job_template = V1beta1JobTemplateSpec(spec=job_spec)
-        spec = V1beta1CronJobSpec(job_template=job_template, schedule="* * * * *")
+        job_template = V1JobTemplateSpec(spec=job_spec)
+        spec = V1CronJobSpec(job_template=job_template, schedule="* * * * *")
         name = "test-files-import"
         metadata = V1ObjectMeta(
             name=name,
@@ -461,7 +461,7 @@ class TestExtractors:
             },
             namespace="test-namespace",
         )
-        cron_job = V1beta1CronJob(metadata=metadata, spec=spec)
+        cron_job = V1CronJob(metadata=metadata, spec=spec)
         app_cron_job = extractor.on_cron_job_parsing(cron_job)
         assert isinstance(app_cron_job, K8sAppCronJob), "should extract CronJob"
 

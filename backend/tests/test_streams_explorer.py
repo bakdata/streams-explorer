@@ -1,6 +1,6 @@
 import pytest
 import pytest_asyncio
-from kubernetes_asyncio.client import V1beta1CronJob, V1Job
+from kubernetes_asyncio.client import V1CronJob, V1Job
 from pytest import MonkeyPatch
 from pytest_mock import MockerFixture
 
@@ -308,9 +308,7 @@ class TestStreamsExplorer:
                 self.job = job
                 return K8sAppJob(job)
 
-            def on_cron_job_parsing(
-                self, cron_job: V1beta1CronJob
-            ) -> K8sAppCronJob | None:
+            def on_cron_job_parsing(self, cron_job: V1CronJob) -> K8sAppCronJob | None:
                 self.cron_job = cron_job
                 return K8sAppCronJob(cron_job)
 

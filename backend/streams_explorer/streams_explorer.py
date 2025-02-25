@@ -1,6 +1,6 @@
 from cachetools.func import ttl_cache
 from fastapi import WebSocket
-from kubernetes_asyncio.client import V1beta1CronJob, V1Job
+from kubernetes_asyncio.client import V1CronJob, V1Job
 from loguru import logger
 
 from streams_explorer.core.client_manager import ClientManager
@@ -157,7 +157,7 @@ class StreamsExplorer:
         match item:
             case V1Job():  # type: ignore[misc]
                 app = extractor_container.on_job(item)
-            case V1beta1CronJob():  # type: ignore[misc]
+            case V1CronJob():  # type: ignore[misc]
                 app = extractor_container.on_cron_job(item)
             case _:
                 app = K8sApp.factory(item)
