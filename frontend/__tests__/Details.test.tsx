@@ -106,7 +106,9 @@ describe("display node information", () => {
       .query({ link_type: "kibana" })
       .reply(
         200,
-        JSON.stringify("http://localhost:5601/app/kibana#/discover?_a=(columns:!(_source),query:(language:lucene,query:'kubernetes.labels.app:%20%22atm-fraud-transactionavroproducer%22'))")
+        JSON.stringify(
+          "http://localhost:5601/app/kibana#/discover?_a=(columns:!(_source),query:(language:lucene,query:'kubernetes.labels.app:%20%22atm-fraud-transactionavroproducer%22'))"
+        )
       );
     const { findByText, asFragment, queryByText } = renderWithClient(
       <Details nodeId="atm-fraud-transactionavroproducer" />
@@ -197,7 +199,9 @@ describe("display node information", () => {
       )
       .reply(
         200,
-        JSON.stringify("http://localhost:3000/d/path/to/dashboard?var-topics=atm-fraud-incoming-transactions-topic")
+        JSON.stringify(
+          "http://localhost:3000/d/path/to/dashboard?var-topics=atm-fraud-incoming-transactions-topic"
+        )
       );
 
     const { getByText, findByText, getByTestId } = renderWithClient(

@@ -92,7 +92,9 @@ describe("Search", () => {
 
     it("node icons", async () => {
       // render App
-      const { getByTestId, findByTestId, findAllByTestId } = renderWithClient(<App />);
+      const { getByTestId, findByTestId, findAllByTestId } = renderWithClient(
+        <App />
+      );
 
       await findByTestId("graph");
       const nodeSelect = getByTestId("node-select");

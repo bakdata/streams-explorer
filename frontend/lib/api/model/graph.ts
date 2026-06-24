@@ -4,8 +4,8 @@
  * Streams Explorer
  * OpenAPI spec version: 0.1.0
  */
-import type { Edge } from './edge';
-import type { Node } from './node';
+import type { Edge } from "./edge";
+import type { Node } from "./node";
 
 export interface Graph {
   directed: boolean;

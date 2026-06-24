@@ -10,11 +10,10 @@
  */
 export type NodeTypesEnum = typeof NodeTypesEnum[keyof typeof NodeTypesEnum];
 
-
 export const NodeTypesEnum = {
-  'streaming-app': 'streaming-app',
-  connector: 'connector',
-  topic: 'topic',
-  'error-topic': 'error-topic',
-  'sink/source': 'sink/source',
+  "streaming-app": "streaming-app",
+  connector: "connector",
+  topic: "topic",
+  "error-topic": "error-topic",
+  "sink/source": "sink/source",
 } as const;

@@ -4,8 +4,8 @@ import copy from "copy-to-clipboard";
 import React from "react";
 import ReactJson from "react-json-view";
 import {
-  getNodeInfoApiNodeNodeIdGetResponse200,
   getLinkingApiNodeLinkingNodeIdGetResponse200,
+  getNodeInfoApiNodeNodeIdGetResponse200,
   useGetLinkingApiNodeLinkingNodeIdGet,
   useGetNodeInfoApiNodeNodeIdGet,
 } from "../lib/api/fetchers";
@@ -21,10 +21,9 @@ const Details = ({ nodeId }: DetailsProps) => {
   const { data: response, isLoading, error } = useGetNodeInfoApiNodeNodeIdGet(
     nodeId
   );
-  const data =
-    response?.status === 200
-      ? (response as getNodeInfoApiNodeNodeIdGetResponse200).data
-      : undefined;
+  const data = response?.status === 200
+    ? (response as getNodeInfoApiNodeNodeIdGetResponse200).data
+    : undefined;
   if (isLoading) {
     return (
       <div className={style.loadingSpinnerContainer}>
@@ -92,10 +91,9 @@ const LinkInfo = ({ infoListItem, nodeId }: NodeInfoDetailProps) => {
     nodeId,
     { link_type: infoListItem.value as string }
   );
-  const linkToService =
-    response?.status === 200
-      ? (response as getLinkingApiNodeLinkingNodeIdGetResponse200).data
-      : undefined;
+  const linkToService = response?.status === 200
+    ? (response as getLinkingApiNodeLinkingNodeIdGetResponse200).data
+    : undefined;
 
   if (isLoading) {
     return <Spin tip="Loading link..." />;

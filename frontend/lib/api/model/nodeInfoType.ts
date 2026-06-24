@@ -10,9 +10,8 @@
  */
 export type NodeInfoType = typeof NodeInfoType[keyof typeof NodeInfoType];
 
-
 export const NodeInfoType = {
-  json: 'json',
-  basic: 'basic',
-  link: 'link',
+  json: "json",
+  basic: "basic",
+  link: "link",
 } as const;

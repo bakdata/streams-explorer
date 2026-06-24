@@ -5,4 +5,6 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export type GetNodeSchemaApiNodeNodeIdSchemaVersionGet200 = { [key: string]: unknown };
+export type GetNodeSchemaApiNodeNodeIdSchemaVersionGet200 = {
+  [key: string]: unknown;
+};

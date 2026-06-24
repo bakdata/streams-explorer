@@ -21,12 +21,11 @@ const Schema = ({ nodeId }: SchemaProps) => {
     isLoading: versionsLoading,
     error: versionsError,
   } = useGetNodeSchemaVersionsApiNodeNodeIdSchemaGet(nodeId);
-  const versions =
-    versionsResponse?.status === 200
-      ? (
-        versionsResponse as getNodeSchemaVersionsApiNodeNodeIdSchemaGetResponse200
-      ).data
-      : undefined;
+  const versions = versionsResponse?.status === 200
+    ? (
+      versionsResponse as getNodeSchemaVersionsApiNodeNodeIdSchemaGetResponse200
+    ).data
+    : undefined;
 
   const menu = (
     <Menu
@@ -51,12 +50,11 @@ const Schema = ({ nodeId }: SchemaProps) => {
     schemaVersion as number,
     { query: { enabled: false } }
   );
-  const schema =
-    schemaResponse?.status === 200
-      ? (
-        schemaResponse as getNodeSchemaApiNodeNodeIdSchemaVersionGetResponse200
-      ).data
-      : undefined;
+  const schema = schemaResponse?.status === 200
+    ? (
+      schemaResponse as getNodeSchemaApiNodeNodeIdSchemaVersionGetResponse200
+    ).data
+    : undefined;
 
   useEffect(() => {
     if (versions) {

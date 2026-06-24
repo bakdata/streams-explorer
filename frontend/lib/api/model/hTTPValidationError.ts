@@ -4,7 +4,7 @@
  * Streams Explorer
  * OpenAPI spec version: 0.1.0
  */
-import type { ValidationError } from './validationError';
+import type { ValidationError } from "./validationError";
 
 export interface HTTPValidationError {
   detail?: ValidationError[];
