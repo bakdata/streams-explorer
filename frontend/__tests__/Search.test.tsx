@@ -1,7 +1,18 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, within } from "@testing-library/react";
 import nock from "nock";
 import React from "react";
 import App from "../components/App";
+
+const renderWithClient = (ui: React.ReactElement) => {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  const Wrapper = ({ children }: { children: React.ReactNode }) => (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  );
+  return render(ui, { wrapper: Wrapper });
+};
 
 jest.mock("next/router", () => require("next-router-mock"));
 
@@ -81,7 +92,7 @@ describe("Search", () => {
 
     it("node icons", async () => {
       // render App
-      const { getByTestId, findByTestId, findAllByTestId } = render(<App />);
+      const { getByTestId, findByTestId, findAllByTestId } = renderWithClient(<App />);
 
       await findByTestId("graph");
       const nodeSelect = getByTestId("node-select");

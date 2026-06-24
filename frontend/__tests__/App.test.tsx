@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   act,
   fireEvent,
@@ -10,6 +11,16 @@ import singletonRouter from "next/router";
 import nock from "nock";
 import React from "react";
 import App from "../components/App";
+
+const renderWithClient = (ui: React.ReactElement) => {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  const Wrapper = ({ children }: { children: React.ReactNode }) => (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  );
+  return render(ui, { wrapper: Wrapper });
+};
 
 jest.mock("next/router", () => require("next-router-mock"));
 
@@ -82,7 +93,7 @@ describe("Streams Explorer", () => {
   describe("renders", () => {
     mockBackendGraph(true);
     it("without crashing", async () => {
-      const { findByTestId } = render(<App />);
+      const { findByTestId } = renderWithClient(<App />);
       await findByTestId("graph");
     });
   });
@@ -128,7 +139,7 @@ describe("Streams Explorer", () => {
     it("should set pipeline from url parameter", async () => {
       mockRouter.setCurrentUrl("/?pipeline=test-pipeline");
 
-      const { getByTestId, findByTestId, asFragment } = render(<App />);
+      const { getByTestId, findByTestId, asFragment } = renderWithClient(<App />);
 
       expect(singletonRouter).toMatchObject({
         asPath: "/?pipeline=test-pipeline",
@@ -161,7 +172,7 @@ describe("Streams Explorer", () => {
           info: [],
         });
 
-      const { findByTestId, getByTestId } = render(<App />);
+      const { findByTestId, getByTestId } = renderWithClient(<App />);
 
       expect(singletonRouter).toMatchObject({
         asPath: "/?focus-node=test-app",
@@ -185,7 +196,7 @@ describe("Streams Explorer", () => {
     it("should render without url parameters", async () => {
       mockRouter.setCurrentUrl("/");
 
-      const { getByTestId, findByTestId } = render(<App />);
+      const { getByTestId, findByTestId } = renderWithClient(<App />);
 
       expect(singletonRouter).toMatchObject({
         asPath: "/",
@@ -209,9 +220,8 @@ describe("Streams Explorer", () => {
       mockRouter.setCurrentUrl("/?pipeline=test-pipeline");
 
       // render App
-      const { getByTestId, getByText, findByTestId, findAllByTestId } = render(
-        <App />
-      );
+      const { getByTestId, getByText, findByTestId, findAllByTestId } =
+        renderWithClient(<App />);
 
       await findByTestId("graph");
       const nodeSelect = getByTestId("node-select");
@@ -311,7 +321,7 @@ describe("Streams Explorer", () => {
 
       mockRouter.setCurrentUrl("/?pipeline=doesnt-exist");
 
-      const { findByTestId } = render(<App />);
+      const { findByTestId } = renderWithClient(<App />);
 
       expect(singletonRouter).toMatchObject({
         asPath: "/?pipeline=doesnt-exist",
@@ -350,7 +360,7 @@ describe("Streams Explorer", () => {
 
       mockRouter.setCurrentUrl("/?pipeline=avail-after-scrape");
 
-      const { getByTestId, findByTestId } = render(<App />);
+      const { getByTestId, findByTestId } = renderWithClient(<App />);
 
       expect(singletonRouter.asPath).toBe("/?pipeline=avail-after-scrape");
 
@@ -378,7 +388,7 @@ describe("Streams Explorer", () => {
     it("should persist metrics refresh interval across page reloads", async () => {
       mockBackendGraph(true);
 
-      const { findByText, findByTestId, rerender } = render(<App />);
+      const { findByText, findByTestId, rerender } = renderWithClient(<App />);
 
       await findByTestId("graph");
 
@@ -414,7 +424,7 @@ describe("Streams Explorer", () => {
       // set metrics refresh interval to 'off'
       window.localStorage.setItem("metrics-interval", "0");
 
-      const { findByTestId, getByText } = render(<App />);
+      const { findByTestId, getByText } = renderWithClient(<App />);
 
       await findByTestId("graph");
 

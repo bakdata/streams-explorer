@@ -1,9 +1,18 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render } from "@testing-library/react";
 import nock from "nock";
 import React from "react";
-import { RestfulProvider } from "restful-react";
 import DetailsCard from "../components/DetailsCard";
 import Node from "../components/graph/Node";
+
+const renderWithClient = (ui: React.ReactElement) => {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  return render(
+    <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
+  );
+};
 
 describe("display card for node details", () => {
   beforeAll(() => {
@@ -37,11 +46,7 @@ describe("display card for node details", () => {
       info: [],
     });
 
-    const { queryByText } = render(
-      <RestfulProvider base="http://localhost">
-        <DetailsCard node={node} />
-      </RestfulProvider>
-    );
+    const { queryByText } = renderWithClient(<DetailsCard node={node} />);
 
     expect(queryByText("test-app-name - Details")).toBeInTheDocument();
   });
