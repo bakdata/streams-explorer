@@ -6,7 +6,4 @@
 import "@testing-library/jest-dom/extend-expect";
 import "jest-fix-undefined";
 import "whatwg-fetch";
-
-// Stub HTMLCanvasElement.getContext so jsdom doesn't require the canvas native
-// module. No tests exercise real canvas rendering — GraphVisualization is mocked.
-HTMLCanvasElement.prototype.getContext = () => null;
+import "jest-canvas-mock";

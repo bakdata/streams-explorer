@@ -69,8 +69,11 @@ const App: React.FC = () => {
     localStorage.setItem(REFRESH_INTERVAL, refreshInterval.toString());
   }, [refreshInterval]);
 
-  const { mutate: updateMutate, isLoading: isUpdating } =
-    useUpdateApiUpdatePost();
+  const {
+    mutate: updateMutate,
+    mutateAsync: updateMutateAsync,
+    isLoading: isUpdating,
+  } = useUpdateApiUpdatePost();
 
   const update = () => updateMutate();
 
@@ -78,38 +81,30 @@ const App: React.FC = () => {
     data: graphResponse,
     isLoading: isLoadingGraph,
     error: graphError,
-    refetch: graphRefetch,
   } = useGetPositionedGraphApiGraphGet(
     currentPipeline !== ALL_PIPELINES
       ? { pipeline_name: currentPipeline }
       : undefined
   );
-  const graph =
-    graphResponse?.status === 200
-      ? (graphResponse as getPositionedGraphApiGraphGetResponse200).data
-      : undefined;
+  const graph = graphResponse?.status === 200
+    ? (graphResponse as getPositionedGraphApiGraphGetResponse200).data
+    : undefined;
 
   const {
     refetch: retryPipelineGraph,
-    error: retryPipelineGraphError,
-    data: retryPipelineGraphResponse,
   } = useGetPositionedGraphApiGraphGet(
     { pipeline_name: currentPipeline },
     { query: { enabled: false } }
   );
-  const retryPipelineGraphData =
-    retryPipelineGraphResponse?.status === 200
-      ? (retryPipelineGraphResponse as getPositionedGraphApiGraphGetResponse200)
-        .data
-      : undefined;
 
   const {
     data: pipelinesResponse,
     isLoading: isLoadingPipelines,
     error: pipelineError,
   } = useGetPipelinesApiPipelinesGet();
-  const pipelines =
-    pipelinesResponse?.status === 200 ? pipelinesResponse.data : undefined;
+  const pipelines = pipelinesResponse?.status === 200
+    ? pipelinesResponse.data
+    : undefined;
 
   const {
     data: metricsResponse,
@@ -117,8 +112,9 @@ const App: React.FC = () => {
     refetch: refetchMetrics,
     error: metricsError,
   } = useGetMetricsApiMetricsGet({ query: { enabled: false } });
-  const metrics =
-    metricsResponse?.status === 200 ? metricsResponse.data : undefined;
+  const metrics = metricsResponse?.status === 200
+    ? metricsResponse.data
+    : undefined;
 
   useEffect(() => {
     if (refreshInterval && refreshInterval > 0) {
@@ -146,48 +142,34 @@ const App: React.FC = () => {
   }, [graph, query]);
 
   useEffect(() => {
-    if (graphError) {
-      let errorMessage: string | undefined;
-      const err = graphError as any;
-      if (err?.data) {
-        const data = err.data as HTTPValidationError;
-        if (data.detail) {
-          errorMessage = data.detail.toString();
-        }
-      }
-      message.error(errorMessage || "Failed loading graph", 5);
+    if (!graphError) return;
 
-      if (err?.status === 404 && currentPipeline !== ALL_PIPELINES) {
-        // check if a re-scrape solves it
-        const hideMessage = message.warning("Refreshing pipelines", 0);
-        updateMutate(undefined, {
-          onSuccess: () => {
-            retryPipelineGraph();
-          },
-          onError: () => {
-            redirectAllPipelines();
-          },
-          onSettled: () => {
-            hideMessage();
-          },
-        });
+    let errorMessage: string | undefined;
+    const err = graphError as any;
+    if (err?.data) {
+      const data = err.data as HTTPValidationError;
+      if (data.detail) {
+        errorMessage = data.detail.toString();
       }
     }
-  }, [graphError]); // eslint-disable-line react-hooks/exhaustive-deps
+    message.error(errorMessage || "Failed loading graph", 5);
 
-  useEffect(() => {
-    if (
-      retryPipelineGraphError
-      && (retryPipelineGraphError as any)?.status === 404
-      && currentPipeline !== ALL_PIPELINES
-    ) {
-      // pipeline still not found
-      redirectAllPipelines();
-    } else if (retryPipelineGraphData) {
-      message.success("Found pipeline!");
-      graphRefetch();
-    } // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [retryPipelineGraphError, retryPipelineGraphData]);
+    if (err?.status !== 404 || currentPipeline === ALL_PIPELINES) return;
+
+    // Pipeline not found — scrape then retry, sequentially.
+    const hideMessage = message.warning("Refreshing pipelines", 0);
+    (async () => {
+      try {
+        await updateMutateAsync();
+        await retryPipelineGraph();
+        message.success("Found pipeline!");
+      } catch {
+        redirectAllPipelines();
+      } finally {
+        hideMessage();
+      }
+    })();
+  }, [graphError]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const redirectAllPipelines = () => {
     message.info("Redirecting to all pipelines");

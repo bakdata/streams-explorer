@@ -106,7 +106,7 @@ describe("display node information", () => {
       .query({ link_type: "kibana" })
       .reply(
         200,
-        "http://localhost:5601/app/kibana#/discover?_a=(columns:!(_source),query:(language:lucene,query:'kubernetes.labels.app:%20%22atm-fraud-transactionavroproducer%22'))"
+        JSON.stringify("http://localhost:5601/app/kibana#/discover?_a=(columns:!(_source),query:(language:lucene,query:'kubernetes.labels.app:%20%22atm-fraud-transactionavroproducer%22'))")
       );
     const { findByText, asFragment, queryByText } = renderWithClient(
       <Details nodeId="atm-fraud-transactionavroproducer" />
@@ -197,7 +197,7 @@ describe("display node information", () => {
       )
       .reply(
         200,
-        "http://localhost:3000/d/path/to/dashboard?var-topics=atm-fraud-incoming-transactions-topic"
+        JSON.stringify("http://localhost:3000/d/path/to/dashboard?var-topics=atm-fraud-incoming-transactions-topic")
       );
 
     const { getByText, findByText, getByTestId } = renderWithClient(
@@ -205,7 +205,6 @@ describe("display node information", () => {
     );
 
     await findByText("v2"); // get dropdown menu for schema version
-    let schemaVersion = getByText("v2");
     expect(nockSchema2.isDone()).toBeTruthy();
     expect(nockSchema1.isDone()).toBeFalsy();
     const schema2 = getByTestId("schema");
@@ -220,7 +219,7 @@ describe("display node information", () => {
     });
 
     await waitFor(() => {
-      expect(schemaVersion).toHaveTextContent("v1");
+      expect(getByTestId("schema-version")).toHaveTextContent("v1");
       expect(nockSchema1.isDone()).toBeTruthy();
     });
 

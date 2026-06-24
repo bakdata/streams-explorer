@@ -61,8 +61,6 @@ export type updateApiUpdatePostResponseSuccess = (updateApiUpdatePostResponse200
 };
 ;
 
-export type updateApiUpdatePostResponse = (updateApiUpdatePostResponseSuccess)
-
 export const getUpdateApiUpdatePostUrl = () => {
 
 
@@ -74,7 +72,7 @@ export const getUpdateApiUpdatePostUrl = () => {
 /**
  * @summary Update
  */
-export const updateApiUpdatePost = async ( options?: RequestInit): Promise<updateApiUpdatePostResponse> => {
+export const updateApiUpdatePost = async ( options?: RequestInit): Promise<updateApiUpdatePostResponseSuccess> => {
 
   const res = await fetch(getUpdateApiUpdatePostUrl(),
   {
@@ -87,15 +85,22 @@ export const updateApiUpdatePost = async ( options?: RequestInit): Promise<updat
 
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
 
-  const data: updateApiUpdatePostResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as updateApiUpdatePostResponse
+    const err: globalThis.Error & {info?: any, status?: number} = new globalThis.Error();
+    const data  = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: updateApiUpdatePostResponseSuccess['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as updateApiUpdatePostResponseSuccess
 }
 
 
 
 
-export const getUpdateApiUpdatePostMutationOptions = <TError = unknown,
+export const getUpdateApiUpdatePostMutationOptions = <TError = globalThis.Error & { info?: unknown; status?: number },
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateApiUpdatePost>>, TError,void, TContext>, fetch?: RequestInit}
 ): UseMutationOptions<Awaited<ReturnType<typeof updateApiUpdatePost>>, TError,void, TContext> => {
 
@@ -124,12 +129,12 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
 
     export type UpdateApiUpdatePostMutationResult = NonNullable<Awaited<ReturnType<typeof updateApiUpdatePost>>>
 
-    export type UpdateApiUpdatePostMutationError = unknown
+    export type UpdateApiUpdatePostMutationError = globalThis.Error & { info?: unknown; status?: number }
 
     /**
  * @summary Update
  */
-export const useUpdateApiUpdatePost = <TError = unknown,
+export const useUpdateApiUpdatePost = <TError = globalThis.Error & { info?: unknown; status?: number },
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateApiUpdatePost>>, TError,void, TContext>, fetch?: RequestInit}
  ): UseMutationResult<
         Awaited<ReturnType<typeof updateApiUpdatePost>>,
@@ -157,8 +162,6 @@ export type getPositionedGraphApiGraphGetResponseError = (getPositionedGraphApiG
   headers: Headers;
 };
 
-export type getPositionedGraphApiGraphGetResponse = (getPositionedGraphApiGraphGetResponseSuccess | getPositionedGraphApiGraphGetResponseError)
-
 export const getGetPositionedGraphApiGraphGetUrl = (params?: GetPositionedGraphApiGraphGetParams,) => {
   const normalizedParams = new URLSearchParams();
 
@@ -177,7 +180,7 @@ export const getGetPositionedGraphApiGraphGetUrl = (params?: GetPositionedGraphA
 /**
  * @summary Get Positioned Graph
  */
-export const getPositionedGraphApiGraphGet = async (params?: GetPositionedGraphApiGraphGetParams, options?: RequestInit): Promise<getPositionedGraphApiGraphGetResponse> => {
+export const getPositionedGraphApiGraphGet = async (params?: GetPositionedGraphApiGraphGetParams, options?: RequestInit): Promise<getPositionedGraphApiGraphGetResponseSuccess> => {
 
   const res = await fetch(getGetPositionedGraphApiGraphGetUrl(params),
   {
@@ -190,9 +193,16 @@ export const getPositionedGraphApiGraphGet = async (params?: GetPositionedGraphA
 
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
 
-  const data: getPositionedGraphApiGraphGetResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as getPositionedGraphApiGraphGetResponse
+    const err: globalThis.Error & {info?: getPositionedGraphApiGraphGetResponseError['data'], status?: number} = new globalThis.Error();
+    const data : getPositionedGraphApiGraphGetResponseError['data'] = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: getPositionedGraphApiGraphGetResponseSuccess['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as getPositionedGraphApiGraphGetResponseSuccess
 }
 
 
@@ -206,7 +216,7 @@ export const getGetPositionedGraphApiGraphGetQueryKey = (params?: GetPositionedG
     }
 
 
-export const getGetPositionedGraphApiGraphGetQueryOptions = <TData = Awaited<ReturnType<typeof getPositionedGraphApiGraphGet>>, TError = HTTPValidationError>(params?: GetPositionedGraphApiGraphGetParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPositionedGraphApiGraphGet>>, TError, TData>, fetch?: RequestInit}
+export const getGetPositionedGraphApiGraphGetQueryOptions = <TData = Awaited<ReturnType<typeof getPositionedGraphApiGraphGet>>, TError = globalThis.Error & { info?: HTTPValidationError; status?: number }>(params?: GetPositionedGraphApiGraphGetParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPositionedGraphApiGraphGet>>, TError, TData>, fetch?: RequestInit}
 ) => {
 
 const {query: queryOptions, fetch: fetchOptions} = options ?? {};
@@ -225,14 +235,14 @@ const {query: queryOptions, fetch: fetchOptions} = options ?? {};
 }
 
 export type GetPositionedGraphApiGraphGetQueryResult = NonNullable<Awaited<ReturnType<typeof getPositionedGraphApiGraphGet>>>
-export type GetPositionedGraphApiGraphGetQueryError = HTTPValidationError
+export type GetPositionedGraphApiGraphGetQueryError = globalThis.Error & { info?: HTTPValidationError; status?: number }
 
 
 /**
  * @summary Get Positioned Graph
  */
 
-export function useGetPositionedGraphApiGraphGet<TData = Awaited<ReturnType<typeof getPositionedGraphApiGraphGet>>, TError = HTTPValidationError>(
+export function useGetPositionedGraphApiGraphGet<TData = Awaited<ReturnType<typeof getPositionedGraphApiGraphGet>>, TError = globalThis.Error & { info?: HTTPValidationError; status?: number }>(
  params?: GetPositionedGraphApiGraphGetParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPositionedGraphApiGraphGet>>, TError, TData>, fetch?: RequestInit}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
@@ -260,8 +270,6 @@ export type getPipelinesApiPipelinesGetResponseSuccess = (getPipelinesApiPipelin
 };
 ;
 
-export type getPipelinesApiPipelinesGetResponse = (getPipelinesApiPipelinesGetResponseSuccess)
-
 export const getGetPipelinesApiPipelinesGetUrl = () => {
 
 
@@ -273,7 +281,7 @@ export const getGetPipelinesApiPipelinesGetUrl = () => {
 /**
  * @summary Get Pipelines
  */
-export const getPipelinesApiPipelinesGet = async ( options?: RequestInit): Promise<getPipelinesApiPipelinesGetResponse> => {
+export const getPipelinesApiPipelinesGet = async ( options?: RequestInit): Promise<getPipelinesApiPipelinesGetResponseSuccess> => {
 
   const res = await fetch(getGetPipelinesApiPipelinesGetUrl(),
   {
@@ -286,9 +294,16 @@ export const getPipelinesApiPipelinesGet = async ( options?: RequestInit): Promi
 
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
 
-  const data: getPipelinesApiPipelinesGetResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as getPipelinesApiPipelinesGetResponse
+    const err: globalThis.Error & {info?: any, status?: number} = new globalThis.Error();
+    const data  = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: getPipelinesApiPipelinesGetResponseSuccess['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as getPipelinesApiPipelinesGetResponseSuccess
 }
 
 
@@ -302,7 +317,7 @@ export const getGetPipelinesApiPipelinesGetQueryKey = () => {
     }
 
 
-export const getGetPipelinesApiPipelinesGetQueryOptions = <TData = Awaited<ReturnType<typeof getPipelinesApiPipelinesGet>>, TError = unknown>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPipelinesApiPipelinesGet>>, TError, TData>, fetch?: RequestInit}
+export const getGetPipelinesApiPipelinesGetQueryOptions = <TData = Awaited<ReturnType<typeof getPipelinesApiPipelinesGet>>, TError = globalThis.Error & { info?: unknown; status?: number }>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPipelinesApiPipelinesGet>>, TError, TData>, fetch?: RequestInit}
 ) => {
 
 const {query: queryOptions, fetch: fetchOptions} = options ?? {};
@@ -321,14 +336,14 @@ const {query: queryOptions, fetch: fetchOptions} = options ?? {};
 }
 
 export type GetPipelinesApiPipelinesGetQueryResult = NonNullable<Awaited<ReturnType<typeof getPipelinesApiPipelinesGet>>>
-export type GetPipelinesApiPipelinesGetQueryError = unknown
+export type GetPipelinesApiPipelinesGetQueryError = globalThis.Error & { info?: unknown; status?: number }
 
 
 /**
  * @summary Get Pipelines
  */
 
-export function useGetPipelinesApiPipelinesGet<TData = Awaited<ReturnType<typeof getPipelinesApiPipelinesGet>>, TError = unknown>(
+export function useGetPipelinesApiPipelinesGet<TData = Awaited<ReturnType<typeof getPipelinesApiPipelinesGet>>, TError = globalThis.Error & { info?: unknown; status?: number }>(
   options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPipelinesApiPipelinesGet>>, TError, TData>, fetch?: RequestInit}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
@@ -363,8 +378,6 @@ export type getNodeInfoApiNodeNodeIdGetResponseError = (getNodeInfoApiNodeNodeId
   headers: Headers;
 };
 
-export type getNodeInfoApiNodeNodeIdGetResponse = (getNodeInfoApiNodeNodeIdGetResponseSuccess | getNodeInfoApiNodeNodeIdGetResponseError)
-
 export const getGetNodeInfoApiNodeNodeIdGetUrl = (nodeId: string,) => {
 
 
@@ -376,7 +389,7 @@ export const getGetNodeInfoApiNodeNodeIdGetUrl = (nodeId: string,) => {
 /**
  * @summary Get Node Info
  */
-export const getNodeInfoApiNodeNodeIdGet = async (nodeId: string, options?: RequestInit): Promise<getNodeInfoApiNodeNodeIdGetResponse> => {
+export const getNodeInfoApiNodeNodeIdGet = async (nodeId: string, options?: RequestInit): Promise<getNodeInfoApiNodeNodeIdGetResponseSuccess> => {
 
   const res = await fetch(getGetNodeInfoApiNodeNodeIdGetUrl(nodeId),
   {
@@ -389,9 +402,16 @@ export const getNodeInfoApiNodeNodeIdGet = async (nodeId: string, options?: Requ
 
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
 
-  const data: getNodeInfoApiNodeNodeIdGetResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as getNodeInfoApiNodeNodeIdGetResponse
+    const err: globalThis.Error & {info?: getNodeInfoApiNodeNodeIdGetResponseError['data'], status?: number} = new globalThis.Error();
+    const data : getNodeInfoApiNodeNodeIdGetResponseError['data'] = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: getNodeInfoApiNodeNodeIdGetResponseSuccess['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as getNodeInfoApiNodeNodeIdGetResponseSuccess
 }
 
 
@@ -405,7 +425,7 @@ export const getGetNodeInfoApiNodeNodeIdGetQueryKey = (nodeId: string,) => {
     }
 
 
-export const getGetNodeInfoApiNodeNodeIdGetQueryOptions = <TData = Awaited<ReturnType<typeof getNodeInfoApiNodeNodeIdGet>>, TError = HTTPValidationError>(nodeId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getNodeInfoApiNodeNodeIdGet>>, TError, TData>, fetch?: RequestInit}
+export const getGetNodeInfoApiNodeNodeIdGetQueryOptions = <TData = Awaited<ReturnType<typeof getNodeInfoApiNodeNodeIdGet>>, TError = globalThis.Error & { info?: HTTPValidationError; status?: number }>(nodeId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getNodeInfoApiNodeNodeIdGet>>, TError, TData>, fetch?: RequestInit}
 ) => {
 
 const {query: queryOptions, fetch: fetchOptions} = options ?? {};
@@ -424,14 +444,14 @@ const {query: queryOptions, fetch: fetchOptions} = options ?? {};
 }
 
 export type GetNodeInfoApiNodeNodeIdGetQueryResult = NonNullable<Awaited<ReturnType<typeof getNodeInfoApiNodeNodeIdGet>>>
-export type GetNodeInfoApiNodeNodeIdGetQueryError = HTTPValidationError
+export type GetNodeInfoApiNodeNodeIdGetQueryError = globalThis.Error & { info?: HTTPValidationError; status?: number }
 
 
 /**
  * @summary Get Node Info
  */
 
-export function useGetNodeInfoApiNodeNodeIdGet<TData = Awaited<ReturnType<typeof getNodeInfoApiNodeNodeIdGet>>, TError = HTTPValidationError>(
+export function useGetNodeInfoApiNodeNodeIdGet<TData = Awaited<ReturnType<typeof getNodeInfoApiNodeNodeIdGet>>, TError = globalThis.Error & { info?: HTTPValidationError; status?: number }>(
  nodeId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getNodeInfoApiNodeNodeIdGet>>, TError, TData>, fetch?: RequestInit}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
@@ -466,8 +486,6 @@ export type getNodeSchemaVersionsApiNodeNodeIdSchemaGetResponseError = (getNodeS
   headers: Headers;
 };
 
-export type getNodeSchemaVersionsApiNodeNodeIdSchemaGetResponse = (getNodeSchemaVersionsApiNodeNodeIdSchemaGetResponseSuccess | getNodeSchemaVersionsApiNodeNodeIdSchemaGetResponseError)
-
 export const getGetNodeSchemaVersionsApiNodeNodeIdSchemaGetUrl = (nodeId: string,) => {
 
 
@@ -479,7 +497,7 @@ export const getGetNodeSchemaVersionsApiNodeNodeIdSchemaGetUrl = (nodeId: string
 /**
  * @summary Get Node Schema Versions
  */
-export const getNodeSchemaVersionsApiNodeNodeIdSchemaGet = async (nodeId: string, options?: RequestInit): Promise<getNodeSchemaVersionsApiNodeNodeIdSchemaGetResponse> => {
+export const getNodeSchemaVersionsApiNodeNodeIdSchemaGet = async (nodeId: string, options?: RequestInit): Promise<getNodeSchemaVersionsApiNodeNodeIdSchemaGetResponseSuccess> => {
 
   const res = await fetch(getGetNodeSchemaVersionsApiNodeNodeIdSchemaGetUrl(nodeId),
   {
@@ -492,9 +510,16 @@ export const getNodeSchemaVersionsApiNodeNodeIdSchemaGet = async (nodeId: string
 
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
 
-  const data: getNodeSchemaVersionsApiNodeNodeIdSchemaGetResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as getNodeSchemaVersionsApiNodeNodeIdSchemaGetResponse
+    const err: globalThis.Error & {info?: getNodeSchemaVersionsApiNodeNodeIdSchemaGetResponseError['data'], status?: number} = new globalThis.Error();
+    const data : getNodeSchemaVersionsApiNodeNodeIdSchemaGetResponseError['data'] = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: getNodeSchemaVersionsApiNodeNodeIdSchemaGetResponseSuccess['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as getNodeSchemaVersionsApiNodeNodeIdSchemaGetResponseSuccess
 }
 
 
@@ -508,7 +533,7 @@ export const getGetNodeSchemaVersionsApiNodeNodeIdSchemaGetQueryKey = (nodeId: s
     }
 
 
-export const getGetNodeSchemaVersionsApiNodeNodeIdSchemaGetQueryOptions = <TData = Awaited<ReturnType<typeof getNodeSchemaVersionsApiNodeNodeIdSchemaGet>>, TError = HTTPValidationError>(nodeId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getNodeSchemaVersionsApiNodeNodeIdSchemaGet>>, TError, TData>, fetch?: RequestInit}
+export const getGetNodeSchemaVersionsApiNodeNodeIdSchemaGetQueryOptions = <TData = Awaited<ReturnType<typeof getNodeSchemaVersionsApiNodeNodeIdSchemaGet>>, TError = globalThis.Error & { info?: HTTPValidationError; status?: number }>(nodeId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getNodeSchemaVersionsApiNodeNodeIdSchemaGet>>, TError, TData>, fetch?: RequestInit}
 ) => {
 
 const {query: queryOptions, fetch: fetchOptions} = options ?? {};
@@ -527,14 +552,14 @@ const {query: queryOptions, fetch: fetchOptions} = options ?? {};
 }
 
 export type GetNodeSchemaVersionsApiNodeNodeIdSchemaGetQueryResult = NonNullable<Awaited<ReturnType<typeof getNodeSchemaVersionsApiNodeNodeIdSchemaGet>>>
-export type GetNodeSchemaVersionsApiNodeNodeIdSchemaGetQueryError = HTTPValidationError
+export type GetNodeSchemaVersionsApiNodeNodeIdSchemaGetQueryError = globalThis.Error & { info?: HTTPValidationError; status?: number }
 
 
 /**
  * @summary Get Node Schema Versions
  */
 
-export function useGetNodeSchemaVersionsApiNodeNodeIdSchemaGet<TData = Awaited<ReturnType<typeof getNodeSchemaVersionsApiNodeNodeIdSchemaGet>>, TError = HTTPValidationError>(
+export function useGetNodeSchemaVersionsApiNodeNodeIdSchemaGet<TData = Awaited<ReturnType<typeof getNodeSchemaVersionsApiNodeNodeIdSchemaGet>>, TError = globalThis.Error & { info?: HTTPValidationError; status?: number }>(
  nodeId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getNodeSchemaVersionsApiNodeNodeIdSchemaGet>>, TError, TData>, fetch?: RequestInit}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
@@ -569,8 +594,6 @@ export type getNodeSchemaApiNodeNodeIdSchemaVersionGetResponseError = (getNodeSc
   headers: Headers;
 };
 
-export type getNodeSchemaApiNodeNodeIdSchemaVersionGetResponse = (getNodeSchemaApiNodeNodeIdSchemaVersionGetResponseSuccess | getNodeSchemaApiNodeNodeIdSchemaVersionGetResponseError)
-
 export const getGetNodeSchemaApiNodeNodeIdSchemaVersionGetUrl = (nodeId: string,
     version: number,) => {
 
@@ -584,7 +607,7 @@ export const getGetNodeSchemaApiNodeNodeIdSchemaVersionGetUrl = (nodeId: string,
  * @summary Get Node Schema
  */
 export const getNodeSchemaApiNodeNodeIdSchemaVersionGet = async (nodeId: string,
-    version: number, options?: RequestInit): Promise<getNodeSchemaApiNodeNodeIdSchemaVersionGetResponse> => {
+    version: number, options?: RequestInit): Promise<getNodeSchemaApiNodeNodeIdSchemaVersionGetResponseSuccess> => {
 
   const res = await fetch(getGetNodeSchemaApiNodeNodeIdSchemaVersionGetUrl(nodeId,version),
   {
@@ -597,9 +620,16 @@ export const getNodeSchemaApiNodeNodeIdSchemaVersionGet = async (nodeId: string,
 
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
 
-  const data: getNodeSchemaApiNodeNodeIdSchemaVersionGetResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as getNodeSchemaApiNodeNodeIdSchemaVersionGetResponse
+    const err: globalThis.Error & {info?: getNodeSchemaApiNodeNodeIdSchemaVersionGetResponseError['data'], status?: number} = new globalThis.Error();
+    const data : getNodeSchemaApiNodeNodeIdSchemaVersionGetResponseError['data'] = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: getNodeSchemaApiNodeNodeIdSchemaVersionGetResponseSuccess['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as getNodeSchemaApiNodeNodeIdSchemaVersionGetResponseSuccess
 }
 
 
@@ -614,7 +644,7 @@ export const getGetNodeSchemaApiNodeNodeIdSchemaVersionGetQueryKey = (nodeId: st
     }
 
 
-export const getGetNodeSchemaApiNodeNodeIdSchemaVersionGetQueryOptions = <TData = Awaited<ReturnType<typeof getNodeSchemaApiNodeNodeIdSchemaVersionGet>>, TError = HTTPValidationError>(nodeId: string,
+export const getGetNodeSchemaApiNodeNodeIdSchemaVersionGetQueryOptions = <TData = Awaited<ReturnType<typeof getNodeSchemaApiNodeNodeIdSchemaVersionGet>>, TError = globalThis.Error & { info?: HTTPValidationError; status?: number }>(nodeId: string,
     version: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getNodeSchemaApiNodeNodeIdSchemaVersionGet>>, TError, TData>, fetch?: RequestInit}
 ) => {
 
@@ -634,14 +664,14 @@ const {query: queryOptions, fetch: fetchOptions} = options ?? {};
 }
 
 export type GetNodeSchemaApiNodeNodeIdSchemaVersionGetQueryResult = NonNullable<Awaited<ReturnType<typeof getNodeSchemaApiNodeNodeIdSchemaVersionGet>>>
-export type GetNodeSchemaApiNodeNodeIdSchemaVersionGetQueryError = HTTPValidationError
+export type GetNodeSchemaApiNodeNodeIdSchemaVersionGetQueryError = globalThis.Error & { info?: HTTPValidationError; status?: number }
 
 
 /**
  * @summary Get Node Schema
  */
 
-export function useGetNodeSchemaApiNodeNodeIdSchemaVersionGet<TData = Awaited<ReturnType<typeof getNodeSchemaApiNodeNodeIdSchemaVersionGet>>, TError = HTTPValidationError>(
+export function useGetNodeSchemaApiNodeNodeIdSchemaVersionGet<TData = Awaited<ReturnType<typeof getNodeSchemaApiNodeNodeIdSchemaVersionGet>>, TError = globalThis.Error & { info?: HTTPValidationError; status?: number }>(
  nodeId: string,
     version: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getNodeSchemaApiNodeNodeIdSchemaVersionGet>>, TError, TData>, fetch?: RequestInit}
 
@@ -677,8 +707,6 @@ export type getLinkingApiNodeLinkingNodeIdGetResponseError = (getLinkingApiNodeL
   headers: Headers;
 };
 
-export type getLinkingApiNodeLinkingNodeIdGetResponse = (getLinkingApiNodeLinkingNodeIdGetResponseSuccess | getLinkingApiNodeLinkingNodeIdGetResponseError)
-
 export const getGetLinkingApiNodeLinkingNodeIdGetUrl = (nodeId: string,
     params: GetLinkingApiNodeLinkingNodeIdGetParams,) => {
   const normalizedParams = new URLSearchParams();
@@ -699,7 +727,7 @@ export const getGetLinkingApiNodeLinkingNodeIdGetUrl = (nodeId: string,
  * @summary Get Linking
  */
 export const getLinkingApiNodeLinkingNodeIdGet = async (nodeId: string,
-    params: GetLinkingApiNodeLinkingNodeIdGetParams, options?: RequestInit): Promise<getLinkingApiNodeLinkingNodeIdGetResponse> => {
+    params: GetLinkingApiNodeLinkingNodeIdGetParams, options?: RequestInit): Promise<getLinkingApiNodeLinkingNodeIdGetResponseSuccess> => {
 
   const res = await fetch(getGetLinkingApiNodeLinkingNodeIdGetUrl(nodeId,params),
   {
@@ -712,9 +740,16 @@ export const getLinkingApiNodeLinkingNodeIdGet = async (nodeId: string,
 
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
 
-  const data: getLinkingApiNodeLinkingNodeIdGetResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as getLinkingApiNodeLinkingNodeIdGetResponse
+    const err: globalThis.Error & {info?: getLinkingApiNodeLinkingNodeIdGetResponseError['data'], status?: number} = new globalThis.Error();
+    const data : getLinkingApiNodeLinkingNodeIdGetResponseError['data'] = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: getLinkingApiNodeLinkingNodeIdGetResponseSuccess['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as getLinkingApiNodeLinkingNodeIdGetResponseSuccess
 }
 
 
@@ -729,7 +764,7 @@ export const getGetLinkingApiNodeLinkingNodeIdGetQueryKey = (nodeId: string,
     }
 
 
-export const getGetLinkingApiNodeLinkingNodeIdGetQueryOptions = <TData = Awaited<ReturnType<typeof getLinkingApiNodeLinkingNodeIdGet>>, TError = HTTPValidationError>(nodeId: string,
+export const getGetLinkingApiNodeLinkingNodeIdGetQueryOptions = <TData = Awaited<ReturnType<typeof getLinkingApiNodeLinkingNodeIdGet>>, TError = globalThis.Error & { info?: HTTPValidationError; status?: number }>(nodeId: string,
     params: GetLinkingApiNodeLinkingNodeIdGetParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getLinkingApiNodeLinkingNodeIdGet>>, TError, TData>, fetch?: RequestInit}
 ) => {
 
@@ -749,14 +784,14 @@ const {query: queryOptions, fetch: fetchOptions} = options ?? {};
 }
 
 export type GetLinkingApiNodeLinkingNodeIdGetQueryResult = NonNullable<Awaited<ReturnType<typeof getLinkingApiNodeLinkingNodeIdGet>>>
-export type GetLinkingApiNodeLinkingNodeIdGetQueryError = HTTPValidationError
+export type GetLinkingApiNodeLinkingNodeIdGetQueryError = globalThis.Error & { info?: HTTPValidationError; status?: number }
 
 
 /**
  * @summary Get Linking
  */
 
-export function useGetLinkingApiNodeLinkingNodeIdGet<TData = Awaited<ReturnType<typeof getLinkingApiNodeLinkingNodeIdGet>>, TError = HTTPValidationError>(
+export function useGetLinkingApiNodeLinkingNodeIdGet<TData = Awaited<ReturnType<typeof getLinkingApiNodeLinkingNodeIdGet>>, TError = globalThis.Error & { info?: HTTPValidationError; status?: number }>(
  nodeId: string,
     params: GetLinkingApiNodeLinkingNodeIdGetParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getLinkingApiNodeLinkingNodeIdGet>>, TError, TData>, fetch?: RequestInit}
 
@@ -785,8 +820,6 @@ export type getMetricsApiMetricsGetResponseSuccess = (getMetricsApiMetricsGetRes
 };
 ;
 
-export type getMetricsApiMetricsGetResponse = (getMetricsApiMetricsGetResponseSuccess)
-
 export const getGetMetricsApiMetricsGetUrl = () => {
 
 
@@ -798,7 +831,7 @@ export const getGetMetricsApiMetricsGetUrl = () => {
 /**
  * @summary Get Metrics
  */
-export const getMetricsApiMetricsGet = async ( options?: RequestInit): Promise<getMetricsApiMetricsGetResponse> => {
+export const getMetricsApiMetricsGet = async ( options?: RequestInit): Promise<getMetricsApiMetricsGetResponseSuccess> => {
 
   const res = await fetch(getGetMetricsApiMetricsGetUrl(),
   {
@@ -811,9 +844,16 @@ export const getMetricsApiMetricsGet = async ( options?: RequestInit): Promise<g
 
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
 
-  const data: getMetricsApiMetricsGetResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as getMetricsApiMetricsGetResponse
+    const err: globalThis.Error & {info?: any, status?: number} = new globalThis.Error();
+    const data  = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: getMetricsApiMetricsGetResponseSuccess['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as getMetricsApiMetricsGetResponseSuccess
 }
 
 
@@ -827,7 +867,7 @@ export const getGetMetricsApiMetricsGetQueryKey = () => {
     }
 
 
-export const getGetMetricsApiMetricsGetQueryOptions = <TData = Awaited<ReturnType<typeof getMetricsApiMetricsGet>>, TError = unknown>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMetricsApiMetricsGet>>, TError, TData>, fetch?: RequestInit}
+export const getGetMetricsApiMetricsGetQueryOptions = <TData = Awaited<ReturnType<typeof getMetricsApiMetricsGet>>, TError = globalThis.Error & { info?: unknown; status?: number }>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMetricsApiMetricsGet>>, TError, TData>, fetch?: RequestInit}
 ) => {
 
 const {query: queryOptions, fetch: fetchOptions} = options ?? {};
@@ -846,14 +886,14 @@ const {query: queryOptions, fetch: fetchOptions} = options ?? {};
 }
 
 export type GetMetricsApiMetricsGetQueryResult = NonNullable<Awaited<ReturnType<typeof getMetricsApiMetricsGet>>>
-export type GetMetricsApiMetricsGetQueryError = unknown
+export type GetMetricsApiMetricsGetQueryError = globalThis.Error & { info?: unknown; status?: number }
 
 
 /**
  * @summary Get Metrics
  */
 
-export function useGetMetricsApiMetricsGet<TData = Awaited<ReturnType<typeof getMetricsApiMetricsGet>>, TError = unknown>(
+export function useGetMetricsApiMetricsGet<TData = Awaited<ReturnType<typeof getMetricsApiMetricsGet>>, TError = globalThis.Error & { info?: unknown; status?: number }>(
   options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMetricsApiMetricsGet>>, TError, TData>, fetch?: RequestInit}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {

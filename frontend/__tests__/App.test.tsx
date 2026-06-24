@@ -99,47 +99,60 @@ describe("Streams Explorer", () => {
   });
 
   describe("handles url parameters", () => {
-    // -- Mock backend endpoints
-    const nockGraph = mockBackendGraph(true);
-    const nockPipelineGraph = mockBackendGraph(true, "test-pipeline");
+    let nockGraph: ReturnType<typeof mockBackendGraph>;
+    let nockPipelineGraph: ReturnType<typeof mockBackendGraph>;
 
-    nock("http://localhost")
-      .persist()
-      .get("/api/pipelines")
-      .reply(200, {
-        pipelines: ["test-pipeline"],
-      });
+    beforeEach(() => {
+      mockRouter.setCurrentUrl("/");
 
-    nock("http://localhost")
-      .persist()
-      .get("/api/metrics")
-      .reply(200, [
-        {
-          node_id: "test-app",
-          messages_in: null,
-          messages_out: null,
-          consumer_lag: null,
-          consumer_read_rate: null,
-          topic_size: null,
-          replicas: null,
-          connector_tasks: null,
-        },
-        {
-          node_id: "test-topic",
-          messages_in: null,
-          messages_out: null,
-          consumer_lag: null,
-          consumer_read_rate: null,
-          topic_size: null,
-          replicas: null,
-          connector_tasks: null,
-        },
-      ]);
+      // Mock backend endpoints
+      nockGraph = mockBackendGraph(true);
+      nockPipelineGraph = mockBackendGraph(true, "test-pipeline");
+
+      nock("http://localhost")
+        .persist()
+        .get("/api/pipelines")
+        .reply(200, {
+          pipelines: ["test-pipeline"],
+        });
+
+      nock("http://localhost")
+        .persist()
+        .get("/api/metrics")
+        .reply(200, [
+          {
+            node_id: "test-app",
+            messages_in: null,
+            messages_out: null,
+            consumer_lag: null,
+            consumer_read_rate: null,
+            topic_size: null,
+            replicas: null,
+            connector_tasks: null,
+          },
+          {
+            node_id: "test-topic",
+            messages_in: null,
+            messages_out: null,
+            consumer_lag: null,
+            consumer_read_rate: null,
+            topic_size: null,
+            replicas: null,
+            connector_tasks: null,
+          },
+        ]);
+    });
+
+    afterEach(() => {
+      nock.cleanAll();
+    });
 
     it("should set pipeline from url parameter", async () => {
       mockRouter.setCurrentUrl("/?pipeline=test-pipeline");
 
-      const { getByTestId, findByTestId, asFragment } = renderWithClient(<App />);
+      const { getByTestId, findByTestId, asFragment } = renderWithClient(
+        <App />
+      );
 
       expect(singletonRouter).toMatchObject({
         asPath: "/?pipeline=test-pipeline",
@@ -189,7 +202,7 @@ describe("Streams Explorer", () => {
       const input = within(nodeSelect).getByRole(
         "combobox"
       ) as HTMLInputElement;
-      expect(input).toHaveValue("test-app-name"); // shows label
+      await waitFor(() => expect(input).toHaveValue("test-app-name"));
       expect(nockAppNode.isDone()).toBeTruthy();
     });
 
@@ -317,8 +330,6 @@ describe("Streams Explorer", () => {
         .post(`/api/update`)
         .reply(200);
 
-      mockBackendGraph(true);
-
       mockRouter.setCurrentUrl("/?pipeline=doesnt-exist");
 
       const { findByTestId } = renderWithClient(<App />);
@@ -348,15 +359,15 @@ describe("Streams Explorer", () => {
     });
 
     it("should update and retry if pipeline is not found", async () => {
-      let nockPipeline = nock("http://localhost")
+      const nockPipeline404 = nock("http://localhost")
         .get(`/api/graph?pipeline_name=avail-after-scrape`)
         .reply(404);
+
+      const nockPipeline200 = mockBackendGraph(false, "avail-after-scrape");
 
       const nockUpdate = nock("http://localhost")
         .post(`/api/update`)
         .reply(200);
-
-      mockBackendGraph(true);
 
       mockRouter.setCurrentUrl("/?pipeline=avail-after-scrape");
 
@@ -364,17 +375,13 @@ describe("Streams Explorer", () => {
 
       expect(singletonRouter.asPath).toBe("/?pipeline=avail-after-scrape");
 
-      await waitFor(() => {
-        // wait for the first pipeline request to fail
-        expect(nockPipeline.isDone()).toBeTruthy();
-        // pipeline becomes available
-        nockPipeline = mockBackendGraph(true, "avail-after-scrape");
-      });
-
       await findByTestId("graph");
 
-      expect(nockUpdate.isDone()).toBeTruthy();
-      expect(nockPipeline.isDone()).toBeTruthy();
+      await waitFor(() => {
+        expect(nockUpdate.isDone()).toBeTruthy();
+        expect(nockPipeline404.isDone()).toBeTruthy();
+        expect(nockPipeline200.isDone()).toBeTruthy();
+      });
       await waitFor(() => {
         const currentPipeline = getByTestId("pipeline-current");
         expect(
@@ -386,8 +393,6 @@ describe("Streams Explorer", () => {
     });
 
     it("should persist metrics refresh interval across page reloads", async () => {
-      mockBackendGraph(true);
-
       const { findByText, findByTestId, rerender } = renderWithClient(<App />);
 
       await findByTestId("graph");
@@ -416,7 +421,6 @@ describe("Streams Explorer", () => {
     });
 
     it("should not fetch metrics if interval is set to 'off'", async () => {
-      mockBackendGraph(true);
       const nockMetrics = nock("http://localhost")
         .get("/api/metrics")
         .reply(200, []);

@@ -44,7 +44,7 @@ const Schema = ({ nodeId }: SchemaProps) => {
   const {
     data: schemaResponse,
     refetch: fetchSchema,
-    isLoading: schemaLoading,
+    isFetching: schemaLoading,
     error: schemaError,
   } = useGetNodeSchemaApiNodeNodeIdSchemaVersionGet(
     nodeId,
