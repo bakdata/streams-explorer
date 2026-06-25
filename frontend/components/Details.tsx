@@ -80,10 +80,11 @@ const NodeInfoDetail = ({ infoListItem, nodeId }: NodeInfoDetailProps) => {
 };
 
 const LinkInfo = ({ infoListItem, nodeId }: NodeInfoDetailProps) => {
-  const { data: linkToService, isLoading } = useGetLinkingApiNodeLinkingNodeIdGet(
-    nodeId,
-    { link_type: infoListItem.value as string }
-  );
+  const { data: linkToService, isLoading } =
+    useGetLinkingApiNodeLinkingNodeIdGet(
+      nodeId,
+      { link_type: infoListItem.value as string }
+    );
 
   if (isLoading) {
     return <Spin tip="Loading link..." />;
