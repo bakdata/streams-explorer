@@ -4,8 +4,8 @@
  * Streams Explorer
  * OpenAPI spec version: 0.1.0
  */
-import type { NodeInfoListItem } from "./nodeInfoListItem";
-import type { NodeTypesEnum } from "./nodeTypesEnum";
+import type { NodeInfoListItem } from './nodeInfoListItem';
+import type { NodeTypesEnum } from './nodeTypesEnum';
 
 export interface NodeInformation {
   node_id: string;

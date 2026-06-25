@@ -6,5 +6,5 @@
  */
 
 export type GetLinkingApiNodeLinkingNodeIdGetParams = {
-  link_type: string;
+link_type: string;
 };

@@ -13,7 +13,6 @@ import { useRouter } from "next/router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import {
-  getPositionedGraphApiGraphGetResponse200,
   useGetMetricsApiMetricsGet,
   useGetPipelinesApiPipelinesGet,
   useGetPositionedGraphApiGraphGet,
@@ -78,7 +77,7 @@ const App: React.FC = () => {
   const update = () => updateMutate();
 
   const {
-    data: graphResponse,
+    data: graph,
     isLoading: isLoadingGraph,
     error: graphError,
   } = useGetPositionedGraphApiGraphGet(
@@ -86,9 +85,6 @@ const App: React.FC = () => {
       ? { pipeline_name: currentPipeline }
       : undefined
   );
-  const graph = graphResponse?.status === 200
-    ? (graphResponse as getPositionedGraphApiGraphGetResponse200).data
-    : undefined;
 
   const {
     refetch: retryPipelineGraph,
@@ -98,23 +94,17 @@ const App: React.FC = () => {
   );
 
   const {
-    data: pipelinesResponse,
+    data: pipelines,
     isLoading: isLoadingPipelines,
     error: pipelineError,
   } = useGetPipelinesApiPipelinesGet();
-  const pipelines = pipelinesResponse?.status === 200
-    ? pipelinesResponse.data
-    : undefined;
 
   const {
-    data: metricsResponse,
+    data: metrics,
     isLoading: isLoadingMetrics,
     refetch: refetchMetrics,
     error: metricsError,
   } = useGetMetricsApiMetricsGet({ query: { enabled: false } });
-  const metrics = metricsResponse?.status === 200
-    ? metricsResponse.data
-    : undefined;
 
   useEffect(() => {
     if (refreshInterval && refreshInterval > 0) {

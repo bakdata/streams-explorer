@@ -3,8 +3,6 @@ import { Alert, Button, Dropdown, Menu, Space, Spin } from "antd";
 import React, { useEffect, useState } from "react";
 import ReactJson from "react-json-view";
 import {
-  getNodeSchemaApiNodeNodeIdSchemaVersionGetResponse200,
-  getNodeSchemaVersionsApiNodeNodeIdSchemaGetResponse200,
   useGetNodeSchemaApiNodeNodeIdSchemaVersionGet,
   useGetNodeSchemaVersionsApiNodeNodeIdSchemaGet,
 } from "../lib/api/fetchers";
@@ -17,15 +15,10 @@ interface SchemaProps {
 const Schema = ({ nodeId }: SchemaProps) => {
   const [schemaVersion, setSchemaVersion] = useState<number | null>(null);
   const {
-    data: versionsResponse,
+    data: versions,
     isLoading: versionsLoading,
     error: versionsError,
   } = useGetNodeSchemaVersionsApiNodeNodeIdSchemaGet(nodeId);
-  const versions = versionsResponse?.status === 200
-    ? (
-      versionsResponse as getNodeSchemaVersionsApiNodeNodeIdSchemaGetResponse200
-    ).data
-    : undefined;
 
   const menu = (
     <Menu
@@ -41,7 +34,7 @@ const Schema = ({ nodeId }: SchemaProps) => {
   );
 
   const {
-    data: schemaResponse,
+    data: schema,
     refetch: fetchSchema,
     isFetching: schemaLoading,
     error: schemaError,
@@ -50,11 +43,6 @@ const Schema = ({ nodeId }: SchemaProps) => {
     schemaVersion as number,
     { query: { enabled: false } }
   );
-  const schema = schemaResponse?.status === 200
-    ? (
-      schemaResponse as getNodeSchemaApiNodeNodeIdSchemaVersionGetResponse200
-    ).data
-    : undefined;
 
   useEffect(() => {
     if (versions) {

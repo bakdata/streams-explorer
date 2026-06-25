@@ -6,5 +6,5 @@
  */
 
 export type GetPositionedGraphApiGraphGetParams = {
-  pipeline_name?: string;
+pipeline_name?: string;
 };

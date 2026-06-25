@@ -4,7 +4,10 @@
  * Streams Explorer
  * OpenAPI spec version: 0.1.0
  */
-import { useMutation, useQuery } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQuery
+} from '@tanstack/react-query';
 import type {
   MutationFunction,
   QueryFunction,
@@ -12,8 +15,8 @@ import type {
   UseMutationOptions,
   UseMutationResult,
   UseQueryOptions,
-  UseQueryResult,
-} from "@tanstack/react-query";
+  UseQueryResult
+} from '@tanstack/react-query';
 
 import type {
   GetLinkingApiNodeLinkingNodeIdGetParams,
@@ -23,22 +26,26 @@ import type {
   HTTPValidationError,
   Metric,
   NodeInformation,
-  Pipelines,
-} from "./model";
+  Pipelines
+} from './model';
 
+import { customInstance } from './mutator';
+import type { ErrorType } from './mutator';
 type AwaitedInput<T> = PromiseLike<T> | T;
 
-type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
+      type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
 
-const withQueryKey = <T extends object, K>(
-  query: T,
-  queryKey: K
-): T & { queryKey: K } => {
+
+type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
+
+
+
+const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKey: K } => {
   const result = { queryKey } as T & { queryKey: K };
   for (const key of Object.keys(query)) {
     // The explicit queryKey always wins, matching the previous
     // `{ ...query, queryKey }` spread where it was set last.
-    if (key === "queryKey") continue;
+    if (key === 'queryKey') continue;
     Object.defineProperty(result, key, {
       enumerable: true,
       configurable: true,
@@ -48,1138 +55,551 @@ const withQueryKey = <T extends object, K>(
   return result;
 };
 
-export type updateApiUpdatePostResponse200 = {
-  data: unknown;
-  status: 200;
-};
-
-export type updateApiUpdatePostResponseSuccess =
-  & (updateApiUpdatePostResponse200)
-  & {
-    headers: Headers;
-  };
-
-export const getUpdateApiUpdatePostUrl = () => {
-  return `/api/update`;
-};
-
 /**
  * @summary Update
  */
-export const updateApiUpdatePost = async (
-  options?: RequestInit
-): Promise<updateApiUpdatePostResponseSuccess> => {
-  const res = await fetch(getUpdateApiUpdatePostUrl(), {
-    ...options,
-    method: "POST",
-  });
+export const updateApiUpdatePost = (
 
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  if (!res.ok) {
-    const err: globalThis.Error & { info?: any; status?: number } =
-      new globalThis.Error();
-    const data = body ? JSON.parse(body) : {};
-    err.info = data;
-    err.status = res.status;
-    throw err;
-  }
-  const data: updateApiUpdatePostResponseSuccess["data"] = body
-    ? JSON.parse(body)
-    : {};
-  return {
-    data,
-    status: res.status,
-    headers: res.headers,
-  } as updateApiUpdatePostResponseSuccess;
-};
-
-export const getUpdateApiUpdatePostMutationOptions = <
-  TError = globalThis.Error & { info?: unknown; status?: number },
-  TContext = unknown,
->(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof updateApiUpdatePost>>,
-      TError,
-      void,
-      TContext
-    >;
-    fetch?: RequestInit;
-  }
-): UseMutationOptions<
-  Awaited<ReturnType<typeof updateApiUpdatePost>>,
-  TError,
-  void,
-  TContext
-> => {
-  const mutationKey = ["updateApiUpdatePost"];
-  const { mutation: mutationOptions, fetch: fetchOptions } = options
-    ? options.mutation && "mutationKey" in options.mutation
-        && options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, fetch: undefined };
-
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof updateApiUpdatePost>>,
-    void
-  > = () => {
-    return updateApiUpdatePost(fetchOptions);
-  };
-
-  return { mutationFn, ...mutationOptions };
-};
-
-export type UpdateApiUpdatePostMutationResult = NonNullable<
-  Awaited<ReturnType<typeof updateApiUpdatePost>>
->;
-
-export type UpdateApiUpdatePostMutationError = globalThis.Error & {
-  info?: unknown;
-  status?: number;
-};
-
-/**
- * @summary Update
- */
-export const useUpdateApiUpdatePost = <
-  TError = globalThis.Error & { info?: unknown; status?: number },
-  TContext = unknown,
->(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof updateApiUpdatePost>>,
-      TError,
-      void,
-      TContext
-    >;
-    fetch?: RequestInit;
-  }
-): UseMutationResult<
-  Awaited<ReturnType<typeof updateApiUpdatePost>>,
-  TError,
-  void,
-  TContext
-> => {
-  return useMutation(getUpdateApiUpdatePostMutationOptions(options));
-};
-
-export type getPositionedGraphApiGraphGetResponse200 = {
-  data: Graph;
-  status: 200;
-};
-
-export type getPositionedGraphApiGraphGetResponse422 = {
-  data: HTTPValidationError;
-  status: 422;
-};
-
-export type getPositionedGraphApiGraphGetResponseSuccess =
-  & (getPositionedGraphApiGraphGetResponse200)
-  & {
-    headers: Headers;
-  };
-export type getPositionedGraphApiGraphGetResponseError =
-  & (getPositionedGraphApiGraphGetResponse422)
-  & {
-    headers: Headers;
-  };
-
-export const getGetPositionedGraphApiGraphGetUrl = (
-  params?: GetPositionedGraphApiGraphGetParams
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
 ) => {
-  const normalizedParams = new URLSearchParams();
 
-  Object.entries(params || {}).forEach(([key, value]) => {
-    if (value !== undefined) {
-      normalizedParams.append(key, value === null ? "null" : String(value));
+
+      return customInstance<unknown>(
+      {url: `/api/update`, method: 'POST', signal
+    },
+      options);
     }
-  });
 
-  const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0
-    ? `/api/graph?${stringifiedParams}`
-    : `/api/graph`;
-};
+
+export const getUpdateApiUpdatePostMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateApiUpdatePost>>, TError,void, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateApiUpdatePost>>, TError,void, TContext> => {
+
+const mutationKey = ['updateApiUpdatePost'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateApiUpdatePost>>, void> = () => {
+
+
+          return  updateApiUpdatePost(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateApiUpdatePostMutationResult = NonNullable<Awaited<ReturnType<typeof updateApiUpdatePost>>>
+
+    export type UpdateApiUpdatePostMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Update
+ */
+export const useUpdateApiUpdatePost = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateApiUpdatePost>>, TError,void, TContext>, request?: SecondParameter<typeof customInstance>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateApiUpdatePost>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getUpdateApiUpdatePostMutationOptions(options));
+    }
 
 /**
  * @summary Get Positioned Graph
  */
-export const getPositionedGraphApiGraphGet = async (
-  params?: GetPositionedGraphApiGraphGetParams,
-  options?: RequestInit
-): Promise<getPositionedGraphApiGraphGetResponseSuccess> => {
-  const res = await fetch(getGetPositionedGraphApiGraphGetUrl(params), {
-    ...options,
-    method: "GET",
-  });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  if (!res.ok) {
-    const err: globalThis.Error & {
-      info?: getPositionedGraphApiGraphGetResponseError["data"];
-      status?: number;
-    } = new globalThis.Error();
-    const data: getPositionedGraphApiGraphGetResponseError["data"] = body
-      ? JSON.parse(body)
-      : {};
-    err.info = data;
-    err.status = res.status;
-    throw err;
-  }
-  const data: getPositionedGraphApiGraphGetResponseSuccess["data"] = body
-    ? JSON.parse(body)
-    : {};
-  return {
-    data,
-    status: res.status,
-    headers: res.headers,
-  } as getPositionedGraphApiGraphGetResponseSuccess;
-};
-
-export const getGetPositionedGraphApiGraphGetQueryKey = (
-  params?: GetPositionedGraphApiGraphGetParams
+export const getPositionedGraphApiGraphGet = (
+    params?: GetPositionedGraphApiGraphGetParams,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
 ) => {
-  return [
-    `/api/graph`,
-    ...(params ? [params] : []),
-  ] as const;
-};
 
-export const getGetPositionedGraphApiGraphGetQueryOptions = <
-  TData = Awaited<ReturnType<typeof getPositionedGraphApiGraphGet>>,
-  TError = globalThis.Error & { info?: HTTPValidationError; status?: number },
->(
-  params?: GetPositionedGraphApiGraphGetParams,
-  options?: {
-    query?: UseQueryOptions<
-      Awaited<ReturnType<typeof getPositionedGraphApiGraphGet>>,
-      TError,
-      TData
-    >;
-    fetch?: RequestInit;
-  }
+
+      return customInstance<Graph>(
+      {url: `/api/graph`, method: 'GET',
+        params, signal
+    },
+      options);
+    }
+
+
+
+
+export const getGetPositionedGraphApiGraphGetQueryKey = (params?: GetPositionedGraphApiGraphGetParams,) => {
+    return [
+    `/api/graph`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetPositionedGraphApiGraphGetQueryOptions = <TData = Awaited<ReturnType<typeof getPositionedGraphApiGraphGet>>, TError = ErrorType<HTTPValidationError>>(params?: GetPositionedGraphApiGraphGetParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPositionedGraphApiGraphGet>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
 ) => {
-  const { query: queryOptions, fetch: fetchOptions } = options ?? {};
 
-  const queryKey = queryOptions?.queryKey
-    ?? getGetPositionedGraphApiGraphGetQueryKey(params);
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof getPositionedGraphApiGraphGet>>
-  > = ({ signal }) =>
-    getPositionedGraphApiGraphGet(params, { signal, ...fetchOptions });
+  const queryKey =  queryOptions?.queryKey ?? getGetPositionedGraphApiGraphGetQueryKey(params);
 
-  return { queryKey, queryFn, ...queryOptions } as
-    & UseQueryOptions<
-      Awaited<ReturnType<typeof getPositionedGraphApiGraphGet>>,
-      TError,
-      TData
-    >
-    & { queryKey: QueryKey };
-};
 
-export type GetPositionedGraphApiGraphGetQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getPositionedGraphApiGraphGet>>
->;
-export type GetPositionedGraphApiGraphGetQueryError = globalThis.Error & {
-  info?: HTTPValidationError;
-  status?: number;
-};
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPositionedGraphApiGraphGet>>> = ({ signal }) => getPositionedGraphApiGraphGet(params, requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPositionedGraphApiGraphGet>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetPositionedGraphApiGraphGetQueryResult = NonNullable<Awaited<ReturnType<typeof getPositionedGraphApiGraphGet>>>
+export type GetPositionedGraphApiGraphGetQueryError = ErrorType<HTTPValidationError>
+
 
 /**
  * @summary Get Positioned Graph
  */
 
-export function useGetPositionedGraphApiGraphGet<
-  TData = Awaited<ReturnType<typeof getPositionedGraphApiGraphGet>>,
-  TError = globalThis.Error & { info?: HTTPValidationError; status?: number },
->(
-  params?: GetPositionedGraphApiGraphGetParams,
-  options?: {
-    query?: UseQueryOptions<
-      Awaited<ReturnType<typeof getPositionedGraphApiGraphGet>>,
-      TError,
-      TData
-    >;
-    fetch?: RequestInit;
-  }
-): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-  const queryOptions = getGetPositionedGraphApiGraphGetQueryOptions(
-    params,
-    options
-  );
+export function useGetPositionedGraphApiGraphGet<TData = Awaited<ReturnType<typeof getPositionedGraphApiGraphGet>>, TError = ErrorType<HTTPValidationError>>(
+ params?: GetPositionedGraphApiGraphGetParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPositionedGraphApiGraphGet>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
 
-  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
-    queryKey: QueryKey;
-  };
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetPositionedGraphApiGraphGetQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
   return withQueryKey(query, queryOptions.queryKey);
 }
 
-export type getPipelinesApiPipelinesGetResponse200 = {
-  data: Pipelines;
-  status: 200;
-};
 
-export type getPipelinesApiPipelinesGetResponseSuccess =
-  & (getPipelinesApiPipelinesGetResponse200)
-  & {
-    headers: Headers;
-  };
 
-export const getGetPipelinesApiPipelinesGetUrl = () => {
-  return `/api/pipelines`;
-};
+
+
+
 
 /**
  * @summary Get Pipelines
  */
-export const getPipelinesApiPipelinesGet = async (
-  options?: RequestInit
-): Promise<getPipelinesApiPipelinesGetResponseSuccess> => {
-  const res = await fetch(getGetPipelinesApiPipelinesGetUrl(), {
-    ...options,
-    method: "GET",
-  });
+export const getPipelinesApiPipelinesGet = (
 
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  if (!res.ok) {
-    const err: globalThis.Error & { info?: any; status?: number } =
-      new globalThis.Error();
-    const data = body ? JSON.parse(body) : {};
-    err.info = data;
-    err.status = res.status;
-    throw err;
-  }
-  const data: getPipelinesApiPipelinesGetResponseSuccess["data"] = body
-    ? JSON.parse(body)
-    : {};
-  return {
-    data,
-    status: res.status,
-    headers: res.headers,
-  } as getPipelinesApiPipelinesGetResponseSuccess;
-};
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+
+
+      return customInstance<Pipelines>(
+      {url: `/api/pipelines`, method: 'GET', signal
+    },
+      options);
+    }
+
+
+
 
 export const getGetPipelinesApiPipelinesGetQueryKey = () => {
-  return [
-    `/api/pipelines`,
-  ] as const;
-};
+    return [
+    `/api/pipelines`
+    ] as const;
+    }
 
-export const getGetPipelinesApiPipelinesGetQueryOptions = <
-  TData = Awaited<ReturnType<typeof getPipelinesApiPipelinesGet>>,
-  TError = globalThis.Error & { info?: unknown; status?: number },
->(
-  options?: {
-    query?: UseQueryOptions<
-      Awaited<ReturnType<typeof getPipelinesApiPipelinesGet>>,
-      TError,
-      TData
-    >;
-    fetch?: RequestInit;
-  }
+
+export const getGetPipelinesApiPipelinesGetQueryOptions = <TData = Awaited<ReturnType<typeof getPipelinesApiPipelinesGet>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPipelinesApiPipelinesGet>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
 ) => {
-  const { query: queryOptions, fetch: fetchOptions } = options ?? {};
 
-  const queryKey = queryOptions?.queryKey
-    ?? getGetPipelinesApiPipelinesGetQueryKey();
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof getPipelinesApiPipelinesGet>>
-  > = ({ signal }) => getPipelinesApiPipelinesGet({ signal, ...fetchOptions });
+  const queryKey =  queryOptions?.queryKey ?? getGetPipelinesApiPipelinesGetQueryKey();
 
-  return { queryKey, queryFn, ...queryOptions } as
-    & UseQueryOptions<
-      Awaited<ReturnType<typeof getPipelinesApiPipelinesGet>>,
-      TError,
-      TData
-    >
-    & { queryKey: QueryKey };
-};
 
-export type GetPipelinesApiPipelinesGetQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getPipelinesApiPipelinesGet>>
->;
-export type GetPipelinesApiPipelinesGetQueryError = globalThis.Error & {
-  info?: unknown;
-  status?: number;
-};
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPipelinesApiPipelinesGet>>> = ({ signal }) => getPipelinesApiPipelinesGet(requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPipelinesApiPipelinesGet>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetPipelinesApiPipelinesGetQueryResult = NonNullable<Awaited<ReturnType<typeof getPipelinesApiPipelinesGet>>>
+export type GetPipelinesApiPipelinesGetQueryError = ErrorType<unknown>
+
 
 /**
  * @summary Get Pipelines
  */
 
-export function useGetPipelinesApiPipelinesGet<
-  TData = Awaited<ReturnType<typeof getPipelinesApiPipelinesGet>>,
-  TError = globalThis.Error & { info?: unknown; status?: number },
->(
-  options?: {
-    query?: UseQueryOptions<
-      Awaited<ReturnType<typeof getPipelinesApiPipelinesGet>>,
-      TError,
-      TData
-    >;
-    fetch?: RequestInit;
-  }
-): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-  const queryOptions = getGetPipelinesApiPipelinesGetQueryOptions(options);
+export function useGetPipelinesApiPipelinesGet<TData = Awaited<ReturnType<typeof getPipelinesApiPipelinesGet>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPipelinesApiPipelinesGet>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
 
-  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
-    queryKey: QueryKey;
-  };
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetPipelinesApiPipelinesGetQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
   return withQueryKey(query, queryOptions.queryKey);
 }
 
-export type getNodeInfoApiNodeNodeIdGetResponse200 = {
-  data: NodeInformation;
-  status: 200;
-};
 
-export type getNodeInfoApiNodeNodeIdGetResponse422 = {
-  data: HTTPValidationError;
-  status: 422;
-};
 
-export type getNodeInfoApiNodeNodeIdGetResponseSuccess =
-  & (getNodeInfoApiNodeNodeIdGetResponse200)
-  & {
-    headers: Headers;
-  };
-export type getNodeInfoApiNodeNodeIdGetResponseError =
-  & (getNodeInfoApiNodeNodeIdGetResponse422)
-  & {
-    headers: Headers;
-  };
 
-export const getGetNodeInfoApiNodeNodeIdGetUrl = (nodeId: string) => {
-  return `/api/node/${nodeId}`;
-};
+
+
 
 /**
  * @summary Get Node Info
  */
-export const getNodeInfoApiNodeNodeIdGet = async (
-  nodeId: string,
-  options?: RequestInit
-): Promise<getNodeInfoApiNodeNodeIdGetResponseSuccess> => {
-  const res = await fetch(getGetNodeInfoApiNodeNodeIdGetUrl(nodeId), {
-    ...options,
-    method: "GET",
-  });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  if (!res.ok) {
-    const err: globalThis.Error & {
-      info?: getNodeInfoApiNodeNodeIdGetResponseError["data"];
-      status?: number;
-    } = new globalThis.Error();
-    const data: getNodeInfoApiNodeNodeIdGetResponseError["data"] = body
-      ? JSON.parse(body)
-      : {};
-    err.info = data;
-    err.status = res.status;
-    throw err;
-  }
-  const data: getNodeInfoApiNodeNodeIdGetResponseSuccess["data"] = body
-    ? JSON.parse(body)
-    : {};
-  return {
-    data,
-    status: res.status,
-    headers: res.headers,
-  } as getNodeInfoApiNodeNodeIdGetResponseSuccess;
-};
-
-export const getGetNodeInfoApiNodeNodeIdGetQueryKey = (nodeId: string) => {
-  return [
-    `/api/node/${nodeId}`,
-  ] as const;
-};
-
-export const getGetNodeInfoApiNodeNodeIdGetQueryOptions = <
-  TData = Awaited<ReturnType<typeof getNodeInfoApiNodeNodeIdGet>>,
-  TError = globalThis.Error & { info?: HTTPValidationError; status?: number },
->(
-  nodeId: string,
-  options?: {
-    query?: UseQueryOptions<
-      Awaited<ReturnType<typeof getNodeInfoApiNodeNodeIdGet>>,
-      TError,
-      TData
-    >;
-    fetch?: RequestInit;
-  }
+export const getNodeInfoApiNodeNodeIdGet = (
+    nodeId: string,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
 ) => {
-  const { query: queryOptions, fetch: fetchOptions } = options ?? {};
 
-  const queryKey = queryOptions?.queryKey
-    ?? getGetNodeInfoApiNodeNodeIdGetQueryKey(nodeId);
 
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof getNodeInfoApiNodeNodeIdGet>>
-  > = ({ signal }) =>
-    getNodeInfoApiNodeNodeIdGet(nodeId, { signal, ...fetchOptions });
+      return customInstance<NodeInformation>(
+      {url: `/api/node/${nodeId}`, method: 'GET', signal
+    },
+      options);
+    }
 
-  return {
-    queryKey,
-    queryFn,
-    enabled: nodeId !== null && nodeId !== undefined,
-    ...queryOptions,
-  } as
-    & UseQueryOptions<
-      Awaited<ReturnType<typeof getNodeInfoApiNodeNodeIdGet>>,
-      TError,
-      TData
-    >
-    & { queryKey: QueryKey };
-};
 
-export type GetNodeInfoApiNodeNodeIdGetQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getNodeInfoApiNodeNodeIdGet>>
->;
-export type GetNodeInfoApiNodeNodeIdGetQueryError = globalThis.Error & {
-  info?: HTTPValidationError;
-  status?: number;
-};
+
+
+export const getGetNodeInfoApiNodeNodeIdGetQueryKey = (nodeId: string,) => {
+    return [
+    `/api/node/${nodeId}`
+    ] as const;
+    }
+
+
+export const getGetNodeInfoApiNodeNodeIdGetQueryOptions = <TData = Awaited<ReturnType<typeof getNodeInfoApiNodeNodeIdGet>>, TError = ErrorType<HTTPValidationError>>(nodeId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getNodeInfoApiNodeNodeIdGet>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetNodeInfoApiNodeNodeIdGetQueryKey(nodeId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getNodeInfoApiNodeNodeIdGet>>> = ({ signal }) => getNodeInfoApiNodeNodeIdGet(nodeId, requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: nodeId !== null && nodeId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getNodeInfoApiNodeNodeIdGet>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetNodeInfoApiNodeNodeIdGetQueryResult = NonNullable<Awaited<ReturnType<typeof getNodeInfoApiNodeNodeIdGet>>>
+export type GetNodeInfoApiNodeNodeIdGetQueryError = ErrorType<HTTPValidationError>
+
 
 /**
  * @summary Get Node Info
  */
 
-export function useGetNodeInfoApiNodeNodeIdGet<
-  TData = Awaited<ReturnType<typeof getNodeInfoApiNodeNodeIdGet>>,
-  TError = globalThis.Error & { info?: HTTPValidationError; status?: number },
->(
-  nodeId: string,
-  options?: {
-    query?: UseQueryOptions<
-      Awaited<ReturnType<typeof getNodeInfoApiNodeNodeIdGet>>,
-      TError,
-      TData
-    >;
-    fetch?: RequestInit;
-  }
-): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-  const queryOptions = getGetNodeInfoApiNodeNodeIdGetQueryOptions(
-    nodeId,
-    options
-  );
+export function useGetNodeInfoApiNodeNodeIdGet<TData = Awaited<ReturnType<typeof getNodeInfoApiNodeNodeIdGet>>, TError = ErrorType<HTTPValidationError>>(
+ nodeId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getNodeInfoApiNodeNodeIdGet>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
 
-  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
-    queryKey: QueryKey;
-  };
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetNodeInfoApiNodeNodeIdGetQueryOptions(nodeId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
   return withQueryKey(query, queryOptions.queryKey);
 }
 
-export type getNodeSchemaVersionsApiNodeNodeIdSchemaGetResponse200 = {
-  data: number[];
-  status: 200;
-};
 
-export type getNodeSchemaVersionsApiNodeNodeIdSchemaGetResponse422 = {
-  data: HTTPValidationError;
-  status: 422;
-};
 
-export type getNodeSchemaVersionsApiNodeNodeIdSchemaGetResponseSuccess =
-  & (getNodeSchemaVersionsApiNodeNodeIdSchemaGetResponse200)
-  & {
-    headers: Headers;
-  };
-export type getNodeSchemaVersionsApiNodeNodeIdSchemaGetResponseError =
-  & (getNodeSchemaVersionsApiNodeNodeIdSchemaGetResponse422)
-  & {
-    headers: Headers;
-  };
 
-export const getGetNodeSchemaVersionsApiNodeNodeIdSchemaGetUrl = (
-  nodeId: string
-) => {
-  return `/api/node/${nodeId}/schema`;
-};
+
+
 
 /**
  * @summary Get Node Schema Versions
  */
-export const getNodeSchemaVersionsApiNodeNodeIdSchemaGet = async (
-  nodeId: string,
-  options?: RequestInit
-): Promise<getNodeSchemaVersionsApiNodeNodeIdSchemaGetResponseSuccess> => {
-  const res = await fetch(
-    getGetNodeSchemaVersionsApiNodeNodeIdSchemaGetUrl(nodeId),
-    {
-      ...options,
-      method: "GET",
+export const getNodeSchemaVersionsApiNodeNodeIdSchemaGet = (
+    nodeId: string,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+
+
+      return customInstance<number[]>(
+      {url: `/api/node/${nodeId}/schema`, method: 'GET', signal
+    },
+      options);
     }
-  );
 
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  if (!res.ok) {
-    const err: globalThis.Error & {
-      info?: getNodeSchemaVersionsApiNodeNodeIdSchemaGetResponseError["data"];
-      status?: number;
-    } = new globalThis.Error();
-    const data:
-      getNodeSchemaVersionsApiNodeNodeIdSchemaGetResponseError["data"] = body
-        ? JSON.parse(body)
-        : {};
-    err.info = data;
-    err.status = res.status;
-    throw err;
-  }
-  const data:
-    getNodeSchemaVersionsApiNodeNodeIdSchemaGetResponseSuccess["data"] = body
-      ? JSON.parse(body)
-      : {};
-  return {
-    data,
-    status: res.status,
-    headers: res.headers,
-  } as getNodeSchemaVersionsApiNodeNodeIdSchemaGetResponseSuccess;
-};
 
-export const getGetNodeSchemaVersionsApiNodeNodeIdSchemaGetQueryKey = (
-  nodeId: string
+
+
+export const getGetNodeSchemaVersionsApiNodeNodeIdSchemaGetQueryKey = (nodeId: string,) => {
+    return [
+    `/api/node/${nodeId}/schema`
+    ] as const;
+    }
+
+
+export const getGetNodeSchemaVersionsApiNodeNodeIdSchemaGetQueryOptions = <TData = Awaited<ReturnType<typeof getNodeSchemaVersionsApiNodeNodeIdSchemaGet>>, TError = ErrorType<HTTPValidationError>>(nodeId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getNodeSchemaVersionsApiNodeNodeIdSchemaGet>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
 ) => {
-  return [
-    `/api/node/${nodeId}/schema`,
-  ] as const;
-};
 
-export const getGetNodeSchemaVersionsApiNodeNodeIdSchemaGetQueryOptions = <
-  TData = Awaited<
-    ReturnType<typeof getNodeSchemaVersionsApiNodeNodeIdSchemaGet>
-  >,
-  TError = globalThis.Error & { info?: HTTPValidationError; status?: number },
->(
-  nodeId: string,
-  options?: {
-    query?: UseQueryOptions<
-      Awaited<ReturnType<typeof getNodeSchemaVersionsApiNodeNodeIdSchemaGet>>,
-      TError,
-      TData
-    >;
-    fetch?: RequestInit;
-  }
-) => {
-  const { query: queryOptions, fetch: fetchOptions } = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey = queryOptions?.queryKey
-    ?? getGetNodeSchemaVersionsApiNodeNodeIdSchemaGetQueryKey(nodeId);
+  const queryKey =  queryOptions?.queryKey ?? getGetNodeSchemaVersionsApiNodeNodeIdSchemaGetQueryKey(nodeId);
 
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof getNodeSchemaVersionsApiNodeNodeIdSchemaGet>>
-  > = ({ signal }) =>
-    getNodeSchemaVersionsApiNodeNodeIdSchemaGet(nodeId, {
-      signal,
-      ...fetchOptions,
-    });
 
-  return {
-    queryKey,
-    queryFn,
-    enabled: nodeId !== null && nodeId !== undefined,
-    ...queryOptions,
-  } as
-    & UseQueryOptions<
-      Awaited<ReturnType<typeof getNodeSchemaVersionsApiNodeNodeIdSchemaGet>>,
-      TError,
-      TData
-    >
-    & { queryKey: QueryKey };
-};
 
-export type GetNodeSchemaVersionsApiNodeNodeIdSchemaGetQueryResult =
-  NonNullable<
-    Awaited<ReturnType<typeof getNodeSchemaVersionsApiNodeNodeIdSchemaGet>>
-  >;
-export type GetNodeSchemaVersionsApiNodeNodeIdSchemaGetQueryError =
-  & globalThis.Error
-  & { info?: HTTPValidationError; status?: number };
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getNodeSchemaVersionsApiNodeNodeIdSchemaGet>>> = ({ signal }) => getNodeSchemaVersionsApiNodeNodeIdSchemaGet(nodeId, requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: nodeId !== null && nodeId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getNodeSchemaVersionsApiNodeNodeIdSchemaGet>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetNodeSchemaVersionsApiNodeNodeIdSchemaGetQueryResult = NonNullable<Awaited<ReturnType<typeof getNodeSchemaVersionsApiNodeNodeIdSchemaGet>>>
+export type GetNodeSchemaVersionsApiNodeNodeIdSchemaGetQueryError = ErrorType<HTTPValidationError>
+
 
 /**
  * @summary Get Node Schema Versions
  */
 
-export function useGetNodeSchemaVersionsApiNodeNodeIdSchemaGet<
-  TData = Awaited<
-    ReturnType<typeof getNodeSchemaVersionsApiNodeNodeIdSchemaGet>
-  >,
-  TError = globalThis.Error & { info?: HTTPValidationError; status?: number },
->(
-  nodeId: string,
-  options?: {
-    query?: UseQueryOptions<
-      Awaited<ReturnType<typeof getNodeSchemaVersionsApiNodeNodeIdSchemaGet>>,
-      TError,
-      TData
-    >;
-    fetch?: RequestInit;
-  }
-): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-  const queryOptions =
-    getGetNodeSchemaVersionsApiNodeNodeIdSchemaGetQueryOptions(nodeId, options);
+export function useGetNodeSchemaVersionsApiNodeNodeIdSchemaGet<TData = Awaited<ReturnType<typeof getNodeSchemaVersionsApiNodeNodeIdSchemaGet>>, TError = ErrorType<HTTPValidationError>>(
+ nodeId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getNodeSchemaVersionsApiNodeNodeIdSchemaGet>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
 
-  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
-    queryKey: QueryKey;
-  };
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetNodeSchemaVersionsApiNodeNodeIdSchemaGetQueryOptions(nodeId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
   return withQueryKey(query, queryOptions.queryKey);
 }
 
-export type getNodeSchemaApiNodeNodeIdSchemaVersionGetResponse200 = {
-  data: GetNodeSchemaApiNodeNodeIdSchemaVersionGet200;
-  status: 200;
-};
 
-export type getNodeSchemaApiNodeNodeIdSchemaVersionGetResponse422 = {
-  data: HTTPValidationError;
-  status: 422;
-};
 
-export type getNodeSchemaApiNodeNodeIdSchemaVersionGetResponseSuccess =
-  & (getNodeSchemaApiNodeNodeIdSchemaVersionGetResponse200)
-  & {
-    headers: Headers;
-  };
-export type getNodeSchemaApiNodeNodeIdSchemaVersionGetResponseError =
-  & (getNodeSchemaApiNodeNodeIdSchemaVersionGetResponse422)
-  & {
-    headers: Headers;
-  };
 
-export const getGetNodeSchemaApiNodeNodeIdSchemaVersionGetUrl = (
-  nodeId: string,
-  version: number
-) => {
-  return `/api/node/${nodeId}/schema/${version}`;
-};
+
+
 
 /**
  * @summary Get Node Schema
  */
-export const getNodeSchemaApiNodeNodeIdSchemaVersionGet = async (
-  nodeId: string,
-  version: number,
-  options?: RequestInit
-): Promise<getNodeSchemaApiNodeNodeIdSchemaVersionGetResponseSuccess> => {
-  const res = await fetch(
-    getGetNodeSchemaApiNodeNodeIdSchemaVersionGetUrl(nodeId, version),
-    {
-      ...options,
-      method: "GET",
+export const getNodeSchemaApiNodeNodeIdSchemaVersionGet = (
+    nodeId: string,
+    version: number,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+
+
+      return customInstance<GetNodeSchemaApiNodeNodeIdSchemaVersionGet200>(
+      {url: `/api/node/${nodeId}/schema/${version}`, method: 'GET', signal
+    },
+      options);
     }
-  );
 
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  if (!res.ok) {
-    const err: globalThis.Error & {
-      info?: getNodeSchemaApiNodeNodeIdSchemaVersionGetResponseError["data"];
-      status?: number;
-    } = new globalThis.Error();
-    const data:
-      getNodeSchemaApiNodeNodeIdSchemaVersionGetResponseError["data"] = body
-        ? JSON.parse(body)
-        : {};
-    err.info = data;
-    err.status = res.status;
-    throw err;
-  }
-  const data:
-    getNodeSchemaApiNodeNodeIdSchemaVersionGetResponseSuccess["data"] = body
-      ? JSON.parse(body)
-      : {};
-  return {
-    data,
-    status: res.status,
-    headers: res.headers,
-  } as getNodeSchemaApiNodeNodeIdSchemaVersionGetResponseSuccess;
-};
 
-export const getGetNodeSchemaApiNodeNodeIdSchemaVersionGetQueryKey = (
-  nodeId: string,
-  version: number
+
+
+export const getGetNodeSchemaApiNodeNodeIdSchemaVersionGetQueryKey = (nodeId: string,
+    version: number,) => {
+    return [
+    `/api/node/${nodeId}/schema/${version}`
+    ] as const;
+    }
+
+
+export const getGetNodeSchemaApiNodeNodeIdSchemaVersionGetQueryOptions = <TData = Awaited<ReturnType<typeof getNodeSchemaApiNodeNodeIdSchemaVersionGet>>, TError = ErrorType<HTTPValidationError>>(nodeId: string,
+    version: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getNodeSchemaApiNodeNodeIdSchemaVersionGet>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
 ) => {
-  return [
-    `/api/node/${nodeId}/schema/${version}`,
-  ] as const;
-};
 
-export const getGetNodeSchemaApiNodeNodeIdSchemaVersionGetQueryOptions = <
-  TData = Awaited<
-    ReturnType<typeof getNodeSchemaApiNodeNodeIdSchemaVersionGet>
-  >,
-  TError = globalThis.Error & { info?: HTTPValidationError; status?: number },
->(
-  nodeId: string,
-  version: number,
-  options?: {
-    query?: UseQueryOptions<
-      Awaited<ReturnType<typeof getNodeSchemaApiNodeNodeIdSchemaVersionGet>>,
-      TError,
-      TData
-    >;
-    fetch?: RequestInit;
-  }
-) => {
-  const { query: queryOptions, fetch: fetchOptions } = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey = queryOptions?.queryKey
-    ?? getGetNodeSchemaApiNodeNodeIdSchemaVersionGetQueryKey(nodeId, version);
+  const queryKey =  queryOptions?.queryKey ?? getGetNodeSchemaApiNodeNodeIdSchemaVersionGetQueryKey(nodeId,version);
 
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof getNodeSchemaApiNodeNodeIdSchemaVersionGet>>
-  > = ({ signal }) =>
-    getNodeSchemaApiNodeNodeIdSchemaVersionGet(nodeId, version, {
-      signal,
-      ...fetchOptions,
-    });
 
-  return {
-    queryKey,
-    queryFn,
-    enabled: nodeId !== null && nodeId !== undefined && version !== null
-      && version !== undefined,
-    ...queryOptions,
-  } as
-    & UseQueryOptions<
-      Awaited<ReturnType<typeof getNodeSchemaApiNodeNodeIdSchemaVersionGet>>,
-      TError,
-      TData
-    >
-    & { queryKey: QueryKey };
-};
 
-export type GetNodeSchemaApiNodeNodeIdSchemaVersionGetQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getNodeSchemaApiNodeNodeIdSchemaVersionGet>>
->;
-export type GetNodeSchemaApiNodeNodeIdSchemaVersionGetQueryError =
-  & globalThis.Error
-  & { info?: HTTPValidationError; status?: number };
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getNodeSchemaApiNodeNodeIdSchemaVersionGet>>> = ({ signal }) => getNodeSchemaApiNodeNodeIdSchemaVersionGet(nodeId,version, requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: nodeId !== null && nodeId !== undefined && version !== null && version !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getNodeSchemaApiNodeNodeIdSchemaVersionGet>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetNodeSchemaApiNodeNodeIdSchemaVersionGetQueryResult = NonNullable<Awaited<ReturnType<typeof getNodeSchemaApiNodeNodeIdSchemaVersionGet>>>
+export type GetNodeSchemaApiNodeNodeIdSchemaVersionGetQueryError = ErrorType<HTTPValidationError>
+
 
 /**
  * @summary Get Node Schema
  */
 
-export function useGetNodeSchemaApiNodeNodeIdSchemaVersionGet<
-  TData = Awaited<
-    ReturnType<typeof getNodeSchemaApiNodeNodeIdSchemaVersionGet>
-  >,
-  TError = globalThis.Error & { info?: HTTPValidationError; status?: number },
->(
-  nodeId: string,
-  version: number,
-  options?: {
-    query?: UseQueryOptions<
-      Awaited<ReturnType<typeof getNodeSchemaApiNodeNodeIdSchemaVersionGet>>,
-      TError,
-      TData
-    >;
-    fetch?: RequestInit;
-  }
-): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-  const queryOptions =
-    getGetNodeSchemaApiNodeNodeIdSchemaVersionGetQueryOptions(
-      nodeId,
-      version,
-      options
-    );
+export function useGetNodeSchemaApiNodeNodeIdSchemaVersionGet<TData = Awaited<ReturnType<typeof getNodeSchemaApiNodeNodeIdSchemaVersionGet>>, TError = ErrorType<HTTPValidationError>>(
+ nodeId: string,
+    version: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getNodeSchemaApiNodeNodeIdSchemaVersionGet>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
 
-  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
-    queryKey: QueryKey;
-  };
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetNodeSchemaApiNodeNodeIdSchemaVersionGetQueryOptions(nodeId,version,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
   return withQueryKey(query, queryOptions.queryKey);
 }
 
-export type getLinkingApiNodeLinkingNodeIdGetResponse200 = {
-  data: string;
-  status: 200;
-};
 
-export type getLinkingApiNodeLinkingNodeIdGetResponse422 = {
-  data: HTTPValidationError;
-  status: 422;
-};
 
-export type getLinkingApiNodeLinkingNodeIdGetResponseSuccess =
-  & (getLinkingApiNodeLinkingNodeIdGetResponse200)
-  & {
-    headers: Headers;
-  };
-export type getLinkingApiNodeLinkingNodeIdGetResponseError =
-  & (getLinkingApiNodeLinkingNodeIdGetResponse422)
-  & {
-    headers: Headers;
-  };
 
-export const getGetLinkingApiNodeLinkingNodeIdGetUrl = (
-  nodeId: string,
-  params: GetLinkingApiNodeLinkingNodeIdGetParams
-) => {
-  const normalizedParams = new URLSearchParams();
 
-  Object.entries(params || {}).forEach(([key, value]) => {
-    if (value !== undefined) {
-      normalizedParams.append(key, value === null ? "null" : String(value));
-    }
-  });
 
-  const stringifiedParams = normalizedParams.toString();
-
-  return stringifiedParams.length > 0
-    ? `/api/node/linking/${nodeId}?${stringifiedParams}`
-    : `/api/node/linking/${nodeId}`;
-};
 
 /**
  * @summary Get Linking
  */
-export const getLinkingApiNodeLinkingNodeIdGet = async (
-  nodeId: string,
-  params: GetLinkingApiNodeLinkingNodeIdGetParams,
-  options?: RequestInit
-): Promise<getLinkingApiNodeLinkingNodeIdGetResponseSuccess> => {
-  const res = await fetch(
-    getGetLinkingApiNodeLinkingNodeIdGetUrl(nodeId, params),
-    {
-      ...options,
-      method: "GET",
+export const getLinkingApiNodeLinkingNodeIdGet = (
+    nodeId: string,
+    params: GetLinkingApiNodeLinkingNodeIdGetParams,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+
+
+      return customInstance<string>(
+      {url: `/api/node/linking/${nodeId}`, method: 'GET',
+        params, signal
+    },
+      options);
     }
-  );
 
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  if (!res.ok) {
-    const err: globalThis.Error & {
-      info?: getLinkingApiNodeLinkingNodeIdGetResponseError["data"];
-      status?: number;
-    } = new globalThis.Error();
-    const data: getLinkingApiNodeLinkingNodeIdGetResponseError["data"] = body
-      ? JSON.parse(body)
-      : {};
-    err.info = data;
-    err.status = res.status;
-    throw err;
-  }
-  const data: getLinkingApiNodeLinkingNodeIdGetResponseSuccess["data"] = body
-    ? JSON.parse(body)
-    : {};
-  return {
-    data,
-    status: res.status,
-    headers: res.headers,
-  } as getLinkingApiNodeLinkingNodeIdGetResponseSuccess;
-};
 
-export const getGetLinkingApiNodeLinkingNodeIdGetQueryKey = (
-  nodeId: string,
-  params?: GetLinkingApiNodeLinkingNodeIdGetParams
+
+
+export const getGetLinkingApiNodeLinkingNodeIdGetQueryKey = (nodeId: string,
+    params?: GetLinkingApiNodeLinkingNodeIdGetParams,) => {
+    return [
+    `/api/node/linking/${nodeId}`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetLinkingApiNodeLinkingNodeIdGetQueryOptions = <TData = Awaited<ReturnType<typeof getLinkingApiNodeLinkingNodeIdGet>>, TError = ErrorType<HTTPValidationError>>(nodeId: string,
+    params: GetLinkingApiNodeLinkingNodeIdGetParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getLinkingApiNodeLinkingNodeIdGet>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
 ) => {
-  return [
-    `/api/node/linking/${nodeId}`,
-    ...(params ? [params] : []),
-  ] as const;
-};
 
-export const getGetLinkingApiNodeLinkingNodeIdGetQueryOptions = <
-  TData = Awaited<ReturnType<typeof getLinkingApiNodeLinkingNodeIdGet>>,
-  TError = globalThis.Error & { info?: HTTPValidationError; status?: number },
->(
-  nodeId: string,
-  params: GetLinkingApiNodeLinkingNodeIdGetParams,
-  options?: {
-    query?: UseQueryOptions<
-      Awaited<ReturnType<typeof getLinkingApiNodeLinkingNodeIdGet>>,
-      TError,
-      TData
-    >;
-    fetch?: RequestInit;
-  }
-) => {
-  const { query: queryOptions, fetch: fetchOptions } = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey = queryOptions?.queryKey
-    ?? getGetLinkingApiNodeLinkingNodeIdGetQueryKey(nodeId, params);
+  const queryKey =  queryOptions?.queryKey ?? getGetLinkingApiNodeLinkingNodeIdGetQueryKey(nodeId,params);
 
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof getLinkingApiNodeLinkingNodeIdGet>>
-  > = ({ signal }) =>
-    getLinkingApiNodeLinkingNodeIdGet(nodeId, params, {
-      signal,
-      ...fetchOptions,
-    });
 
-  return {
-    queryKey,
-    queryFn,
-    enabled: nodeId !== null && nodeId !== undefined,
-    ...queryOptions,
-  } as
-    & UseQueryOptions<
-      Awaited<ReturnType<typeof getLinkingApiNodeLinkingNodeIdGet>>,
-      TError,
-      TData
-    >
-    & { queryKey: QueryKey };
-};
 
-export type GetLinkingApiNodeLinkingNodeIdGetQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getLinkingApiNodeLinkingNodeIdGet>>
->;
-export type GetLinkingApiNodeLinkingNodeIdGetQueryError = globalThis.Error & {
-  info?: HTTPValidationError;
-  status?: number;
-};
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getLinkingApiNodeLinkingNodeIdGet>>> = ({ signal }) => getLinkingApiNodeLinkingNodeIdGet(nodeId,params, requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: nodeId !== null && nodeId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getLinkingApiNodeLinkingNodeIdGet>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetLinkingApiNodeLinkingNodeIdGetQueryResult = NonNullable<Awaited<ReturnType<typeof getLinkingApiNodeLinkingNodeIdGet>>>
+export type GetLinkingApiNodeLinkingNodeIdGetQueryError = ErrorType<HTTPValidationError>
+
 
 /**
  * @summary Get Linking
  */
 
-export function useGetLinkingApiNodeLinkingNodeIdGet<
-  TData = Awaited<ReturnType<typeof getLinkingApiNodeLinkingNodeIdGet>>,
-  TError = globalThis.Error & { info?: HTTPValidationError; status?: number },
->(
-  nodeId: string,
-  params: GetLinkingApiNodeLinkingNodeIdGetParams,
-  options?: {
-    query?: UseQueryOptions<
-      Awaited<ReturnType<typeof getLinkingApiNodeLinkingNodeIdGet>>,
-      TError,
-      TData
-    >;
-    fetch?: RequestInit;
-  }
-): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-  const queryOptions = getGetLinkingApiNodeLinkingNodeIdGetQueryOptions(
-    nodeId,
-    params,
-    options
-  );
+export function useGetLinkingApiNodeLinkingNodeIdGet<TData = Awaited<ReturnType<typeof getLinkingApiNodeLinkingNodeIdGet>>, TError = ErrorType<HTTPValidationError>>(
+ nodeId: string,
+    params: GetLinkingApiNodeLinkingNodeIdGetParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getLinkingApiNodeLinkingNodeIdGet>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
 
-  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
-    queryKey: QueryKey;
-  };
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetLinkingApiNodeLinkingNodeIdGetQueryOptions(nodeId,params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
   return withQueryKey(query, queryOptions.queryKey);
 }
 
-export type getMetricsApiMetricsGetResponse200 = {
-  data: Metric[];
-  status: 200;
-};
 
-export type getMetricsApiMetricsGetResponseSuccess =
-  & (getMetricsApiMetricsGetResponse200)
-  & {
-    headers: Headers;
-  };
 
-export const getGetMetricsApiMetricsGetUrl = () => {
-  return `/api/metrics`;
-};
+
+
+
 
 /**
  * @summary Get Metrics
  */
-export const getMetricsApiMetricsGet = async (
-  options?: RequestInit
-): Promise<getMetricsApiMetricsGetResponseSuccess> => {
-  const res = await fetch(getGetMetricsApiMetricsGetUrl(), {
-    ...options,
-    method: "GET",
-  });
+export const getMetricsApiMetricsGet = (
 
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  if (!res.ok) {
-    const err: globalThis.Error & { info?: any; status?: number } =
-      new globalThis.Error();
-    const data = body ? JSON.parse(body) : {};
-    err.info = data;
-    err.status = res.status;
-    throw err;
-  }
-  const data: getMetricsApiMetricsGetResponseSuccess["data"] = body
-    ? JSON.parse(body)
-    : {};
-  return {
-    data,
-    status: res.status,
-    headers: res.headers,
-  } as getMetricsApiMetricsGetResponseSuccess;
-};
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+
+
+      return customInstance<Metric[]>(
+      {url: `/api/metrics`, method: 'GET', signal
+    },
+      options);
+    }
+
+
+
 
 export const getGetMetricsApiMetricsGetQueryKey = () => {
-  return [
-    `/api/metrics`,
-  ] as const;
-};
+    return [
+    `/api/metrics`
+    ] as const;
+    }
 
-export const getGetMetricsApiMetricsGetQueryOptions = <
-  TData = Awaited<ReturnType<typeof getMetricsApiMetricsGet>>,
-  TError = globalThis.Error & { info?: unknown; status?: number },
->(
-  options?: {
-    query?: UseQueryOptions<
-      Awaited<ReturnType<typeof getMetricsApiMetricsGet>>,
-      TError,
-      TData
-    >;
-    fetch?: RequestInit;
-  }
+
+export const getGetMetricsApiMetricsGetQueryOptions = <TData = Awaited<ReturnType<typeof getMetricsApiMetricsGet>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMetricsApiMetricsGet>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
 ) => {
-  const { query: queryOptions, fetch: fetchOptions } = options ?? {};
 
-  const queryKey = queryOptions?.queryKey
-    ?? getGetMetricsApiMetricsGetQueryKey();
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof getMetricsApiMetricsGet>>
-  > = ({ signal }) => getMetricsApiMetricsGet({ signal, ...fetchOptions });
+  const queryKey =  queryOptions?.queryKey ?? getGetMetricsApiMetricsGetQueryKey();
 
-  return { queryKey, queryFn, ...queryOptions } as
-    & UseQueryOptions<
-      Awaited<ReturnType<typeof getMetricsApiMetricsGet>>,
-      TError,
-      TData
-    >
-    & { queryKey: QueryKey };
-};
 
-export type GetMetricsApiMetricsGetQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getMetricsApiMetricsGet>>
->;
-export type GetMetricsApiMetricsGetQueryError = globalThis.Error & {
-  info?: unknown;
-  status?: number;
-};
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMetricsApiMetricsGet>>> = ({ signal }) => getMetricsApiMetricsGet(requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMetricsApiMetricsGet>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetMetricsApiMetricsGetQueryResult = NonNullable<Awaited<ReturnType<typeof getMetricsApiMetricsGet>>>
+export type GetMetricsApiMetricsGetQueryError = ErrorType<unknown>
+
 
 /**
  * @summary Get Metrics
  */
 
-export function useGetMetricsApiMetricsGet<
-  TData = Awaited<ReturnType<typeof getMetricsApiMetricsGet>>,
-  TError = globalThis.Error & { info?: unknown; status?: number },
->(
-  options?: {
-    query?: UseQueryOptions<
-      Awaited<ReturnType<typeof getMetricsApiMetricsGet>>,
-      TError,
-      TData
-    >;
-    fetch?: RequestInit;
-  }
-): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-  const queryOptions = getGetMetricsApiMetricsGetQueryOptions(options);
+export function useGetMetricsApiMetricsGet<TData = Awaited<ReturnType<typeof getMetricsApiMetricsGet>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMetricsApiMetricsGet>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
 
-  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
-    queryKey: QueryKey;
-  };
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetMetricsApiMetricsGetQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
   return withQueryKey(query, queryOptions.queryKey);
 }

@@ -8,10 +8,11 @@ export default defineConfig({
       target: "./lib/api/fetchers.ts",
       schemas: "./lib/api/model",
       client: "react-query",
-      httpClient: "fetch",
+      httpClient: "axios",
       override: {
-        fetch: {
-          forceSuccessResponse: true,
+        mutator: {
+          path: "./lib/api/mutator.ts",
+          name: "customInstance",
         },
       },
     },

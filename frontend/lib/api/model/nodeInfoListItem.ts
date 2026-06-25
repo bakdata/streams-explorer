@@ -4,8 +4,8 @@
  * Streams Explorer
  * OpenAPI spec version: 0.1.0
  */
-import type { NodeInfoListItemValue } from "./nodeInfoListItemValue";
-import type { NodeInfoType } from "./nodeInfoType";
+import type { NodeInfoListItemValue } from './nodeInfoListItemValue';
+import type { NodeInfoType } from './nodeInfoType';
 
 export interface NodeInfoListItem {
   name: string;
