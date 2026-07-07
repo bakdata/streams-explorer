@@ -59,9 +59,6 @@ const App: React.FC = () => {
       localStorage.getItem(REFRESH_INTERVAL) || DEFAULT_REFRESH_INTERVAL
     );
     setRefreshInterval(storedRefreshInterval);
-    if (storedRefreshInterval) {
-      refetchMetrics();
-    }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
@@ -104,14 +101,12 @@ const App: React.FC = () => {
     isLoading: isLoadingMetrics,
     refetch: refetchMetrics,
     error: metricsError,
-  } = useGetMetricsApiMetricsGet({ query: { enabled: false } });
-
-  useEffect(() => {
-    if (refreshInterval && refreshInterval > 0) {
-      const interval = setInterval(refetchMetrics, refreshInterval * 1000);
-      return () => clearInterval(interval);
-    }
-  }, [refreshInterval]); // eslint-disable-line react-hooks/exhaustive-deps
+  } = useGetMetricsApiMetricsGet({
+    query: {
+      enabled: refreshInterval > 0,
+      refetchInterval: refreshInterval > 0 ? refreshInterval * 1000 : false,
+    },
+  });
 
   useEffect(() => {
     if (!graph) return;
