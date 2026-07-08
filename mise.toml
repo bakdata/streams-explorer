@@ -2,4 +2,10 @@
 [tools]
 python = "3.10"
 node = "24"
-pre-commit = "latest"
+
+[env]
+VIRTUAL_ENV = "{{config_root}}/backend/.venv"
+_.path = [
+  "{{config_root}}/backend/.venv/bin",
+  "{{config_root}}/frontend/node_modules/.bin",
+]
