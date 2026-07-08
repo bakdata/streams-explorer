@@ -1,0 +1,5 @@
+# :schema https://mise.jdx.dev/schema/mise.json
+[tools]
+python = "3.10"
+node = "24"
+pre-commit = "latest"
