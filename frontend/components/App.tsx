@@ -12,13 +12,13 @@ import {
 import { useRouter } from "next/router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
-import { useMutate } from "restful-react";
 import {
-  HTTPValidationError,
   useGetMetricsApiMetricsGet,
   useGetPipelinesApiPipelinesGet,
   useGetPositionedGraphApiGraphGet,
-} from "./api/fetchers";
+  useUpdateApiUpdatePost,
+} from "../lib/api/fetchers";
+import { HTTPValidationError } from "../lib/api/model";
 import DetailsCard from "./DetailsCard";
 import Node from "./graph/Node";
 import GraphVisualization from "./graph/Visualization";
@@ -59,59 +59,54 @@ const App: React.FC = () => {
       localStorage.getItem(REFRESH_INTERVAL) || DEFAULT_REFRESH_INTERVAL
     );
     setRefreshInterval(storedRefreshInterval);
-    if (storedRefreshInterval) {
-      refetchMetrics();
-    }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     localStorage.setItem(REFRESH_INTERVAL, refreshInterval.toString());
   }, [refreshInterval]);
 
-  const { mutate: update, loading: isUpdating } = useMutate({
-    verb: "POST",
-    path: "/api/update",
-  });
+  const {
+    mutate: updateMutate,
+    mutateAsync: updateMutateAsync,
+    isLoading: isUpdating,
+  } = useUpdateApiUpdatePost();
+
+  const update = () => updateMutate();
 
   const {
     data: graph,
-    loading: isLoadingGraph,
+    isLoading: isLoadingGraph,
     error: graphError,
-    refetch: graphRefetch,
-  } = useGetPositionedGraphApiGraphGet({
-    queryParams: currentPipeline !== ALL_PIPELINES
+  } = useGetPositionedGraphApiGraphGet(
+    currentPipeline !== ALL_PIPELINES
       ? { pipeline_name: currentPipeline }
-      : undefined,
-  });
+      : undefined
+  );
 
   const {
     refetch: retryPipelineGraph,
-    error: retryPipelineGraphError,
-    data: retryPipelineGraphData,
-  } = useGetPositionedGraphApiGraphGet({
-    queryParams: { pipeline_name: currentPipeline },
-    lazy: true,
-  });
+  } = useGetPositionedGraphApiGraphGet(
+    { pipeline_name: currentPipeline },
+    { query: { enabled: false } }
+  );
 
   const {
     data: pipelines,
-    loading: isLoadingPipelines,
+    isLoading: isLoadingPipelines,
     error: pipelineError,
-  } = useGetPipelinesApiPipelinesGet({});
+  } = useGetPipelinesApiPipelinesGet();
 
   const {
     data: metrics,
-    loading: isLoadingMetrics,
+    isFetching: isFetchingMetrics,
     refetch: refetchMetrics,
     error: metricsError,
-  } = useGetMetricsApiMetricsGet({ lazy: true });
-
-  useEffect(() => {
-    if (refreshInterval && refreshInterval > 0) {
-      const interval = setInterval(refetchMetrics, refreshInterval * 1000);
-      return () => clearInterval(interval);
-    }
-  }, [refreshInterval]); // eslint-disable-line react-hooks/exhaustive-deps
+  } = useGetMetricsApiMetricsGet({
+    query: {
+      enabled: refreshInterval > 0,
+      refetchInterval: refreshInterval > 0 ? refreshInterval * 1000 : false,
+    },
+  });
 
   useEffect(() => {
     if (!graph) return;
@@ -132,47 +127,34 @@ const App: React.FC = () => {
   }, [graph, query]);
 
   useEffect(() => {
-    if (graphError) {
-      let errorMessage: string | undefined;
-      if ("data" in graphError) {
-        // specific pipeline was not found
-        const data = graphError["data"] as HTTPValidationError;
-        if (data.detail) {
-          errorMessage = data.detail.toString();
-        }
-      }
-      message.error(errorMessage || "Failed loading graph", 5);
+    if (!graphError) return;
 
-      if (graphError.status === 404 && currentPipeline !== ALL_PIPELINES) {
-        // check if a re-scrape solves it
-        const hideMessage = message.warning("Refreshing pipelines", 0);
-        update({})
-          .then(() => {
-            retryPipelineGraph();
-          })
-          .catch(() => {
-            redirectAllPipelines();
-          })
-          .finally(() => {
-            hideMessage();
-          });
+    let errorMessage: string | undefined;
+    const err = graphError as any;
+    if (err?.data) {
+      const data = err.data as HTTPValidationError;
+      if (data.detail) {
+        errorMessage = data.detail.toString();
       }
     }
-  }, [graphError]); // eslint-disable-line react-hooks/exhaustive-deps
+    message.error(errorMessage || "Failed loading graph", 5);
 
-  useEffect(() => {
-    if (
-      retryPipelineGraphError
-      && retryPipelineGraphError.status === 404
-      && currentPipeline !== ALL_PIPELINES
-    ) {
-      // pipeline still not found
-      redirectAllPipelines();
-    } else if (retryPipelineGraphData) {
-      message.success("Found pipeline!");
-      graphRefetch();
-    } // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [retryPipelineGraphError, retryPipelineGraphData]);
+    if (err?.status !== 404 || currentPipeline === ALL_PIPELINES) return;
+
+    // Pipeline not found — scrape then retry, sequentially.
+    const hideMessage = message.warning("Refreshing pipelines", 0);
+    (async () => {
+      try {
+        await updateMutateAsync();
+        await retryPipelineGraph();
+        message.success("Found pipeline!");
+      } catch {
+        redirectAllPipelines();
+      } finally {
+        hideMessage();
+      }
+    })();
+  }, [graphError]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const redirectAllPipelines = () => {
     message.info("Redirecting to all pipelines");
@@ -261,9 +243,10 @@ const App: React.FC = () => {
                 key="3"
                 style={{ float: "right", marginLeft: "auto" }}
                 onClick={() => {
-                  update({})
-                    .then(() => router.reload())
-                    .catch(() => message.error("Failed to update!"));
+                  updateMutate(undefined, {
+                    onSuccess: () => router.reload(),
+                    onError: () => message.error("Failed to update!"),
+                  });
                 }}
               >
                 <Button type="dashed" ghost={true}>
@@ -282,15 +265,17 @@ const App: React.FC = () => {
                 </Dropdown>
               </Menu.Item>
             </Menu>
-            <Spin
-              style={{
-                position: "fixed",
-                top: "1.5em",
-                right: "1em",
-              }}
-              indicator={<LoadingOutlined spin />}
-              spinning={isLoadingMetrics}
-            />
+            {isFetchingMetrics && (
+              <Spin
+                data-testid="metrics-spinner"
+                style={{
+                  position: "fixed",
+                  top: "1.5em",
+                  right: "1em",
+                }}
+                indicator={<LoadingOutlined spin />}
+              />
+            )}
           </Header>
           <Content
             style={{
@@ -305,7 +290,7 @@ const App: React.FC = () => {
                   <GraphVisualization
                     data-testid="graph"
                     data={graph}
-                    metrics={metrics}
+                    metrics={metrics ?? null}
                     refetchMetrics={() => refetchMetrics()}
                     onClickNode={(node: Node) => setDetailNode(node)}
                     width={width ? width : window.innerWidth}

@@ -1,7 +1,7 @@
 import { AutoComplete, Space } from "antd";
 import { useRouter } from "next/router";
-import React, { useEffect, useState } from "react";
-import { Node as GraphNode } from "./api/fetchers";
+import React, { useEffect, useRef, useState } from "react";
+import { Node as GraphNode } from "../lib/api/model";
 import Node from "./graph/Node";
 
 const ICON_SIZE = 18;
@@ -26,6 +26,21 @@ interface SearchProps {
 const Search = (props: SearchProps) => {
   const router = useRouter();
   const [width, setWidth] = useState<number>(300);
+  const [inputValue, setInputValue] = useState<string | undefined>(
+    props.focusedNode?.label
+  );
+  // When the user picks from the dropdown, onSelect sets this ref so the
+  // focusedNode effect doesn't immediately overwrite the displayed value.
+  const selectedFromDropdown = useRef(false);
+
+  // keep the input in sync when focusedNode is set externally (e.g. via URL param)
+  useEffect(() => {
+    if (selectedFromDropdown.current) {
+      selectedFromDropdown.current = false;
+      return;
+    }
+    setInputValue(props.focusedNode?.label);
+  }, [props.focusedNode]);
 
   // find longest node name and multiply string length by char width 8
   // doesn't cause long delays as builtin function
@@ -58,12 +73,15 @@ const Search = (props: SearchProps) => {
       }}
       filterOption={(inputValue, option) =>
         option?.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1}
-      defaultValue={props.focusedNode ? props.focusedNode.label : undefined}
+      value={inputValue}
+      onChange={(val) => setInputValue(val)}
       onSelect={(nodeId, option) => {
         const node = option.node as Node;
         if (node) {
+          selectedFromDropdown.current = true;
           props.setFocusedNode(node);
           props.setDetailNode(node);
+          setInputValue(nodeId);
         }
         pushRouteFocusNode(nodeId);
       }}

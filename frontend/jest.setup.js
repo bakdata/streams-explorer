@@ -6,3 +6,4 @@
 import "@testing-library/jest-dom/extend-expect";
 import "jest-fix-undefined";
 import "whatwg-fetch";
+import "jest-canvas-mock";

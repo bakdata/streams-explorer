@@ -1,6 +1,6 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import nock from "nock";
 import React from "react";
-import { RestfulProvider } from "restful-react";
 
 import {
   fireEvent,
@@ -9,6 +9,15 @@ import {
   waitForElementToBeRemoved,
 } from "@testing-library/react";
 import Details from "../components/Details";
+
+const renderWithClient = (ui: React.ReactElement) => {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  return render(
+    <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
+  );
+};
 
 describe("display node information", () => {
   beforeAll(() => {
@@ -32,10 +41,8 @@ describe("display node information", () => {
       detail: 'Could not find information for node with name "fake-node"',
     });
 
-    const { findByTestId, asFragment } = render(
-      <RestfulProvider base="http://localhost">
-        <Details nodeId="1" />
-      </RestfulProvider>
+    const { findByTestId, asFragment } = renderWithClient(
+      <Details nodeId="1" />
     );
 
     await findByTestId("no-node-info");
@@ -49,10 +56,8 @@ describe("display node information", () => {
       info: [],
     });
 
-    const { findByText, asFragment } = render(
-      <RestfulProvider base="http://localhost">
-        <Details nodeId="2" />
-      </RestfulProvider>
+    const { findByText, asFragment } = renderWithClient(
+      <Details nodeId="2" />
     );
 
     await findByText("connector");
@@ -66,10 +71,8 @@ describe("display node information", () => {
       info: [],
     });
 
-    const { findByText, asFragment } = render(
-      <RestfulProvider base="http://localhost">
-        <Details nodeId="2" />
-      </RestfulProvider>
+    const { findByText, asFragment } = renderWithClient(
+      <Details nodeId="2" />
     );
 
     await findByText("connector");
@@ -103,12 +106,12 @@ describe("display node information", () => {
       .query({ link_type: "kibana" })
       .reply(
         200,
-        "http://localhost:5601/app/kibana#/discover?_a=(columns:!(_source),query:(language:lucene,query:'kubernetes.labels.app:%20%22atm-fraud-transactionavroproducer%22'))"
+        JSON.stringify(
+          "http://localhost:5601/app/kibana#/discover?_a=(columns:!(_source),query:(language:lucene,query:'kubernetes.labels.app:%20%22atm-fraud-transactionavroproducer%22'))"
+        )
       );
-    const { findByText, asFragment, queryByText } = render(
-      <RestfulProvider base="http://localhost">
-        <Details nodeId="atm-fraud-transactionavroproducer" />
-      </RestfulProvider>
+    const { findByText, asFragment, queryByText } = renderWithClient(
+      <Details nodeId="atm-fraud-transactionavroproducer" />
     );
 
     await findByText("streaming-app");
@@ -196,17 +199,16 @@ describe("display node information", () => {
       )
       .reply(
         200,
-        "http://localhost:3000/d/path/to/dashboard?var-topics=atm-fraud-incoming-transactions-topic"
+        JSON.stringify(
+          "http://localhost:3000/d/path/to/dashboard?var-topics=atm-fraud-incoming-transactions-topic"
+        )
       );
 
-    const { getByText, findByText, getByTestId } = render(
-      <RestfulProvider base="http://localhost">
-        <Details nodeId="atm-fraud-incoming-transactions-topic" />
-      </RestfulProvider>
+    const { getByText, findByText, getByTestId } = renderWithClient(
+      <Details nodeId="atm-fraud-incoming-transactions-topic" />
     );
 
     await findByText("v2"); // get dropdown menu for schema version
-    let schemaVersion = getByText("v2");
     expect(nockSchema2.isDone()).toBeTruthy();
     expect(nockSchema1.isDone()).toBeFalsy();
     const schema2 = getByTestId("schema");
@@ -221,7 +223,7 @@ describe("display node information", () => {
     });
 
     await waitFor(() => {
-      expect(schemaVersion).toHaveTextContent("v1");
+      expect(getByTestId("schema-version")).toHaveTextContent("v1");
       expect(nockSchema1.isDone()).toBeTruthy();
     });
 
@@ -251,10 +253,8 @@ describe("display node information", () => {
       .get("/api/node/atm-fraud-incoming-transactions-topic/schema")
       .reply(404);
 
-    const { findByTestId } = render(
-      <RestfulProvider base="http://localhost">
-        <Details nodeId="atm-fraud-incoming-transactions-topic" />
-      </RestfulProvider>
+    const { findByTestId } = renderWithClient(
+      <Details nodeId="atm-fraud-incoming-transactions-topic" />
     );
 
     await findByTestId("no-schema-versions");
@@ -279,10 +279,8 @@ describe("display node information", () => {
       .get("/api/node/atm-fraud-incoming-transactions-topic/schema")
       .reply(200, []);
 
-    const { findByTestId } = render(
-      <RestfulProvider base="http://localhost">
-        <Details nodeId="atm-fraud-incoming-transactions-topic" />
-      </RestfulProvider>
+    const { findByTestId } = renderWithClient(
+      <Details nodeId="atm-fraud-incoming-transactions-topic" />
     );
 
     await findByTestId("no-schema-versions");
@@ -311,10 +309,8 @@ describe("display node information", () => {
       .get("/api/node/atm-fraud-incoming-transactions-topic/schema/1")
       .reply(404);
 
-    const { findByTestId } = render(
-      <RestfulProvider base="http://localhost">
-        <Details nodeId="atm-fraud-incoming-transactions-topic" />
-      </RestfulProvider>
+    const { findByTestId } = renderWithClient(
+      <Details nodeId="atm-fraud-incoming-transactions-topic" />
     );
 
     await findByTestId("no-schema");

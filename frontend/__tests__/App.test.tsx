@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   act,
   fireEvent,
@@ -10,6 +11,16 @@ import singletonRouter from "next/router";
 import nock from "nock";
 import React from "react";
 import App from "../components/App";
+
+const renderWithClient = (ui: React.ReactElement) => {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  const Wrapper = ({ children }: { children: React.ReactNode }) => (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  );
+  return render(ui, { wrapper: Wrapper });
+};
 
 jest.mock("next/router", () => require("next-router-mock"));
 
@@ -82,53 +93,66 @@ describe("Streams Explorer", () => {
   describe("renders", () => {
     mockBackendGraph(true);
     it("without crashing", async () => {
-      const { findByTestId } = render(<App />);
+      const { findByTestId } = renderWithClient(<App />);
       await findByTestId("graph");
     });
   });
 
   describe("handles url parameters", () => {
-    // -- Mock backend endpoints
-    const nockGraph = mockBackendGraph(true);
-    const nockPipelineGraph = mockBackendGraph(true, "test-pipeline");
+    let nockGraph: ReturnType<typeof mockBackendGraph>;
+    let nockPipelineGraph: ReturnType<typeof mockBackendGraph>;
 
-    nock("http://localhost")
-      .persist()
-      .get("/api/pipelines")
-      .reply(200, {
-        pipelines: ["test-pipeline"],
-      });
+    beforeEach(() => {
+      mockRouter.setCurrentUrl("/");
 
-    nock("http://localhost")
-      .persist()
-      .get("/api/metrics")
-      .reply(200, [
-        {
-          node_id: "test-app",
-          messages_in: null,
-          messages_out: null,
-          consumer_lag: null,
-          consumer_read_rate: null,
-          topic_size: null,
-          replicas: null,
-          connector_tasks: null,
-        },
-        {
-          node_id: "test-topic",
-          messages_in: null,
-          messages_out: null,
-          consumer_lag: null,
-          consumer_read_rate: null,
-          topic_size: null,
-          replicas: null,
-          connector_tasks: null,
-        },
-      ]);
+      // Mock backend endpoints
+      nockGraph = mockBackendGraph(true);
+      nockPipelineGraph = mockBackendGraph(true, "test-pipeline");
+
+      nock("http://localhost")
+        .persist()
+        .get("/api/pipelines")
+        .reply(200, {
+          pipelines: ["test-pipeline"],
+        });
+
+      nock("http://localhost")
+        .persist()
+        .get("/api/metrics")
+        .reply(200, [
+          {
+            node_id: "test-app",
+            messages_in: null,
+            messages_out: null,
+            consumer_lag: null,
+            consumer_read_rate: null,
+            topic_size: null,
+            replicas: null,
+            connector_tasks: null,
+          },
+          {
+            node_id: "test-topic",
+            messages_in: null,
+            messages_out: null,
+            consumer_lag: null,
+            consumer_read_rate: null,
+            topic_size: null,
+            replicas: null,
+            connector_tasks: null,
+          },
+        ]);
+    });
+
+    afterEach(() => {
+      nock.cleanAll();
+    });
 
     it("should set pipeline from url parameter", async () => {
       mockRouter.setCurrentUrl("/?pipeline=test-pipeline");
 
-      const { getByTestId, findByTestId, asFragment } = render(<App />);
+      const { getByTestId, findByTestId, asFragment } = renderWithClient(
+        <App />
+      );
 
       expect(singletonRouter).toMatchObject({
         asPath: "/?pipeline=test-pipeline",
@@ -161,7 +185,7 @@ describe("Streams Explorer", () => {
           info: [],
         });
 
-      const { findByTestId, getByTestId } = render(<App />);
+      const { findByTestId, getByTestId } = renderWithClient(<App />);
 
       expect(singletonRouter).toMatchObject({
         asPath: "/?focus-node=test-app",
@@ -178,14 +202,14 @@ describe("Streams Explorer", () => {
       const input = within(nodeSelect).getByRole(
         "combobox"
       ) as HTMLInputElement;
-      expect(input).toHaveValue("test-app-name"); // shows label
+      await waitFor(() => expect(input).toHaveValue("test-app-name"));
       expect(nockAppNode.isDone()).toBeTruthy();
     });
 
     it("should render without url parameters", async () => {
       mockRouter.setCurrentUrl("/");
 
-      const { getByTestId, findByTestId } = render(<App />);
+      const { getByTestId, findByTestId } = renderWithClient(<App />);
 
       expect(singletonRouter).toMatchObject({
         asPath: "/",
@@ -209,9 +233,8 @@ describe("Streams Explorer", () => {
       mockRouter.setCurrentUrl("/?pipeline=test-pipeline");
 
       // render App
-      const { getByTestId, getByText, findByTestId, findAllByTestId } = render(
-        <App />
-      );
+      const { getByTestId, getByText, findByTestId, findAllByTestId } =
+        renderWithClient(<App />);
 
       await findByTestId("graph");
       const nodeSelect = getByTestId("node-select");
@@ -307,11 +330,9 @@ describe("Streams Explorer", () => {
         .post(`/api/update`)
         .reply(200);
 
-      mockBackendGraph(true);
-
       mockRouter.setCurrentUrl("/?pipeline=doesnt-exist");
 
-      const { findByTestId } = render(<App />);
+      const { findByTestId } = renderWithClient(<App />);
 
       expect(singletonRouter).toMatchObject({
         asPath: "/?pipeline=doesnt-exist",
@@ -338,33 +359,29 @@ describe("Streams Explorer", () => {
     });
 
     it("should update and retry if pipeline is not found", async () => {
-      let nockPipeline = nock("http://localhost")
+      const nockPipeline404 = nock("http://localhost")
         .get(`/api/graph?pipeline_name=avail-after-scrape`)
         .reply(404);
+
+      const nockPipeline200 = mockBackendGraph(false, "avail-after-scrape");
 
       const nockUpdate = nock("http://localhost")
         .post(`/api/update`)
         .reply(200);
 
-      mockBackendGraph(true);
-
       mockRouter.setCurrentUrl("/?pipeline=avail-after-scrape");
 
-      const { getByTestId, findByTestId } = render(<App />);
+      const { getByTestId, findByTestId } = renderWithClient(<App />);
 
       expect(singletonRouter.asPath).toBe("/?pipeline=avail-after-scrape");
 
-      await waitFor(() => {
-        // wait for the first pipeline request to fail
-        expect(nockPipeline.isDone()).toBeTruthy();
-        // pipeline becomes available
-        nockPipeline = mockBackendGraph(true, "avail-after-scrape");
-      });
-
       await findByTestId("graph");
 
-      expect(nockUpdate.isDone()).toBeTruthy();
-      expect(nockPipeline.isDone()).toBeTruthy();
+      await waitFor(() => {
+        expect(nockUpdate.isDone()).toBeTruthy();
+        expect(nockPipeline404.isDone()).toBeTruthy();
+        expect(nockPipeline200.isDone()).toBeTruthy();
+      });
       await waitFor(() => {
         const currentPipeline = getByTestId("pipeline-current");
         expect(
@@ -376,9 +393,7 @@ describe("Streams Explorer", () => {
     });
 
     it("should persist metrics refresh interval across page reloads", async () => {
-      mockBackendGraph(true);
-
-      const { findByText, findByTestId, rerender } = render(<App />);
+      const { findByText, findByTestId, rerender } = renderWithClient(<App />);
 
       await findByTestId("graph");
 
@@ -406,7 +421,6 @@ describe("Streams Explorer", () => {
     });
 
     it("should not fetch metrics if interval is set to 'off'", async () => {
-      mockBackendGraph(true);
       const nockMetrics = nock("http://localhost")
         .get("/api/metrics")
         .reply(200, []);
@@ -414,7 +428,7 @@ describe("Streams Explorer", () => {
       // set metrics refresh interval to 'off'
       window.localStorage.setItem("metrics-interval", "0");
 
-      const { findByTestId, getByText } = render(<App />);
+      const { findByTestId, getByText } = renderWithClient(<App />);
 
       await findByTestId("graph");
 
@@ -423,6 +437,19 @@ describe("Streams Explorer", () => {
       expect(anchor).toHaveTextContent("off");
       // verify metrics haven't been refreshed
       expect(nockMetrics.isDone()).toBeFalsy();
+    });
+
+    it("should not show metrics loading spinner if interval is set to 'off'", async () => {
+      // set metrics refresh interval to 'off'
+      window.localStorage.setItem("metrics-interval", "0");
+
+      const { findByTestId, queryByTestId } = renderWithClient(<App />);
+
+      await findByTestId("graph");
+
+      // The metrics spinner should not be spinning
+      const metricsSpinner = queryByTestId("metrics-spinner");
+      expect(metricsSpinner).not.toBeInTheDocument();
     });
   });
 });

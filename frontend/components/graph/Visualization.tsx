@@ -8,7 +8,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { Graph as Data, Metric } from "../api/fetchers";
+import { Graph as Data, Metric } from "../../lib/api/model";
 import { graphConfig as config } from "./config";
 import Node from "./Node";
 import "./GenericNode";

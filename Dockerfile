@@ -1,5 +1,5 @@
 # build stage 1: frontend
-FROM node:16 AS frontend
+FROM node:24 AS frontend
 
 WORKDIR /build
 COPY ./frontend/package.json ./frontend/package-lock.json /build/
