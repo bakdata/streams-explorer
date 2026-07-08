@@ -61,7 +61,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: ["16"]
+        node-version: ["24"]
     defaults:
       run:
         working-directory: ${{ env.working-directory }}
