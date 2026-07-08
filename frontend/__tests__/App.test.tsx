@@ -438,6 +438,19 @@ describe("Streams Explorer", () => {
       // verify metrics haven't been refreshed
       expect(nockMetrics.isDone()).toBeFalsy();
     });
+
+    it("should not show metrics loading spinner if interval is set to 'off'", async () => {
+      // set metrics refresh interval to 'off'
+      window.localStorage.setItem("metrics-interval", "0");
+
+      const { findByTestId, queryByTestId } = renderWithClient(<App />);
+
+      await findByTestId("graph");
+
+      // The metrics spinner should not be spinning
+      const metricsSpinner = queryByTestId("metrics-spinner");
+      expect(metricsSpinner).not.toBeInTheDocument();
+    });
   });
 });
 

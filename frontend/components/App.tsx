@@ -98,7 +98,7 @@ const App: React.FC = () => {
 
   const {
     data: metrics,
-    isLoading: isLoadingMetrics,
+    isFetching: isFetchingMetrics,
     refetch: refetchMetrics,
     error: metricsError,
   } = useGetMetricsApiMetricsGet({
@@ -265,15 +265,17 @@ const App: React.FC = () => {
                 </Dropdown>
               </Menu.Item>
             </Menu>
-            <Spin
-              style={{
-                position: "fixed",
-                top: "1.5em",
-                right: "1em",
-              }}
-              indicator={<LoadingOutlined spin />}
-              spinning={isLoadingMetrics}
-            />
+            {isFetchingMetrics && (
+              <Spin
+                data-testid="metrics-spinner"
+                style={{
+                  position: "fixed",
+                  top: "1.5em",
+                  right: "1em",
+                }}
+                indicator={<LoadingOutlined spin />}
+              />
+            )}
           </Header>
           <Content
             style={{
