@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       working-directory: ./backend
-      poetry-version: "1.3.2"
+      poetry-version: "2.5.1"
     strategy:
       fail-fast: false
       matrix:
@@ -36,7 +36,7 @@ jobs:
           working-directory: ${{ env.working-directory }}
 
       - name: Install dependencies
-        run: poetry install --no-interaction
+        run: poetry sync --no-interaction
 
       - name: Lint (flake8)
         run: poetry run pre-commit run flake8 --all-files --show-diff-on-failure

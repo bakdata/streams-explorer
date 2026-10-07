@@ -22,10 +22,10 @@ WORKDIR /app
 
 COPY ./backend/pyproject.toml ./backend/poetry.lock /app/
 ENV PIP_NO_CACHE_DIR=1
-RUN pip install poetry==1.8.5 && \
+RUN pip install poetry==2.5.1 && \
     python -m venv --copies /app/venv && \
     . /app/venv/bin/activate && \
-    poetry install --without=dev --no-interaction
+    poetry sync --without=dev --no-interaction
 
 FROM python:3.10-slim AS prod
 

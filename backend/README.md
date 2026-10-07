@@ -84,7 +84,7 @@ helm upgrade --install --values helm-chart/values.yaml streams-explorer streams-
 1. Install dependencies using [Poetry](https://python-poetry.org)
 
 ```sh
-poetry install
+poetry sync
 ```
 
 2. Forward the ports to Prometheus. (Kafka Connect, Schema Registry, and other integrations are optional)
