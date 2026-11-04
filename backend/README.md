@@ -81,10 +81,10 @@ helm upgrade --install --values helm-chart/values.yaml streams-explorer streams-
 
 #### Backend
 
-1. Install dependencies using [Poetry](https://python-poetry.org)
+1. Install dependencies using [uv](https://docs.astral.sh/uv/)
 
 ```sh
-poetry install
+uv sync
 ```
 
 2. Forward the ports to Prometheus. (Kafka Connect, Schema Registry, and other integrations are optional)
@@ -92,7 +92,7 @@ poetry install
 4. Start the backend server
 
 ```sh
-poetry run start
+uv run start
 ```
 
 #### Frontend

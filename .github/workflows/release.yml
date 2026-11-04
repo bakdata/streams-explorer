@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       release-type:
-        description: "Scope of the release; see https://python-poetry.org/docs/cli/#version"
+        description: "SemVer scope of the release"
         type: choice
         required: true
         default: patch
@@ -24,9 +24,14 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Install uv
+        uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          version-file: .tool-versions
+
       - name: Bump version
         id: bump-version
-        uses: bakdata/ci-templates/actions/python-poetry-bump-version@v1.5.1
+        uses: bakdata/ci-templates/actions/bump-version@2.3.0
         with:
           release-type: "${{ github.event.inputs.release-type }}"
           working-directory: ${{ env.BACKEND_DIR }}
@@ -34,7 +39,7 @@ jobs:
       - name: Commit and push pyproject.toml file
         uses: bakdata/ci-templates/actions/commit-and-push@v1.3.0
         with:
-          commit-message: "Bump version ${{ steps.bump-version.outputs.old-tag }} → ${{ steps.bump-version.outputs.release-tag }}"
+          commit-message: "Bump version ${{ steps.bump-version.outputs.old-version }} → ${{ steps.bump-version.outputs.release-version }}"
           github-username: ${{ secrets.GH_USERNAME }}
           github-email: ${{ secrets.GH_EMAIL }}
           github-token: ${{ secrets.GH_TOKEN }}
@@ -43,10 +48,10 @@ jobs:
         run: |
           git config user.name ${{ secrets.GH_USERNAME }}
           git config user.email ${{ secrets.GH_EMAIL }}
-          git tag v${{ steps.bump-version.outputs.release-tag }}
+          git tag v${{ steps.bump-version.outputs.release-version }}
 
       - name: Push tag
         uses: ad-m/github-push-action@v0.6.0
         with:
           github_token: ${{ secrets.GH_TOKEN }}
-          branch: refs/tags/v${{ steps.bump-version.outputs.release-tag }}
+          branch: refs/tags/v${{ steps.bump-version.outputs.release-version }}
