@@ -14,18 +14,26 @@ RUN npm run build
 
 # build stage 2: backend
 FROM python:3.10-slim AS backend
+COPY --from=ghcr.io/astral-sh/uv:0.13.4 /uv /uvx /bin/
 
 RUN apt-get -y update && \
     apt-get --no-install-recommends -y install libc6-dev gcc libgraphviz-dev
 
+ENV UV_COMPILE_BYTECODE=1 \
+    UV_LINK_MODE=copy \
+    UV_NO_DEV=1 \
+    UV_PROJECT_ENVIRONMENT=/app/venv
+
 WORKDIR /app
 
-COPY ./backend/pyproject.toml ./backend/poetry.lock /app/
-ENV PIP_NO_CACHE_DIR=1
-RUN pip install poetry==1.8.5 && \
-    python -m venv --copies /app/venv && \
-    . /app/venv/bin/activate && \
-    poetry install --without=dev --no-interaction
+RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=bind,source=backend/uv.lock,target=uv.lock \
+    --mount=type=bind,source=backend/pyproject.toml,target=pyproject.toml \
+    uv sync --locked --no-install-project
+
+COPY ./backend /app
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --locked
 
 FROM python:3.10-slim AS prod
 
@@ -35,13 +43,10 @@ RUN apt-get -y update && \
 
 WORKDIR /app
 
-COPY --from=backend /app /app
+COPY --from=backend /app/venv /app/venv
 COPY --from=frontend /build/out /app/static
 ENV PATH=/app/venv/bin:$PATH
 COPY ./backend /app
-
-# install streams_explorer package
-RUN pip install -e .
 
 EXPOSE 8080
 
