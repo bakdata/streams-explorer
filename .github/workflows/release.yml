@@ -14,44 +14,12 @@ on:
           - major
 
 jobs:
-  bump-version:
-    name: Bump version
-    runs-on: ubuntu-latest
-    env:
-      BACKEND_DIR: ./backend
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          persist-credentials: false
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
-        with:
-          version-file: .tool-versions
-
-      - name: Bump version
-        id: bump-version
-        uses: bakdata/ci-templates/actions/bump-version@2.3.0
-        with:
-          release-type: "${{ github.event.inputs.release-type }}"
-          working-directory: ${{ env.BACKEND_DIR }}
-
-      - name: Commit and push pyproject.toml file
-        uses: bakdata/ci-templates/actions/commit-and-push@v1.3.0
-        with:
-          commit-message: "Bump version ${{ steps.bump-version.outputs.old-version }} → ${{ steps.bump-version.outputs.release-version }}"
-          github-username: ${{ secrets.GH_USERNAME }}
-          github-email: ${{ secrets.GH_EMAIL }}
-          github-token: ${{ secrets.GH_TOKEN }}
-
-      - name: Create tag
-        run: |
-          git config user.name ${{ secrets.GH_USERNAME }}
-          git config user.email ${{ secrets.GH_EMAIL }}
-          git tag v${{ steps.bump-version.outputs.release-version }}
-
-      - name: Push tag
-        uses: ad-m/github-push-action@v0.6.0
-        with:
-          github_token: ${{ secrets.GH_TOKEN }}
-          branch: refs/tags/v${{ steps.bump-version.outputs.release-version }}
+  release:
+    name: Release
+    uses: bakdata/ci-templates/.github/workflows/python-uv-release.yaml@2.3.0
+    with:
+      release-type: ${{ inputs.release-type }}
+    secrets:
+      github-username: ${{ secrets.GH_USERNAME }}
+      github-email: ${{ secrets.GH_EMAIL }}
+      github-token: ${{ secrets.GH_TOKEN }}

@@ -1,0 +1,36 @@
+[tool.bumpversion]
+current_version = "2.4.2"
+parse = """(?x)
+    (?P<major>[0-9]+)
+    \\.(?P<minor>[0-9]+)
+    \\.(?P<patch>[0-9]+)
+    (?:-(?P<release>dev))?
+"""
+serialize = [
+  "{major}.{minor}.{patch}-{release}",
+  "{major}.{minor}.{patch}",
+]
+
+# Propagate the new version into the lock files after the manifests have been updated
+pre_commit_hooks = [
+  "uv --directory backend lock --no-refresh --upgrade-package=streams-explorer",
+  "npm --prefix frontend install --package-lock-only --ignore-scripts",
+]
+
+[tool.bumpversion.parts.release]
+optional_value = "release"
+values = [
+  "dev",
+  "release",
+]
+
+[[tool.bumpversion.files]]
+filename = "backend/pyproject.toml"
+regex = true
+search = '''(?P<prefix>^version\s*=\s*"){current_version}(?P<suffix>")'''
+replace = '''\g<prefix>{new_version}\g<suffix>'''
+
+[[tool.bumpversion.files]]
+filename = "frontend/package.json"
+search = '"version": "{current_version}"'
+replace = '"version": "{new_version}"'
