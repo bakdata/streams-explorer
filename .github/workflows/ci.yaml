@@ -10,7 +10,7 @@ on:
 jobs:
   backend:
     name: Backend
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       working-directory: ./backend
     defaults:
@@ -51,7 +51,7 @@ jobs:
 
   frontend:
     name: Frontend
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       working-directory: ./frontend
     strategy:
@@ -92,7 +92,7 @@ jobs:
   docker:
     name: Docker
     needs: [backend, frontend]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       image: bakdata/streams-explorer
     steps:
